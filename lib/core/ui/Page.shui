@@ -1,0 +1,167 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/mid";
+
+MouseBox {
+    id: page
+
+    container default: contentArea
+
+    property frozen: false
+    property _frozen: false
+    property _parentPage: null
+
+    property pushPage: {
+        _parentPage = arguments[0];
+
+        if (_parentPage)
+        {
+            _parentPage.frozen = true;
+        }
+
+        frozen = true;
+        pushAnimation.from = marginLeft;
+        pushAnimation.to = 0;
+        pushAnimation.start();
+    }
+
+    property popPage: {
+        frozen = true;
+        popAnimation.from = marginLeft;
+        popAnimation.to = documentRoot.windowWidth;
+        popAnimation.start();
+    }
+
+    position: _frozen ? "free" : "inline"
+    width: documentRoot.windowWidth
+    height: _frozen ? documentRoot.windowHeight : -1
+
+    minHeight: documentRoot.windowHeight
+    marginLeft: documentRoot.windowWidth
+    fillWidth: ! _frozen
+    color: theme.secondaryBackgroundColor
+
+    scrollbars: false
+
+    onFrozenChanged: {
+        if (frozen)
+        {
+            const scrollTop = documentRoot.contentY;
+            documentRoot.contentY = 0;
+            contentArea.minHeight = contentArea.contentHeight;
+            _frozen = true;
+            page.contentY = scrollTop;
+        }
+        else
+        {
+            const scrollTop = page.contentY;
+            page.contentY = 0;
+            contentArea.minHeight = 0;
+            contentArea.contentY = 0;
+            _frozen = false;
+            documentRoot.contentY = scrollTop;
+        }
+    }
+
+    onDrag: {
+        if (! touched)
+        {
+            return;
+        }
+
+        const dx = arguments[0];
+        const dy = arguments[1];
+
+        if (Math.abs(dx) > Math.abs(dy))
+        {
+            if (! frozen)
+            {
+                frozen = true;
+            }
+            marginLeft = Math.max(0, marginLeft + dx);
+        }
+        else if (! frozen)
+        {
+            documentRoot.contentY -= dy;
+        } 
+    }
+
+    onDragEnd: {
+        if (frozen)
+        {
+            pushAnimation.from = marginLeft;
+            pushAnimation.to = 0;
+            pushAnimation.start();
+        }
+    }
+
+    Box {
+        id: contentArea
+
+        enabled: ! page._frozen
+        fillWidth: true
+    }
+
+    /*
+    Label {
+        visible: page.frozen
+        position: "free"
+        fontSize: 32
+        text: "FROZEN"
+    }
+    */
+
+    NumberAnimation {
+        id: pushAnimation
+
+        duration: 400
+
+        onNext: {
+            const v = arguments[0];
+            page.marginLeft = v;
+        }
+
+        onFinished: {
+            page.frozen = false;
+        }
+    }
+
+    NumberAnimation {
+        id: popAnimation
+
+        duration: 400
+
+        onNext: {
+            const v = arguments[0];
+            page.marginLeft = v;
+        }
+
+        onFinished: {
+            if (_parentPage)
+            {
+                _parentPage.frozen = false;
+            }
+            page.discard();
+        }
+    }
+}

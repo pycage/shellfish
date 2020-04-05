@@ -1,0 +1,89 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/mid";
+require "shellfish/ui";
+
+MouseBox {
+    id: switch
+
+    property checked: false
+    property containsMouse: false
+
+    canFocus: true
+
+    width: theme.itemWidthMedium
+    height: theme.itemHeightSmall
+
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: 3
+
+    color: checked ? theme.highlightBackgroundColor
+                   : theme.secondaryBackgroundColor
+
+    onClick: {
+        checked = ! checked;
+    }
+
+    onMouseOver: {
+        containsMouse = true;
+    }
+
+    onMouseOut: {
+        containsMouse = false;
+    }
+
+    onKeyDown: {
+        const ev = arguments[0];
+        if (ev.key === " ")
+        {
+            checked = ! checked;
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+    }
+
+    Box {
+        position: "free"
+        marginLeft: switch.checked ? width - 2 : 1
+        width: switch.width / 2
+        fillHeight: true
+
+        marginTop: 1
+        marginRight: 1
+        marginBottom: 1
+
+        color: theme.primaryBackgroundColor
+
+        borderColor: theme.borderColor
+        borderWidth: 1
+        borderRadius: 3
+
+        marginLeftTransition: NumberAnimation {
+            duration: 200
+            easing: "InExpo"
+        }
+    }
+
+    FocusIndicator { visible: switch.focus }
+}

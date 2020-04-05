@@ -1,0 +1,130 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/mid";
+
+Overlay {
+    id: menu
+
+    container default: menuBox
+
+    property popup: {
+        const parent = arguments[0];
+        const parentBbox = parent.bbox;
+        const bbox = menuBox.bbox;
+
+        const menuTopBelow = parentBbox.y + parentBbox.height * 0.96;
+        const menuTopAbove = parentBbox.y - bbox.height;
+
+        menuBox.minWidth = parentBbox.width;
+        menuBox.x = parentBbox.x;
+        if (menuTopBelow + bbox.height <= documentRoot.windowHeight)
+        {
+            menuBox.y = menuTopBelow;
+        }
+        else if (menuTopAbove >= 0)
+        {
+            menuBox.y = menuTopAbove;
+        }
+        else
+        {
+            menuBox.y = menuTopBelow;
+        }
+
+        documentRoot.add(menu);
+
+        let maxWidth = menuBox.minWidth;
+        let maxHeight = documentRoot.windowHeight - menuBox.y - 16;
+        let height = 0;
+        const cs = menuBox.children();
+        for (let i = 0; i < cs.length; ++i)
+        {
+            maxWidth = Math.max(maxWidth, cs[i].labelWidth());
+            height += cs[i].bbox.height;
+        }
+        menuBox.width = maxWidth;
+        menuBox.height = Math.min(maxHeight, height + 2);
+        for (let i = 0; i < cs.length; ++i)
+        {
+            cs[i].width = maxWidth - 2;
+        }
+
+        if (cs.length > 0)
+        {
+            cs[0].focus = true;
+        }
+    }
+
+    onClick: {
+        visible = false;
+    }
+
+    Box {
+        id: menuBox
+
+        position: "global"
+        width: 100
+        height: -1
+        color: theme.contentBackgroundColor
+        borderWidth: 1
+        borderColor: theme.borderColor
+
+        scrollbars: false
+
+        onKeyDown: {
+            const ev = arguments[0];
+            ev.preventDefault();
+
+            console.log("menu key down " + ev.key);
+
+            if (ev.key === "Escape" || ev.key === " ")
+            {
+                menu.visible = false;
+            }
+
+            let current = -1;
+            const cs = children();
+            for (let i = 0; i < cs.length; ++i)
+            {
+                if (cs[i].focus)
+                {
+                    current = i;
+                    break;
+                }
+            }
+
+            console.log("current: " + current);
+            if (ev.key === "ArrowUp")
+            {
+                current = Math.max(0, current - 1);
+            }
+            if (ev.key === "ArrowDown")
+            {
+                current = Math.min(cs.length - 1, current + 1);
+            }
+            console.log("new current: " + current);
+            cs[current].focus = true;
+        }
+
+    }
+}

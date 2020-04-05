@@ -1,0 +1,137 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/mid";
+require "shellfish/ui";
+
+MouseBox {
+    id: slider
+
+    property minValue: 0
+    property maxValue: 100
+    property value: 0
+    property stepSize: 5
+
+    onValueChanged: {
+        const p = (value - minValue) / (maxValue - minValue);
+        const hx = (width - handle.width) * p;
+        if (Math.abs(hx - handle.x) > 1)
+        {
+            handle.x = hx;
+        }
+    }
+
+    canFocus: true
+
+    layout: "center"
+
+    width: theme.itemWidthLarge
+    height: theme.itemHeightSmall
+
+    Box {
+        fillWidth: true
+        height: 6
+
+        borderWidth: 1
+        borderColor: theme.borderColor
+        borderRadius: 3
+
+        color: theme.secondaryColor
+    }
+
+    MouseBox {
+        id: handle
+
+        property dragging: false
+        property containsMouse: false
+
+        position: "free"
+        layout: "center"
+
+        width: height * 1.5
+        height: theme.itemHeightSmall
+
+        borderWidth: 1
+        borderColor: theme.borderColor
+        borderRadius: 3
+
+        color: containsMouse ? theme.highlightBackgroundColor
+                             : theme.primaryBackgroundColor
+
+        xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
+
+        onMouseOver: {
+            containsMouse = true;
+        }
+
+        onMouseOut: {
+            containsMouse = false;
+        }
+
+        onMouseDown: {
+            slider.focus = true;
+        }
+
+        onDrag: {
+            const dx = arguments[0];
+
+            const sx = Math.max(0, Math.min(slider.width - width, x + dx));
+            const p = sx / (slider.width - width);
+            const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
+            const hx = (slider.width - width) * p;
+
+            dragging = true;
+            x = hx;
+            slider.value = newValue;
+            dragging = false;
+
+            slider.focus = true;
+        }
+
+        Label { color: theme.borderColor; text: "[icon:drag_indicator]" }
+    }
+
+    onMouseDown: {
+        const ev = arguments[0];
+        const x = Math.max(0, Math.min(width, ev.x));
+        value = minValue + (maxValue - minValue) * (x / width);
+
+        focus = true;
+    }
+
+    onKeyDown: {
+        const ev = arguments[0];
+
+        if (ev.key === "ArrowLeft")
+        {
+            value = Math.max(minValue, value - stepSize);
+            direct ev.accepted = true;
+        }
+        if (ev.key === "ArrowRight")
+        {
+            value = Math.min(maxValue, value + stepSize);
+            direct ev.accepted = true;
+        }
+    }
+
+    FocusIndicator { visible: slider.focus }
+}

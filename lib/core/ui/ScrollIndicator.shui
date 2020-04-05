@@ -1,0 +1,266 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/mid";
+require "shellfish/ui";
+
+MouseBox {
+    id: box
+
+    property target: null
+    property orientation: "vertical"
+
+    position: "free"
+    origin: orientation === "vertical" ? "top-right"
+                                       : "bottom-left"
+
+    visible: handle.sizePercents < 1
+
+    property _contentPos: target ? (orientation === "vertical" ? target.contentY
+                                                               : target.contentX)
+                                 : 0
+    property _contentSize: target ? (orientation === "vertical" ? target.contentHeight
+                                                                : target.contentWidth)
+                                  : 1
+    property _viewSize: target ? (orientation === "vertical" ? target.bbox.height
+                                                             : target.bbox.width)
+                               : 1
+
+    property _animatedContentPos: 0
+    _animatedContentPosTransition: NumberAnimation { enabled: box.pressed; duration: 300; easing: "InOutQuad" }
+
+    _animatedContentPosChanged: {
+        if (orientation === "vertical")
+        {
+            target.contentY = _animatedContentPos;
+        }
+        else
+        {
+            target.contentX = _animatedContentPos;
+        }
+    }
+
+    property pressed: false
+    property _direction: 0
+
+    property lineUp: {
+        _animatedContentPos = Math.max(0, box._contentPos - theme.itemHeightMedium);
+    }
+
+    property lineDown: {
+        const maxPos = box._contentSize - box._viewSize;
+        _animatedContentPos = Math.min(maxPos, box._contentPos + theme.itemHeightMedium);
+    }
+
+    property pageUp: {
+        _animatedContentPos = Math.max(0, box._contentPos - box._viewSize);
+    }
+
+    property pageDown: {
+        const maxPos = box._contentSize - box._viewSize;
+        _animatedContentPos = Math.min(maxPos, box._contentPos + box._viewSize);
+    }
+
+    property firstPage: {
+        _animatedContentPos = 0;
+    }
+
+    property lastPage: {
+        _animatedContentPos = box._contentSize - box._viewSize;
+    }
+
+    canFocus: true
+
+    fillWidth: orientation === "vertical" ? false : true
+    fillHeight: orientation === "vertical" ? true : false
+    
+    width: orientation === "vertical" ? theme.paddingMedium : 0
+    height: orientation === "vertical" ? 0 : theme.paddingMedium
+
+    color: "rgba(0, 0, 0, 0.3)"
+
+    scrollbars: false
+
+    MouseBox {
+        id: handle
+
+        position: "free"
+
+        property sizePercents: Math.max(0, Math.min(1, box._viewSize / box._contentSize))
+        property posPercents: box._contentSize > box._viewSize ? box._contentPos / (box._contentSize - box._viewSize)
+                                                               : 0
+        
+        x: box.orientation === "vertical" ? 0
+                                          : posPercents * (box.bbox.width - bbox.width)
+        y: box.orientation === "vertical" ? posPercents * (box.bbox.height - bbox.height)
+                                          : 0
+        width: box.orientation === "vertical" ? 0 : Math.max(16, sizePercents * box.bbox.width)
+        height: box.orientation === "vertical" ? Math.max(16, sizePercents * box.bbox.height) : 0
+
+        fillWidth: box.orientation === "vertical" ? true : false
+        fillHeight: box.orientation === "vertical" ? false : true
+
+        color: theme.primaryBackgroundColor
+        borderWidth: 1
+        borderColor: theme.borderColor
+        borderRadius: 3
+
+        onMouseDown: {
+            box.focus = true;
+        }
+
+        onDrag: {
+            const dx = arguments[0];
+            const dy = arguments[1];
+
+            const bbox = box.bbox;
+
+            const pX = Math.max(0, Math.min(1, (x + dx) / (bbox.width - width)));
+            const pY = Math.max(0, Math.min(1, (y + dy) / (bbox.height - height)));
+            if (box.orientation === "vertical")
+            {
+                box._animatedContentPos = pY * (box._contentSize - bbox.height);
+            }
+            else
+            {
+                box._animatedContentPos = pX * (box._contentSize - bbox.width);
+            }
+        }
+
+        FocusIndicator { visible: box.focus }
+    }
+
+    onMouseDown: {
+        console.log("mouse down");
+        _animatedContentPos = _contentPos;
+        pressed = true;
+
+        const ev = arguments[0];
+        const x = ev.layerX; //clientX;
+        const y = ev.layerY; //clientY;
+        direct ev.accepted = true;
+
+        if (orientation === "vertical")
+        {
+            if (y < handle.y)
+            {
+                _direction = 0;
+            }
+            else if (y > handle.y + handle.height)
+            {
+                _direction = 1;
+            }
+        }
+        else
+        {
+            if (x < handle.x)
+            {
+                _direction = 0;
+            }
+            else if (x > handle.x + handle.width)
+            {
+                _direction = 1;
+            }
+        }
+
+        if (_direction === 0)
+        {
+            pageUp();
+        }
+        else
+        {
+            pageDown();
+        }
+
+        focus = true;
+    }
+
+    onMouseUp: {
+        pressed = false;
+    }
+
+    onMouseOut: {
+        pressed = false;
+    }
+
+    onKeyDown: {
+        const ev = arguments[0];
+
+        switch (ev.key)
+        {
+        case "ArrowUp":
+        case "ArrowLeft":
+            lineUp();
+            direct ev.accepted = true;
+            break;
+        case "ArrowDown":
+        case "ArrowRight":
+            lineDown();
+            direct ev.accepted = true;
+            break;
+        case "PageUp":
+            pageUp();
+            direct ev.accepted = true;
+            break;
+        case "PageDown":
+            pageDown();
+            direct ev.accepted = true;
+            break;
+        case "Home":
+            firstPage();
+            direct ev.accepted = true;
+            break;
+        case "End":
+            lastPage();
+            direct ev.accepted = true;
+            break;
+        }
+    }
+
+    Timer {
+        id: pullTimer
+
+        interval: 300
+        repeat: true
+        running: box.pressed
+
+        onTimeout: {
+            if (_direction === 0)
+            {
+                pageUp();
+            }
+            else
+            {
+                pageDown();
+            }
+        }
+    }
+
+    /*
+    Label {
+        visible: box.visible
+        position: "global"
+        origin: "top-right"
+        text: "ch: " + box._contentSize + " vh: " + box._viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
+    }
+    */
+}

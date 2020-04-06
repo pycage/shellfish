@@ -56,7 +56,7 @@ Button {
             _menu.init();
         }
 
-        console.log("options " + JSON.stringify(options));
+        //console.log("options " + JSON.stringify(options));
         let cs = _menu.children();
         for (let i = 0; i < cs.length; ++i)
         {

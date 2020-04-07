@@ -30,7 +30,6 @@ Box {
     container second: box2
 
     layout: "row"
-    color: theme.primaryBackgroundColor
 
     Box {
         id: box1

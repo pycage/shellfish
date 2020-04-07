@@ -35,7 +35,7 @@ MouseBox {
                                 : theme.secondaryBackgroundColor
     borderWidth: 1
     borderColor: theme.borderColor
-    layout: "row"
+    layout: "center-row"
 
     height: theme.itemHeightSmall
     scrollbars: false
@@ -80,6 +80,7 @@ MouseBox {
         marginRight: button.secondaryIcon !== "" ? 0 : 4
         marginBottom: 2
         overflowMode: "ellipsis"
+        horizontalAlignment: "center"
         text: button.text
     }
 

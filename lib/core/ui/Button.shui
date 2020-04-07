@@ -27,6 +27,7 @@ MouseBox {
     id: button
 
     property icon: ""
+    property secondaryIcon: ""
     property text: ""
     property containsMouse: false
 
@@ -36,6 +37,7 @@ MouseBox {
     borderColor: theme.borderColor
     layout: "row"
 
+    height: theme.itemHeightSmall
     scrollbars: false
 
     canFocus: true
@@ -46,6 +48,10 @@ MouseBox {
 
     onMouseOut: {
         containsMouse = false;
+    }
+
+    onClick: {
+        focus = true;
     }
 
     onKeyDown: {
@@ -68,11 +74,22 @@ MouseBox {
 
     Label {
         visible: button.text !== ""
+        fillWidth: true
         marginTop: 2
         marginLeft: button.icon !== "" ? 0 : 4
+        marginRight: button.secondaryIcon !== "" ? 0 : 4
+        marginBottom: 2
+        overflowMode: "ellipsis"
+        text: button.text
+    }
+
+    Label {
+        visible: button.secondaryIcon !== ""
+        marginTop: 2
+        marginLeft: 4
         marginRight: 4
         marginBottom: 2
-        text: button.text
+        text: "[icon:" + button.secondaryIcon + "]"
     }
 
     FocusIndicator { visible: button.focus }

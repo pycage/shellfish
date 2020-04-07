@@ -31,6 +31,7 @@ Button {
 
     minWidth: theme.itemWidthLarge
 
+    secondaryIcon: "menu"
     text: options[selection[0] || 0] || "?"
 
     property _menu: null
@@ -102,17 +103,5 @@ Button {
             selection = [selection[0] + 1];
         }
     } 
-
-    Box {
-        position: "free"
-        origin: "top-right"
-        layout: "center"
-        width: theme.itemWidthSmall
-        fillHeight: true
-
-        Label {
-            text: "[icon:menu]"
-        }
-    }
 
 }

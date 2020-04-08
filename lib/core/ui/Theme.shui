@@ -40,6 +40,7 @@ Object {
     property contentAltBackgroundColor: "#f0f0f0"
 
     property borderColor: "#808080"
+    property borderRadius: 3
     
     property itemWidthSmall: 32
     property itemWidthMedium: 64

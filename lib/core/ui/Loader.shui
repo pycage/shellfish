@@ -55,6 +55,9 @@ Box {
         }
     }
 
+    //width: item ? item.bbox.width : 0
+    height: item ? item.bbox.height : 0
+
     onSourceChanged: { load(); }
     onSourceTemplateChanged: { load(); }
 }

@@ -72,7 +72,7 @@ MouseBox {
 
         borderWidth: 1
         borderColor: theme.borderColor
-        borderRadius: 3
+        borderRadius: theme.borderRadius
 
         color: containsMouse ? theme.highlightBackgroundColor
                              : theme.primaryBackgroundColor

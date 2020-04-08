@@ -29,11 +29,15 @@ MouseBox {
     property icon: ""
     property secondaryIcon: ""
     property text: ""
+    property flat: false
+
     property containsMouse: false
 
+    style: flat ? "" : "sh-dropshadow"
     color: button.containsMouse ? theme.highlightBackgroundColor
-                                : theme.secondaryBackgroundColor
-    borderWidth: 1
+                                : flat ? "transparent" : theme.secondaryBackgroundColor
+    borderWidth: flat ? 0 : 1
+    borderRadius: flat ? 0 : theme.borderRadius
     borderColor: theme.borderColor
     layout: "center-row"
 

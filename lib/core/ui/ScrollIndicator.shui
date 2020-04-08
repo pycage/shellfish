@@ -33,7 +33,7 @@ MouseBox {
     origin: orientation === "vertical" ? "top-right"
                                        : "bottom-left"
 
-    visible: handle.sizePercents < 1
+    visible: handle.sizePercents < 0.99
 
     property _contentPos: target ? (orientation === "vertical" ? target.contentY
                                                                : target.contentX)

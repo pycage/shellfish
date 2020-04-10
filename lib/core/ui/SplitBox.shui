@@ -52,7 +52,8 @@ Box {
         width: theme.paddingLarge
         fillHeight: true
 
-        color: theme.secondaryBackgroundColor
+        color: containsMouse || touched ? theme.highlightBackgroundColor
+                                        : theme.secondaryBackgroundColor
         borderColor: theme.borderColor
         borderWidth: 1
 
@@ -61,14 +62,18 @@ Box {
         scrollbars: false
 
         onDrag: {
-            const dx = arguments[0];
+            const ev = arguments[0];
             const w = splitBox.bbox.width;
 
-            x = Math.max(16, Math.min(w - width - 16, x + dx));
+            x = Math.max(16, Math.min(w - width - 16, x + ev.dx));
+
+            direct ev.accepted = true;
         }
 
         onMouseDown: {
+            const ev = arguments[0];
             gutter.focus = true;
+            direct ev.accepted = true;
         }
 
         onKeyDown: {
@@ -77,15 +82,13 @@ Box {
             
             if (ev.key === "ArrowLeft")
             {
-                ev.preventDefault();
-                ev.stopPropagation();
                 x = Math.max(16, Math.min(w - width - 16, x - 32));
+                direct ev.accepted = true;
             }
             if (ev.key === "ArrowRight")
             {
-                ev.preventDefault();
-                ev.stopPropagation();
                 x = Math.max(16, Math.min(w - width - 16, x + 32));
+                direct ev.accepted = true;
             }
         }
 

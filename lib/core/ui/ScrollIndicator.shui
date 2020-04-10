@@ -129,13 +129,12 @@ MouseBox {
         }
 
         onDrag: {
-            const dx = arguments[0];
-            const dy = arguments[1];
+            const ev = arguments[0];
 
             const bbox = box.bbox;
 
-            const pX = Math.max(0, Math.min(1, (x + dx) / (bbox.width - width)));
-            const pY = Math.max(0, Math.min(1, (y + dy) / (bbox.height - height)));
+            const pX = Math.max(0, Math.min(1, (x + ev.dx) / (bbox.width - width)));
+            const pY = Math.max(0, Math.min(1, (y + ev.dy) / (bbox.height - height)));
             if (box.orientation === "vertical")
             {
                 box._animatedContentPos = pY * (box._contentSize - bbox.height);

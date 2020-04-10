@@ -27,7 +27,6 @@ MouseBox {
     id: switch
 
     property checked: false
-    property containsMouse: false
 
     canFocus: true
 
@@ -43,14 +42,6 @@ MouseBox {
 
     onClick: {
         checked = ! checked;
-    }
-
-    onMouseOver: {
-        containsMouse = true;
-    }
-
-    onMouseOut: {
-        containsMouse = false;
     }
 
     onKeyDown: {

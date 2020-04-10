@@ -20,46 +20,66 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/ui";
 require "shellfish/mid";
+require "shellfish/fengshui" as fengshui;
 
-MouseBox {
-    id: item
+Object {
+    id: pageStack
 
-    property text: ""
-    property menu: null
+    property initialPage: ""
+    property loading: true
 
-    property labelWidth: {
-        return label.bbox.width;
-    }
+    property pushPage: {
+        const url = arguments[0];
+        const props = arguments[1];
 
-    canFocus: true
-
-    height: theme.itemHeightMedium
-    layout: "center"
-
-    Label {
-        id: label
-        
-        fillWidth: true
-        marginLeft: 4
-        marginRight: 4
-        color: item.containsMouse ? theme.highlightColor
-                                  : item.enabled ? theme.primaryColor
-                                                 : theme.disabledColor
-        text: item.text
-    }
-
-    onKeyDown: {
-        const ev = arguments[0];
-        if (ev.key === " ")
+        loading = true;
+        fengshui.load(url, null, __rslv__, (page) =>
         {
-            item.click();
+            loading = false;
+            if (pages.length > 0)
+            {
+                pages[pages.length - 1].frozen = true;
+                pages[pages.length - 1].currentPage = false;
+            }
+            page.pageStack = pageStack;
+            
+            if (props)
+            {
+                for (let key in props)
+                {
+                    page[key] = props[key];
+                }
+            }
+
+            page.init();
+            documentRoot.add(page);
+            page.show();
+            pages.push(page);
+            page.currentPage = true;
+        });
+    }
+
+    property popPage: {
+        if (pages.length > 1)
+        {
+            const p = pages.pop();
+            p.close(function ()
+            {
+                p.discard();
+                pages[pages.length - 1].frozen = false;
+                pages[pages.length - 1].currentPage = true;
+
+            });
         }
     }
 
-    color: item.containsMouse ? theme.highlightBackgroundColor
-                              : "transparent"
+    property pages: []
 
-    FocusIndicator { visible: item.focus }
+    onInitialization: {
+        if (initialPage !== "")
+        {
+            pushPage(initialPage);
+        }
+    }
 }

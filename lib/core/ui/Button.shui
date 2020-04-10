@@ -31,11 +31,8 @@ MouseBox {
     property text: ""
     property flat: false
 
-    property containsMouse: false
-
-    style: flat ? "" : "sh-dropshadow"
-    color: button.containsMouse ? theme.highlightBackgroundColor
-                                : flat ? "transparent" : theme.secondaryBackgroundColor
+    color: containsMouse || touched ? theme.highlightBackgroundColor
+                                    : flat ? "transparent" : theme.secondaryBackgroundColor
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
     borderColor: theme.borderColor
@@ -46,14 +43,6 @@ MouseBox {
 
     canFocus: true
 
-    onMouseOver: {
-        containsMouse = true;
-    }
-
-    onMouseOut: {
-        containsMouse = false;
-    }
-
     onClick: {
         focus = true;
     }
@@ -62,8 +51,8 @@ MouseBox {
         const ev = arguments[0];
         if (ev.key === " ")
         {
-            direct ev.accepted = true;
             click();
+            direct ev.accepted = true;
         }
     }
 

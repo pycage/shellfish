@@ -27,41 +27,40 @@ MouseBox {
 
     container default: contentArea
 
+    property pageStack: null
+    property currentPage: false
     property frozen: false
     property _frozen: false
     property _parentPage: null
 
-    property pushPage: {
-        _parentPage = arguments[0];
-
-        if (_parentPage)
-        {
-            _parentPage.frozen = true;
-        }
-
+    property show: {
         frozen = true;
         pushAnimation.from = marginLeft;
         pushAnimation.to = 0;
         pushAnimation.start();
     }
 
-    property popPage: {
+    property close: {
+        const callback = arguments[0];
+
         frozen = true;
         popAnimation.from = marginLeft;
         popAnimation.to = documentRoot.windowWidth;
+        popAnimation.onFinished = callback;
         popAnimation.start();
     }
 
     position: _frozen ? "free" : "inline"
+    
     width: documentRoot.windowWidth
     height: _frozen ? documentRoot.windowHeight : -1
-
     minHeight: documentRoot.windowHeight
+
     marginLeft: documentRoot.windowWidth
     fillWidth: ! _frozen
-    color: theme.secondaryBackgroundColor
+    color: theme.primaryBackgroundColor
 
-    scrollbars: false
+    opacity: marginLeft > width / 3 ? 0.6 : 1
 
     onFrozenChanged: {
         if (frozen)
@@ -84,34 +83,55 @@ MouseBox {
     }
 
     onDrag: {
-        if (! touched)
+        if (! currentPage)
         {
             return;
         }
 
-        const dx = arguments[0];
-        const dy = arguments[1];
+        if (! touched)
+        {
+            //return;
+        }
 
-        if (Math.abs(dx) > Math.abs(dy))
+        const ev = arguments[0];
+
+        if (! frozen)
+        {
+            if (pageStack.pages.length === 1 || contentArea.contentX > 0 || ev.dx < 16)
+            {
+                return;
+            }
+        }
+
+        if (Math.abs(ev.dx) > Math.abs(ev.dy))
         {
             if (! frozen)
             {
                 frozen = true;
             }
-            marginLeft = Math.max(0, marginLeft + dx);
+            marginLeft = Math.max(0, marginLeft + ev.dx);
+            direct ev.accepted = true;
         }
-        else if (! frozen)
-        {
-            documentRoot.contentY -= dy;
-        } 
     }
 
     onDragEnd: {
+        if (! currentPage)
+        {
+            return;
+        }
+
         if (frozen)
         {
-            pushAnimation.from = marginLeft;
-            pushAnimation.to = 0;
-            pushAnimation.start();
+            if (marginLeft > width / 2)
+            {
+                pageStack.popPage();
+            }
+            else
+            {
+                pushAnimation.from = marginLeft;
+                pushAnimation.to = 0;
+                pushAnimation.start();
+            }
         }
     }
 
@@ -121,15 +141,6 @@ MouseBox {
         enabled: ! page._frozen
         fillWidth: true
     }
-
-    /*
-    Label {
-        visible: page.frozen
-        position: "free"
-        fontSize: 32
-        text: "FROZEN"
-    }
-    */
 
     NumberAnimation {
         id: pushAnimation
@@ -154,14 +165,6 @@ MouseBox {
         onNext: {
             const v = arguments[0];
             page.marginLeft = v;
-        }
-
-        onFinished: {
-            if (_parentPage)
-            {
-                _parentPage.frozen = false;
-            }
-            page.discard();
         }
     }
 }

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,39 +20,53 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
+require "shellfish/ui";
+require "shellfish/mid";
 
-exports.__id = "shellfish/ui";
+Box {
+    id: header
 
-const mods = [
-    "Button",
-    "DarkTheme",
-    "Dialog",
-    "FocusIndicator",
-    "Label",
-    "Loader",
-    "Menu",
-    "MenuBar",
-    "MenuItem",
-    "Overlay",
-    "Page",
-    "PageHeader",
-    "PageStack",
-    "ScrollIndicator",
-    "SelectionBox",
-    "Slider",
-    "SplitBox",
-    "Switch",
-    "Theme"
-];
+    container first: firstBox
+    container second: secondBox
 
-shRequire(__dirname + "/../fengshui.js", function (fengshui)
-{
-    shRequire(mods.map(m => __dirname + "/ui/" + m + ".shui"), function ()
-    {
-        for (var i = 0; i < arguments.length; ++i)
-        {
-            exports.include(arguments[i]);
+    property title: ""
+    property subtitle: ""
+    property pageStack: null
+
+    width: documentRoot.windowWidth
+    height: theme.itemHeightLarge
+
+    color: theme.primaryBackgroundColorTranslucent
+    style: "sh-dropshadow"
+
+    layout: "row"
+
+    Box {
+        id: firstBox
+        
+        height: header.height
+    }
+
+    Box {
+        fillWidth: true
+        height: header.height
+
+        layout: "center-column"
+
+        Label {
+            text: header.title
+            bold: true
         }
-    }, fengshui.compile);
-});
+
+        Label {
+            fontSize: theme.fontSizeSmall
+            text: header.subtitle
+        }
+    }
+
+    Box {
+        id: secondBox
+
+        height: header.height
+    }
+}

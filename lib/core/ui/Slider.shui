@@ -62,7 +62,6 @@ MouseBox {
         id: handle
 
         property dragging: false
-        property containsMouse: false
 
         position: "free"
         layout: "center"
@@ -74,27 +73,19 @@ MouseBox {
         borderColor: theme.borderColor
         borderRadius: theme.borderRadius
 
-        color: containsMouse ? theme.highlightBackgroundColor
-                             : theme.primaryBackgroundColor
+        color: containsMouse || touched ? theme.highlightBackgroundColor
+                                        : theme.primaryBackgroundColor
 
         xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
-
-        onMouseOver: {
-            containsMouse = true;
-        }
-
-        onMouseOut: {
-            containsMouse = false;
-        }
 
         onMouseDown: {
             slider.focus = true;
         }
 
         onDrag: {
-            const dx = arguments[0];
+            const ev = arguments[0];
 
-            const sx = Math.max(0, Math.min(slider.width - width, x + dx));
+            const sx = Math.max(0, Math.min(slider.width - width, x + ev.dx));
             const p = sx / (slider.width - width);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
             const hx = (slider.width - width) * p;
@@ -105,6 +96,8 @@ MouseBox {
             dragging = false;
 
             slider.focus = true;
+
+            direct ev.accepted = true;
         }
 
         Label { color: theme.borderColor; text: "[icon:drag_indicator]" }

@@ -59,8 +59,6 @@ Box {
 
         cursor: "col-resize"
 
-        scrollbars: false
-
         onDrag: {
             const ev = arguments[0];
             const w = splitBox.bbox.width;

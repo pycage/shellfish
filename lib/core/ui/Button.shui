@@ -39,7 +39,6 @@ MouseBox {
     layout: "center-row"
 
     height: theme.itemHeightSmall
-    scrollbars: false
 
     canFocus: true
 

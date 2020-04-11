@@ -28,6 +28,6 @@ Box {
     fillHeight: true
     enabled: false
     color: "transparent"
-    borderWidth: 2
+    borderWidth: documentRoot.operationMode === "mouse" ? 2 : 0
     borderColor: theme.highlightBackgroundColor
 }

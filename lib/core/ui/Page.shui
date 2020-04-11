@@ -53,7 +53,7 @@ MouseBox {
         popAnimation.start();
     }
 
-    position: _frozen ? "free" : "inline"
+    position: _frozen ? "global" : "inline"
     
     width: documentRoot.windowWidth
     height: _frozen ? documentRoot.windowHeight : -1
@@ -63,7 +63,7 @@ MouseBox {
     fillWidth: ! _frozen
     color: theme.primaryBackgroundColor
 
-    style: marginLeft > 0 ? "sh-dropshadow" : ""
+    style: marginLeft > 0 ? ["sh-no-scrollbars", "sh-dropshadow"] : "sh-no-scrollbars"
 
     onFrozenChanged: {
         if (frozen)
@@ -160,7 +160,7 @@ MouseBox {
         id: contentArea
 
         enabled: ! page._frozen
-        fillWidth: true
+        width: documentRoot.windowWidth
     }
 
     NumberAnimation {

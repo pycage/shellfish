@@ -26,6 +26,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     box-sizing: border-box;
 }
 
+*:focus {
+    outline: none;
+}
+
 body {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -35,6 +39,9 @@ body {
     
     font-size: 0.5cm;
     font-family: sans-serif;
+
+    /* disable Chrome's annoying back swipe gesture */
+    overscroll-behavior: contain;
 }
 
 .sh-no-scrollbars {

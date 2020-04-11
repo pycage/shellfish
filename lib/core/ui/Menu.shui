@@ -89,8 +89,6 @@ Overlay {
         borderWidth: 1
         borderColor: theme.borderColor
 
-        scrollbars: false
-
         onKeyDown: {
             const ev = arguments[0];
             ev.preventDefault();

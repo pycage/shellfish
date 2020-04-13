@@ -42,6 +42,7 @@ Box {
             {
                 item = root;
                 add(root);
+                item.init();
                 loading = false;
             });
         }
@@ -49,14 +50,11 @@ Box {
         {
             loading = true;
             item = sourceTemplate.create();
-            item.init();
             add(item);
+            item.init();
             loading = false;
         }
     }
-
-    //width: item ? item.bbox.width : 0
-    height: item ? item.bbox.height : 0
 
     onSourceChanged: { load(); }
     onSourceTemplateChanged: { load(); }

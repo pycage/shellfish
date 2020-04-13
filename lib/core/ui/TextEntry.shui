@@ -1,0 +1,80 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/mid";
+
+Box {
+    id: box
+
+    property text: ""
+    property password: false
+    property pattern: ".*"
+
+    width: theme.itemWidthLarge
+    height: theme.itemHeightSmall
+    color: theme.contentBackgroundColor
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: theme.borderRadius
+    layout: "center-row"
+
+    Box {
+        id: flashBox
+        position: "free"
+        fillWidth: true
+        fillHeight: true
+        color: "red"
+        opacity: 0
+    }
+
+    TextInput {
+        id: input
+
+        fillWidth: true
+        marginLeft: theme.paddingSmall
+        marginRight: theme.paddingSmall
+        fontSize: theme.fontSizeNormal
+        text: box.text
+        password: box.password
+        pattern: box.pattern
+
+        canFocus: true
+
+        onTextChanged: { box.text = text; }
+        onReject: { flashAnimation.start(); }
+    }
+
+    NumberAnimation {
+        id: flashAnimation
+        from: 1
+        to: 0
+        duration: 300
+        easing: "InOutQuad"
+
+        onNext: {
+            flashBox.opacity = arguments[0];
+        }
+    }
+
+    FocusIndicator { visible: input.focus }
+}

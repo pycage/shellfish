@@ -71,7 +71,7 @@ MouseBox {
         marginLeft: button.icon !== "" ? 0 : 4
         marginRight: button.secondaryIcon !== "" ? 0 : 4
         marginBottom: 2
-        overflowMode: "ellipsis"
+        overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
         text: button.text
     }

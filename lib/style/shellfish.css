@@ -44,6 +44,23 @@ body {
     overscroll-behavior: contain;
 }
 
+input[type=text], input[type=password] {
+    border: none;
+    background-color: transparent;
+    background-image: none;
+    overflow: hidden;
+    font-size: 100%;
+}
+
+textarea {
+    border: none;
+    background-color: transparent;
+    background-image: none;
+    resize: none;
+    overflow: hidden;
+    font-size: 100%;
+}
+
 .sh-no-scrollbars {
     scrollbar-width: none;
     -ms-overflow-style: none;

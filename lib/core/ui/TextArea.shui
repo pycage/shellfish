@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,37 +20,44 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
+require "shellfish/ui";
+require "shellfish/mid" as mid;
 
-exports.__id = "shellfish/mid";
+Box {
+    id: box
 
-const mods = [
-    __dirname + "/mid/box.js",
-    __dirname + "/mid/cameraview.js",
-    __dirname + "/mid/canvas.js",
-    __dirname + "/mid/document.js",
-    __dirname + "/mid/image.js",
-    __dirname + "/mid/item.js",
-    __dirname + "/mid/label.js",
-    __dirname + "/mid/listmodel.js",
-    __dirname + "/mid/listmodelview.js",
-    __dirname + "/mid/mousebox.js",
-    __dirname + "/mid/numberanimation.js",
-    __dirname + "/mid/object.js",
-    __dirname + "/mid/parallelanimation.js",
-    __dirname + "/mid/repeater.js",
-    __dirname + "/mid/ruler.js",
-    __dirname + "/mid/scriptaction.js",
-    __dirname + "/mid/sequentialanimation.js",
-    __dirname + "/mid/textarea.js",
-    __dirname + "/mid/textinput.js",
-    __dirname + "/mid/timer.js"
-];
+    property text: ""
+    property textColor: theme.primaryColor
+    property fontSize: theme.fontSizeNormal
+    property fontFamily: "sans-serif"
+    property bold: false
 
-shRequire(mods, function ()
-{
-    for (var i = 0; i < arguments.length; ++i)
-    {
-        exports.include(arguments[i]);
+    width: theme.itemWidthLarge * 2
+    height: theme.itemHeightLarge * 2
+    color: theme.contentBackgroundColor
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: theme.borderRadius
+
+    mid.TextArea {
+        id: input
+
+        fillWidth: true
+        fillHeight: true
+        marginTop: theme.paddingSmall
+        marginLeft: theme.paddingSmall
+        marginRight: theme.paddingSmall
+        marginBottom: theme.paddingSmall
+        fontSize: box.fontSize
+        fontFamily: box.fontFamily
+        bold: box.bold
+        color: box.textColor
+        text: box.text
+
+        canFocus: true
+
+        onTextChanged: { box.text = text; }
     }
-});
+
+    FocusIndicator { visible: input.focus }
+}

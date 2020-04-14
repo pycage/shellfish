@@ -63,7 +63,7 @@ Box {
             const ev = arguments[0];
             const w = splitBox.bbox.width;
 
-            x = Math.max(16, Math.min(w - width - 16, x + ev.dx));
+            x = Math.max(16, Math.min(w - width - 16, x + ev.deltaX));
 
             direct ev.accepted = true;
         }

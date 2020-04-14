@@ -23,7 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 require "shellfish/ui";
 require "shellfish/mid" as mid;
 
-Box {
+MouseBox {
     id: box
 
     property text: ""
@@ -38,6 +38,29 @@ Box {
     borderColor: theme.borderColor
     borderWidth: 1
     borderRadius: theme.borderRadius
+
+    onWheel: {
+        const ev = arguments[0];
+        direct ev.accepted = true;
+
+        if (ev.deltaX < 0)
+        {
+            input.contentX = Math.max(0, input.contentX - theme.itemHeightMedium);
+        }
+        else if (ev.deltaX > 0)
+        {
+            input.contentX = Math.min(input.contentWidth - input.bbox.width, input.contentX + theme.itemHeightMedium);
+        }
+
+        if (ev.deltaY < 0)
+        {
+            input.contentY = Math.max(0, input.contentY - theme.itemHeightMedium);
+        }
+        else if (ev.deltaY > 0)
+        {
+            input.contentY = Math.min(input.contentHeight - input.bbox.height, input.contentY + theme.itemHeightMedium);
+        }
+    }
 
     mid.TextArea {
         id: input
@@ -58,6 +81,9 @@ Box {
 
         onTextChanged: { box.text = text; }
     }
+
+    ScrollIndicator { target: input; orientation: "vertical" }
+    ScrollIndicator { target: input; orientation: "horizontal" }
 
     FocusIndicator { visible: input.focus }
 }

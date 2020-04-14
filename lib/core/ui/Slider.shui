@@ -85,7 +85,7 @@ MouseBox {
         onDrag: {
             const ev = arguments[0];
 
-            const sx = Math.max(0, Math.min(slider.width - width, x + ev.dx));
+            const sx = Math.max(0, Math.min(slider.width - width, x + ev.deltaX));
             const p = sx / (slider.width - width);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
             const hx = (slider.width - width) * p;

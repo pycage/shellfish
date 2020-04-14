@@ -123,23 +123,27 @@ MouseBox {
         borderRadius: 3
 
         onMouseDown: {
+            const ev = arguments[0];
+            direct ev.accepted = true;
+
             box.focus = true;
         }
 
         onDrag: {
             const ev = arguments[0];
+            direct ev.accepted = true;
 
-            const bbox = box.bbox;
+            _animatedContentPos = _contentPos;
 
-            const pX = Math.max(0, Math.min(1, (x + ev.dx) / (bbox.width - width)));
-            const pY = Math.max(0, Math.min(1, (y + ev.dy) / (bbox.height - height)));
             if (box.orientation === "vertical")
             {
-                box._animatedContentPos = pY * (box._contentSize - bbox.height);
+                const scale = box.bbox.height / Math.max(1, box._contentSize);
+                box._animatedContentPos = box._contentPos + ev.deltaY / scale;
             }
             else
             {
-                box._animatedContentPos = pX * (box._contentSize - bbox.width);
+                const scale = box.bbox.width / Math.max(1, box._contentSize);
+                box._animatedContentPos = box._contentPos + ev.deltaX / scale;
             }
         }
 
@@ -147,14 +151,13 @@ MouseBox {
     }
 
     onMouseDown: {
-        console.log("mouse down");
+        const ev = arguments[0];
+        const x = ev.x;
+        const y = ev.y;
+        direct ev.accepted = true;
+
         _animatedContentPos = _contentPos;
         pressed = true;
-
-        const ev = arguments[0];
-        const x = ev.layerX; //clientX;
-        const y = ev.layerY; //clientY;
-        direct ev.accepted = true;
 
         if (orientation === "vertical")
         {

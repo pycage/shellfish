@@ -20,7 +20,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/mid";
 require "shellfish/ui";
 
 MouseBox {
@@ -255,12 +254,12 @@ MouseBox {
         }
     }
 
-    /*
     Label {
         visible: box.visible
         position: "global"
         origin: "top-right"
         text: "ch: " + box._contentSize + " vh: " + box._viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
     }
+    /*
     */
 }

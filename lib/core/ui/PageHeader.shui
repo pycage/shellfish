@@ -21,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 require "shellfish/ui";
-require "shellfish/mid";
 
 Box {
     id: header
@@ -33,23 +32,34 @@ Box {
     property subtitle: ""
     property pageStack: null
 
+    property active: true
+
+    position: "global"
+    y: active ? 0 : -height
+    yTransition: NumberAnimation { duration: 700; easing: "InOutQuad" }
+
     width: documentRoot.windowWidth
     height: theme.itemHeightLarge
 
     color: theme.primaryBackgroundColorTranslucent
     style: "sh-dropshadow"
 
-    layout: "row"
+
 
     Box {
         id: firstBox
         
+        position: "free"
         height: header.height
     }
 
     Box {
+        property margin: Math.max(firstBox.bbox.width, secondBox.bbox.width)
+
         fillWidth: true
         height: header.height
+        marginLeft: margin
+        marginRight: margin
 
         layout: "center-column"
 
@@ -67,6 +77,8 @@ Box {
     Box {
         id: secondBox
 
+        position: "free"
+        origin: "top-right"
         height: header.height
     }
 }

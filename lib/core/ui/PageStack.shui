@@ -20,7 +20,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/mid";
 require "shellfish/fengshui" as fengshui;
 
 Object {
@@ -30,9 +29,38 @@ Object {
     property loading: true
 
     property pushPage: {
-        const url = arguments[0];
+        const target = arguments[0];
         const props = arguments[1];
 
+        if (target.create)
+        {
+            const page = target.create();
+                        loading = false;
+            if (pages.length > 0)
+            {
+                pages[pages.length - 1].frozen = true;
+                pages[pages.length - 1].currentPage = false;
+            }
+            page.pageStack = pageStack;
+            
+            if (props)
+            {
+                for (let key in props)
+                {
+                    page[key] = props[key];
+                }
+            }
+
+            page.init();
+            documentRoot.add(page);
+            page.show();
+            pages.push(page);
+            page.currentPage = true;
+            pagesChanged();
+            return;
+        }
+
+        const url = target;
         loading = true;
         fengshui.load(url, null, __rslv__, (page) =>
         {
@@ -57,6 +85,7 @@ Object {
             page.show();
             pages.push(page);
             page.currentPage = true;
+            pagesChanged();
         });
     }
 
@@ -71,6 +100,7 @@ Object {
                 pages[pages.length - 1].currentPage = true;
 
             });
+            pagesChanged();
         }
     }
 

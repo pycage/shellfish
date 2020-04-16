@@ -20,12 +20,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/mid";
-
 MouseBox {
     id: page
 
     container default: contentArea
+    container header: headerArea
 
     property pageStack: null
     property currentPage: false
@@ -100,19 +99,19 @@ MouseBox {
 
         if (! frozen)
         {
-            if (pageStack.pages.length === 1 || contentArea.contentX > 0 || ev.dx < 16)
+            if (pageStack.pages.length === 1 || contentArea.contentX > 0 || ev.deltaX < 16)
             {
                 return;
             }
         }
 
-        if (Math.abs(ev.dx) > Math.abs(ev.dy))
+        if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY))
         {
             if (! frozen)
             {
                 frozen = true;
             }
-            marginLeft = Math.max(0, marginLeft + ev.dx);
+            marginLeft = Math.max(0, marginLeft + ev.deltaX);
             direct ev.accepted = true;
         }
     }
@@ -161,6 +160,10 @@ MouseBox {
 
         enabled: ! page._frozen
         width: documentRoot.windowWidth
+    }
+
+    Box {
+        id: headerArea
     }
 
     NumberAnimation {

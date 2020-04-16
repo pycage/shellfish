@@ -21,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 require "shellfish/ui";
-require "shellfish/mid";
 
 MouseBox {
     id: item

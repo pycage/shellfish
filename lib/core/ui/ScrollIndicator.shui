@@ -254,12 +254,12 @@ MouseBox {
         }
     }
 
+    /*
     Label {
         visible: box.visible
         position: "global"
         origin: "top-right"
         text: "ch: " + box._contentSize + " vh: " + box._viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
     }
-    /*
     */
 }

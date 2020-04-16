@@ -30,8 +30,10 @@ MouseBox {
     property text: ""
     property flat: false
 
-    color: containsMouse || touched ? theme.highlightBackgroundColor
-                                    : flat ? "transparent" : theme.secondaryBackgroundColor
+    color: (containsMouse && documentRoot.inputDevice !== "touch") ||
+           touched ? theme.highlightBackgroundColor
+                   : flat ? "transparent"
+                          : theme.secondaryBackgroundColor
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
     borderColor: theme.borderColor

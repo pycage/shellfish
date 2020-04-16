@@ -51,6 +51,8 @@ Box {
         
         position: "free"
         height: header.height
+
+        layout: "center-row"
     }
 
     Box {
@@ -80,5 +82,7 @@ Box {
         position: "free"
         origin: "top-right"
         height: header.height
+
+        layout: "center-row"
     }
 }

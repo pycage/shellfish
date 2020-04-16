@@ -53,6 +53,7 @@ Box {
         marginLeft: theme.paddingSmall
         marginRight: theme.paddingSmall
         fontSize: theme.fontSizeNormal
+        color: theme.primaryColor
         text: box.text
         password: box.password
         pattern: box.pattern

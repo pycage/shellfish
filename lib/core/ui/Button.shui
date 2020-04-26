@@ -29,8 +29,10 @@ MouseBox {
     property secondaryIcon: ""
     property text: ""
     property flat: false
+    property checked: false
 
-    color: (containsMouse && documentRoot.inputDevice !== "touch") ||
+    color: checked ||
+           (containsMouse && documentRoot.inputDevice !== "touch") ||
            touched ? theme.highlightBackgroundColor
                    : flat ? "transparent"
                           : theme.secondaryBackgroundColor

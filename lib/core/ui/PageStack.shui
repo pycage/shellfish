@@ -35,7 +35,7 @@ Object {
         if (target.create)
         {
             const page = target.create();
-                        loading = false;
+            loading = false;
             if (pages.length > 0)
             {
                 pages[pages.length - 1].frozen = true;

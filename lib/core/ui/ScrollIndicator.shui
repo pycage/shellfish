@@ -123,14 +123,14 @@ MouseBox {
 
         onMouseDown: {
             const ev = arguments[0];
-            direct ev.accepted = true;
+            ev.accepted = true;
 
             box.focus = true;
         }
 
         onDrag: {
             const ev = arguments[0];
-            direct ev.accepted = true;
+            ev.accepted = true;
 
             _animatedContentPos = _contentPos;
 
@@ -153,7 +153,7 @@ MouseBox {
         const ev = arguments[0];
         const x = ev.x;
         const y = ev.y;
-        direct ev.accepted = true;
+        ev.accepted = true;
 
         _animatedContentPos = _contentPos;
         pressed = true;
@@ -209,28 +209,28 @@ MouseBox {
         case "ArrowUp":
         case "ArrowLeft":
             lineUp();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         case "ArrowDown":
         case "ArrowRight":
             lineDown();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         case "PageUp":
             pageUp();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         case "PageDown":
             pageDown();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         case "Home":
             firstPage();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         case "End":
             lastPage();
-            direct ev.accepted = true;
+            ev.accepted = true;
             break;
         }
     }

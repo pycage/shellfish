@@ -112,7 +112,7 @@ MouseBox {
                 frozen = true;
             }
             marginLeft = Math.max(0, marginLeft + ev.deltaX);
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
     }
 

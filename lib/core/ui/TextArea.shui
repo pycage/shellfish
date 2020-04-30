@@ -40,7 +40,7 @@ MouseBox {
 
     onWheel: {
         const ev = arguments[0];
-        direct ev.accepted = true;
+        ev.accepted = true;
 
         if (ev.deltaX < 0)
         {

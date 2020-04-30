@@ -73,7 +73,7 @@ Button {
             {
                 box.selection = [i];
                 console.log("selected " + i);
-            }
+            };
             menuItem.init();
             _menu.add(menuItem);
         }
@@ -94,7 +94,7 @@ Button {
 
     onWheel: {
         const ev = arguments[0];
-        direct ev.accepted = true;
+        ev.accepted = true;
 
         if (ev.deltaY < 0 && selection[0] > 0)
         {

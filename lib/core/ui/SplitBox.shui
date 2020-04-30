@@ -64,13 +64,13 @@ Box {
 
             x = Math.max(16, Math.min(w - width - 16, x + ev.deltaX));
 
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
 
         onMouseDown: {
             const ev = arguments[0];
             gutter.focus = true;
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
 
         onKeyDown: {
@@ -80,12 +80,12 @@ Box {
             if (ev.key === "ArrowLeft")
             {
                 x = Math.max(16, Math.min(w - width - 16, x - 32));
-                direct ev.accepted = true;
+                ev.accepted = true;
             }
             if (ev.key === "ArrowRight")
             {
                 x = Math.max(16, Math.min(w - width - 16, x + 32));
-                direct ev.accepted = true;
+                ev.accepted = true;
             }
         }
 

@@ -54,7 +54,7 @@ MouseBox {
         if (ev.key === " ")
         {
             click();
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
     }
 

@@ -96,7 +96,7 @@ MouseBox {
 
             slider.focus = true;
 
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
 
         Label { color: theme.borderColor; text: "[icon:drag_indicator]" }
@@ -116,12 +116,12 @@ MouseBox {
         if (ev.key === "ArrowLeft")
         {
             value = Math.max(minValue, value - stepSize);
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
         if (ev.key === "ArrowRight")
         {
             value = Math.min(maxValue, value + stepSize);
-            direct ev.accepted = true;
+            ev.accepted = true;
         }
     }
 

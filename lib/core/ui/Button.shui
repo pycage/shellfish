@@ -45,12 +45,13 @@ MouseBox {
 
     canFocus: true
 
-    onClick: {
+    onClick: () =>
+    {
         focus = true;
     }
 
-    onKeyDown: {
-        const ev = arguments[0];
+    onKeyDown: (ev) =>
+    {
         if (ev.key === " ")
         {
             click();

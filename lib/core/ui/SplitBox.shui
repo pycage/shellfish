@@ -58,8 +58,8 @@ Box {
 
         cursor: "col-resize"
 
-        onDrag: {
-            const ev = arguments[0];
+        onDrag: (ev) =>
+        {
             const w = splitBox.bbox.width;
 
             x = Math.max(16, Math.min(w - width - 16, x + ev.deltaX));
@@ -67,14 +67,14 @@ Box {
             ev.accepted = true;
         }
 
-        onMouseDown: {
-            const ev = arguments[0];
+        onMouseDown: (ev) =>
+        {
             gutter.focus = true;
             ev.accepted = true;
         }
 
-        onKeyDown: {
-            const ev = arguments[0];
+        onKeyDown: (ev) =>
+        {
             const w = splitBox.bbox.width;
             
             if (ev.key === "ArrowLeft")

@@ -27,8 +27,8 @@ Overlay {
 
     container default: menuBox
 
-    property popup: {
-        const parent = arguments[0];
+    property popup: (parent) =>
+    {
         const parentBbox = parent.bbox;
         const bbox = menuBox.bbox;
 
@@ -74,7 +74,8 @@ Overlay {
         }
     }
 
-    onClick: {
+    onClick: () =>
+    {
         visible = false;
     }
 
@@ -88,9 +89,9 @@ Overlay {
         borderWidth: 1
         borderColor: theme.borderColor
 
-        onKeyDown: {
-            const ev = arguments[0];
-            ev.preventDefault();
+        onKeyDown: (ev) =>
+        {
+            ev.accepted = true;
 
             console.log("menu key down " + ev.key);
 

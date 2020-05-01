@@ -22,16 +22,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/fengshui" as fengshui;
 
+/**
+ * Element for managing a stack of Page elements.
+ *
+ * @memberof ui
+ * @name PageStack
+ * @class
+ *
+ * @property {string} initialPage - The URL to load the initial page from.
+ * @property {bool} loading - [readonly] `true` while a page is being loaded.
+ * @property {ui.Page[]} pages - [readonly] The stack of pages.
+ */
 Object {
     id: pageStack
 
     property initialPage: ""
     property loading: true
+    property pages: []
 
-    property pushPage: {
-        const target = arguments[0];
-        const props = arguments[1];
-
+    /**
+     * Pushes a page onto the page stack.
+     *
+     * @memberof ui.PageStack
+     * @name pushPage
+     * @method
+     *
+     * @param {string} target - The URL of the page.
+     * @param {object} props - The properties to set on the page. 
+     */
+    property pushPage: (target, props) =>
+    {
         if (target.create)
         {
             const page = target.create();
@@ -89,7 +109,15 @@ Object {
         });
     }
 
-    property popPage: {
+    /**
+     * Pops the topmost page off the page stack.
+     *
+     * @memberof ui.PageStack
+     * @name popPage
+     * @method
+     */
+    property popPage: () =>
+    {
         if (pages.length > 1)
         {
             const p = pages.pop();
@@ -104,9 +132,8 @@ Object {
         }
     }
 
-    property pages: []
-
-    onInitialization: {
+    onInitialization: () =>
+    {
         if (initialPage !== "")
         {
             pushPage(initialPage);

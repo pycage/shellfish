@@ -39,17 +39,17 @@ MouseBox {
     color: checked ? theme.highlightBackgroundColor
                    : theme.secondaryBackgroundColor
 
-    onClick: {
+    onClick: () =>
+    {
         checked = ! checked;
     }
 
-    onKeyDown: {
-        const ev = arguments[0];
+    onKeyDown: (ev) =>
+    {
         if (ev.key === " ")
         {
             checked = ! checked;
-            ev.preventDefault();
-            ev.stopPropagation();
+            ev.accepted = true;
         }
     }
 

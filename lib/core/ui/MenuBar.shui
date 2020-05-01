@@ -31,9 +31,10 @@ Box {
     fillWidth: true
     height: theme.itemHeightMedium
 
-    onInitialization: { console.log("Internal init"); console.log("style: " + style); }
+    onInitialization: () => { console.log("Internal init"); console.log("style: " + style); }
 
-    property setup: {
+    property setup: () =>
+    {
         console.log("setup menubar");
 
         const children = contentBox.children();
@@ -87,19 +88,13 @@ Box {
         fillWidth: true
         fillHeight: true
 
-        onMouseDown: {
+        onMouseDown: (ev) =>
+        {
             if (menuBar.currentMenu)
             {
                 //menuBar.currentMenu.close();
             }
         }
-
-        /*
-        onMouseMove: {
-            var ev = arguments[0];
-            //console.log(ev.x + ", " + ev.y);
-        }
-        */
 
     }
 

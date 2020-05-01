@@ -34,11 +34,13 @@ MouseBox {
 
     _opacityTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
-    onInitialization: {
+    onInitialization: () =>
+    {
         documentRoot.add(self);
     }
 
-    onDimChanged: {
+    onDimChanged: () =>
+    {
         if (dim)
         {
             _opacity = 0.6;

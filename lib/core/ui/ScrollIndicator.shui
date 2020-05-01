@@ -47,7 +47,8 @@ MouseBox {
     property _animatedContentPos: 0
     _animatedContentPosTransition: NumberAnimation { enabled: box.pressed; duration: 300; easing: "InOutQuad" }
 
-    _animatedContentPosChanged: {
+    _animatedContentPosChanged: () =>
+    {
         if (orientation === "vertical")
         {
             target.contentY = _animatedContentPos;
@@ -61,29 +62,35 @@ MouseBox {
     property pressed: false
     property _direction: 0
 
-    property lineUp: {
+    property lineUp: () =>
+    {
         _animatedContentPos = Math.max(0, box._contentPos - theme.itemHeightMedium);
     }
 
-    property lineDown: {
+    property lineDown: () =>
+    {
         const maxPos = box._contentSize - box._viewSize;
         _animatedContentPos = Math.min(maxPos, box._contentPos + theme.itemHeightMedium);
     }
 
-    property pageUp: {
+    property pageUp: () =>
+    {
         _animatedContentPos = Math.max(0, box._contentPos - box._viewSize);
     }
 
-    property pageDown: {
+    property pageDown: () =>
+    {
         const maxPos = box._contentSize - box._viewSize;
         _animatedContentPos = Math.min(maxPos, box._contentPos + box._viewSize);
     }
 
-    property firstPage: {
+    property firstPage: () =>
+    {
         _animatedContentPos = 0;
     }
 
-    property lastPage: {
+    property lastPage: () =>
+    {
         _animatedContentPos = box._contentSize - box._viewSize;
     }
 
@@ -121,15 +128,14 @@ MouseBox {
         borderColor: theme.borderColor
         borderRadius: 3
 
-        onMouseDown: {
-            const ev = arguments[0];
+        onMouseDown: (ev) =>
+        {
             ev.accepted = true;
-
             box.focus = true;
         }
 
-        onDrag: {
-            const ev = arguments[0];
+        onDrag: (ev) =>
+        {
             ev.accepted = true;
 
             _animatedContentPos = _contentPos;
@@ -149,8 +155,8 @@ MouseBox {
         FocusIndicator { visible: box.focus }
     }
 
-    onMouseDown: {
-        const ev = arguments[0];
+    onMouseDown: (ev) =>
+    {
         const x = ev.x;
         const y = ev.y;
         ev.accepted = true;
@@ -193,17 +199,18 @@ MouseBox {
         focus = true;
     }
 
-    onMouseUp: {
+    onMouseUp: (ev) =>
+    {
         pressed = false;
     }
 
-    onMouseOut: {
+    onMouseOut: (ev) =>
+    {
         pressed = false;
     }
 
-    onKeyDown: {
-        const ev = arguments[0];
-
+    onKeyDown: (ev) =>
+    {
         switch (ev.key)
         {
         case "ArrowUp":
@@ -242,7 +249,8 @@ MouseBox {
         repeat: true
         running: box.pressed
 
-        onTimeout: {
+        onTimeout: () =>
+        {
             if (_direction === 0)
             {
                 pageUp();

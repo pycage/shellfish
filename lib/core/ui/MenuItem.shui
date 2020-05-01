@@ -28,7 +28,8 @@ MouseBox {
     property text: ""
     property menu: null
 
-    property labelWidth: {
+    property labelWidth: () =>
+    {
         return label.bbox.width;
     }
 
@@ -49,8 +50,8 @@ MouseBox {
         text: item.text
     }
 
-    onKeyDown: {
-        const ev = arguments[0];
+    onKeyDown: (ev) =>
+    {
         if (ev.key === " ")
         {
             item.click();

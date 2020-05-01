@@ -30,7 +30,8 @@ MouseBox {
     property value: 0
     property stepSize: 5
 
-    onValueChanged: {
+    onValueChanged: () =>
+    {
         const p = (value - minValue) / (maxValue - minValue);
         const hx = (width - handle.width) * p;
         if (Math.abs(hx - handle.x) > 1)
@@ -77,13 +78,14 @@ MouseBox {
 
         xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
 
-        onMouseDown: {
+        onMouseDown: () =>
+        {
             slider.focus = true;
+            ev.accepted = true;
         }
 
-        onDrag: {
-            const ev = arguments[0];
-
+        onDrag: (ev) =>
+        {
             const sx = Math.max(0, Math.min(slider.width - width, x + ev.deltaX));
             const p = sx / (slider.width - width);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
@@ -102,17 +104,18 @@ MouseBox {
         Label { color: theme.borderColor; text: "[icon:drag_indicator]" }
     }
 
-    onMouseDown: {
-        const ev = arguments[0];
+    onMouseDown: (ev) =>
+    {
+        ev.accepted = true;
+
         const x = Math.max(0, Math.min(width, ev.x));
         value = minValue + (maxValue - minValue) * (x / width);
 
         focus = true;
     }
 
-    onKeyDown: {
-        const ev = arguments[0];
-
+    onKeyDown: (ev) =>
+    {
         if (ev.key === "ArrowLeft")
         {
             value = Math.max(minValue, value - stepSize);

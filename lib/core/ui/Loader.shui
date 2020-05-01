@@ -28,7 +28,8 @@ Box {
     property item: null
     property loading: false
 
-    property load: {
+    property load: () =>
+    {
         if (item)
         {
             item.discard();

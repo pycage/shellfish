@@ -39,7 +39,8 @@ Button {
 
         visible: false
 
-        onVisibleChanged: {
+        onVisibleChanged: () =>
+        {
             if (! visible)
             {
                 box.focus = true;
@@ -49,7 +50,8 @@ Button {
         property item: template MenuItem { }
     }
 
-    onOptionsChanged: {
+    onOptionsChanged: () =>
+    {
         if (! _menu)
         {
             _menu = _menuT.create();
@@ -84,7 +86,8 @@ Button {
         }
     }
 
-    onClick: {
+    onClick: () =>
+    {
         if (_menu)
         {
             _menu.visible = true;
@@ -92,8 +95,8 @@ Button {
         }
     }
 
-    onWheel: {
-        const ev = arguments[0];
+    onWheel: (ev) =>
+    {
         ev.accepted = true;
 
         if (ev.deltaY < 0 && selection[0] > 0)

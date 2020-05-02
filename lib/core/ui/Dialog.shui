@@ -22,42 +22,81 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a dialog window.
+ *
+ * Containers:
+ * * `buttons` - The buttons box.
+ *
+ * @memberof ui
+ * @class
+ * @name Dialog
+ * @extends ui.Overlay
+ *
+ * @property {string} title - (default: `""`) The title text.
+ */
 Overlay {
     id: dialog
 
     container default: contentArea
     container buttons: buttonBox
 
-    property title: "Dialog"
+    property title: ""
 
     dim: true
     layout: "center"
 
-    onClick: {
-        self.discard();
-    }
-
     MouseBox {
-        width: 300
-        height: 400
+        id: win
 
         borderWidth: 2
         borderColor: theme.borderColor
         borderRadius: 3
 
-        onClick: { arguments[0].stopPropagation(); }
+        color: theme.primaryBackgroundColor
+        opacity: titlebar.pressed ? 0.4 : 1
+
+        onClick: (ev) =>
+        {
+            ev.accepted = true;
+        }
 
         // titlebar
-        Box {
-            position: "free"
+        MouseBox {
+            id: titlebar
+
+            property pressed: false
+
             fillWidth: true
             height: theme.itemHeightMedium
             color: theme.highlightBackgroundColor
             layout: "center"
 
+            onMouseDown: (ev) =>
+            {
+                ev.accepted = true;
+                pressed = true;
+            }
+
+            onMouseUp: (ev) =>
+            {
+                ev.accepted = true;
+                pressed = false;
+            }
+
+            onMouseOut: (ev) =>
+            {
+                pressed = false;
+            }
+
             Label {
+                position: "free"
+                y: (parent.bbox.height - bbox.height) / 2
                 marginLeft: 8
                 marginRight: 8
+                fillWidth: true
+                bold: true
+                overflowBehavior: "ellipsis"
                 text: dialog.title
             }
 
@@ -70,31 +109,42 @@ Overlay {
             }
         }
 
-        // buttons
-        Box {
-            id: buttonBox
-
-            position: "free"
-            origin: "bottom-left"
-            layout: "row"
-            fillWidth: true
-            height: theme.itemHeightMedium
-            color: theme.secondaryBackgroundColor
-
-            Box { fillWidth: true }
-        }
-
         // content
         Box {
             id: contentArea
 
-            position: "free"
             fillWidth: true
             fillHeight: true
-            marginTop: theme.itemHeightMedium
-            marginBottom: theme.itemHeightMedium
+            marginTop: theme.paddingLarge
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+            marginBottom: theme.paddingLarge
             color: theme.primaryBackgroundColor
         }
+
+        // buttons
+        Box {
+            origin: "bottom-left"
+            fillWidth: true
+            height: theme.itemHeightMedium + theme.paddingSmall
+            color: theme.secondaryBackgroundColor
+
+    	    Box {
+                id: buttonBox
+
+                fillWidth: true
+                fillHeight: true
+                marginTop: theme.paddingSmall / 2
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall / 2
+                layout: "center-row"
+    
+                Box { fillWidth: true }
+            }
+        }
+
+
     }
 
 }

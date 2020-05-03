@@ -26,12 +26,12 @@ Button {
     id: box
 
     property options: []
-    property selection: []
+    property selection: -1
 
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "menu"
-    text: options[selection[0] || 0] || "?"
+    text: options[selection] || "?"
 
     property _menu: null
 
@@ -73,16 +73,16 @@ Button {
             menuItem.text = option;
             menuItem.onClick = function ()
             {
-                box.selection = [i];
+                box.selection = i;
                 console.log("selected " + i);
             };
             menuItem.init();
             _menu.add(menuItem);
         }
 
-        if (selection.length === 0)
+        if (selection === -1)
         {
-            selection = [0];
+            selection = 0;
         }
     }
 
@@ -99,13 +99,13 @@ Button {
     {
         ev.accepted = true;
 
-        if (ev.deltaY < 0 && selection[0] > 0)
+        if (ev.deltaY < 0 && selection > 0)
         {
-            selection = [selection[0] - 1];
+            --selection;
         }
-        else if (ev.deltaY > 0 && selection[0] < options.length - 1)
+        else if (ev.deltaY > 0 && selection < options.length - 1)
         {
-            selection = [selection[0] + 1];
+            ++selection;
         }
     } 
 

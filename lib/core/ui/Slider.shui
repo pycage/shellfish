@@ -78,7 +78,7 @@ MouseBox {
 
         xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
 
-        onMouseDown: () =>
+        onMouseDown: (ev) =>
         {
             slider.focus = true;
             ev.accepted = true;

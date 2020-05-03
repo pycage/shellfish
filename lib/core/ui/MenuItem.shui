@@ -35,6 +35,7 @@ MouseBox {
 
     canFocus: true
 
+    fillWidth: true
     height: theme.itemHeightMedium
     layout: "center"
 

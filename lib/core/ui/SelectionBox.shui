@@ -25,74 +25,36 @@ require "shellfish/ui";
 Button {
     id: box
 
+    property model: ListModel { data: [["A"], ["B"], ["C"]] }
     property options: []
-    property selection: -1
+    property selection: 0
 
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "menu"
     text: options[selection] || "?"
 
-    property _menu: null
-
-    property _menuT: template Menu {
-
-        visible: false
-
-        onVisibleChanged: () =>
-        {
-            if (! visible)
-            {
-                box.focus = true;
-            }
-        }
-
-        property item: template MenuItem { }
+    onInitialization: () =>
+    {
+        /*
+        _menu = _menuT2.create();
+        _menu.init();
+        */
     }
 
     onOptionsChanged: () =>
     {
-        if (! _menu)
-        {
-            _menu = _menuT.create();
-            _menu.init();
-        }
-
-        //console.log("options " + JSON.stringify(options));
-        let cs = _menu.children();
-        for (let i = 0; i < cs.length; ++i)
-        {
-            cs[i].discard();
-        }
-
-        let items = [];
-        for (let i = 0; i < options.length; ++i)
-        {
-            const option = options[i];
-            const menuItem = _menu.item.create();
-            menuItem.text = option;
-            menuItem.onClick = function ()
-            {
-                box.selection = i;
-                console.log("selected " + i);
-            };
-            menuItem.init();
-            _menu.add(menuItem);
-        }
-
-        if (selection === -1)
-        {
-            selection = 0;
-        }
+        console.warn("The use of SelectionBox.options is deprecated (" + objectLocation + ").");
+        model.reset(options.map((o) => { return [o]; }));
     }
 
-    onClick: () =>
+    onClick: (ev) =>
     {
-        if (_menu)
-        {
-            _menu.visible = true;
-            _menu.popup(self);
-        }
+        const m = _menuT2.create();
+        console.log(m.parent);
+        m.init();
+        m.popup(self);
+        m.initFocus();
     }
 
     onWheel: (ev) =>
@@ -109,4 +71,50 @@ Button {
         }
     } 
 
+    property _menuT2: template Menu {
+        id: menu
+
+        property initFocus: () =>
+        {
+            /*
+            console.log("childewn: " + itemRepeater.children.length);
+            for (let i = 0; i < itemRepeater.children.length; ++i)
+            {
+                console.log("test focus " + i);
+                itemRepeater.children[i].focus = (i === box.selection);
+            }
+            */
+        }
+
+        onVisibleChanged: () =>
+        {
+            if (! visible)
+            {
+                discard();
+                box.focus = true;
+            }
+        }
+
+        Repeater {
+            id: itemRepeater
+            
+            //fillWidth: true
+            model: box.model
+            delegate: template MenuItem {
+                text: modelData[0]
+
+                onClick: (ev) =>
+                {
+                    box.selection = modelData.index;
+                }
+
+                Timer {
+                    running: parent.modelData.index === box.selection
+                    repeat: false
+                    interval: 0
+                    onTimeout: () => { parent.focus = true; }
+                }
+            }
+        }
+    }
 }

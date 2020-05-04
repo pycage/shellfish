@@ -25,36 +25,19 @@ require "shellfish/ui";
 Button {
     id: box
 
-    property model: ListModel { data: [["A"], ["B"], ["C"]] }
-    property options: []
+    property model: ListModel { }
     property selection: 0
 
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "menu"
-    text: options[selection] || "?"
-
-    onInitialization: () =>
-    {
-        /*
-        _menu = _menuT2.create();
-        _menu.init();
-        */
-    }
-
-    onOptionsChanged: () =>
-    {
-        console.warn("The use of SelectionBox.options is deprecated (" + objectLocation + ").");
-        model.reset(options.map((o) => { return [o]; }));
-    }
+    text: model.data[selection] || "?"
 
     onClick: (ev) =>
     {
-        const m = _menuT2.create();
-        console.log(m.parent);
+        const m = _menuT.create();
         m.init();
         m.popup(self);
-        m.initFocus();
     }
 
     onWheel: (ev) =>
@@ -71,20 +54,8 @@ Button {
         }
     } 
 
-    property _menuT2: template Menu {
+    property _menuT: template Menu {
         id: menu
-
-        property initFocus: () =>
-        {
-            /*
-            console.log("childewn: " + itemRepeater.children.length);
-            for (let i = 0; i < itemRepeater.children.length; ++i)
-            {
-                console.log("test focus " + i);
-                itemRepeater.children[i].focus = (i === box.selection);
-            }
-            */
-        }
 
         onVisibleChanged: () =>
         {
@@ -98,10 +69,10 @@ Button {
         Repeater {
             id: itemRepeater
             
-            //fillWidth: true
             model: box.model
+
             delegate: template MenuItem {
-                text: modelData[0]
+                text: modelData.value
 
                 onClick: (ev) =>
                 {

@@ -75,6 +75,11 @@ textarea {
     display: none !important;
 }
 
+.sh-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
 .sh-blur {
     -webkit-filter: blur(5px);
        -moz-filter: blur(5px);

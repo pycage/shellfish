@@ -48,7 +48,7 @@ Button {
         {
             --selection;
         }
-        else if (ev.deltaY > 0 && selection < options.length - 1)
+        else if (ev.deltaY > 0 && selection < model.size - 1)
         {
             ++selection;
         }

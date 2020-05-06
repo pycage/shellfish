@@ -73,8 +73,8 @@ Object {
 
             page.init();
             documentRoot.add(page);
-            page.show();
             pages.push(page);
+            page.show(pages.length === 1);
             page.currentPage = true;
             pagesChanged();
             return;
@@ -102,8 +102,8 @@ Object {
 
             page.init();
             documentRoot.add(page);
-            page.show();
             pages.push(page);
+            page.show(pages.length === 1);
             page.currentPage = true;
             pagesChanged();
         });

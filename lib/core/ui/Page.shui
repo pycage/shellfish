@@ -33,13 +33,21 @@ MouseBox {
     property _parentPage: null
     property _sliding: false
 
-    property show: () =>
+    property show: (immediate) =>
     {
-        frozen = true;
-        _sliding = true;
-        pushAnimation.from = marginLeft;
-        pushAnimation.to = 0;
-        pushAnimation.start();
+        if (immediate)
+        {
+            marginLeft = 0;
+            frozen = false;
+        }
+        else
+        {
+            frozen = true;
+            _sliding = true;
+            pushAnimation.from = marginLeft;
+            pushAnimation.to = 0;
+            pushAnimation.start();
+        }
     }
 
     property close: (callback) =>
@@ -62,7 +70,8 @@ MouseBox {
     fillWidth: ! _frozen
     color: theme.primaryBackgroundColor
 
-    style: marginLeft > 0 ? ["sh-no-scrollbars", "sh-dropshadow"] : "sh-no-scrollbars"
+    style: marginLeft > 0 ? ["sh-no-scrollbars", "sh-dropshadow"]
+                          : ["sh-no-scrollbars"]
 
     onFrozenChanged: () =>
     {
@@ -138,6 +147,7 @@ MouseBox {
         }
     }
 
+    // back arrow indicator
     Box {
         visible: ! _sliding && page.marginLeft > page.width / 3
 
@@ -145,12 +155,13 @@ MouseBox {
         x: theme.paddingMedium
         y: documentRoot.windowHeight / 2 - height / 2
         width: height
-        height: theme.itemHeightLarge
+        height: theme.itemHeightLarge * 2
+        borderRadius: theme.borderRadius
         color: theme.primaryColor
         layout: "center"
 
         Label {
-            fontSize: theme.fontSizeNormal
+            fontSize: parent.height / 2
             color: theme.primaryBackgroundColor
             text: "[icon:arrow-left]"
         }
@@ -159,7 +170,7 @@ MouseBox {
     Box {
         id: contentArea
 
-        enabled: ! page._frozen
+        interactive: ! page._frozen
         width: documentRoot.windowWidth
     }
 

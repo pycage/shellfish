@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,50 +20,21 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
+Box {
+    property text: ""
 
-/**
- * **Module ID:** `shellfish/ui`
- * 
- * This module provides Shellfish's default Shui elements.
- * 
- * @module ui
- */
+    position: "free"
+    fillWidth: true
+    fillHeight: true
+    layout: "center"
 
-exports.__id = "shellfish/ui";
-
-const mods = [
-    "Button",
-    "DarkTheme",
-    "Dialog",
-    "FocusIndicator",
-    "Label",
-    "Loader",
-    "Menu",
-    "MenuBar",
-    "MenuItem",
-    "Overlay",
-    "Page",
-    "PageHeader",
-    "PageStack",
-    "Placeholder",
-    "ScrollIndicator",
-    "SelectionBox",
-    "Slider",
-    "SplitBox",
-    "Switch",
-    "TextArea",
-    "TextEntry",
-    "Theme"
-];
-
-shRequire(__dirname + "/../fengshui.js", function (fengshui)
-{
-    shRequire(mods.map(m => __dirname + "/ui/" + m + ".shui"), function ()
-    {
-        for (var i = 0; i < arguments.length; ++i)
-        {
-            exports.include(arguments[i]);
-        }
-    }, fengshui.compile);
-});
+    Label {
+        width: parent.bbox.width - 2 * theme.paddingLarge
+        overflowBehavior: "wrap"
+        horizontalAlignment: "center"
+        color: theme.primaryColor
+        opacity: 0.6
+        fontSize: theme.fontSizeLarge
+        text: parent.text
+    }
+}

@@ -65,6 +65,7 @@ MouseBox {
         marginLeft: 4
         marginRight: 4
         marginBottom: 2
+        fontSize: parent.bbox.height * 0.5
         text: "[icon:" + button.icon + "]"
     }
 

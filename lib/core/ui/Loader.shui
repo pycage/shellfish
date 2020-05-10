@@ -41,7 +41,7 @@ Box {
             fengshui.load(source, null, __rslv__, (root) =>
             {
                 item = root;
-                add(root);
+                add(item);
                 item.init();
                 loading = false;
             });
@@ -49,7 +49,7 @@ Box {
         else if (sourceTemplate)
         {
             loading = true;
-            item = sourceTemplate.create();
+            item = sourceTemplate.create(__rslv__);
             add(item);
             item.init();
             loading = false;

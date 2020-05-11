@@ -37,6 +37,14 @@ Box {
     borderRadius: theme.borderRadius
     layout: "center-row"
 
+    onTextChanged: () =>
+    {
+        if (text !== input.text)
+        {
+            input.text = text;
+        }
+    }
+
     Box {
         id: flashBox
         position: "free"
@@ -54,7 +62,7 @@ Box {
         marginRight: theme.paddingSmall
         fontSize: theme.fontSizeNormal
         color: theme.primaryColor
-        text: box.text
+        //text: box.text
         password: box.password
         pattern: box.pattern
 

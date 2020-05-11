@@ -81,6 +81,7 @@ MouseBox {
     }
 
     Label {
+        visible: button.text !== "" || text !== ""
         marginTop: 2
         marginLeft: 4
         marginRight: 4

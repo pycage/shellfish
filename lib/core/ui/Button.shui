@@ -60,13 +60,12 @@ MouseBox {
     }
 
     Label {
-        visible: button.icon !== ""
         marginTop: 2
         marginLeft: 4
         marginRight: 4
         marginBottom: 2
         fontSize: parent.bbox.height * 0.5
-        text: "[icon:" + button.icon + "]"
+        text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
     }
 
     Label {
@@ -82,12 +81,11 @@ MouseBox {
     }
 
     Label {
-        visible: button.secondaryIcon !== ""
         marginTop: 2
         marginLeft: 4
         marginRight: 4
         marginBottom: 2
-        text: "[icon:" + button.secondaryIcon + "]"
+        text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
     }
 
     FocusIndicator { visible: button.focus }

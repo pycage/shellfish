@@ -30,25 +30,10 @@ Overlay {
     property popup: (parent) =>
     {
         const parentBbox = parent.bbox;
-        const bbox = menuBox.bbox;
-
-        const menuTopBelow = parentBbox.y + parentBbox.height * 0.96;
-        const menuTopAbove = parentBbox.y - bbox.height;
-
+        menuBox.anchorX = parentBbox.x;
+        menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
+        menuBox.anchorHeight = parentBbox.height * 0.96;
         menuBox.minWidth = parentBbox.width;
-        menuBox.x = parentBbox.x;
-        if (menuTopBelow + bbox.height <= documentRoot.windowHeight)
-        {
-            menuBox.y = menuTopBelow;
-        }
-        else if (menuTopAbove >= 0)
-        {
-            menuBox.y = menuTopAbove;
-        }
-        else
-        {
-            menuBox.y = menuTopBelow;
-        }
         visible = true;
     }
 
@@ -62,7 +47,17 @@ Overlay {
     Box {
         id: menuBox
 
+        property anchorX: 0
+        property anchorY: 0
+        property anchorHeight: 0
+
         position: "global"
+
+        x: anchorX + bbox.width < parent.bbox.width ? anchorX
+                                                    : parent.bbox.width - bbox.width
+        y: anchorY + bbox.height < parent.bbox.height ? anchorY
+                                                      : anchorY - anchorHeight - bbox.height;
+
         height: -1
         color: theme.contentBackgroundColor
         borderWidth: 1

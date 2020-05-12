@@ -45,16 +45,11 @@ Box {
         canFocus: true
 
         position: "free"
-        layout: "center"
+        layout: "center-column"
 
         x: splitBox.bbox.width / 2
         width: theme.paddingLarge
         fillHeight: true
-
-        color: containsMouse || touched ? theme.highlightBackgroundColor
-                                        : theme.secondaryBackgroundColor
-        borderColor: theme.borderColor
-        borderWidth: 1
 
         cursor: "col-resize"
 
@@ -89,8 +84,35 @@ Box {
             }
         }
 
-        Label {
-            text: "[icon:drag_indicator]"
+        Box {
+            width: 1
+            fillHeight: true
+            color: theme.borderColor
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+            marginLeft: 2
+            marginRight: 2
+
+            color: parent.containsMouse || parent.touched ? theme.highlightBackgroundColor
+                                                          : theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+            borderRadius: theme.borderRadius
+
+            layout: "center"
+
+            Label {
+                text: "[icon:drag_indicator]"
+            }
+        }
+
+        Box {
+            width: 1
+            fillHeight: true
+            color: theme.borderColor
         }
 
         FocusIndicator { visible: gutter.focus }

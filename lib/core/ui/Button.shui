@@ -64,7 +64,7 @@ MouseBox {
         marginLeft: 4
         marginRight: 4
         marginBottom: 2
-        fontSize: parent.bbox.height * 0.5
+        fontSize: parent.bbox.height * 0.6
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
     }
 
@@ -86,6 +86,7 @@ MouseBox {
         marginLeft: 4
         marginRight: 4
         marginBottom: 2
+        fontSize: parent.bbox.height * 0.6
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
     }
 

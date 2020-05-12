@@ -1,0 +1,132 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a recursive filesystem tree node.
+ *
+ * @memberof ui
+ * @name FSTreeNode
+ * @class
+ */
+Box {
+    id: node
+
+    property target: null
+
+    property fs: null
+    property name: ""
+    property path: ""
+
+    property collapsed: true
+    property indentation: 0
+
+    property targetPath: target ? target.path : ""
+
+    fillWidth: true
+
+    onTargetPathChanged: () =>
+    {
+        if (target &&
+            path !== "" &&
+            targetPath.length > path.length &&
+            targetPath.startsWith(path))
+        {
+            collapsed = false;
+        }
+    }
+
+    MouseBox {
+        fillWidth: true
+        height: theme.itemHeightSmall
+
+        color: node.path === target.path ||
+               (containsMouse && documentRoot.inputDevice !== "touch") ||
+               touched ? theme.highlightBackgroundColor
+                       : "transparent"
+
+        layout: "center-row"
+
+        onClick: () =>
+        {
+            if (node.target)
+            {
+                node.target.path = node.path;
+            }
+        }
+
+        onDoubleClick: () =>
+        {
+            node.collapsed = ! node.collapsed;
+        }
+
+        Button {
+            marginLeft: node.indentation * theme.paddingLarge
+            flat: true
+            icon: node.collapsed ? "arrow_right"
+                                 : "arrow_drop_down"
+
+            onClick: (ev) =>
+            {
+                ev.accepted = true;
+                node.collapsed = ! node.collapsed;
+            }
+        }
+
+        Label {
+            text: node.path === "/" ? "[icon:drive]"
+                                    : "[icon:folder]"
+        }
+
+        Label {
+            fillWidth: true
+            marginLeft: theme.paddingSmall
+            bold: node.target && node.target.path === node.path
+            text: node.name
+        }
+    }
+
+    Repeater {
+        id: repeater
+
+        model: FSModel {
+            fs: node.collapsed ? null : node.fs
+            path: node.path
+            withFiles: false
+
+            onFsChanged: () =>
+            {
+                console.log("fs: " + fs);
+            }
+        }
+
+        delegate: template FSTreeNode {
+            target: node.target
+            fs: node.fs
+            name: modelData.value.name
+            path: modelData.value.path
+            indentation: node.indentation + 1
+        }
+    }
+
+}

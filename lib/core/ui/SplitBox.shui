@@ -105,6 +105,7 @@ Box {
             layout: "center"
 
             Label {
+                fontSize: parent.bbox.width
                 text: "[icon:drag_indicator]"
             }
         }

@@ -163,7 +163,7 @@ MouseBox {
         Label {
             fontSize: parent.height / 2
             color: theme.primaryBackgroundColor
-            text: "[icon:arrow-left]"
+            text: "[icon:navigate_before]"
         }
     }
 

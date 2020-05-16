@@ -96,7 +96,7 @@ Box {
             marginLeft: 2
             marginRight: 2
 
-            color: parent.containsMouse || parent.touched ? theme.highlightBackgroundColor
+            color: parent.containsMouse || parent.pressed ? theme.highlightBackgroundColor
                                                           : theme.secondaryBackgroundColor
             borderColor: theme.borderColor
             borderWidth: 1

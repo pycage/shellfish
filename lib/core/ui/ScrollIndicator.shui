@@ -26,7 +26,9 @@ MouseBox {
     id: box
 
     property target: null
+    property other: null
     property orientation: "vertical"
+    property size: theme.paddingLarge
 
     position: "free"
     origin: orientation === "vertical" ? "top-right"
@@ -59,7 +61,6 @@ MouseBox {
         }
     }
 
-    property pressed: false
     property _direction: 0
 
     property lineUp: () =>
@@ -98,9 +99,12 @@ MouseBox {
 
     fillWidth: orientation === "vertical" ? false : true
     fillHeight: orientation === "vertical" ? true : false
+
+    marginRight: orientation === "horizontal" && other && other.visible ? other.bbox.width : 0
+    marginBottom: orientation === "vertical" && other && other.visible ? other.bbox.height : 0
     
-    width: orientation === "vertical" ? theme.paddingMedium : 0
-    height: orientation === "vertical" ? 0 : theme.paddingMedium
+    width: orientation === "vertical" ? size : -1
+    height: orientation === "vertical" ? -1 : size
 
     color: "rgba(0, 0, 0, 0.3)"
 
@@ -122,13 +126,17 @@ MouseBox {
 
         fillWidth: box.orientation === "vertical" ? true : false
         fillHeight: box.orientation === "vertical" ? false : true
+        marginLeft: 2
+        marginRight: 2
+        marginTop: 2
+        marginBottom: 2
 
         color: theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor
         borderRadius: 3
 
-        onMouseDown: (ev) =>
+        onPointerDown: (ev) =>
         {
             ev.accepted = true;
             box.focus = true;
@@ -155,14 +163,13 @@ MouseBox {
         FocusIndicator { visible: box.focus }
     }
 
-    onMouseDown: (ev) =>
+    onPointerDown: (ev) =>
     {
         const x = ev.x;
         const y = ev.y;
         ev.accepted = true;
 
         _animatedContentPos = _contentPos;
-        pressed = true;
 
         if (orientation === "vertical")
         {
@@ -199,14 +206,24 @@ MouseBox {
         focus = true;
     }
 
-    onMouseUp: (ev) =>
+    onPointerUp: (ev) =>
     {
-        pressed = false;
+        ev.accepted = true;
     }
 
-    onMouseOut: (ev) =>
+    onPointerMove: (ev) =>
     {
-        pressed = false;
+        ev.accepted = true;
+    }
+
+    onPointerOut: (ev) =>
+    {
+        ev.accepted = true;
+    }
+
+    onClick: (ev) =>
+    {
+        ev.accepted = true;
     }
 
     onKeyDown: (ev) =>

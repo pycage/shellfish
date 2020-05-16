@@ -31,11 +31,10 @@ MouseBox {
     property flat: false
     property checked: false
 
-    color: checked ||
-           (containsMouse && documentRoot.inputDevice !== "touch") ||
-           touched ? theme.highlightBackgroundColor
+    color: checked ? theme.highlightBackgroundColor
                    : flat ? "transparent"
                           : theme.secondaryBackgroundColor
+
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
     borderColor: theme.borderColor
@@ -90,5 +89,5 @@ MouseBox {
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
     }
 
-    FocusIndicator { visible: button.focus }
+    FocusIndicator { visible: button.focus || button.pressed || button.containsMouse }
 }

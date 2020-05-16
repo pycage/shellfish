@@ -101,11 +101,6 @@ MouseBox {
             return;
         }
 
-        if (! touched)
-        {
-            //return;
-        }
-
         if (! frozen)
         {
             if (pageStack.pages.length === 1 || contentArea.contentX > 0 || ev.deltaX < 16)

@@ -33,7 +33,7 @@ MouseBox {
     onValueChanged: () =>
     {
         const p = (value - minValue) / (maxValue - minValue);
-        const hx = (width - handle.width) * p;
+        const hx = (bbox.width - handle.width) * p;
         if (Math.abs(hx - handle.x) > 1)
         {
             handle.x = hx;
@@ -73,12 +73,11 @@ MouseBox {
         borderColor: theme.borderColor
         borderRadius: theme.borderRadius
 
-        color: containsMouse || touched ? theme.highlightBackgroundColor
-                                        : theme.primaryBackgroundColor
+        color: theme.primaryBackgroundColor
 
         xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
 
-        onMouseDown: (ev) =>
+        onPointerDown: (ev) =>
         {
             slider.focus = true;
             ev.accepted = true;
@@ -86,10 +85,10 @@ MouseBox {
 
         onDrag: (ev) =>
         {
-            const sx = Math.max(0, Math.min(slider.width - width, x + ev.deltaX));
-            const p = sx / (slider.width - width);
+            const sx = Math.max(0, Math.min(slider.bbox.width - width, x + ev.deltaX));
+            const p = sx / (slider.bbox.width - width);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
-            const hx = (slider.width - width) * p;
+            const hx = (slider.bbox.width - width) * p;
 
             dragging = true;
             x = hx;
@@ -104,7 +103,7 @@ MouseBox {
         Label { color: theme.borderColor; text: "[icon:drag_indicator]" }
     }
 
-    onMouseDown: (ev) =>
+    onPointerDown: (ev) =>
     {
         ev.accepted = true;
 
@@ -128,5 +127,5 @@ MouseBox {
         }
     }
 
-    FocusIndicator { visible: slider.focus }
+    FocusIndicator { visible: slider.focus || parent.containsMouse }
 }

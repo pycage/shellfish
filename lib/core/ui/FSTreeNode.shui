@@ -62,7 +62,7 @@ Box {
 
         color: node.path === target.path ||
                (containsMouse && documentRoot.inputDevice !== "touch") ||
-               touched ? theme.highlightBackgroundColor
+               pressed ? theme.highlightBackgroundColor
                        : "transparent"
 
         layout: "center-row"

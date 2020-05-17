@@ -32,11 +32,26 @@ MouseBox {
 
     onValueChanged: () =>
     {
-        const p = (value - minValue) / (maxValue - minValue);
-        const hx = (bbox.width - handle.width) * p;
-        if (Math.abs(hx - handle.x) > 1)
+        if (bbox.width > 0)
         {
-            handle.x = hx;
+            const p = (value - minValue) / (maxValue - minValue);
+            const hx = (bbox.width - handle.width) * p;
+            if (Math.abs(hx - handle.x) > 1)
+            {
+                handle.x = hx;
+            }
+        }
+    }
+    onBboxChanged: () =>
+    {
+        if (bbox.width > 0)
+        {
+            const p = (value - minValue) / (maxValue - minValue);
+            const hx = (bbox.width - handle.width) * p;
+            if (Math.abs(hx - handle.x) > 1)
+            {
+                handle.x = hx;
+            }
         }
     }
 
@@ -107,8 +122,8 @@ MouseBox {
     {
         ev.accepted = true;
 
-        const x = Math.max(0, Math.min(width, ev.x));
-        value = minValue + (maxValue - minValue) * (x / width);
+        const x = Math.max(0, Math.min(bbox.width, ev.x));
+        value = minValue + (maxValue - minValue) * (x / bbox.width);
 
         focus = true;
     }

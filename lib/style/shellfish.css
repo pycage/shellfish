@@ -44,6 +44,10 @@ body {
     overscroll-behavior: contain;
 }
 
+div {
+    touch-action: inherit;
+}
+
 input[type=text], input[type=password] {
     border: none;
     background-color: transparent;

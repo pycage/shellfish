@@ -31,9 +31,11 @@ MouseBox {
     property flat: false
     property checked: false
 
-    color: checked ? theme.highlightBackgroundColor
-                   : flat ? "transparent"
-                          : theme.secondaryBackgroundColor
+    property activated: false
+
+    color: checked || activated ? theme.highlightBackgroundColor
+                                : flat ? "transparent"
+                                       : theme.secondaryBackgroundColor
 
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
@@ -44,9 +46,23 @@ MouseBox {
 
     canFocus: true
 
+    onPointerEnter: () =>
+    {
+        focusIndicator.flash();
+    }
+
+    onPressedChanged: () =>
+    {
+        if (pressed)
+        {
+            focusIndicator.flash();
+        }
+    }
+
     onClick: () =>
     {
         focus = true;
+        activated = true;
     }
 
     onKeyDown: (ev) =>
@@ -55,6 +71,19 @@ MouseBox {
         {
             click();
             ev.accepted = true;
+        }
+    }
+
+    Timer {
+        id: activateTimer
+
+        interval: 300
+        running: button.activated
+        repeat: false
+
+        onTimeout: () =>
+        {
+            button.activated = false;
         }
     }
 
@@ -89,5 +118,39 @@ MouseBox {
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
     }
 
-    FocusIndicator { visible: button.focus || button.pressed || button.containsMouse }
+    FocusIndicator {
+        id: focusIndicator
+
+        property flashing: false
+
+        property flash: () =>
+        {
+            if (! flashing)
+            {
+                flashing = true;
+                flashAnim.start();
+            }
+        }
+
+        visible: button.focus || flashing
+
+        NumberAnimation {
+            id: flashAnim
+
+            duration: 500
+            from: 1
+            to: 0
+
+            onNext: (value) =>
+            {
+                focusIndicator.opacity = value;
+            }
+
+            onFinished: () =>
+            {
+                focusIndicator.flashing = false;
+                focusIndicator.opacity = 1;
+            }
+        }
+    }
 }

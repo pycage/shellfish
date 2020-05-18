@@ -93,7 +93,8 @@ MouseBox {
             documentRoot.contentY = scrollTop;
         }
     }
-
+    
+    /*
     onDrag: (ev) =>
     {
         if (! currentPage)
@@ -101,12 +102,17 @@ MouseBox {
             return;
         }
 
-        if (! frozen)
+        if (! frozen &&
+            (pageStack.pages.length === 1 || contentArea.contentX > 0))
         {
-            if (pageStack.pages.length === 1 || contentArea.contentX > 0 || ev.deltaX < 16)
-            {
-                return;
-            }
+            return;
+        }
+
+        ev.accepted = true;
+
+        if (! frozen && (ev.deltaX < 16 || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)))
+        {
+            return;
         }
 
         if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY))
@@ -116,7 +122,6 @@ MouseBox {
                 frozen = true;
             }
             marginLeft = Math.max(0, marginLeft + ev.deltaX);
-            ev.accepted = true;
         }
     }
 
@@ -140,6 +145,17 @@ MouseBox {
                 pushAnimation.start();
             }
         }
+    }
+    */
+
+    // background
+    Box {
+        visible: page.frozen && page.marginLeft > 0
+        position: "global"
+        width: page.marginLeft
+        fillHeight: true
+        color: "black"
+        opacity: 0.8 - (width / documentRoot.windowWidth) * 0.8
     }
 
     // back arrow indicator

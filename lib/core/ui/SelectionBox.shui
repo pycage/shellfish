@@ -35,6 +35,8 @@ Button {
 
     onClick: (ev) =>
     {
+        ev.accepted = true;
+        
         const m = _menuT.create();
         m.init();
         m.popup(self);

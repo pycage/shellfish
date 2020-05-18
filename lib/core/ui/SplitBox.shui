@@ -52,7 +52,7 @@ Box {
         fillHeight: true
 
         cursor: "col-resize"
-
+        
         onDrag: (ev) =>
         {
             const w = splitBox.bbox.width;
@@ -62,7 +62,7 @@ Box {
             ev.accepted = true;
         }
 
-        onMouseDown: (ev) =>
+        onPointerDown: (ev) =>
         {
             gutter.focus = true;
             ev.accepted = true;

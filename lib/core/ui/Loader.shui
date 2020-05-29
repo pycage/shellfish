@@ -33,6 +33,7 @@ Box {
         if (item)
         {
             item.discard();
+            item = null;
         }
 
         if (source !== "")
@@ -56,6 +57,17 @@ Box {
         }
     }
 
-    onSourceChanged: { load(); }
-    onSourceTemplateChanged: { load(); }
+    onSourceChanged: { loadTimer.start(); }
+    onSourceTemplateChanged: { loadTimer.start(); }
+
+    Timer {
+        id: loadTimer
+        interval: 0
+        repeat: false
+
+        onTimeout: () =>
+        {
+            parent.load();
+        }
+    }
 }

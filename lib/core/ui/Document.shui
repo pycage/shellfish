@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,54 +20,13 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
+require "shellfish/ui";
 
-/**
- * **Module ID:** `shellfish/ui`
- * 
- * This module provides Shellfish's default Shui elements.
- * 
- * @module ui
- */
+mid.Document {
 
-exports.__id = "shellfish/ui";
+    // the Document element can be accessed from anywhere by 'documentRoot'
+    property documentRoot: self
 
-const mods = [
-    "Button",
-    "DarkTheme",
-    "Dialog",
-    "Document",
-    "FocusIndicator",
-    "FSIcon",
-    "FSTreeNode",
-    "FSView",
-    "Label",
-    "Loader",
-    "Menu",
-    "MenuBar",
-    "MenuItem",
-    "Overlay",
-    "Page",
-    "PageHeader",
-    "PageStack",
-    "Placeholder",
-    "ScrollIndicator",
-    "SelectionBox",
-    "Slider",
-    "SplitBox",
-    "Switch",
-    "TextArea",
-    "TextEntry",
-    "Theme"
-];
+    property theme: Theme { }
 
-shRequire(__dirname + "/../fengshui.js", function (fengshui)
-{
-    shRequire(mods.map(m => __dirname + "/ui/" + m + ".shui"), function ()
-    {
-        for (var i = 0; i < arguments.length; ++i)
-        {
-            exports.include(arguments[i]);
-        }
-    }, fengshui.compile);
-});
+}

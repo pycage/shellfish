@@ -34,6 +34,10 @@ const BABEL_CONFIG = {
     minified: true
 };
 
+const MODULE_ID_REGEXP = new RegExp("\n *exports.__id *= *\"([^\"]+)\";");
+
+const TEXT_TYPES = ["css", "js", "shui"];
+
 function help()
 {
     console.log("Create a Shellfish bundle.");
@@ -45,36 +49,64 @@ function help()
     console.log("");
 }
 
-function updateJsBundle(path)
+function updateBundle(path)
 {
-    function findJs(prefix, location, path)
+    function findFiles(prefix, location, path)
     {
         modFs.readdirSync(modPath.join(location, path)).forEach((name) =>
         {
             const filePath = modPath.join(path, name);
             const fullPath = modPath.join(location, filePath);
             const stats = modFs.statSync(fullPath);
+
+            const ext = name.toLowerCase().substr(name.lastIndexOf(".") + 1);
+
             if (stats.isDirectory())
             {
-                findJs(prefix, location, filePath);
+                findFiles(prefix, location, filePath);
             }
-            else if (name.endsWith(".js") || name.endsWith(".css") || name.endsWith(".shui"))
+            else
             {
                 let sizeBefore = 0;
                 let sizeAfter = 0;
                 try
                 {
-                    let data = modFs.readFileSync(fullPath).toString("binary" /* as is */);
-                    sizeBefore = Math.ceil(data.length / 1024);
-                    if (name.endsWith("js"))
+                    const resourcePath = modPath.posix.join(prefix, filePath.replace(/\\/g, "/"));
+                    let binary = modFs.readFileSync(fullPath);
+                    let data = "";
+                    sizeBefore = Math.ceil(binary.length / 1024);
+                    let actionTaken = "minified";
+
+                    if (ext === "js")
                     {
-                        const result = modBabel.transform(data, BABEL_CONFIG);
+                        // JS files get minified
+                        const code = binary.toString("utf8");
+                        const match = MODULE_ID_REGEXP.exec(code);
+                        if (match && match[1])
+                        {
+                            bundle.aliases[match[1]] = resourcePath;
+                        }
+                        const result = modBabel.transform(code, BABEL_CONFIG);
                         data = result.code;
+                        bundle.formats[resourcePath] = "utf-8";
+                    }
+                    else if (TEXT_TYPES.indexOf(ext) !== -1)
+                    {
+                        // other textual files are stored unchanged
+                        data = binary.toString("utf8");
+                        bundle.formats[resourcePath] = "utf-8";
+                        actionTaken = "stored";
+                    }
+                    else
+                    {
+                        // binary files are base64-encoded
+                        data = binary.toString("base64");
+                        bundle.formats[resourcePath] = "base64";
+                        actionTaken = "base64-encoded";
                     }
                     sizeAfter = Math.ceil(data.length / 1024);
-                    const resourcePath = modPath.posix.join(prefix, filePath.replace(/\\/g, "/"));
-                    jsBundle[resourcePath] = data;
-                    console.log(` - ${fullPath} -> ${resourcePath} (${ sizeBefore !== sizeAfter ? "minified: " + sizeBefore + " K -> " + sizeAfter + " K" : sizeAfter + " K" })`);
+                    bundle.resources[resourcePath] = data;
+                    console.log(` - ${fullPath} -> ${resourcePath} (${ sizeBefore !== sizeAfter ? actionTaken + ": " + sizeBefore + " K -> " + sizeAfter + " K" : sizeAfter + " K" })`);
                 }
                 catch (err)
                 {
@@ -85,10 +117,15 @@ function updateJsBundle(path)
         });
     }
 
-    const jsBundle = { };
-    findJs("", path, "");
+    const bundle = {
+        version: 2,
+        resources: { },
+        aliases: { },
+        formats: { }
+    };
+    findFiles("", path, "");
 
-    return JSON.stringify(jsBundle);
+    return JSON.stringify(bundle);
 }
 
 if (modProcess.argv.length !== 4 || modProcess.argv[2] === "-h")
@@ -107,7 +144,7 @@ if (! modFs.existsSync(path))
 }
 
 console.log(`Bundling path: ${path}`);
-const bundle = updateJsBundle(path);
+const bundle = updateBundle(path);
 modFs.writeFileSync(bundleFile, bundle);
 const stats = modFs.statSync(bundleFile);
 console.log(`Bundle written successfully: ${bundleFile} (${Math.ceil(stats.size / 1024)} K)`);

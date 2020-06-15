@@ -43,7 +43,6 @@ Box {
             {
                 item = root;
                 add(item);
-                item.init();
                 loading = false;
             });
         }
@@ -52,7 +51,6 @@ Box {
             loading = true;
             item = sourceTemplate.create(__rslv__);
             add(item);
-            item.init();
             loading = false;
         }
     }

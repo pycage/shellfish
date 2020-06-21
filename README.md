@@ -10,6 +10,22 @@ It also features Shui, a **UI modeling language** taking full advantage
 of Shellfish's declarative nature, loosely inspired by QML. If you are into
 QML, you will quickly feel at home with Shui.
 
+This is the obligatory "Hello, world!" in Shui code:
+
+```
+require "shellfish/ui";
+
+Document {
+
+    title: "Hello, world of declarative UI programming!"
+
+    Label {
+        text: parent.title
+    }
+
+}
+```
+
 Shellfish's module loader supports **module bundles** to reduce transfer times.
 A bundle is a single file containing all required code modules.
 Since transfering a single file to the web browser causes less overhead than
@@ -51,7 +67,6 @@ Label {
           " square pixels."
 }
 ```
-
 
 ### How to integrate Shui?
 

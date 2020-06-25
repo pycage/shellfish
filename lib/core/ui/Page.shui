@@ -26,8 +26,11 @@ MouseBox {
     container default: contentArea
     container header: headerArea
 
+    property scrollable: true
     property pageStack: null
     property currentPage: false
+    property contentTemplate: null
+    property loading: false
     property frozen: false
     property _frozen: false
     property _parentPage: null
@@ -35,6 +38,11 @@ MouseBox {
 
     property show: (immediate) =>
     {
+        if (contentTemplate)
+        {
+            loading = true;
+        }
+
         if (immediate)
         {
             marginLeft = 0;
@@ -58,6 +66,13 @@ MouseBox {
         popAnimation.to = documentRoot.windowWidth;
         popAnimation.onFinished = callback;
         popAnimation.start();
+    }
+
+    property loadContent: () =>
+    {
+        const item = contentTemplate.create(__rslv__);
+        loading = false;
+        contentArea.add(item);
     }
 
     position: _frozen ? "global" : "inline"
@@ -91,6 +106,11 @@ MouseBox {
             contentArea.contentY = 0;
             _frozen = false;
             documentRoot.contentY = scrollTop;
+
+            if (page.contentTemplate && page.loading)
+            {
+                loadContentTimer.start();
+            }
         }
     }
     
@@ -183,10 +203,22 @@ MouseBox {
 
         interactive: ! page._frozen
         width: documentRoot.windowWidth
+        height: page.scrollable ? -1 : documentRoot.windowHeight
     }
 
     Box {
         id: headerArea
+    }
+
+    Timer {
+        id: loadContentTimer
+        interval: 0
+        repeat: false
+
+        onTimeout: () =>
+        {
+            page.loadContent();
+        }
     }
 
     NumberAnimation {

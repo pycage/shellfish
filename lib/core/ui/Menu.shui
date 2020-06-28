@@ -46,7 +46,12 @@ Overlay {
             menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
             menuBox.anchorHeight = parentBbox.height * 0.96;
         }
-        menuBox.minWidth = parentBbox.width;
+        menuRuler.request({
+            x: 0,
+            y: 0,
+            width: parentBbox.width - 2 * theme.paddingSmall,
+            height: 0
+        });
         visible = true;
     }
 

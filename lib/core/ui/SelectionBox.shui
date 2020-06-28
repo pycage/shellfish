@@ -59,15 +59,6 @@ Button {
     property _menuT: template Menu {
         id: selMenu
 
-        onInitialization: () =>
-        {
-            menuRuler.request({
-                x: 0,
-                y: 0,
-                width: box.bbox.width - 2 * theme.paddingSmall,
-                height: 0
-            });
-        }
 
         onVisibleChanged: () =>
         {

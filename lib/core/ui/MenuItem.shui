@@ -26,41 +26,170 @@ MouseBox {
     id: item
 
     property text: ""
+    property highlighted: false
     property menu: null
+    property menuOpened: false
 
-    property labelWidth: () =>
+    property menuRuler: parent.menuRuler || null
+
+    property _menu: null
+
+    property showMenu: () =>
     {
-        return label.bbox.width;
+        if (! menu || _menu)
+        {
+            return;
+        }
+
+        _menu = menu.create();
+        _menu.init();
+
+        if (parent.menuOpened)
+        {
+            _menu.popup(self, true);
+        }
+        else
+        {
+            _menu.popup(self, false);
+        }
+
+        // unhighlight when menu clicked away
+        _menu.get().onVisibleChanged = () =>
+        {
+            if (! _menu.visible)
+            {
+                highlighted = false;
+            }
+        };
+
+        _menu.get().onPointerMove = (ev) =>
+        {
+            let onItem = false;
+            parent.children().forEach((child) =>
+            {
+                const cBox = child.bbox;
+                if (ev.x >= cBox.x && ev.x < cBox.x + cBox.width &&
+                    ev.y >= cBox.y && ev.y < cBox.y + cBox.height)
+                {
+                    if (child !== self && child.highlighted === false)
+                    {
+                        child.highlighted = true;
+                    }
+                    onItem = true;
+                }
+            });
+
+            if (! onItem && parent.pointerMove)
+            {
+                parent.pointerMove(ev);
+            }
+        }
+
+        menuOpened = true;
+    }
+
+    property closeMenu: () =>
+    {
+        if (_menu)
+        {
+            menuOpened = false;
+            _menu.discard();
+            _menu = null;
+        }
+    }
+
+    onDestruction: () =>
+    {
+        if (_menu)
+        {
+            closeMenu();
+        }
+    }
+
+    onHighlightedChanged: () =>
+    {
+        if (highlighted)
+        {
+            // open menu if there is one, and if a sibling menu or the parent
+            // menu is opened
+            if (menu &&
+                (parent.children().filter((c) => { return c.menuOpened; }).length > 0 ||
+                 parent.menuOpened))
+            {
+                showMenu();
+            }
+
+            // unhighlight siblings
+            parent.children().forEach((child) =>
+            {
+                if (child !== self && child.highlighted)
+                {
+                    child.highlighted = false;
+                }
+            });
+        }
+        else
+        {
+            // close menu if there is one
+            if (menuOpened)
+            {
+                closeMenu();
+            }
+        }
+    }
+
+    onPointerEnter: (ev) =>
+    {
+        highlighted = true;
+    }
+
+    onClick: (ev) =>
+    {
+        if (menu)
+        {
+            if (! _menu)
+            {
+                showMenu();
+            }
+            else
+            {
+                closeMenu();
+            }
+            ev.accepted = true;
+        }
     }
 
     canFocus: true
 
-    fillWidth: true
+    width: !! menuRuler ? menuRuler.max.width + 2 * theme.paddingSmall : -1
     height: theme.itemHeightMedium
-    layout: "center"
+    layout: "center-row"
+
+    color: containsMouse || menuOpened ? theme.highlightBackgroundColor
+                                       : "transparent"
 
     Label {
         id: label
         
-        fillWidth: true
-        marginLeft: 4
-        marginRight: 4
-        color: item.containsMouse ? theme.highlightColor
-                                  : item.enabled ? theme.primaryColor
-                                                 : theme.disabledColor
+        ruler: item.menuRuler
+
+        marginLeft: theme.paddingSmall
+        marginRight: theme.paddingSmall
+        color: item.containsMouse || item.menuOpened ? theme.highlightColor
+                                                     : item.enabled ? theme.primaryColor
+                                                                    : theme.disabledColor
         text: item.text
     }
+
+    Box { fillWidth: true }
 
     onKeyDown: (ev) =>
     {
         if (ev.key === " ")
         {
-            item.click();
+            item.click(ev);
         }
     }
-
-    color: item.containsMouse ? theme.highlightBackgroundColor
-                              : "transparent"
 
     FocusIndicator { visible: item.focus }
 }

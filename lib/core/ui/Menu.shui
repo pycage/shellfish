@@ -27,24 +27,38 @@ Overlay {
 
     container default: menuBox
 
-    property popup: (parent) =>
+    property menuOpened: visible
+
+    property menuRuler: Ruler { }
+
+    property popup: (parent, horizontal) =>
     {
         const parentBbox = parent.bbox;
-        menuBox.anchorX = parentBbox.x;
-        menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
-        menuBox.anchorHeight = parentBbox.height * 0.96;
+        if (horizontal)
+        {
+            menuBox.anchorX = parentBbox.x + parentBbox.width;
+            menuBox.anchorY = parentBbox.y;
+            menuBox.anchorHeight = 0;
+        }
+        else
+        {
+            menuBox.anchorX = parentBbox.x;
+            menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
+            menuBox.anchorHeight = parentBbox.height * 0.96;
+        }
         menuBox.minWidth = parentBbox.width;
         visible = true;
     }
 
     visible: false
 
-    onClick: () =>
+    onPointerDown: (ev) =>
     {
         visible = false;
+        ev.accepted = true;
     }
 
-    Box {
+    MouseBox {
         id: menuBox
 
         property anchorX: 0
@@ -59,9 +73,17 @@ Overlay {
                                                       : anchorY - anchorHeight - bbox.height;
 
         height: -1
-        color: theme.contentBackgroundColor
+        color: theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor
+
+        onPointerDown: (ev) => { ev.accepted = true; }
+
+        onClick: (ev) =>
+        {
+            menu.visible = false;
+            ev.accepted = true;
+        }
 
         onKeyDown: (ev) =>
         {

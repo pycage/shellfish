@@ -20,37 +20,10 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/ui";
-
-MenuItemBase {
-    id: item
-
-    property icon: ""
-    property text: ""
-
-    Box {
-        marginLeft: theme.paddingSmall
-        marginRight: theme.paddingSmall
-        ruler: item.menuRuler
-        layout: "center-row"
-
-        Label {
-            visible: item.icon !== ""
-            width: label.bbox.height
-            height: width
-            text: visible ? "[icon:" + item.icon + "]" : ""
-        }
-
-        Label {
-            id: label
-
-            color: item.containsMouse || item.menuOpened ? theme.highlightColor
-                                                        : item.enabled ? theme.primaryColor
-                                                                        : theme.disabledColor
-            text: item.text
-        }
-    }
-
-
-    Box { fillWidth: true }
+Box {
+    marginLeft: theme.paddingMedium
+    marginRight: theme.paddingMedium
+    fillWidth: true
+    height: 1
+    color: theme.borderColor
 }

@@ -1,0 +1,251 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+MouseBox {
+    id: item
+
+    property highlighted: false
+
+    property menu: null
+    property menuOpened: false
+
+    property menuRuler: parent.menuRuler || null
+
+    property _menu: null
+
+    property showMenu: () =>
+    {
+        if (! menu || _menu)
+        {
+            return;
+        }
+
+        _menu = menu.create();
+        _menu.init();
+
+        if (parent.menuOpened)
+        {
+            _menu.popup(self, true);
+        }
+        else
+        {
+            _menu.popup(self, false);
+        }
+
+        // unhighlight when menu clicked away
+        _menu.get().onVisibleChanged = () =>
+        {
+            if (! _menu.visible)
+            {
+                highlighted = false;
+                item.focus = true;
+            }
+        };
+
+        _menu.get().onPointerMove = (ev) =>
+        {
+            let onItem = false;
+            parent.children().forEach((child) =>
+            {
+                const cBox = child.bbox;
+                if (ev.x >= cBox.x && ev.x < cBox.x + cBox.width &&
+                    ev.y >= cBox.y && ev.y < cBox.y + cBox.height)
+                {
+                    if (child !== self && child.highlighted === false)
+                    {
+                        child.highlighted = true;
+                    }
+                    onItem = true;
+                }
+            });
+
+            if (! onItem && parent.pointerMove)
+            {
+                parent.pointerMove(ev);
+            }
+        };
+
+        _menu.get().onKeyDown = (ev) =>
+        {
+            if (ev.key === "ArrowLeft")
+            {
+                toSibling(-1, (sibling) =>
+                {
+                    sibling.highlighted = true;
+                });
+                ev.accepted = true;
+            }
+            else if (ev.key === "ArrowRight")
+            {
+                toSibling(1, (sibling) =>
+                {
+                    sibling.highlighted = true;
+                });
+                ev.accepted = true;
+            }
+        };
+
+        menuOpened = true;
+    }
+
+    property closeMenu: () =>
+    {
+        menuOpened = false;
+        if (_menu)
+        {
+            _menu.discard();
+            _menu = null;
+        }
+    }
+
+    property toSibling: (direction, f) =>
+    {
+        const siblings = parent.children().filter((c) => { return !! c.showMenu; });
+        let selfPos = -1;
+        for (let i = 0; i < siblings.length; ++i)
+        {
+            if (siblings[i] === self)
+            {
+                selfPos = i;
+                break;
+            }
+        }
+
+        if (selfPos !== -1)
+        {
+            if (direction === -1)
+            {
+                f(siblings[(siblings.length + selfPos - 1) % siblings.length]);
+            }
+            else if (direction === 1)
+            {
+                f(siblings[(selfPos + 1) % siblings.length]);
+            }
+        }
+    }
+
+    onDestruction: () =>
+    {
+        if (_menu)
+        {
+            closeMenu();
+        }
+    }
+
+    onHighlightedChanged: () =>
+    {
+        if (highlighted)
+        {
+            // open menu if there is one, and if a sibling menu or the parent
+            // menu is opened
+            if (menu &&
+                (parent.children().filter((c) => { return c.menuOpened; }).length > 0 ||
+                 parent.menuOpened))
+            {
+                showMenu();
+            }
+
+            // unhighlight siblings
+            parent.children()
+            .filter((c) => { return c !== self && !! c.showMenu; })
+            .forEach((c) => { c.highlighted = false; });
+        }
+        else
+        {
+            // close menu if there is one
+            if (menuOpened)
+            {
+                closeMenu();
+            }
+        }
+    }
+
+    onPointerEnter: (ev) =>
+    {
+        highlighted = true;
+    }
+
+    onClick: (ev) =>
+    {
+        focus = true;
+        if (menu)
+        {
+            if (! _menu)
+            {
+                highlighted = true;
+                showMenu();
+            }
+            else
+            {
+                highlighted = false;
+                closeMenu();
+            }
+            ev.accepted = true;
+        }
+    }
+
+    onKeyDown: (ev) =>
+    {
+        if (!! parent.popup)
+        {
+            return;
+        }
+
+        if (ev.key === "ArrowLeft")
+        {
+            toSibling(-1, (sibling) =>
+            {
+                sibling.focus = true;
+            });
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowRight")
+        {
+            toSibling(1, (sibling) =>
+            {
+                sibling.focus = true;
+            });
+            ev.accepted = true;
+        }
+    }
+
+    canFocus: true
+
+    width: !! menuRuler ? menuRuler.max.width + 2 * theme.paddingSmall : -1
+    height: theme.itemHeightMedium
+    layout: "center-row"
+
+    color: containsMouse || menuOpened ? theme.highlightBackgroundColor
+                                       : "transparent"
+
+    onKeyDown: (ev) =>
+    {
+        if (ev.key === " ")
+        {
+            item.click(ev);
+        }
+    }
+
+    FocusIndicator { visible: item.focus }
+}

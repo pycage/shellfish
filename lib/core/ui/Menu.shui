@@ -53,6 +53,11 @@ Overlay {
             height: 0
         });
         visible = true;
+
+        if (menuBox.children().length > 0)
+        {
+            menuBox.children()[0].focus = true;
+        }
     }
 
     visible: false
@@ -92,18 +97,17 @@ Overlay {
 
         onKeyDown: (ev) =>
         {
-            ev.accepted = true;
-
             console.log("menu key down " + ev.key);
 
             if (ev.key === "Escape" || ev.key === " ")
             {
                 menu.visible = false;
+                ev.accepted = true;
                 return;
             }
 
             let current = -1;
-            const cs = children();
+            const cs = children().filter((c) => { return c.canFocus; });
             for (let i = 0; i < cs.length; ++i)
             {
                 if (cs[i].focus)
@@ -115,11 +119,13 @@ Overlay {
 
             if (ev.key === "ArrowUp")
             {
-                current = Math.max(0, current - 1);
+                current = (cs.length + current - 1) % cs.length;
+                ev.accepted = true;
             }
-            if (ev.key === "ArrowDown")
+            else if (ev.key === "ArrowDown")
             {
-                current = Math.min(cs.length - 1, current + 1);
+                current = (current + 1) % cs.length;
+                ev.accepted = true;
             }
             cs[current].focus = true;
         }

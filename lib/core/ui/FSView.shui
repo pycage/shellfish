@@ -83,13 +83,11 @@ ListView {
                     if (fileItem.modelData.value.path.toLowerCase().endsWith(".jpg") ||
                         fileItem.modelData.value.path.toLowerCase().endsWith(".png"))
                     {
-                        fsview.model.fs.read(fileItem.modelData.value.path, safeCallback((ok, blob) =>
+                        fsview.model.fs.read(fileItem.modelData.value.path)
+                        .then(safeCallback((blob) =>
                         {
-                            if (ok)
-                            {
-                                const url = URL.createObjectURL(blob);
-                                source = url;
-                            }
+                            const url = URL.createObjectURL(blob);
+                            source = url;
                         }));
                     }
                 }

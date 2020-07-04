@@ -29,7 +29,7 @@ mid.Document {
 
     property theme: Theme { }
 
-    property showMessageDialog: (title, icon, message, buttons) =>
+    function showMessageDialog(title, icon, message, buttons)
     {
         const dlg = _messageDialogT.create(__rslv__);
         dlg.title = title;
@@ -39,28 +39,28 @@ mid.Document {
         dlg.show();
     }
 
-    property showInfoDialog: (title, message, callback) =>
+    function showInfoDialog(title, message, callback)
     {
         showMessageDialog(title, "info1", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
-    property showWarningDialog: (title, message, callback) =>
+    function showWarningDialog(title, message, callback)
     {
         showMessageDialog(title, "warning1", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
-    property showErrorDialog: (title, message, callback) =>
+    function showErrorDialog(title, message, callback)
     {
         showMessageDialog(title, "notification", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
-    property showQuestionDialog: (title, message, yesCallback, noCallback) =>
+    function showQuestionDialog(title, message, yesCallback, noCallback)
     {
         showMessageDialog(title, "question", message, [
             { label: "Yes", callback: yesCallback },

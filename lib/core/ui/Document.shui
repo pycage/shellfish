@@ -29,4 +29,88 @@ mid.Document {
 
     property theme: Theme { }
 
+    property showMessageDialog: (title, icon, message, buttons) =>
+    {
+        const dlg = _messageDialogT.create(__rslv__);
+        dlg.title = title;
+        dlg.icon = icon;
+        dlg.message = message;
+        dlg.buttons = buttons;
+        dlg.show();
+    }
+
+    property showInfoDialog: (title, message, callback) =>
+    {
+        showMessageDialog(title, "info1", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    property showWarningDialog: (title, message, callback) =>
+    {
+        showMessageDialog(title, "warning1", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    property showErrorDialog: (title, message, callback) =>
+    {
+        showMessageDialog(title, "notification", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    property showQuestionDialog: (title, message, yesCallback, noCallback) =>
+    {
+        showMessageDialog(title, "question", message, [
+            { label: "Yes", callback: yesCallback },
+            { label: "No", callback: noCallback }
+        ]);
+    }
+
+    property _messageDialogT: template Dialog {
+        id: dialog
+
+        property buttons: []
+
+        property icon: ""
+        property message: ""
+
+        into buttons Repeater {
+            model: ListModel { data: dialog.buttons }
+
+            delegate: template Button {
+                marginLeft: theme.paddingSmall
+                icon: modelData.value.icon
+                text: modelData.value.label
+                onClick: () =>
+                {
+                    const cb = modelData.value.callback;
+                    dialog.discard();
+                    if (cb)
+                    {
+                        cb();
+                    }
+                }
+            }
+        }
+
+        Box {
+            layout: "row"
+
+            Label {
+                visible: dialog.icon !== ""
+                marginRight: theme.paddingLarge
+                width: theme.itemWidthSmall
+                height: width
+                fontSize: height
+                text: visible ? "[icon:" + dialog.icon + "]" : ""
+            }
+
+            Label {
+                overflowBehavior: "wrap"
+                text: dialog.message
+            }
+        }
+    }
 }

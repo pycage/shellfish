@@ -26,6 +26,11 @@ MouseBox {
     property dim: false
     property _opacity: 0
 
+    property show: () =>
+    {
+        documentRoot.add(self);
+    }
+
     position: "global"
     fillWidth: true
     fillHeight: true
@@ -34,10 +39,7 @@ MouseBox {
 
     _opacityTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
-    onInitialization: () =>
-    {
-        documentRoot.add(self);
-    }
+
 
     onDimChanged: () =>
     {

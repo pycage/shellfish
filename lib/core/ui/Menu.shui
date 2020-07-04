@@ -58,6 +58,7 @@ Overlay {
         {
             menuBox.children()[0].focus = true;
         }
+        show();
     }
 
     visible: false

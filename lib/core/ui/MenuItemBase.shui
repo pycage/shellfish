@@ -42,7 +42,6 @@ MouseBox {
         }
 
         _menu = menu.create();
-        _menu.init();
 
         if (parent.menuOpened)
         {

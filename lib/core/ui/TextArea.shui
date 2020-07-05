@@ -30,6 +30,8 @@ MouseBox {
     property fontSize: theme.fontSizeNormal
     property fontFamily: "sans-serif"
     property bold: false
+    property selectionStart: input.selectionStart
+    property selectionEnd: input.selectionEnd
 
     width: theme.itemWidthLarge * 2
     height: theme.itemHeightLarge * 2

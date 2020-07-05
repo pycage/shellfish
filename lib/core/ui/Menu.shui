@@ -20,6 +20,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+require "shellfish/low";
 require "shellfish/ui";
 
 Overlay {
@@ -31,7 +32,7 @@ Overlay {
 
     property menuRuler: Ruler { }
 
-    property popup: (parent, horizontal) =>
+    function popup(parent, horizontal)
     {
         const parentBbox = parent.bbox;
         if (horizontal)
@@ -52,13 +53,17 @@ Overlay {
             width: parentBbox.width - 2 * theme.paddingSmall,
             height: 0
         });
-        visible = true;
+
+        show();
 
         if (menuBox.children().length > 0)
         {
-            menuBox.children()[0].focus = true;
+            const handle = low.addFrameHandler(() =>
+            {
+                handle.cancel();
+                menuBox.children()[0].focus = true;
+            });
         }
-        show();
     }
 
     visible: false

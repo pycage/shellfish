@@ -34,23 +34,14 @@ MouseBox {
 
     property _menu: null
 
-    property showMenu: () =>
+    function _createMenu()
     {
-        if (! menu || _menu)
+        if (! menu)
         {
             return;
         }
 
         _menu = menu.create();
-
-        if (parent.menuOpened)
-        {
-            _menu.popup(self, true);
-        }
-        else
-        {
-            _menu.popup(self, false);
-        }
 
         // unhighlight when menu clicked away
         _menu.get().onVisibleChanged = () =>
@@ -104,21 +95,44 @@ MouseBox {
                 ev.accepted = true;
             }
         };
+    }
+
+    function showMenu()
+    {
+        if (! menu)
+        {
+            return;
+        }
+
+        if (! _menu)
+        {
+            _createMenu();
+        }
+
+        if (parent.menuOpened)
+        {
+            _menu.popup(self, true);
+        }
+        else
+        {
+            _menu.popup(self, false);
+        }
 
         menuOpened = true;
     }
 
-    property closeMenu: () =>
+    function closeMenu()
     {
         menuOpened = false;
         if (_menu)
         {
-            _menu.discard();
-            _menu = null;
+            _menu.visible = false;
+            //_menu.discard();
+            //_menu = null;
         }
     }
 
-    property toSibling: (direction, f) =>
+    function toSibling(direction, f)
     {
         const siblings = parent.children().filter((c) => { return !! c.showMenu; });
         let selfPos = -1;
@@ -144,9 +158,25 @@ MouseBox {
         }
     }
 
+    onInitialization: () =>
+    {
+        if (menu && ! _menu)
+        {
+            _createMenu();
+        }
+    }
+
     onDestruction: () =>
     {
         if (_menu)
+        {
+            _menu.discard();
+        }
+    }
+
+    onAncestorsVisibleChanged: () =>
+    {
+        if (_menu && ! ancestorsVisible)
         {
             closeMenu();
         }
@@ -190,7 +220,7 @@ MouseBox {
         focus = true;
         if (menu)
         {
-            if (! _menu)
+            if (! menuOpened)
             {
                 highlighted = true;
                 showMenu();

@@ -28,18 +28,29 @@ MouseBox {
 
     property show: () =>
     {
-        documentRoot.add(self);
+        visible = true;
     }
 
     position: "global"
     fillWidth: true
     fillHeight: true
+    visible: false
 
     color: "rgba(0, 0, 0, " + popup._opacity + ")"
 
     _opacityTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
-
+    onVisibleChanged: () =>
+    {
+        if (visible)
+        {
+            documentRoot.add(self);
+        }
+        else
+        {
+            self.parent = null;
+        }
+    }
 
     onDimChanged: () =>
     {

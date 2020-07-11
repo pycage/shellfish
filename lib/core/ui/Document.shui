@@ -37,35 +37,45 @@ mid.Document {
         dlg.message = message;
         dlg.buttons = buttons;
         dlg.show();
+        return dlg;
     }
 
     function showInfoDialog(title, message, callback)
     {
-        showMessageDialog(title, "info1", message, [
+        return showMessageDialog(title, "info1", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
     function showWarningDialog(title, message, callback)
     {
-        showMessageDialog(title, "warning1", message, [
+        return showMessageDialog(title, "warning1", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
     function showErrorDialog(title, message, callback)
     {
-        showMessageDialog(title, "notification", message, [
+        return showMessageDialog(title, "notification", message, [
             { label: "Ok", callback: callback }
         ]);
     }
 
     function showQuestionDialog(title, message, yesCallback, noCallback)
     {
-        showMessageDialog(title, "question", message, [
+        return showMessageDialog(title, "question", message, [
             { label: "Yes", callback: yesCallback },
             { label: "No", callback: noCallback }
         ]);
+    }
+
+    function showProgressDialog(title, message)
+    {
+        const dlg = _progressDialogT.create(__rslv__);
+        dlg.title = title;
+        dlg.message = message;
+        dlg.show();
+        return dlg;
     }
 
     property _messageDialogT: template Dialog {
@@ -108,9 +118,37 @@ mid.Document {
             }
 
             Label {
+                fillWidth: true
                 overflowBehavior: "wrap"
                 text: dialog.message
             }
         }
+    }
+
+    property _progressDialogT: template Dialog {
+        id: dialog
+
+        property message: ""
+        property progress: 0  /* between 0 and 1 */
+        
+        Box {
+            width: 400
+
+            Label {
+                fillWidth: true
+                overflowBehavior: "wrap"
+                text: message
+            }
+            
+            Box {
+                marginTop: theme.paddingMedium
+                marginRight: parent.bbox.width * (1.0 - dialog.progress)
+                marginBottom: theme.paddingMedium
+                fillWidth: true
+                height: theme.paddingSmall
+                color: theme.primaryColor
+            }
+        }
+
     }
 }

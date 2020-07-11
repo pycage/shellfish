@@ -30,6 +30,7 @@ MouseBox {
     property text: ""
     property flat: false
     property checked: false
+    property labelProfile: Object { }
 
     property activated: false
 
@@ -105,6 +106,8 @@ MouseBox {
         overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
         text: button.text
+
+        profiles: [button.labelProfile]
     }
 
     Label {
@@ -115,6 +118,8 @@ MouseBox {
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
+
+        profiles: [button.labelProfile]
     }
 
     FocusIndicator {

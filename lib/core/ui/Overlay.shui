@@ -59,4 +59,6 @@ MouseBox {
             _opacity = 0.6;
         }
     }
+
+    onContextMenu: (ev) => { ev.accepted = true; }
 }

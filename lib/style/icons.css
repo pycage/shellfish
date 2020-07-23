@@ -44,24 +44,30 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
 .sh-fw-icon {
-    width: 1.5em;
+    display: inline-block;
     text-align: center;
     font-weight: 100;
 }
 
-.sh-icon-busy-indicator {
-    display: inline-block;
-    width: 1.25em;
-    line-height: 1.25em;
-    text-align: center;
-    animation: sh-icon-busy-indicator-rotation 1.5s infinite linear;
+/* animate the spinners */
+.sh-icon-spinner1,
+.sh-icon-spinner2,
+.sh-icon-spinner3,
+.sh-icon-spinner4,
+.sh-icon-spinner5,
+.sh-icon-spinner6,
+.sh-icon-spinner7,
+.sh-icon-spinner8,
+.sh-icon-spinner9,
+.sh-icon-spinner10,
+.sh-icon-spinner11
+{
+    width: 1em;
+    line-height: 1em;
+    animation: sh-rotation-animation 1.5s infinite linear;
 }
 
-.sh-icon-busy-indicator:before {
-    content: "\edf4";
-}
-
-@keyframes sh-icon-busy-indicator-rotation {
+@keyframes sh-rotation-animation {
     0% {
         transform: rotate(0deg);
     }

@@ -31,6 +31,7 @@ MouseBox {
 
     width: theme.itemWidthMedium
     height: theme.itemHeightSmall
+    opacity: enabled && ancestorsEnabled ? 1 : 0.6
 
     borderColor: theme.borderColor
     borderWidth: 1

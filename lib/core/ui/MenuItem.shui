@@ -44,9 +44,8 @@ MenuItemBase {
         Label {
             id: label
 
-            color: item.containsMouse || item.menuOpened ? theme.highlightColor
-                                                        : item.enabled ? theme.primaryColor
-                                                                        : theme.disabledColor
+            color: ancestorsEnabled ? (item.containsMouse || item.menuOpened ? theme.highlightColor : theme.primaryColor)
+                                    : theme.disabledColor
             text: item.text
         }
     }

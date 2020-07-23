@@ -32,10 +32,12 @@ Overlay {
 
     property menuRuler: Ruler { }
 
-    function popup(parent, horizontal)
+    function popup(parent, options)
     {
+        options = options || { };
+
         const parentBbox = parent.bbox;
-        if (horizontal)
+        if (options.horizontal)
         {
             menuBox.anchorX = parentBbox.x + parentBbox.width;
             menuBox.anchorY = parentBbox.y;
@@ -63,6 +65,17 @@ Overlay {
                 handle.cancel();
                 menuBox.children()[0].focus = true;
             });
+        }
+
+        if (! options.keepAlive)
+        {
+            self.get().onVisibleChanged = () =>
+            {
+                if (! visible)
+                {
+                    discard();
+                }
+            };
         }
     }
 

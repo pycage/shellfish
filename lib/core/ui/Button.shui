@@ -45,6 +45,8 @@ MouseBox {
 
     height: theme.itemHeightSmall
 
+    opacity: ancestorsEnabled && enabled ? 1 : 0.6
+
     canFocus: true
 
     onPointerEnter: () =>

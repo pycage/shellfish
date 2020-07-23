@@ -111,11 +111,11 @@ MouseBox {
 
         if (parent.menuOpened)
         {
-            _menu.popup(self, true);
+            _menu.popup(self, { horizontal: true, keepAlive: true });
         }
         else
         {
-            _menu.popup(self, false);
+            _menu.popup(self, { horizontal: false, keepAlive: true });
         }
 
         menuOpened = true;

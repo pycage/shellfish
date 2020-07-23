@@ -201,7 +201,7 @@ MouseBox {
     Box {
         id: contentArea
 
-        interactive: ! page._frozen
+        enabled: ! page._frozen
         width: documentRoot.windowWidth
         height: page.scrollable ? -1 : documentRoot.windowHeight
     }

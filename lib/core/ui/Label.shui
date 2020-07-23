@@ -21,7 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 Label {
-    color: theme.primaryColor
+    color: ancestorsEnabled && enabled ? theme.primaryColor : theme.disabledColor
     fontSize: theme.fontSizeMedium
     fontFamily: "sans-serif"
 }

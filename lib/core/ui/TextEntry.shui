@@ -31,6 +31,7 @@ Box {
 
     width: theme.itemWidthLarge
     height: theme.itemHeightSmall
+    opacity: enabled && ancestorsEnabled ? 1 : 0.6
     color: theme.contentBackgroundColor
     borderColor: theme.borderColor
     borderWidth: 1

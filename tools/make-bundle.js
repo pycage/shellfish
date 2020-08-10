@@ -25,7 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 const modFs = require("fs"),
       modPath = require("path"),
       modProcess = require("process"),
-      modBabel = require("@babel/core");
+      modBabel = require("@babel/core"),
+      modFengshui = require("../lib/fengshui.js");
 
 const BABEL_CONFIG = {
     ast: false,
@@ -71,7 +72,7 @@ function updateBundle(path)
                 let sizeAfter = 0;
                 try
                 {
-                    const resourcePath = modPath.posix.join(prefix, filePath.replace(/\\/g, "/"));
+                    let resourcePath = modPath.posix.join(prefix, filePath.replace(/\\/g, "/"));
                     let binary = modFs.readFileSync(fullPath);
                     let data = "";
                     sizeBefore = Math.ceil(binary.length / 1024);
@@ -87,6 +88,17 @@ function updateBundle(path)
                             bundle.aliases[match[1]] = resourcePath;
                         }
                         const result = modBabel.transform(code, BABEL_CONFIG);
+                        data = result.code;
+                        bundle.formats[resourcePath] = "utf-8";
+                    }
+                    else if (ext === "shui")
+                    {
+                        // pre-compile Shui code
+                        const shuiPath = resourcePath;
+                        resourcePath = resourcePath + ".js";
+                        const code = modFengshui.compile(shuiPath, binary.toString("utf8"));
+                        const result = modBabel.transform(code, BABEL_CONFIG);
+                        bundle.aliases[shuiPath] = resourcePath;
                         data = result.code;
                         bundle.formats[resourcePath] = "utf-8";
                     }
@@ -111,6 +123,7 @@ function updateBundle(path)
                 catch (err)
                 {
                     console.error(`Failed to read file: ${fullPath}`);
+                    console.error(err);
                     return;
                 }
             }

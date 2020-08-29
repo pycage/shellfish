@@ -96,6 +96,8 @@ MouseBox {
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
+
+        profiles: [button.labelProfile]
     }
 
     Label {

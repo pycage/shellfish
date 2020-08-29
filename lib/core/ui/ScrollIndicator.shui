@@ -126,15 +126,6 @@ MouseBox {
 
         fillWidth: box.orientation === "vertical" ? true : false
         fillHeight: box.orientation === "vertical" ? false : true
-        marginLeft: 2
-        marginRight: 2
-        marginTop: 2
-        marginBottom: 2
-
-        color: theme.primaryBackgroundColor
-        borderWidth: 1
-        borderColor: theme.borderColor
-        borderRadius: 3
 
         onPointerDown: (ev) =>
         {
@@ -158,6 +149,21 @@ MouseBox {
                 const scale = box.bbox.width / Math.max(1, box._contentSize);
                 box._animatedContentPos = box._contentPos + ev.deltaX / scale;
             }
+        }
+
+        Box {
+            fillWidth: true
+            fillHeight: true
+
+            marginLeft: 1
+            marginRight: 1
+            marginTop: 1
+            marginBottom: 1
+
+            color: theme.primaryBackgroundColor
+            borderWidth: 1
+            borderColor: theme.borderColor
+            borderRadius: 3
         }
 
         FocusIndicator { visible: box.focus }

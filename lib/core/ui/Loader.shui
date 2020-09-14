@@ -28,7 +28,7 @@ Box {
     property item: null
     property loading: false
 
-    property load: () =>
+    function load()
     {
         if (item)
         {

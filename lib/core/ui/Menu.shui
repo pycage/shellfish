@@ -66,17 +66,6 @@ Overlay {
                 menuBox.children()[0].focus = true;
             });
         }
-
-        if (! options.keepAlive)
-        {
-            self.get().onVisibleChanged = () =>
-            {
-                if (! visible)
-                {
-                    discard();
-                }
-            };
-        }
     }
 
     visible: false

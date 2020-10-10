@@ -58,12 +58,10 @@ Button {
     property _menuT: template Menu {
         id: selMenu
 
-
         onVisibleChanged: () =>
         {
             if (! visible)
             {
-                discard();
                 box.focus = true;
             }
         }

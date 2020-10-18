@@ -49,19 +49,6 @@ MouseBox {
 
     canFocus: true
 
-    onPointerEnter: () =>
-    {
-        focusIndicator.flash();
-    }
-
-    onPressedChanged: () =>
-    {
-        if (pressed)
-        {
-            focusIndicator.flash();
-        }
-    }
-
     onClick: () =>
     {
         focus = true;
@@ -128,7 +115,9 @@ MouseBox {
 
     FocusIndicator {
         id: focusIndicator
+        visible: button.focus
 
+        /*
         property flashing: false
 
         property flash: () =>
@@ -160,5 +149,6 @@ MouseBox {
                 focusIndicator.opacity = 1;
             }
         }
+        */
     }
 }

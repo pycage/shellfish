@@ -25,6 +25,9 @@ require "shellfish/ui";
 MouseBox {
     id: item
 
+    property isMenuItem: true
+
+    property selected: false
     property highlighted: false
 
     property menu: null
@@ -48,23 +51,29 @@ MouseBox {
         {
             if (! _menu.visible)
             {
-                highlighted = false;
-                item.focus = true;
+                menuOpened = false;
+                if (parent.isMenu)
+                {
+                    selected = true;
+                }
             }
         };
 
         _menu.get().onPointerMove = (ev) =>
         {
             let onItem = false;
-            parent.children().forEach((child) =>
+            // test the sibling menu items on the menu bar
+            parent.children()
+            .filter((c) => { return c.enabled && c.visible; })
+            .forEach((child) =>
             {
                 const cBox = child.bbox;
                 if (ev.x >= cBox.x && ev.x < cBox.x + cBox.width &&
                     ev.y >= cBox.y && ev.y < cBox.y + cBox.height)
                 {
-                    if (child !== self && child.highlighted === false)
+                    if (child !== self)
                     {
-                        child.highlighted = true;
+                        child.selectItem(true);
                     }
                     onItem = true;
                 }
@@ -78,27 +87,55 @@ MouseBox {
 
         _menu.get().onKeyDown = (ev) =>
         {
-            if (ev.key === "ArrowLeft")
+            if (parent.isMenu)
             {
-                toSibling(-1, (sibling) =>
+                if (ev.key === "ArrowLeft")
                 {
-                    sibling.highlighted = true;
-                });
-                ev.accepted = true;
+                    // cursor-left close the submenu
+                    console.log("close submenu");
+                    _menu.visible = false;
+                    ev.accepted = true;
+                }
             }
-            else if (ev.key === "ArrowRight")
+            else
             {
-                toSibling(1, (sibling) =>
+                if (ev.key === "ArrowLeft")
                 {
-                    sibling.highlighted = true;
-                });
-                ev.accepted = true;
+                    // cursor-left opens the previous menu
+                    console.log("open menu to the left");
+                    toSibling(-1, (sibling) =>
+                    {
+                        sibling.selectItem(true);
+                    });
+                    ev.accepted = true;
+                }
+                else if (ev.key === "ArrowRight")
+                {
+                    // cursor-right opens the next menu
+                    console.log("open menu to the right");
+                    toSibling(1, (sibling) =>
+                    {
+                        sibling.selectItem(true);
+                    });
+                    ev.accepted = true;
+                }
+            }
+        };
+
+        _menu.get().onCascadingClose = () =>
+        {
+            if (parent.isMenu)
+            {
+                parent.visible = false;
+                parent.cascadingClose();
             }
         };
     }
 
     function showMenu()
     {
+        selected = false;
+
         if (! menu)
         {
             return;
@@ -111,11 +148,11 @@ MouseBox {
 
         if (parent.menuOpened)
         {
-            _menu.popup(self, { horizontal: true, keepAlive: true });
+            _menu.popup(self, { horizontal: true });
         }
         else
         {
-            _menu.popup(self, { horizontal: false, keepAlive: true });
+            _menu.popup(self, { horizontal: false });
         }
 
         menuOpened = true;
@@ -123,18 +160,51 @@ MouseBox {
 
     function closeMenu()
     {
-        menuOpened = false;
-        if (_menu)
+        _menu.visible = false;
+    }
+
+    function unselectSiblings()
+    {
+        // unhighlight siblings and close menu
+        parent.children()
+        .filter((c) => { return c !== self && c.isMenuItem; })
+        .forEach((c) =>
         {
-            _menu.visible = false;
-            //_menu.discard();
-            //_menu = null;
+            c.selected = false;
+            if (c.menuOpened)
+            {
+                c.closeMenu();
+            }
+        });
+    }
+
+    function selectItem(activate)
+    {
+        unselectSiblings();
+
+        if (menu && activate)
+        {
+            if (! menuOpened)
+            {
+                showMenu();
+            }
         }
+        else
+        {
+            selected = true;
+        }
+    }
+
+    function hasSiblingMenuOpen()
+    {
+        return parent.children()
+               .filter((c) => { return c !== self && c.menuOpened; })
+               .length > 0;
     }
 
     function toSibling(direction, f)
     {
-        const siblings = parent.children().filter((c) => { return !! c.showMenu; });
+        const siblings = parent.children().filter((c) => { return c.isMenuItem && c.enabled; });
         let selfPos = -1;
         for (let i = 0; i < siblings.length; ++i)
         {
@@ -166,97 +236,156 @@ MouseBox {
         }
     }
 
-    onDestruction: () =>
-    {
-        if (_menu)
-        {
-            _menu.discard();
-        }
-    }
-
     onAncestorsVisibleChanged: () =>
     {
-        if (_menu && ! ancestorsVisible)
+        if (! ancestorsVisible)
         {
-            closeMenu();
+            if (menuOpened)
+            {
+                _menu.visible = false;
+            }
+            selected = false;
         }
     }
 
-    onHighlightedChanged: () =>
+    onSelectedChanged: () =>
     {
-        if (highlighted)
+        if (selected)
         {
-            // open menu if there is one, and if a sibling menu or the parent
-            // menu is opened
-            if (menu &&
-                (parent.children().filter((c) => { return c.menuOpened; }).length > 0 ||
-                 parent.menuOpened))
-            {
-                showMenu();
-            }
+            focus = true;
+        }
+    }
 
-            // unhighlight siblings
-            parent.children()
-            .filter((c) => { return c !== self && !! c.showMenu; })
-            .forEach((c) => { c.highlighted = false; });
+    onFocusChanged: () =>
+    {
+        if (! parent.isMenu)
+        {
+            if (focus)
+            {
+                selectItem(false);
+            }
+            else
+            {
+                selected = false;
+            }
+        }
+    }
+
+    onContainsMouseChanged: () =>
+    {
+        if (containsMouse)
+        {
+            if (parent.isMenu)
+            {
+                selectItem(true);
+            }
+            else
+            {
+                if (hasSiblingMenuOpen())
+                {
+                    selectItem(true);
+                }
+                else
+                {
+                    selectItem(false);
+                }
+            }
         }
         else
         {
-            // close menu if there is one
-            if (menuOpened)
-            {
-                closeMenu();
-            }
+            selected = false;
         }
-    }
-
-    onPointerEnter: (ev) =>
-    {
-        highlighted = true;
     }
 
     onClick: (ev) =>
     {
-        focus = true;
-        if (menu)
+        if (parent.isMenu)
         {
-            if (! menuOpened)
+            if (menu)
             {
-                highlighted = true;
+                console.log("click on item with submenu");
+                ev.accepted = true;
+            }
+        }
+        else
+        {
+            if (menu && ! menuOpened)
+            {
                 showMenu();
+                ev.accepted = true;
             }
-            else
+            else if (menuOpened)
             {
-                highlighted = false;
-                closeMenu();
+                _menu.visible = false;
+                ev.accepted = true;
             }
-            ev.accepted = true;
         }
     }
 
     onKeyDown: (ev) =>
     {
-        if (!! parent.popup)
+        if (parent.isMenu)
         {
-            return;
+            if (selected && ev.key === "ArrowRight" && menu)
+            {
+                // cursor-right opens the submenu
+                console.log("open submenu");
+                showMenu();
+                ev.accepted = true;
+            }
+            else if (ev.key === " " || ev.key === "Enter")
+            {
+                if (selected)
+                {
+                    item.click(ev);
+                }
+                else
+                {
+                    ev.accepted = true;
+                }
+            }
+        }
+        else
+        {
+            // parent is not a menu
+
+            if (ev.key === "ArrowLeft")
+            {
+                // cursor-left moves to the previous sibling menu item
+                console.log("select previous menu item");
+                if (! menuOpened)
+                {
+                    toSibling(-1, (sibling) =>
+                    {
+                        sibling.selectItem(false);
+                    });
+                    ev.accepted = true;
+                }
+            }
+            else if (ev.key === "ArrowRight")
+            {
+                // cursor-right moves to the next sibling menu item
+                console.log("select next menu item");
+                if (! menuOpened)
+                {
+                    toSibling(1, (sibling) =>
+                    {
+                        sibling.selectItem(false);
+                    });
+                    ev.accepted = true;
+                }
+            }
+
+            if (ev.key === " " || ev.key === "Enter" || ev.key === "ArrowDown")
+            {
+                if (selected)
+                {
+                    item.click(ev);
+                }
+                ev.accepted = true;
+            }
         }
 
-        if (ev.key === "ArrowLeft")
-        {
-            toSibling(-1, (sibling) =>
-            {
-                sibling.focus = true;
-            });
-            ev.accepted = true;
-        }
-        else if (ev.key === "ArrowRight")
-        {
-            toSibling(1, (sibling) =>
-            {
-                sibling.focus = true;
-            });
-            ev.accepted = true;
-        }
     }
 
     canFocus: true
@@ -265,16 +394,10 @@ MouseBox {
     height: theme.itemHeightMedium
     layout: "center-row"
 
-    color: containsMouse || menuOpened ? theme.highlightBackgroundColor
-                                       : "transparent"
+    highlighted: selected || menuOpened
 
-    onKeyDown: (ev) =>
-    {
-        if (ev.key === " ")
-        {
-            item.click(ev);
-        }
-    }
+    color: highlighted ? theme.highlightBackgroundColor
+                       : "transparent"
 
-    FocusIndicator { visible: item.focus }
+    //FocusIndicator { visible: parent.selected; borderColor: "red" }
 }

@@ -28,6 +28,8 @@ Overlay {
 
     container default: menuBox
 
+    property isMenu: true
+
     property menuOpened: visible
 
     property menuRuler: Ruler { }
@@ -63,10 +65,17 @@ Overlay {
             const handle = low.addFrameHandler(() =>
             {
                 handle.cancel();
-                menuBox.children()[0].focus = true;
+                const cs = menuBox.children().filter((c) => { return c.canFocus && c.enabled && c.visible; });
+                if (cs.length > 0)
+                {
+                    cs[0].focus = true;
+                }
             }, objectLocation);
         }
     }
+
+    // is triggered when the menu cascade is closing
+    event cascadingClose
 
     visible: false
 
@@ -74,6 +83,18 @@ Overlay {
     {
         visible = false;
         ev.accepted = true;
+        
+        cascadingClose();
+    }
+
+    Box {
+        position: "global"
+        x: menuBox.bbox.x + 2
+        y: menuBox.bbox.y + 2
+        width: menuBox.bbox.width
+        height: menuBox.bbox.height
+        color: "black"
+        opacity: 0.2
     }
 
     MouseBox {
@@ -101,24 +122,28 @@ Overlay {
         {
             menu.visible = false;
             ev.accepted = true;
+
+            menu.cascadingClose();
         }
 
         onKeyDown: (ev) =>
         {
             console.log("menu key down " + ev.key);
 
-            if (ev.key === "Escape" || ev.key === " ")
+            if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
             {
                 menu.visible = false;
                 ev.accepted = true;
+
+                menu.cascadingClose();
                 return;
             }
 
             let current = -1;
-            const cs = children().filter((c) => { return c.canFocus; });
+            const cs = children().filter((c) => { return c.isMenuItem && c.enabled && c.visible; });
             for (let i = 0; i < cs.length; ++i)
             {
-                if (cs[i].focus)
+                if (cs[i].selected)
                 {
                     current = i;
                     break;
@@ -127,15 +152,34 @@ Overlay {
 
             if (ev.key === "ArrowUp")
             {
-                current = (cs.length + current - 1) % cs.length;
+                console.log("select previous menu item");
+                if (current !== -1)
+                {
+                    current = (cs.length + current - 1) % cs.length;
+                }
+                else
+                {
+                    current = cs.length - 1;
+                }
                 ev.accepted = true;
             }
             else if (ev.key === "ArrowDown")
             {
-                current = (current + 1) % cs.length;
+                console.log("select next menu item");
+                if (current !== -1)
+                {
+                    current = (current + 1) % cs.length;
+                }
+                else
+                {
+                    current = 0;
+                }
                 ev.accepted = true;
             }
-            cs[current].focus = true;
+            if (current !== -1)
+            {
+                cs[current].selectItem(false);
+            }
         }
 
     }

@@ -85,6 +85,10 @@ MouseBox {
     fillWidth: ! _frozen
     color: theme.primaryBackgroundColor
 
+    enabled: ! _frozen
+
+    trapFocus: true
+
     style: marginLeft > 0 ? ["sh-no-scrollbars", "sh-dropshadow"]
                           : ["sh-no-scrollbars"]
 
@@ -201,7 +205,6 @@ MouseBox {
     Box {
         id: contentArea
 
-        enabled: ! page._frozen
         width: documentRoot.windowWidth
         height: page.scrollable ? -1 : documentRoot.windowHeight
     }

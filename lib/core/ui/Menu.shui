@@ -152,7 +152,6 @@ Overlay {
 
             if (ev.key === "ArrowUp")
             {
-                console.log("select previous menu item");
                 if (current !== -1)
                 {
                     current = (cs.length + current - 1) % cs.length;
@@ -165,7 +164,6 @@ Overlay {
             }
             else if (ev.key === "ArrowDown")
             {
-                console.log("select next menu item");
                 if (current !== -1)
                 {
                     current = (current + 1) % cs.length;

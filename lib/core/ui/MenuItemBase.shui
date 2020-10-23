@@ -92,7 +92,6 @@ MouseBox {
                 if (ev.key === "ArrowLeft")
                 {
                     // cursor-left close the submenu
-                    console.log("close submenu");
                     _menu.visible = false;
                     ev.accepted = true;
                 }
@@ -102,7 +101,6 @@ MouseBox {
                 if (ev.key === "ArrowLeft")
                 {
                     // cursor-left opens the previous menu
-                    console.log("open menu to the left");
                     toSibling(-1, (sibling) =>
                     {
                         sibling.selectItem(true);
@@ -112,7 +110,6 @@ MouseBox {
                 else if (ev.key === "ArrowRight")
                 {
                     // cursor-right opens the next menu
-                    console.log("open menu to the right");
                     toSibling(1, (sibling) =>
                     {
                         sibling.selectItem(true);
@@ -303,7 +300,6 @@ MouseBox {
         {
             if (menu)
             {
-                console.log("click on item with submenu");
                 ev.accepted = true;
             }
         }
@@ -329,7 +325,6 @@ MouseBox {
             if (selected && ev.key === "ArrowRight" && menu)
             {
                 // cursor-right opens the submenu
-                console.log("open submenu");
                 showMenu();
                 ev.accepted = true;
             }
@@ -352,7 +347,6 @@ MouseBox {
             if (ev.key === "ArrowLeft")
             {
                 // cursor-left moves to the previous sibling menu item
-                console.log("select previous menu item");
                 if (! menuOpened)
                 {
                     toSibling(-1, (sibling) =>
@@ -365,7 +359,6 @@ MouseBox {
             else if (ev.key === "ArrowRight")
             {
                 // cursor-right moves to the next sibling menu item
-                console.log("select next menu item");
                 if (! menuOpened)
                 {
                     toSibling(1, (sibling) =>

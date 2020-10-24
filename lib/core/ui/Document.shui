@@ -87,6 +87,8 @@ mid.Document {
         property message: ""
 
         into buttons Repeater {
+            id: buttonsRepeater
+
             model: ListModel { data: dialog.buttons }
 
             delegate: template Button {
@@ -100,6 +102,23 @@ mid.Document {
                     if (cb)
                     {
                         cb();
+                    }
+                }
+
+                dialog.onKeyDown: (ev) =>
+                {
+                    if (buttonsRepeater.model.size === 1 &&
+                        (ev.key === "Enter" || ev.key === "Escape"))
+                    {
+                        click(ev);
+                    }
+                    else if (modelData.index === 0 && ev.key === "Enter")
+                    {
+                        click(ev);
+                    }
+                    else if (modelData.index === 1 && ev.key === "Escape")
+                    {
+                        click(ev);
                     }
                 }
             }

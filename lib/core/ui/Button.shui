@@ -57,7 +57,7 @@ MouseBox {
 
     onKeyDown: (ev) =>
     {
-        if (ev.key === " ")
+        if (ev.key === " " || ev.key === "Enter")
         {
             click(ev);
         }

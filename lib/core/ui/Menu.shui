@@ -28,10 +28,8 @@ Overlay {
 
     container default: menuBox
 
-    property isMenu: true
-
+    property thisMenu: self
     property menuOpened: visible
-
     property menuRuler: Ruler { }
 
     function popup(parent, options)
@@ -104,6 +102,8 @@ Overlay {
         property anchorY: 0
         property anchorHeight: 0
 
+        property isMenu: true
+
         position: "global"
 
         x: anchorX + bbox.width < parent.bbox.width ? anchorX
@@ -149,6 +149,8 @@ Overlay {
                     break;
                 }
             }
+
+            console.log("current " + current + " of " + cs.length);
 
             if (ev.key === "ArrowUp")
             {

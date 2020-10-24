@@ -30,7 +30,6 @@ Box {
 
     property title: ""
     property subtitle: ""
-    property pageStack: null
 
     property active: true
 

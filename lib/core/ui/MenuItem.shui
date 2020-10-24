@@ -31,7 +31,7 @@ MenuItemBase {
     Box {
         marginLeft: theme.paddingSmall
         marginRight: theme.paddingSmall
-        ruler: item.menuRuler
+        ruler: !! thisMenu ? thisMenu.menuRuler : null
         layout: "center-row"
 
         Label {

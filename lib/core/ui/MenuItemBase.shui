@@ -33,8 +33,6 @@ MouseBox {
     property menu: null
     property menuOpened: false
 
-    property menuRuler: parent.menuRuler || null
-
     property _menu: null
 
     function _createMenu()
@@ -52,7 +50,7 @@ MouseBox {
             if (! _menu.visible)
             {
                 menuOpened = false;
-                if (parent.isMenu)
+                if (thisMenu)
                 {
                     selected = true;
                 }
@@ -79,15 +77,15 @@ MouseBox {
                 }
             });
 
-            if (! onItem && parent.pointerMove)
+            if (! onItem && !! thisMenu)
             {
-                parent.pointerMove(ev);
+                thisMenu.pointerMove(ev);
             }
         };
 
         _menu.get().onKeyDown = (ev) =>
         {
-            if (parent.isMenu)
+            if (thisMenu)
             {
                 if (ev.key === "ArrowLeft")
                 {
@@ -121,10 +119,10 @@ MouseBox {
 
         _menu.get().onCascadingClose = () =>
         {
-            if (parent.isMenu)
+            if (thisMenu)
             {
-                parent.visible = false;
-                parent.cascadingClose();
+                thisMenu.visible = false;
+                thisMenu.cascadingClose();
             }
         };
     }
@@ -143,7 +141,7 @@ MouseBox {
             _createMenu();
         }
 
-        if (parent.menuOpened)
+        if (!! thisMenu)
         {
             _menu.popup(self, { horizontal: true });
         }
@@ -255,7 +253,7 @@ MouseBox {
 
     onFocusChanged: () =>
     {
-        if (! parent.isMenu)
+        if (! thisMenu)
         {
             if (focus)
             {
@@ -272,7 +270,7 @@ MouseBox {
     {
         if (containsMouse)
         {
-            if (parent.isMenu)
+            if (thisMenu)
             {
                 selectItem(true);
             }
@@ -296,7 +294,7 @@ MouseBox {
 
     onClick: (ev) =>
     {
-        if (parent.isMenu)
+        if (thisMenu)
         {
             if (menu)
             {
@@ -320,7 +318,7 @@ MouseBox {
 
     onKeyDown: (ev) =>
     {
-        if (parent.isMenu)
+        if (thisMenu)
         {
             if (selected && ev.key === "ArrowRight" && menu)
             {
@@ -383,7 +381,7 @@ MouseBox {
 
     canFocus: true
 
-    width: !! menuRuler ? menuRuler.max.width + 2 * theme.paddingSmall : -1
+    width: !! thisMenu ? thisMenu.menuRuler.max.width + 2 * theme.paddingSmall : -1
     height: theme.itemHeightMedium
     layout: "center-row"
 

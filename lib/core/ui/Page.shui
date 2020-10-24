@@ -26,6 +26,8 @@ MouseBox {
     container default: contentArea
     container header: headerArea
 
+    property thisPage: self
+
     property scrollable: true
     property pageStack: null
     property currentPage: false

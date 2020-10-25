@@ -98,7 +98,7 @@ mid.Document {
                 onClick: () =>
                 {
                     const cb = modelData.value.callback;
-                    dialog.discard();
+                    dialog.parent = null;
                     if (cb)
                     {
                         cb();

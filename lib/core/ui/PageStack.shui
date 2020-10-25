@@ -121,7 +121,7 @@ Object {
             const p = pages.pop();
             p.close(function ()
             {
-                p.discard();
+                p.parent = null;
                 pages[pages.length - 1].frozen = false;
                 pages[pages.length - 1].currentPage = true;
 

@@ -32,7 +32,7 @@ Box {
     {
         if (item)
         {
-            item.discard();
+            item.parent = null;
             item = null;
         }
 

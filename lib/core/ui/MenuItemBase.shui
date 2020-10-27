@@ -342,31 +342,6 @@ MouseBox {
         {
             // parent is not a menu
 
-            if (ev.key === "ArrowLeft")
-            {
-                // cursor-left moves to the previous sibling menu item
-                if (! menuOpened)
-                {
-                    toSibling(-1, (sibling) =>
-                    {
-                        sibling.selectItem(false);
-                    });
-                    ev.accepted = true;
-                }
-            }
-            else if (ev.key === "ArrowRight")
-            {
-                // cursor-right moves to the next sibling menu item
-                if (! menuOpened)
-                {
-                    toSibling(1, (sibling) =>
-                    {
-                        sibling.selectItem(false);
-                    });
-                    ev.accepted = true;
-                }
-            }
-
             if (ev.key === " " || ev.key === "Enter" || ev.key === "ArrowDown")
             {
                 if (selected)
@@ -379,7 +354,7 @@ MouseBox {
 
     }
 
-    canFocus: true
+    canFocus: !! thisMenu
 
     width: !! thisMenu ? thisMenu.menuRuler.max.width + 2 * theme.paddingSmall : -1
     height: theme.itemHeightMedium

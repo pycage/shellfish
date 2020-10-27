@@ -28,6 +28,13 @@ Button {
     property model: ListModel { }
     property selection: 0
 
+    property _menu: null
+
+    function _createMenu()
+    {
+        _menu = _menuT.create();
+    }
+
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "menu"
@@ -37,8 +44,12 @@ Button {
     {
         ev.accepted = true;
         
-        const m = _menuT.create();
-        m.popup(self);
+        if (! _menu)
+        {
+            _createMenu();
+        }
+
+        _menu.popup(self);
     }
 
     onWheel: (ev) =>
@@ -53,7 +64,28 @@ Button {
         {
             ++selection;
         }
-    } 
+        ev.accepted = true;
+    }
+
+    onKeyDown: (ev) =>
+    {
+        if (ev.key === "ArrowUp")
+        {
+            if (selection > 0)
+            {
+                --selection;
+            }
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowDown")
+        {
+            if (selection < model.size - 1)
+            {
+                ++selection;
+            }
+            ev.accepted = true;
+        }
+    }
 
     property _menuT: template Menu {
         id: selMenu
@@ -73,7 +105,6 @@ Button {
 
             delegate: template MenuItem {
                 text: modelData.value
-                menuRuler: selMenu.menuRuler
 
                 onClick: (ev) =>
                 {
@@ -81,10 +112,10 @@ Button {
                 }
 
                 Timer {
-                    running: parent.modelData.index === box.selection
+                    running: selMenu.visible && parent.modelData.index === box.selection
                     repeat: false
                     interval: 0
-                    onTimeout: () => { parent.focus = true; }
+                    onTimeout: () => { parent.selectItem(false); }
                 }
             }
         }

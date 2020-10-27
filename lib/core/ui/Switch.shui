@@ -47,7 +47,7 @@ MouseBox {
 
     onKeyDown: (ev) =>
     {
-        if (ev.key === " ")
+        if (ev.key === " " || ev.key === "Enter" || ev.key === "ArrowLeft" || ev.key === "ArrowRight")
         {
             checked = ! checked;
             ev.accepted = true;

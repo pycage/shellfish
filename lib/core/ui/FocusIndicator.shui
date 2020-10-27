@@ -24,8 +24,7 @@ Box {
     position: "free"
     fillWidth: true
     fillHeight: true
-    enabled: false
     color: "transparent"
     borderWidth: 2
-    borderColor: theme.highlightBackgroundColor
+    borderColor: theme.borderColor
 }

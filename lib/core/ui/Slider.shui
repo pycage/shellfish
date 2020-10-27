@@ -133,12 +133,32 @@ MouseBox {
     {
         if (ev.key === "ArrowLeft")
         {
+            value = Math.max(minValue, value - 1);
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowRight")
+        {
+            value = Math.min(maxValue, value + 1);
+            ev.accepted = true;
+        }
+        else if (ev.key === "PageUp")
+        {
             value = Math.max(minValue, value - stepSize);
             ev.accepted = true;
         }
-        if (ev.key === "ArrowRight")
+        else if (ev.key === "PageDown")
         {
             value = Math.min(maxValue, value + stepSize);
+            ev.accepted = true;
+        }
+        else if (ev.key === "Home")
+        {
+            value = minValue;
+            ev.accepted = true;
+        }
+        else if (ev.key === "End")
+        {
+            value = maxValue;
             ev.accepted = true;
         }
     }

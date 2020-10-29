@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,58 +20,62 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
+require "shellfish/ui";
 
-/**
- * **Module ID:** `shellfish/ui`
- * 
- * This module provides Shellfish's default Shui elements.
- * 
- * @module ui
- */
+MouseBox {
+    id: switch
 
-exports.__id = "shellfish/ui";
+    property checked: false
 
-const mods = [
-    "Button",
-    "CheckBox",
-    "DarkTheme",
-    "Dialog",
-    "Document",
-    "FocusIndicator",
-    "FSIcon",
-    "FSTreeNode",
-    "FSView",
-    "Label",
-    "Loader",
-    "Menu",
-    "MenuItem",
-    "MenuItemBase",
-    "MenuSeparator",
-    "Overlay",
-    "Page",
-    "PageHeader",
-    "PageStack",
-    "PinchGesture",
-    "Placeholder",
-    "ScrollIndicator",
-    "SelectionBox",
-    "Slider",
-    "SpinBox",
-    "SplitBox",
-    "Switch",
-    "TextArea",
-    "TextEntry",
-    "Theme"
-];
+    canFocus: true
 
-shRequire(__dirname + "/../fengshui.js", function (fengshui)
-{
-    shRequire(mods.map(m => __dirname + "/ui/" + m + ".shui"), function ()
+    width: height
+    height: theme.itemHeightSmall
+    opacity: enabled && ancestorsEnabled ? 1 : 0.6
+
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: theme.borderRadius
+
+    color: containsMouse ? theme.highlightBackgroundColor
+                         : theme.secondaryBackgroundColor
+
+    onClick: () =>
     {
-        for (var i = 0; i < arguments.length; ++i)
+        checked = ! checked;
+    }
+
+    onKeyDown: (ev) =>
+    {
+        if (ev.key === " " || ev.key === "Enter" || ev.key === "ArrowLeft" || ev.key === "ArrowRight")
         {
-            exports.include(arguments[i]);
+            checked = ! checked;
+            ev.accepted = true;
         }
-    }, fengshui.compile);
-});
+    }
+
+    Box {
+        visible: switch.checked
+        position: "free"
+        fillWidth: true
+        fillHeight: true
+        marginTop: 1
+        marginLeft: 1
+        marginRight: 1
+        marginBottom: 1
+
+        color: theme.primaryBackgroundColor
+
+        borderColor: theme.borderColor
+        borderWidth: 1
+        borderRadius: theme.borderRadius
+
+        layout: "center"
+
+        Label {
+            text: "[icon:done]"
+        }
+    }
+
+    FocusIndicator { visible: switch.focus }
+}

@@ -163,5 +163,5 @@ MouseBox {
         }
     }
 
-    FocusIndicator { visible: slider.focus || parent.containsMouse }
+    FocusIndicator { visible: slider.focus }
 }

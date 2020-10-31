@@ -40,9 +40,10 @@ MouseBox {
     color: containsMouse ? theme.highlightBackgroundColor
                          : theme.secondaryBackgroundColor
 
-    onClick: () =>
+    onClick: (ev) =>
     {
         checked = ! checked;
+        ev.accepted = true;
     }
 
     onKeyDown: (ev) =>
@@ -63,6 +64,7 @@ MouseBox {
         marginLeft: 1
         marginRight: 1
         marginBottom: 1
+        enabled: false
 
         color: theme.primaryBackgroundColor
 

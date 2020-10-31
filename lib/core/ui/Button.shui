@@ -60,6 +60,7 @@ MouseBox {
         if (ev.key === " " || ev.key === "Enter")
         {
             click(ev);
+            ev.accepted = true;
         }
     }
 

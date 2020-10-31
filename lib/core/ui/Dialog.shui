@@ -44,17 +44,29 @@ Overlay {
     property title: ""
 
     dim: true
-    layout: "center"
 
     MouseBox {
         id: win
+
+        property offset: 1.0
+
+        position: "free"
+        x: (parent.bbox.width - bbox.width) / 2
+        y: (parent.bbox.height - bbox.height) / 2 - (offset * theme.itemHeightLarge)
+
+        offsetTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
         borderWidth: 2
         borderColor: theme.borderColor
         borderRadius: 3
 
         color: theme.primaryBackgroundColor
-        opacity: titlebar.pressed ? 0.4 : 1
+        opacity: titlebar.pressed ? 0.4 : 1 * (1.0 - offset)
+
+        onInitialization: () =>
+        {
+            offset = 0.0;
+        }
 
         onClick: (ev) =>
         {
@@ -91,13 +103,6 @@ Overlay {
                 text: dialog.title
             }
 
-            Box {
-                position: "free"
-                fillWidth: true
-                height: 1
-                origin: "bottom-left"
-                color: theme.borderColor
-            }
         }
 
         // content

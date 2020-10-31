@@ -40,9 +40,10 @@ MouseBox {
     color: checked ? theme.highlightBackgroundColor
                    : theme.secondaryBackgroundColor
 
-    onClick: () =>
+    onClick: (ev) =>
     {
         checked = ! checked;
+        ev.accepted = true;
     }
 
     onKeyDown: (ev) =>
@@ -59,6 +60,7 @@ MouseBox {
         marginLeft: switch.checked ? width - 2 : 1
         width: switch.width / 2
         fillHeight: true
+        enabled: false
 
         marginTop: 1
         marginRight: 1

@@ -27,15 +27,75 @@ MenuItemBase {
 
     property icon: ""
     property text: ""
+    property shortcut: ""
+
+    function format(t)
+    {
+        const pos = t.indexOf("&");
+        if (pos === -1)
+        {
+            return t;
+        }
+        else
+        {
+            return t.substr(0, pos) + "_" + t[pos + 1] + "_" + t.substr(pos + 2);
+        }
+    }
+
+    shortcutReceiver.onKeyDown: (ev) =>
+    {
+        if (ev.altKey)
+        {
+            const idx = text.indexOf("&");
+            if (idx !== -1)
+            {
+                const key = text[idx + 1].toLowerCase();
+                if (ev.key === key)
+                {
+                    click(ev);
+                    ev.accepted = true;
+                }
+            }
+        }
+        else if (shortcut !== "")
+        {
+            const parts = shortcut.split("+").filter((key) =>
+            {
+                if (key === "Ctrl")
+                {
+                    return ! ev.ctrlKey;
+                }
+                else if (key === "Alt")
+                {
+                    return ! ev.altKey;
+                }
+                else if (key === "Shift")
+                {
+                    return ! ev.shiftKey;
+                }
+                else
+                {
+                    return ev.key !== key.toLowerCase();
+                }
+            });
+            if (parts.length === 0)
+            {
+                click(ev);
+                ev.accepted = true;
+            }
+        }
+    }
 
     Box {
-        marginLeft: theme.paddingSmall
-        marginRight: theme.paddingSmall
-        ruler: !! thisMenu ? thisMenu.menuRuler : null
+        fillWidth: true
+        fillHeight: true
         layout: "center-row"
 
         Label {
+            id: iconLabel
+
             visible: item.icon !== ""
+            marginLeft: theme.paddingSmall
             width: label.bbox.height
             height: width
             text: visible ? "[icon:" + item.icon + "]" : ""
@@ -44,12 +104,59 @@ MenuItemBase {
         Label {
             id: label
 
+            marginLeft: theme.paddingSmall
             color: ancestorsEnabled ? (item.highlighted ? theme.highlightColor : theme.primaryColor)
                                     : theme.disabledColor
-            text: item.text
+            text: item.format(item.text)
+        }
+
+        Box { fillWidth: true}
+
+        Box {
+            id: shortcutLabel
+
+            visible: item.shortcut !== ""
+            marginLeft: theme.paddingLarge
+            color: theme.secondaryColor
+            borderRadius: theme.borderRadius
+
+            Label {
+                marginTop: 2
+                marginLeft: 2
+                marginRight: 2
+                marginBottom: 2
+                fontSize: theme.fontSizeSmall
+                color: theme.primaryBackgroundColor
+                text: item.shortcut
+            }
+        }
+
+        Label {
+            id: arrowLabel
+
+            visible: !! item.menu && !! thisMenu
+            marginLeft: 2
+            marginRight: 2
+            width: theme.paddingMedium
+            fontSize: theme.fontSizeSmall
+            text: "[icon:navigate_next]"
+        }
+
+        Box {
+            visible: ! item.menu && !! thisMenu
+            marginLeft: 2
+            marginRight: 2
+            width: theme.paddingMedium
         }
     }
 
-
-    Box { fillWidth: true }
+    Box {
+        ruler: !! thisMenu ? thisMenu.menuRuler : null
+        width: (iconLabel.visible ? iconLabel.bbox.width + theme.paddingSmall : 0) +
+               (label.visible ? label.bbox.width + theme.paddingSmall : 0) +
+               (shortcutLabel.visible ? shortcutLabel.bbox.width + theme.paddingLarge : 0) +
+               (!! thisMenu ? theme.paddingMedium + 4 : theme.paddingSmall)
+        //height: 1
+        //color: "red"
+    }
 }

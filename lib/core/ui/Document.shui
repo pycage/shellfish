@@ -26,6 +26,7 @@ mid.Document {
 
     // the Document element can be accessed from anywhere by 'documentRoot'
     property documentRoot: self
+    property shortcutReceiver: self
 
     property theme: Theme { }
 

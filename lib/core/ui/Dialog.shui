@@ -41,6 +41,8 @@ Overlay {
     container default: contentArea
     container buttons: buttonBox
 
+    property shortcutReceiver: self
+
     property title: ""
 
     dim: true

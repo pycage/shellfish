@@ -34,6 +34,19 @@ MouseBox {
 
     property activated: false
 
+    function format(t)
+    {
+        const pos = t.indexOf("&");
+        if (pos === -1)
+        {
+            return t;
+        }
+        else
+        {
+            return t.substr(0, pos) + "_" + t[pos + 1] + "_" + t.substr(pos + 2);
+        }
+    }
+
     color: checked || activated ? theme.highlightBackgroundColor
                                 : flat ? "transparent"
                                        : theme.secondaryBackgroundColor
@@ -53,6 +66,23 @@ MouseBox {
     {
         focus = true;
         activated = true;
+    }
+
+    shortcutReceiver.onKeyDown: (ev) =>
+    {
+        if (ev.altKey)
+        {
+            const idx = text.indexOf("&");
+            if (idx !== -1)
+            {
+                const key = text[idx + 1].toLowerCase();
+                if (ev.key === key)
+                {
+                    click(ev);
+                    ev.accepted = true;
+                }
+            }
+        }
     }
 
     onKeyDown: (ev) =>
@@ -97,7 +127,7 @@ MouseBox {
         marginBottom: 2
         overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
-        text: button.text
+        text: button.format(button.text)
 
         profiles: [button.labelProfile]
     }

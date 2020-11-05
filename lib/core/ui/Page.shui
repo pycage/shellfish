@@ -27,6 +27,7 @@ MouseBox {
     container header: headerArea
 
     property thisPage: self
+    property shortcutReceiver: self
 
     property scrollable: true
     property pageStack: null

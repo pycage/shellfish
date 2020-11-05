@@ -65,6 +65,18 @@ textarea {
     font-size: 100%;
 }
 
+.sh-underline {
+    text-decoration: underline;
+}
+
+.sh-bold {
+    font-weight: bold;
+}
+
+.sh-italic {
+    font-style: italic;
+}
+
 .sh-no-scrollbars {
     scrollbar-width: none;
     -ms-overflow-style: none;

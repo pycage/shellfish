@@ -108,6 +108,18 @@ MouseBox {
 
     color: "rgba(0, 0, 0, 0.3)"
 
+    onParentChanged: () =>
+    {
+        if (parent)
+        {
+            parent.get().connect("destruction", self.get(), () =>
+            {
+                // break cycle
+                other = null;
+            });
+        }
+    }
+
     MouseBox {
         id: handle
 

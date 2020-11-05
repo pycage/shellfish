@@ -122,6 +122,7 @@ ListView {
             marginBottom: fsview.displayMode === 0 ? 0 : sizeLabel.bbox.height
             horizontalAlignment: fsview.displayMode === 0 ? "left" : "center"
             overflowBehavior: "ellipsis"
+            literal: true
             text: fileItem.modelData.value.name
         }
 

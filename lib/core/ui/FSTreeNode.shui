@@ -102,6 +102,7 @@ Box {
             fillWidth: true
             marginLeft: theme.paddingSmall
             bold: node.target && node.target.path === node.path
+            literal: true
             text: node.name
         }
     }

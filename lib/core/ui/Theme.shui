@@ -23,14 +23,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Object {
 
     property primaryColor: "#404040"
-    property primaryBackgroundColor: "#f0f0f0"
-    property primaryBackgroundColorTranslucent: "rgba(240, 240, 240, 0.8)"
+    property primaryBackgroundColor: "#fafafa"
+    property primaryBackgroundColorTranslucent: "rgba(250, 250, 250, 0.8)"
     
     property secondaryColor: "#606060"
-    property secondaryBackgroundColor: "#c0c0c0"
+    property secondaryBackgroundColor: "#e0e0e0"
 
     property highlightColor: "#404040"
-    property highlightBackgroundColor: "#7faac7"
+    property highlightBackgroundColor: "#9fcae7"
 
     property disabledColor: "#808080"
 

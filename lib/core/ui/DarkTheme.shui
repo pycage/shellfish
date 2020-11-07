@@ -23,20 +23,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 require "shellfish/ui";
 
 Theme {
-    primaryColor: "#a0a0a0"
-    primaryBackgroundColor: "#202020"
-    primaryBackgroundColorTranslucent: "rgba(32, 32, 32, 0.8)"
+    primaryColor: "#e0e0e0"
+    primaryBackgroundColor: "#303030"
+    primaryBackgroundColorTranslucent: "rgba(48, 48, 48, 0.8)"
 
-    secondaryColor: "#808080"
+    secondaryColor: "#a0a0a0"
     secondaryBackgroundColor: "#404040"
 
-    highlightColor: "#a0a0a0"
-    highlightBackgroundColor: "#1f4a67"
+    highlightColor: "#ffffff"
+    highlightBackgroundColor: "#606068"
 
     disabledColor: "#707070"
 
-    contentBackgroundColor: "#303030"
+    contentBackgroundColor: "#101010"
     contentAltBackgroundColor: "#404040"
 
-    borderColor: "#a0a0a0"
+    borderColor: "black"
 }

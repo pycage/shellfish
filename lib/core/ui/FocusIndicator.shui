@@ -26,6 +26,6 @@ Box {
     fillHeight: true
     enabled: false
     color: "transparent"
-    borderWidth: 2
+    borderWidth: 1
     borderColor: theme.borderColor
 }

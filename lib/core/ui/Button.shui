@@ -47,9 +47,9 @@ MouseBox {
         }
     }
 
-    color: checked || activated ? theme.highlightBackgroundColor
-                                : flat ? "transparent"
-                                       : theme.secondaryBackgroundColor
+    color: checked || activated || containsMouse ? theme.highlightBackgroundColor
+                                                 : flat ? "transparent"
+                                                        : theme.secondaryBackgroundColor
 
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
@@ -108,6 +108,7 @@ MouseBox {
     }
 
     Label {
+        visible: button.icon !== ""
         marginTop: 2
         marginLeft: 4
         marginRight: 4
@@ -122,8 +123,8 @@ MouseBox {
         visible: button.text !== ""
         fillWidth: true
         marginTop: 2
-        marginLeft: button.icon !== "" ? 0 : 4
-        marginRight: button.secondaryIcon !== "" ? 0 : 4
+        marginLeft: button.icon !== "" ? 4 : theme.paddingSmall
+        marginRight: button.secondaryIcon !== "" ? 4 : theme.paddingSmall
         marginBottom: 2
         overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
@@ -133,7 +134,7 @@ MouseBox {
     }
 
     Label {
-        visible: button.text !== "" || text !== ""
+        visible: button.secondaryIcon !== ""
         marginTop: 2
         marginLeft: 4
         marginRight: 4

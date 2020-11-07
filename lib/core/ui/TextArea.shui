@@ -88,8 +88,8 @@ MouseBox {
         onTextChanged: { box.text = text; }
     }
 
-    ScrollIndicator { target: input; orientation: "vertical" }
-    ScrollIndicator { target: input; orientation: "horizontal" }
+    ScrollIndicator { id: siA; other: siB; target: input; orientation: "vertical" }
+    ScrollIndicator { id: siB; other: siA; target: input; orientation: "horizontal" }
 
     FocusIndicator { visible: input.focus }
 }

@@ -89,7 +89,8 @@ MouseBox {
         borderColor: theme.borderColor
         borderRadius: theme.borderRadius
 
-        color: theme.primaryBackgroundColor
+        color: containsMouse ? theme.highlightBackgroundColor
+                             : theme.secondaryBackgroundColor
 
         xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
 
@@ -116,7 +117,10 @@ MouseBox {
             ev.accepted = true;
         }
 
-        Label { color: theme.borderColor; text: "[icon:drag_indicator]" }
+        Label {
+            color: parent.containsMouse ? theme.highlightColor : theme.secondaryColor;
+            text: "[icon:drag_indicator]"
+        }
     }
 
     onPointerDown: (ev) =>

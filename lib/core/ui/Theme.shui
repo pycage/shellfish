@@ -30,7 +30,7 @@ Object {
     property secondaryBackgroundColor: "#e0e0e0"
 
     property highlightColor: "#404040"
-    property highlightBackgroundColor: "#9fcae7"
+    property highlightBackgroundColor: "#9fcad7"
 
     property disabledColor: "#808080"
 

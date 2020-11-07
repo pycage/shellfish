@@ -76,8 +76,8 @@ Overlay {
     event cascadingClose
 
     visible: false
-    opacity: visible ? 1 : 0
-    opacityTransition: NumberAnimation { duration: 400; easing: "InOutQuad" }
+    //opacity: visible ? 1 : 0
+    //opacityTransition: NumberAnimation { duration: 400; easing: "InOutQuad" }
 
     onPointerDown: (ev) =>
     {

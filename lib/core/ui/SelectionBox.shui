@@ -104,6 +104,7 @@ Button {
             model: box.model
 
             delegate: template MenuItem {
+                minWidth: box.bbox.width - 2 /* menu borders */
                 text: modelData.value
 
                 onClick: (ev) =>

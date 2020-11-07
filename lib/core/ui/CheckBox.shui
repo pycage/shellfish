@@ -75,6 +75,7 @@ MouseBox {
         layout: "center"
 
         Label {
+            color: theme.primaryColor
             text: "[icon:done]"
         }
     }

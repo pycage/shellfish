@@ -38,5 +38,5 @@ Theme {
     contentBackgroundColor: "#101010"
     contentAltBackgroundColor: "#404040"
 
-    borderColor: "black"
+    borderColor: "#808080"
 }

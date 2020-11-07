@@ -94,7 +94,7 @@ mid.Document {
 
             delegate: template Button {
                 marginLeft: theme.paddingSmall
-                icon: modelData.value.icon
+                icon: modelData.value.icon || ""
                 text: modelData.value.label
                 onClick: () =>
                 {

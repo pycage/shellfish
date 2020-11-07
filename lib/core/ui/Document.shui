@@ -131,9 +131,7 @@ mid.Document {
             Label {
                 visible: dialog.icon !== ""
                 marginRight: theme.paddingLarge
-                width: theme.itemWidthSmall
-                height: width
-                fontSize: height
+                fontSize: theme.itemHeightLarge
                 text: visible ? "[icon:" + dialog.icon + "]" : ""
             }
 

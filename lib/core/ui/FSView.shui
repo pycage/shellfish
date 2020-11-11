@@ -30,6 +30,8 @@ ListView {
     property displayMode: 0
     property currentIndex: -1
 
+    event fileOpen
+
     cellWidth: fsview.displayMode === 0 ? fsview.bbox.width - 1 : theme.itemWidthLarge * iconScale
     cellHeight: fsview.displayMode === 0 ? theme.itemHeightMedium : cellWidth
 
@@ -56,6 +58,10 @@ ListView {
             {
                 fsview.model.path = modelData.value.path;
             }
+            else
+            {
+                fsview.fileOpen(modelData.value);
+            }
         }
 
         Box {
@@ -73,29 +79,35 @@ ListView {
             Image {
                 id: thumbnail
 
+                property path: fileItem.modelData.value.path
+                property file: null
+
                 visible: status === "success"
                 fillWidth: true
                 fillHeight: true
                 fitMode: displayMode === 0 ? "cover" : "contain"
 
-                onInitialization: () =>
+                source: !! file ? blobUrl(file) : ""
+
+                onPathChanged: () =>
                 {
-                    if (fileItem.modelData.value.path.toLowerCase().endsWith(".jpg") ||
-                        fileItem.modelData.value.path.toLowerCase().endsWith(".png"))
+                    if (path.toLowerCase().endsWith(".jpg") ||
+                        path.toLowerCase().endsWith(".jpeg") ||
+                        path.toLowerCase().endsWith(".png"))
                     {
-                        fsview.model.fs.read(fileItem.modelData.value.path)
+                        fsview.model.fs.read(path)
                         .then(safeCallback((blob) =>
                         {
-                            const url = URL.createObjectURL(blob);
-                            source = url;
+                            file = blob;
+                        }))
+                        .catch(safeCallback(() =>
+                        {
+                            file = null;
                         }));
                     }
-                }
-
-                onStatusChanged: {
-                    if (status === "success" || status === "error")
+                    else
                     {
-                        URL.revokeObjectURL(source);
+                        file = null;
                     }
                 }
             }

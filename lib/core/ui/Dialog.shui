@@ -102,6 +102,7 @@ Overlay {
                 fillWidth: true
                 bold: true
                 overflowBehavior: "ellipsis"
+                literal: true
                 text: dialog.title
             }
 

@@ -52,7 +52,7 @@ Overlay {
         menuRuler.request({
             x: 0,
             y: 0,
-            width: parentBbox.width - 2 * theme.paddingSmall,
+            width: parentBbox.width - 2 * 1 /* border */,
             height: 0
         });
 

@@ -110,7 +110,7 @@ MenuItemBase {
             text: item.format(item.text)
         }
 
-        Box { fillWidth: true}
+        Box { fillWidth: true }
 
         Box {
             id: shortcutLabel

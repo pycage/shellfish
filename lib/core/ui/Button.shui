@@ -126,7 +126,7 @@ MouseBox {
         marginLeft: button.icon !== "" ? 4 : theme.paddingSmall
         marginRight: button.secondaryIcon !== "" ? 4 : theme.paddingSmall
         marginBottom: 2
-        overflowBehavior: "ellipsis"
+        //overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
         text: button.format(button.text)
 

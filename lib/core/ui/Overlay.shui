@@ -37,7 +37,7 @@ MouseBox {
     trapFocus: true
     visible: false
 
-    color: "rgba(0, 0, 0, " + popup._opacity + ")"
+    color: rgba(0, 0, 0, popup._opacity)
 
     _opacityTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 

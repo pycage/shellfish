@@ -25,7 +25,7 @@ require "shellfish/ui";
 Theme {
     primaryColor: "#e0e0e0"
     primaryBackgroundColor: "#303030"
-    primaryBackgroundColorTranslucent: "rgba(48, 48, 48, 0.8)"
+    primaryBackgroundColorTranslucent: "#303030cc"
 
     secondaryColor: "#a0a0a0"
     secondaryBackgroundColor: "#404040"

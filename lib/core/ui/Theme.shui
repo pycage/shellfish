@@ -24,7 +24,7 @@ Object {
 
     property primaryColor: "#404040"
     property primaryBackgroundColor: "#fafafa"
-    property primaryBackgroundColorTranslucent: "rgba(250, 250, 250, 0.8)"
+    property primaryBackgroundColorTranslucent: "#fafafacc"
     
     property secondaryColor: "#606060"
     property secondaryBackgroundColor: "#e0e0e0"

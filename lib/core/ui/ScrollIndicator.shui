@@ -106,7 +106,7 @@ MouseBox {
     width: orientation === "vertical" ? size : -1
     height: orientation === "vertical" ? -1 : size
 
-    color: "rgba(0, 0, 0, 0.3)"
+    color: rgba(0, 0, 0, 0.3)
 
     onParentChanged: () =>
     {

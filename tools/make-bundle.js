@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-const modFs = require("fs"),
+const modChildProcess = require("child_process"),
+      modFs = require("fs"),
       modPath = require("path"),
       modProcess = require("process"),
       modBabel = require("@babel/core"),
@@ -39,6 +40,11 @@ const MODULE_ID_REGEXP = new RegExp("\n *exports.__id *= *\"([^\"]+)\";");
 
 const TEXT_TYPES = ["css", "js", "shui"];
 
+const DATE = new Date().toISOString();
+const GIT_AUTHOR = modChildProcess.execSync("git log -n 1 --format=%an HEAD").toString("utf8").replace(/\n/, "");
+const GIT_HASH = modChildProcess.execSync("git log -n 1 --format=%H HEAD").toString("utf8").replace(/\n/, "");
+const GIT_SHORTHASH = modChildProcess.execSync("git log -n 1 --format=%h HEAD").toString("utf8").replace(/\n/, "");
+
 function help()
 {
     console.log("Create a Shellfish bundle.");
@@ -48,6 +54,15 @@ function help()
     console.log("with <bundle-file>   The name of the bundle file to create.");
     console.log("     <path>          The path to pack into the bundle.");
     console.log("");
+}
+
+function fillPlaceholders(s)
+{
+    return s.replace(/%PKG_DATE%/g, DATE)
+            .replace(/%PKG_GIT_AUTHOR%/g, GIT_AUTHOR)
+            .replace(/%PKG_GIT_HASH%/g, GIT_HASH)
+            .replace(/%PKG_GIT_SHORTHASH%/g, GIT_SHORTHASH)
+    ;
 }
 
 function updateBundle(path)
@@ -81,7 +96,7 @@ function updateBundle(path)
                     if (ext === "js")
                     {
                         // JS files get minified
-                        const code = binary.toString("utf8");
+                        const code = fillPlaceholders(binary.toString("utf8"));
                         const match = MODULE_ID_REGEXP.exec(code);
                         if (match && match[1])
                         {
@@ -96,7 +111,7 @@ function updateBundle(path)
                         // pre-compile Shui code
                         const shuiPath = resourcePath;
                         resourcePath = resourcePath + ".js";
-                        const code = modFengshui.compile(shuiPath, binary.toString("utf8"));
+                        const code = modFengshui.compile(shuiPath, fillPlaceholders(binary.toString("utf8")));
                         const result = modBabel.transform(code, BABEL_CONFIG);
                         bundle.aliases[shuiPath] = resourcePath;
                         data = result.code;

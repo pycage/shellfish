@@ -112,3 +112,35 @@ textarea {
 .sh-translucent {
     opacity: 0.66;
 }
+
+div.sh-layout-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: start;
+}
+
+div.sh-layout-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: start;
+}
+
+div.sh-layout-center-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+div.sh-layout-center-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}

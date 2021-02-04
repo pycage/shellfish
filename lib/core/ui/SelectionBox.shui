@@ -38,7 +38,7 @@ Button {
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "menu"
-    text: model.data[selection] || "?"
+    text: model.size > selection ? model.at(selection) : "?"
 
     onClick: (ev) =>
     {

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -34,10 +34,8 @@ MouseBox {
     property currentPage: false
     property contentTemplate: null
     property loading: false
-    property frozen: false
-    property _frozen: false
-    property _parentPage: null
-    property _sliding: false
+    property frozen: openingPercentage < 1 || ! currentPage
+    property openingPercentage: 0
 
     property show: (immediate) =>
     {
@@ -46,29 +44,14 @@ MouseBox {
             loading = true;
         }
 
-        if (immediate)
-        {
-            marginLeft = 0;
-            frozen = false;
-        }
-        else
-        {
-            frozen = true;
-            _sliding = true;
-            pushAnimation.from = marginLeft;
-            pushAnimation.to = 0;
-            pushAnimation.start();
-        }
+        console.log("show page");
+        openingPercentage = 1;
     }
 
     property close: (callback) =>
     {
-        frozen = true;
-        _sliding = true;
-        popAnimation.from = marginLeft;
-        popAnimation.to = documentRoot.windowWidth;
-        popAnimation.onFinished = callback;
-        popAnimation.start();
+        priv.closeCallback = callback;
+        openingPercentage = 0;
     }
 
     property loadContent: () =>
@@ -78,22 +61,53 @@ MouseBox {
         contentArea.add(item);
     }
 
-    position: _frozen ? "global" : "inline"
+    Object {
+        id: priv
+
+        property frozenInternal: false
+        property closeCallback: null
+    }
+
+    position: priv.frozenInternal ? "global" : "inline"
     
     width: documentRoot.windowWidth
-    height: _frozen ? documentRoot.windowHeight : -1
+    height: priv.frozenInternal ? documentRoot.windowHeight : -1
     minHeight: documentRoot.windowHeight
 
-    marginLeft: documentRoot.windowWidth
-    fillWidth: ! _frozen
+    marginLeft: (1 - openingPercentage) * width
+
+    openingPercentageTransition: NumberAnimation { duration: 700; easing: "InOutQuad" }
+
     color: theme.primaryBackgroundColor
 
-    enabled: ! _frozen
+    enabled: ! frozen
 
     trapFocus: true
 
-    style: marginLeft > 0 ? ["sh-no-scrollbars", "sh-dropshadow"]
-                          : ["sh-no-scrollbars"]
+    style: openingPercentage < 1 ? ["sh-no-scrollbars", "sh-dropshadow"]
+                                 : ["sh-no-scrollbars"]
+
+
+    onOpeningPercentageChanged: () =>
+    {
+        if (openingPercentage === 0)
+        {
+            // closed
+            if (priv.closeCallback)
+            {
+                priv.closeCallback();
+                priv.closeCallback = null;
+            }
+        }
+        else if (openingPercentage === 1)
+        {
+            // opened
+            if (contentTemplate && loading)
+            {
+                loadContentTimer.start();
+            }
+        }
+    }
 
     onFrozenChanged: () =>
     {
@@ -102,7 +116,7 @@ MouseBox {
             const scrollTop = documentRoot.contentY;
             documentRoot.contentY = 0;
             contentArea.minHeight = contentArea.contentHeight;
-            _frozen = true;
+            priv.frozenInternal = true;
             page.contentY = scrollTop;
         }
         else
@@ -111,104 +125,15 @@ MouseBox {
             page.contentY = 0;
             contentArea.minHeight = 0;
             contentArea.contentY = 0;
-            _frozen = false;
+            priv.frozenInternal = false;
             documentRoot.contentY = scrollTop;
-
-            if (page.contentTemplate && page.loading)
-            {
-                loadContentTimer.start();
-            }
         }
     }
     
-    /*
-    onDrag: (ev) =>
-    {
-        if (! currentPage)
-        {
-            return;
-        }
-
-        if (! frozen &&
-            (pageStack.pages.length === 1 || contentArea.contentX > 0))
-        {
-            return;
-        }
-
-        ev.accepted = true;
-
-        if (! frozen && (ev.deltaX < 16 || Math.abs(ev.deltaY) > Math.abs(ev.deltaX)))
-        {
-            return;
-        }
-
-        if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY))
-        {
-            if (! frozen)
-            {
-                frozen = true;
-            }
-            marginLeft = Math.max(0, marginLeft + ev.deltaX);
-        }
-    }
-
-    onDragEnd: (ev) =>
-    {
-        if (! currentPage)
-        {
-            return;
-        }
-
-        if (frozen)
-        {
-            if (marginLeft > width / 3)
-            {
-                pageStack.popPage();
-            }
-            else
-            {
-                pushAnimation.from = marginLeft;
-                pushAnimation.to = 0;
-                pushAnimation.start();
-            }
-        }
-    }
-    */
-
-    // background
-    Box {
-        visible: page.frozen && page.marginLeft > 0
-        position: "global"
-        width: page.marginLeft
-        fillHeight: true
-        color: "black"
-        opacity: 0.8 - (width / documentRoot.windowWidth) * 0.8
-    }
-
-    // back arrow indicator
-    Box {
-        visible: ! _sliding && page.marginLeft > page.width / 3
-
-        position: "global"
-        x: theme.paddingMedium
-        y: documentRoot.windowHeight / 2 - height / 2
-        width: height
-        height: theme.itemHeightLarge * 2
-        borderRadius: theme.borderRadius
-        color: theme.primaryColor
-        layout: "center"
-
-        Label {
-            fontSize: parent.height / 2
-            color: theme.primaryBackgroundColor
-            text: "[icon:navigate_before]"
-        }
-    }
-
     Box {
         id: contentArea
 
-        width: documentRoot.windowWidth
+        width: parent.width
         height: page.scrollable ? -1 : documentRoot.windowHeight
     }
 
@@ -218,45 +143,13 @@ MouseBox {
 
     Timer {
         id: loadContentTimer
+
         interval: 0
         repeat: false
 
         onTimeout: () =>
         {
             page.loadContent();
-        }
-    }
-
-    NumberAnimation {
-        id: pushAnimation
-
-        duration: 700
-
-        onNext: (v) =>
-        {
-            page.marginLeft = v;
-        }
-
-        onFinished: () =>
-        {
-            page.frozen = false;
-            page._sliding = false;
-        }
-    }
-
-    NumberAnimation {
-        id: popAnimation
-
-        duration: 700
-
-        onNext: (v) =>
-        {
-            page.marginLeft = v;
-        }
-
-        onFinished: () =>
-        {
-            page._sliding = false;
         }
     }
 }

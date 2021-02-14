@@ -26,7 +26,7 @@ require "shellfish/ui";
 Overlay {
     id: menu
 
-    container default: menuBox
+    container default: menuBoxContent
 
     property thisMenu: self
     property menuOpened: visible
@@ -87,6 +87,7 @@ Overlay {
         cascadingClose();
     }
 
+    // cheap shadow box
     Box {
         position: "global"
         x: menuBox.bbox.x + 2
@@ -97,92 +98,115 @@ Overlay {
         opacity: 0.2
     }
 
-    MouseBox {
+    Box {
         id: menuBox
 
         property anchorX: 0
         property anchorY: 0
         property anchorHeight: 0
 
-        property isMenu: true
+        property spaceAbove: anchorY - anchorHeight
+        property spaceBelow: menu.bbox.height - anchorY
+        property showBelow: spaceBelow > 5 * theme.itemHeightMedium ? true
+                                                                    : spaceBelow > spaceAbove
 
         position: "global"
+        overflowBehavior: "scroll"
 
-        x: anchorX + bbox.width < parent.bbox.width ? anchorX
-                                                    : parent.bbox.width - bbox.width
-        y: anchorY + bbox.height < parent.bbox.height ? anchorY
-                                                      : anchorY - anchorHeight - bbox.height;
+        x: anchorX + bbox.width < menu.bbox.width ? anchorX
+                                                  : menu.bbox.width - bbox.width
+        y: showBelow ? anchorY : anchorY - anchorHeight - height
 
-        height: -1
+        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bbox.height + 2 /* borders */)
         color: theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor
 
-        onPointerDown: (ev) => { ev.accepted = true; }
+        MouseBox {
+            id: menuBoxContent
 
-        onClick: (ev) =>
-        {
-            menu.visible = false;
-            ev.accepted = true;
+            property isMenu: true
 
-            menu.cascadingClose();
-        }
+            onPointerDown: (ev) => { ev.accepted = true; }
 
-        onKeyDown: (ev) =>
-        {
-            console.log("menu key down " + ev.key);
-
-            if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
+            onClick: (ev) =>
             {
                 menu.visible = false;
                 ev.accepted = true;
 
                 menu.cascadingClose();
-                return;
             }
 
-            let current = -1;
-            const cs = children().filter((c) => { return c.isMenuItem && c.enabled && c.visible; });
-            for (let i = 0; i < cs.length; ++i)
+            onKeyDown: (ev) =>
             {
-                if (cs[i].selected)
+                console.log("menu key down " + ev.key);
+
+                if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
                 {
-                    current = i;
-                    break;
+                    menu.visible = false;
+                    ev.accepted = true;
+
+                    menu.cascadingClose();
+                    return;
                 }
-            }
 
-            console.log("current " + current + " of " + cs.length);
+                let current = -1;
+                const cs = children().filter((c) => { return c.isMenuItem && c.enabled && c.visible; });
+                for (let i = 0; i < cs.length; ++i)
+                {
+                    if (cs[i].selected)
+                    {
+                        current = i;
+                        break;
+                    }
+                }
 
-            if (ev.key === "ArrowUp")
-            {
+                console.log("current " + current + " of " + cs.length);
+
+                if (ev.key === "ArrowUp")
+                {
+                    if (current !== -1)
+                    {
+                        current = (cs.length + current - 1) % cs.length;
+                    }
+                    else
+                    {
+                        current = cs.length - 1;
+                    }
+                    ev.accepted = true;
+                }
+                else if (ev.key === "ArrowDown")
+                {
+                    if (current !== -1)
+                    {
+                        current = (current + 1) % cs.length;
+                    }
+                    else
+                    {
+                        current = 0;
+                    }
+                    ev.accepted = true;
+                }
                 if (current !== -1)
                 {
-                    current = (cs.length + current - 1) % cs.length;
+                    cs[current].selectItem(false);
                 }
-                else
-                {
-                    current = cs.length - 1;
-                }
-                ev.accepted = true;
-            }
-            else if (ev.key === "ArrowDown")
-            {
-                if (current !== -1)
-                {
-                    current = (current + 1) % cs.length;
-                }
-                else
-                {
-                    current = 0;
-                }
-                ev.accepted = true;
-            }
-            if (current !== -1)
-            {
-                cs[current].selectItem(false);
             }
         }
 
     }
+
+    Box {
+        position: "free"
+        x: menuBox.x + menuBox.bbox.width - width
+        y: menuBox.y
+        width: theme.paddingSmall
+        height: menuBox.height
+
+        ScrollIndicator {
+            target: menuBox
+            width: parent.width
+        }
+    }
+
 }

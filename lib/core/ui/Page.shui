@@ -44,7 +44,6 @@ MouseBox {
             loading = true;
         }
 
-        console.log("show page");
         openingPercentage = 1;
     }
 

@@ -175,7 +175,7 @@ MouseBox {
                 focusIndicator.opacity = value;
             }
 
-            onFinished: () =>
+            onFinish: () =>
             {
                 focusIndicator.flashing = false;
                 focusIndicator.opacity = 1;

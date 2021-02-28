@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -30,31 +30,6 @@ MouseBox {
     property value: 0
     property stepSize: 5
 
-    onValueChanged: () =>
-    {
-        if (bbox.width > 0)
-        {
-            const p = (value - minValue) / (maxValue - minValue);
-            const hx = (bbox.width - handle.width) * p;
-            if (Math.abs(hx - handle.x) > 1)
-            {
-                handle.x = hx;
-            }
-        }
-    }
-    onBboxChanged: () =>
-    {
-        if (bbox.width > 0)
-        {
-            const p = (value - minValue) / (maxValue - minValue);
-            const hx = (bbox.width - handle.width) * p;
-            if (Math.abs(hx - handle.x) > 1)
-            {
-                handle.x = hx;
-            }
-        }
-    }
-
     canFocus: true
 
     layout: "center"
@@ -77,7 +52,10 @@ MouseBox {
     MouseBox {
         id: handle
 
-        property dragging: false
+        property percents: slider.maxValue > slider.minValue ? Math.max(0, Math.min(1, (slider.value - slider.minValue) / (slider.maxValue - slider.minValue)))
+                                                             : 0
+
+        property animated: false
 
         position: "free"
         layout: "center"
@@ -92,7 +70,8 @@ MouseBox {
         color: containsMouse ? theme.highlightBackgroundColor
                              : theme.secondaryBackgroundColor
 
-        xTransition: NumberAnimation { enabled: ! handle.dragging; duration: 300; easing: "InOutQuad" }
+        x: (slider.bbox.width - width) * percents
+        xTransition: NumberAnimation { enabled: handle.animated; duration: 300; easing: "InOutQuad" }
 
         onPointerDown: (ev) =>
         {
@@ -105,13 +84,8 @@ MouseBox {
             const sx = Math.max(0, Math.min(slider.bbox.width - width, x + ev.deltaX));
             const p = sx / (slider.bbox.width - width);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
-            const hx = (slider.bbox.width - width) * p;
 
-            dragging = true;
-            x = hx;
             slider.value = newValue;
-            dragging = false;
-
             slider.focus = true;
 
             ev.accepted = true;
@@ -127,14 +101,17 @@ MouseBox {
     {
         ev.accepted = true;
 
+        handle.animated = true;
         const x = Math.max(0, Math.min(bbox.width, ev.x));
         value = minValue + (maxValue - minValue) * (x / bbox.width);
+        handle.animated = false;
 
         focus = true;
     }
 
     onKeyDown: (ev) =>
     {
+        handle.animated = true;
         if (ev.key === "ArrowLeft")
         {
             value = Math.max(minValue, value - 1);
@@ -165,6 +142,7 @@ MouseBox {
             value = maxValue;
             ev.accepted = true;
         }
+        handle.animated = false;
     }
 
     FocusIndicator { visible: slider.focus }

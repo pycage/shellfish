@@ -36,63 +36,61 @@ MouseBox {
 
     visible: handle.sizePercents < 0.99
 
-    property _contentPos: target ? (orientation === "vertical" ? target.contentY
-                                                               : target.contentX)
-                                 : 0
-    property _contentSize: target ? (orientation === "vertical" ? target.contentHeight
-                                                                : target.contentWidth)
-                                  : 1
-    property _viewSize: target ? (orientation === "vertical" ? target.bbox.height
-                                                             : target.bbox.width)
-                               : 1
+    Object {
+        id: priv
 
-    property _animatedContentPos: 0
-    _animatedContentPosTransition: NumberAnimation { enabled: box.pressed; duration: 300; easing: "InOutQuad" }
+        property contentPos: box.target ? (box.orientation === "vertical" ? box.target.contentY
+                                                                          : box.target.contentX)
+                                        : 0
+        property contentSize: box.target ? (box.orientation === "vertical" ? box.target.contentHeight
+                                                                           : box.target.contentWidth)
+                                         : 1
+        property viewSize: box.target ? (box.orientation === "vertical" ? box.target.bbox.height
+                                                                        : box.target.bbox.width)
+                                      : 1
 
-    on_animatedContentPosChanged: () =>
-    {
-        if (orientation === "vertical")
-        {
-            target.contentY = _animatedContentPos;
-        }
-        else
-        {
-            target.contentX = _animatedContentPos;
-        }
+        property direction: 0
     }
 
-    property _direction: 0
 
     property lineUp: () =>
     {
-        _animatedContentPos = Math.max(0, box._contentPos - theme.itemHeightMedium);
+        scrollTo(priv.contentPos - theme.itemHeightMedium);
     }
 
     property lineDown: () =>
     {
-        const maxPos = box._contentSize - box._viewSize;
-        _animatedContentPos = Math.min(maxPos, box._contentPos + theme.itemHeightMedium);
+        scrollTo(priv.contentPos + theme.itemHeightMedium);
     }
 
     property pageUp: () =>
     {
-        _animatedContentPos = Math.max(0, box._contentPos - box._viewSize);
+        scrollTo(priv.contentPos - priv.viewSize);
     }
 
     property pageDown: () =>
     {
-        const maxPos = box._contentSize - box._viewSize;
-        _animatedContentPos = Math.min(maxPos, box._contentPos + box._viewSize);
+        scrollTo(priv.contentPos + priv.viewSize);
     }
 
     property firstPage: () =>
     {
-        _animatedContentPos = 0;
+        scrollTo(0);
     }
 
     property lastPage: () =>
     {
-        _animatedContentPos = box._contentSize - box._viewSize;
+        scrollTo(priv.contentSize - priv.viewSize);
+    }
+
+    function scrollTo(pos)
+    {
+        if (! scrollAnimation.busy)
+        {
+            scrollAnimation.from = priv.contentPos;
+            scrollAnimation.to = Math.max(0, Math.min(priv.contentSize - priv.viewSize, pos));
+            scrollAnimation.start();
+        }
     }
 
     canFocus: true
@@ -125,8 +123,8 @@ MouseBox {
 
         position: "free"
 
-        property sizePercents: Math.max(0, Math.min(1, box._viewSize / box._contentSize))
-        property posPercents: box._contentSize > box._viewSize ? box._contentPos / (box._contentSize - box._viewSize)
+        property sizePercents: Math.max(0, Math.min(1, priv.viewSize / priv.contentSize))
+        property posPercents: priv.contentSize > priv.viewSize ? priv.contentPos / (priv.contentSize - priv.viewSize)
                                                                : 0
         
         x: box.orientation === "vertical" ? 0
@@ -139,6 +137,12 @@ MouseBox {
         fillWidth: box.orientation === "vertical" ? true : false
         fillHeight: box.orientation === "vertical" ? false : true
 
+        color: containsMouse ? theme.highlightBackgroundColor
+                             : theme.primaryBackgroundColor
+        borderWidth: 1
+        borderColor: theme.borderColor
+        borderRadius: 3
+
         onPointerDown: (ev) =>
         {
             ev.accepted = true;
@@ -149,33 +153,16 @@ MouseBox {
         {
             ev.accepted = true;
 
-            _animatedContentPos = _contentPos;
-
             if (box.orientation === "vertical")
             {
-                const scale = box.bbox.height / Math.max(1, box._contentSize);
-                box._animatedContentPos = box._contentPos + ev.deltaY / scale;
+                const scale = box.bbox.height / Math.max(1, priv.contentSize);
+                target.contentY = priv.contentPos + ev.deltaY / scale;
             }
             else
             {
-                const scale = box.bbox.width / Math.max(1, box._contentSize);
-                box._animatedContentPos = box._contentPos + ev.deltaX / scale;
+                const scale = box.bbox.width / Math.max(1, priv.contentSize);
+                target.contentX = priv.contentPos + ev.deltaX / scale;
             }
-        }
-
-        Box {
-            fillWidth: true
-            fillHeight: true
-
-            marginLeft: 1
-            marginRight: 1
-            marginTop: 1
-            marginBottom: 1
-
-            color: theme.primaryBackgroundColor
-            borderWidth: 1
-            borderColor: theme.borderColor
-            borderRadius: 3
         }
 
         FocusIndicator { visible: box.focus }
@@ -187,32 +174,30 @@ MouseBox {
         const y = ev.y;
         ev.accepted = true;
 
-        _animatedContentPos = _contentPos;
-
         if (orientation === "vertical")
         {
             if (y < handle.y)
             {
-                _direction = 0;
+                priv.direction = 0;
             }
             else if (y > handle.y + handle.height)
             {
-                _direction = 1;
+                priv.direction = 1;
             }
         }
         else
         {
             if (x < handle.x)
             {
-                _direction = 0;
+                priv.direction = 0;
             }
             else if (x > handle.x + handle.width)
             {
-                _direction = 1;
+                priv.direction = 1;
             }
         }
 
-        if (_direction === 0)
+        if (priv.direction === 0)
         {
             pageUp();
         }
@@ -280,13 +265,13 @@ MouseBox {
     Timer {
         id: pullTimer
 
-        interval: 300
+        interval: 500
         repeat: true
         running: box.pressed
 
         onTimeout: () =>
         {
-            if (_direction === 0)
+            if (priv.direction === 0)
             {
                 pageUp();
             }
@@ -297,12 +282,31 @@ MouseBox {
         }
     }
 
+    NumberAnimation {
+        id: scrollAnimation
+
+        duration: 300
+        easing: "InOutQuad"
+
+        onNext: value =>
+        {
+            if (box.orientation === "vertical")
+            {
+                target.contentY = value;
+            }
+            else
+            {
+                target.contentX = value;
+            }
+        }
+    }
+
     /*
     Label {
         visible: box.visible
         position: "global"
         origin: "top-right"
-        text: "ch: " + box._contentSize + " vh: " + box._viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
+        text: "ch: " + priv.contentSize + " vh: " + priv.viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
     }
     */
 }

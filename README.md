@@ -1,4 +1,4 @@
-# Shellfish UI Toolkit
+# Shellfish
 
 Shellfish is a **declarative toolkit library** for creating HTML5 user
 interfaces.
@@ -25,6 +25,29 @@ Document {
 
 }
 ```
+
+## Set up the SDK
+
+Make sure you have Node.js (https://nodejs.org) installed on your computer for
+setting up the Shellfish SDK.
+
+Run
+    npm install
+to install the necessary dependencies of the SDK.
+
+### Build a Shellfish Bundle
+
+Run
+    npm run build-package
+to generate the `shellfish.pkg` bundle file for easy distribution.
+
+### Generate the Shellfish Documentation
+
+Run
+    npm run generate-docs
+to generate Shellfish's documentation in `doc/html`.
+
+# Bundles
 
 Shellfish's module loader supports **module bundles** to reduce transfer times.
 A bundle is a single file containing all required code modules.

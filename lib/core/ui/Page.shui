@@ -20,6 +20,30 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+/**
+ * Element representing a UI page.
+ *
+ * Stacked pages are a good way of structuring mobile applications. As you
+ * go deeper into the application (e.g. by entering the settings), new pages
+ * are stacked on top, and when returning, pages are removed from the stack.
+ *
+ * Page stacking is controlled by the {@link ui.PageStack PageStack} element.
+ *
+ * @class
+ * @name Page
+ * @memberof ui
+ *
+ * @property {fengshui.Container} header - A container for displaying a page header.
+ * @property {ui.Page} thisPage - [readonly] A reference to this page.
+ * @property {ui.Page} shortcutReceiver - [readonly] A reference to this page for receiving shortcuts.
+ * @property {bool} scrollable - If `true`, the page is scrollable with dynamic height. Otherweise, the page's height is fixed to the screen.
+ * @property {ui.PageStack} pageStack - The page stack to use.
+ * @property {bool} currentPage - [readonly] Whether this page is the currently visible page.
+ * @property {fengshui.Template} contentTemplate - An optional template for creating the page's content dynamically after the page was brought to front.
+ * @property {bool} loading - [readonly] Whether the page is currently loading.
+ * @property {bool} frozen - [readonly] Whether the page is currently frozen. All pages on the page stack except for the current page are frozen.
+ * @property {number} openingPercentage - [readonly] The transitioning opening percentage as a value between `0.0` and `1.0`. You may use this value for implementing custom opening animations.
+ */
 MouseBox {
     id: page
 
@@ -37,7 +61,16 @@ MouseBox {
     property frozen: openingPercentage < 1 || ! currentPage
     property openingPercentage: 0
 
-    property show: (immediate) =>
+    /**
+     * Shows the page.
+     *
+     * @private
+     * @method
+     * @name show
+     * @memberof ui.Page.prototype
+     * @param {bool} immediate - Deprecated. Has no effect.
+     */
+    function show(immediate)
     {
         if (contentTemplate)
         {
@@ -47,13 +80,22 @@ MouseBox {
         openingPercentage = 1;
     }
 
-    property close: (callback) =>
+    /**
+     * Closes the page.
+     *
+     * @private
+     * @method
+     * @name close
+     * @memberof ui.Page.prototype
+     * @param {function} callback - An optional callback to invoke afterwards.
+     */
+    function close(callback)
     {
         priv.closeCallback = callback;
         openingPercentage = 0;
     }
 
-    property loadContent: () =>
+    function loadContent()
     {
         const item = contentTemplate.create(__rslv__);
         loading = false;

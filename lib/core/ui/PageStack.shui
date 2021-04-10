@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 require "shellfish/fengshui" as fengshui;
 
 /**
- * Element for managing a stack of Page elements.
+ * Element for managing a stack of {@link ui.Page Page} elements.
+ *
+ * Pages are stacked and only the topmost page is active. New pages get added
+ * to the top of the stack.
  *
  * @memberof ui
  * @name PageStack
@@ -41,16 +44,22 @@ Object {
     property pages: []
 
     /**
-     * Pushes a page onto the page stack.
+     * Pushes a new page onto the page stack.
      *
-     * @memberof ui.PageStack
+     * @example
+     * pageStack.pushPage("MyPage.shui", {
+     *     title: "My Page",
+     *     foo: "bar"
+     * });
+     * 
+     * @memberof ui.PageStack.prototype
      * @name pushPage
      * @method
      *
-     * @param {string} target - The URL of the page.
+     * @param {string} target - The URL of the new page.
      * @param {object} props - The properties to set on the page. 
      */
-    property pushPage: (target, props) =>
+    function pushPage(target, props)
     {
         if (target.create)
         {
@@ -110,11 +119,11 @@ Object {
     /**
      * Pops the topmost page off the page stack.
      *
-     * @memberof ui.PageStack
+     * @memberof ui.PageStack.prototype
      * @name popPage
      * @method
      */
-    property popPage: () =>
+    function popPage()
     {
         if (pages.length > 1)
         {

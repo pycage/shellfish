@@ -1,0 +1,16 @@
+{
+  "name": "shellfish",
+  "version": "1.0.0",
+  "description": "Shellfish",
+  "author": "Martin Grimme",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@pixi/jsdoc-template": "^2.6.0",
+    "jsdoc": "~3.6.6"
+  },
+  "scripts": {
+    "build-package": "node tools/make-bundle.js shellfish.pkg lib",
+    "generate-docs": "jsdoc -c doc/conf.json"
+  }
+}

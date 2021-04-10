@@ -1,0 +1,21 @@
+{
+	"plugins": [
+		"plugins/markdown",
+		"doc/jsdoc-plugins/fengshui"
+	],
+	"opts": {
+		"template": "./node_modules/@pixi/jsdoc-template",
+		"encoding": "utf8",
+		"recurse": true,
+		"verbose": true,
+		"readme": "doc/Main.md",
+		"destination": "doc/html"
+	},
+	"source": {
+		"include": ["lib"],
+		"includePattern": ".+\\.(js|shui)$"
+	},
+	"templates": {
+		"applicationName": "Shellfish"
+	}
+}

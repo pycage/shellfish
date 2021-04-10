@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Element for detecting pinch gestures on a touchscreen.
- * Put it into a MouseBox.
+ *
+ * This element requires a target {@link mid.MouseBox MouseBox} element for detecting events.
  *
  * @memberof ui
  * @name PinchGesture

@@ -40,7 +40,7 @@ Box {
     width: documentRoot.windowWidth
     height: theme.itemHeightLarge
 
-    color: theme.primaryBackgroundColorTranslucent
+    color: theme.primaryBackgroundColor.alpha(0.8)
     style: "sh-dropshadow"
 
 

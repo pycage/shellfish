@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,24 +20,55 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+/**
+ * Element representing the default UI theme. Custom themes derive from this element.
+ *
+ * @class
+ * @name Theme
+ * @extends mid.Object
+ * @memberof ui
+ *
+ * @property {mid.Object.Color} primaryColor - The primary foreground (text) color.
+ * @property {mid.Object.Color} primaryBackgroundColor - The primary background color.
+ * @property {mid.Object.Color} secondaryColor - The secondary foreground (text) color.
+ * @property {mid.Object.Color} secondaryBackgroundColor - The secondary background color.
+ * @property {mid.Object.Color} highlightColor - The color for highlighted text.
+ * @property {mid.Object.Color} highlightBackgroundColor - The highlighted background color.
+ * @property {mid.Object.Color} disabledColor - The color for disabled text.
+ * @property {mid.Object.Color} contentBackgroundColor - The color for content areas, such as list views.
+ * @property {mid.Object.Color} contentAltBackgroundColor - The alternating color for content areas, e.g. for alternating backgrounds in a list view.
+ * @property {mid.Object.Color} borderColor - The color for UI borders.
+ * @property {number} borderRadius - The radius of rounded UI borders.
+ * @property {number} itemWidthSmall - The width of small UI items.
+ * @property {number} itemWidthMedium - The width of medium UI items.
+ * @property {number} itemWidthLarge - The width of large UI items.
+ * @property {number} itemHeightSmall - The height of small UI items.
+ * @property {number} itemHeightMedium - The height of medium UI items.
+ * @property {number} itemHeightLarge - The height of large UI items.
+ * @property {number} paddingSmall - A small amount of padding between UI items.
+ * @property {number} paddingMedium - A medium amount of padding between UI items.
+ * @property {number} paddingLarge - A large amount of padding between UI items.
+ * @property {number} fontSizeSmall - The font size for small text.
+ * @property {number} fontSizeMedium - The font size for regular text.
+ * @property {number} fontSizeLarge - The font size for large text.
+ */
 Object {
 
-    property primaryColor: "#404040"
-    property primaryBackgroundColor: "#fafafa"
-    property primaryBackgroundColorTranslucent: "#fafafacc"
+    property primaryColor: colorName("#404040")
+    property primaryBackgroundColor: colorName("#fafafa")
     
-    property secondaryColor: "#606060"
-    property secondaryBackgroundColor: "#e0e0e0"
+    property secondaryColor: colorName("#606060")
+    property secondaryBackgroundColor: colorName("#e0e0e0")
 
-    property highlightColor: "#404040"
-    property highlightBackgroundColor: "#9fcad7"
+    property highlightColor: colorName("#fafafa")
+    property highlightBackgroundColor: colorName("#9fcad7")
 
-    property disabledColor: "#808080"
+    property disabledColor: colorName("#808080")
 
-    property contentBackgroundColor: "#ffffff"
-    property contentAltBackgroundColor: "#f0f0f0"
+    property contentBackgroundColor: colorName("#ffffff")
+    property contentAltBackgroundColor: colorName("#f0f0f0")
 
-    property borderColor: "#808080"
+    property borderColor: colorName("#808080")
     property borderRadius: 3
     
     property itemWidthSmall: 32

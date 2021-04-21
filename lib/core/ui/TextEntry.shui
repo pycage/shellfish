@@ -22,6 +22,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a single-line text entry box.
+ *
+ * @memberof ui
+ * @name TextEntry
+ * @class
+ * @extends mid.Box
+ *
+ * @property {string} text - (default: `""`) The current text.
+ * @property {bool} password - (default: `false`) Whether this is a password entry, i.e. the actual text is not displayed.
+ * @property {string} pattern - (default: `".*"`) A regular expression for limiting the allowed text input, e.g. `"[0-9]*"` would allow entering numbers only.
+ */
 Box {
     id: box
 
@@ -63,7 +75,6 @@ Box {
         marginRight: theme.paddingSmall
         fontSize: theme.fontSizeMedium
         color: theme.primaryColor
-        //text: box.text
         password: box.password
         pattern: box.pattern
 

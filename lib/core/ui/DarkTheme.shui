@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,21 +22,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing the default dark UI theme.
+ *
+ * @class
+ * @name DarkTheme
+ * @extends ui.Theme
+ * @memberof ui
+ */
 Theme {
-    primaryColor: "#e0e0e0"
-    primaryBackgroundColor: "#303030"
-    primaryBackgroundColorTranslucent: "#303030cc"
+    primaryColor: colorName("#e0e0e0")
+    primaryBackgroundColor: colorName("#303030")
 
-    secondaryColor: "#a0a0a0"
-    secondaryBackgroundColor: "#404040"
+    secondaryColor: colorName("#a0a0a0")
+    secondaryBackgroundColor: colorName("#404040")
 
-    highlightColor: "#ffffff"
-    highlightBackgroundColor: "#606068"
+    highlightColor: colorName("#ffffff")
+    highlightBackgroundColor: colorName("#606068")
 
-    disabledColor: "#707070"
+    disabledColor: colorName("#707070")
 
-    contentBackgroundColor: "#101010"
-    contentAltBackgroundColor: "#404040"
+    contentBackgroundColor: colorName("#101010")
+    contentAltBackgroundColor: colorName("#404040")
 
-    borderColor: "#808080"
+    borderColor: colorName("#808080")
 }

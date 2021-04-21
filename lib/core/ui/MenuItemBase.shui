@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing the base class for menu items.
+ *
+ * @memberof ui
+ * @name MenuItemBase
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {bool} isMenuItem - (always `true`) Sub-elements may use this property to check if they are within a menu item.
+ * @property {bool} selected - (default: `false`) Whether the menu item is currently selected.
+ * @property {bool} highlighted - (default: `false`) Whether the menu item is currently highlighted.
+ * @property {fengshui.Template} menu - (default: `null`) A template for a submenu.
+ * @property {bool} menuOpened - [readonly] Whether the submenu is currently opened.
+ */
 MouseBox {
     id: item
 
@@ -127,6 +141,13 @@ MouseBox {
         };
     }
 
+    /**
+     * Shows the submenu if there is one.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name showMenu
+     * @method
+     */
     function showMenu()
     {
         selected = false;
@@ -153,11 +174,25 @@ MouseBox {
         menuOpened = true;
     }
 
+    /**
+     * Closes the submenu.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name closeMenu
+     * @method
+     */
     function closeMenu()
     {
         _menu.visible = false;
     }
 
+    /**
+     * Unselects all sibling menu items.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name unselectSiblings
+     * @method
+     */
     function unselectSiblings()
     {
         // unhighlight siblings and close menu
@@ -173,6 +208,15 @@ MouseBox {
         });
     }
 
+    /**
+     * Selects this menu item.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name selectItem
+     * @method
+     *
+     * @param {bool} activate - Whether the item should be activated to open its submenu.
+     */
     function selectItem(activate)
     {
         unselectSiblings();
@@ -190,6 +234,15 @@ MouseBox {
         }
     }
 
+    /**
+     * Returns whether one of the sibling menu items has a submenu opened.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name hasSiblingMenuOpen
+     * @method
+     *
+     * @return {bool} Whether a sibling menu item has a submenu opened.
+     */
     function hasSiblingMenuOpen()
     {
         return parent.children()
@@ -197,6 +250,16 @@ MouseBox {
                .length > 0;
     }
 
+    /**
+     * Directs a function to the previous or next sibling.
+     *
+     * @memberof ui.MenuItemBase.prototype
+     * @name toSibling
+     * @method
+     *
+     * @param {number} direction - If `-1`, targets the previous sibling. If `1`, targets the next sibling.
+     * @param {function} f - The function to execute. Takes the sibling instance as parameter.
+     */
     function toSibling(direction, f)
     {
         const siblings = parent.children().filter((c) => { return c.isMenuItem && c.enabled; });

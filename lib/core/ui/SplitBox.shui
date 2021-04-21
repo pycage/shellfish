@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a horizontal or vertical UI splitter with two child
+ * containers, one for each side.
+ *
+ * Containers:
+ * * `box1` - The first container.
+ * * `box2` - The second container.
+ *
+ * @example
+ * SplitBox {
+ *     into box1 Placeholder { text: "Left Side" }
+ *     into box2 Placeholder { text: "Right Side" }
+ * }
+ *
+ * @memberof ui
+ * @name SplitBox
+ * @class
+ * @extends mid.Box
+ */
 Box {
     id: splitBox
 

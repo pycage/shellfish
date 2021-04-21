@@ -20,6 +20,14 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+/**
+ * Themable version of {@link mid.Label}.
+ *
+ * @memberof ui
+ * @name Label
+ * @class
+ * @extends mid.Label
+ */
 Label {
     color: ancestorsEnabled && enabled ? theme.primaryColor : theme.disabledColor
     fontSize: theme.fontSizeMedium

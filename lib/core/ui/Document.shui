@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing the document. This is an extension of the {@link mid.Document Document class}
+ * and adds theming as well as some modal standard dialogs.
+ *
+ * @memberof ui
+ * @name Document
+ * @class
+ * @extends mid.Document
+ *
+ * @property {ui.Document} documentRoot - [readonly] A reference to this document. Elements within the document may use this reference.
+ * @property {ui.Document} shortcutReceiver - [readonly] A reference to this document for functioning as a receiver of keyboard shortcuts.
+ * @property {ui.Theme} theme - (default: `Theme { }`) The current UI theme.
+ */
 mid.Document {
 
     // the Document element can be accessed from anywhere by 'documentRoot'
@@ -30,6 +43,25 @@ mid.Document {
 
     property theme: Theme { }
 
+    /**
+     * Shows a generic modal message dialog.
+     *
+     * @example
+     * showMessageDialog("Error opening file", "bug", "The file could not be opened.", [
+     *     { label: "Retry", callback: retryCallback },
+     *     { label: "Cancel", callback: cancelCallback }
+     * ]);
+     *
+     * @memberof ui.Document.prototype
+     * @name showMessageDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} icon - The name of the icon on the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {object[]} buttons - The dialog buttons. Each item in the list is a `{ label, callback }` object.
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showMessageDialog(title, icon, message, buttons)
     {
         const dlg = _messageDialogT.create(__rslv__);
@@ -41,6 +73,18 @@ mid.Document {
         return dlg;
     }
 
+    /**
+     * Shows a modal info message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showInfoDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showInfoDialog(title, message, callback)
     {
         return showMessageDialog(title, "info1", message, [
@@ -48,6 +92,18 @@ mid.Document {
         ]);
     }
 
+    /**
+     * Shows a modal warning message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showWarningDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showWarningDialog(title, message, callback)
     {
         return showMessageDialog(title, "warning1", message, [
@@ -55,6 +111,18 @@ mid.Document {
         ]);
     }
 
+    /**
+     * Shows a modal error message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showErrorDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showErrorDialog(title, message, callback)
     {
         return showMessageDialog(title, "notification", message, [
@@ -62,6 +130,19 @@ mid.Document {
         ]);
     }
 
+    /**
+     * Shows a modal question dialog with buttons for answering "Yes" or "No".
+     *
+     * @memberof ui.Document.prototype
+     * @name showQuestionDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} yesCallback - The callback that is invoked when the user chooses "Yes".
+     * @param {function} noCallback - The callback that is invoked when the user chooses "No".
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showQuestionDialog(title, message, yesCallback, noCallback)
     {
         return showMessageDialog(title, "question", message, [
@@ -70,6 +151,21 @@ mid.Document {
         ]);
     }
 
+    /**
+     * Shows a modal progress dialog.
+     *
+     * The returned dialog instance has a property `progress` for changing the
+     * progress value (a value between 0.0 and 1.0), and a property `message`
+     * for changing the current message text.
+     *
+     * @memberof ui.Document.prototype
+     * @name showProgressDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
     function showProgressDialog(title, message)
     {
         const dlg = _progressDialogT.create(__rslv__);

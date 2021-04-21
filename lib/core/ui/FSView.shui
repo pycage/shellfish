@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,11 +38,13 @@ ListView {
     delegate: template MouseBox {
         id: fileItem
 
+        property highlighted: modelData.index === fsview.currentIndex
+
         width: fsview.cellWidth
         height: fsview.cellHeight
 
-        color: modelData.index === fsview.currentIndex ? theme.highlightBackgroundColor
-                                                       : "transparent"
+        color: highlighted ? theme.highlightBackgroundColor
+                           : "transparent"
 
         layout: fsview.displayMode === 0 ? "center-row" : "center-column"
 
@@ -135,6 +137,7 @@ ListView {
             horizontalAlignment: fsview.displayMode === 0 ? "left" : "center"
             overflowBehavior: "ellipsis"
             literal: true
+            color: parent.highlighted ? theme.highlightColor : theme.primaryColor
             text: fileItem.modelData.value.name
         }
 
@@ -148,7 +151,7 @@ ListView {
             marginRight: theme.paddingSmall
             horizontalAlignment: fsview.displayMode === 0 ? "left" : "center"
             fontSize: fsview.displayMode === 0 ? theme.fontSizeMedium : theme.fontSizeSmall
-            color: theme.secondaryColor
+            color: parent.highlighted ? theme.highlightColor : theme.secondaryColor
             text: Math.ceil(fileItem.modelData.value.size / 1024) + " KB"
         }
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/fengshui" as fengshui;
 
+/**
+ * Element for embedding Shui element dynamically, either from a Shui file or
+ * a Shui template.
+ *
+ * @memberof ui
+ * @name Loader
+ * @class
+ * @extends mid.Box
+ *
+ * @property {string} source - (default: `""`) The source URL of a Shui file.
+ * @property {function} sourceTemplate - (default: `null`) A Shui template.
+ * @property {mid.Object} item - [readonly] The embedded item after it has been loaded. `null` otherwise.
+ * @property {bool} loading - [readonly] Whether the element is being loaded currently.
+ */
 Box {
     property source: ""
     property sourceTemplate: null

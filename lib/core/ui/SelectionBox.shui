@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a drop-down selection box.
+ *
+ * @example
+ * SelectionBox {
+ *     model: ListModel { data: ["One", "Two", "Three"] }
+ * }
+ *
+ * @memberof ui
+ * @name SelectionBox
+ * @class
+ * @extends ui.Button
+ *
+ * @property {mid.ListModel} model - (default: `ListModel { }`) The list model of strings holding the selection items.
+ * @property {number} selection - (default: `0`) The index of the currently selected item.
+ */
 Button {
     id: box
 

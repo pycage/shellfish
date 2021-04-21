@@ -22,6 +22,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a multi-line text area.
+ *
+ * @memberof ui
+ * @name TextArea
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {bool} bold - (default: `false`) Show text in bold face.
+ * @property {number} column - [readonly] The column of the current cursor position.
+ * @property {string} fontFamily - The font family.
+ * @property {number} fontSize - The font size in CSS pixels.
+ * @property {number} row - The row of the current cursor position.
+ * @property {number} selectionEnd - [readonly] The ending position of the text selection. This value is the same as `selectionStart` if no text is selected.
+ * @property {number} selectionStart - [readonly] The starting position of the text selection.
+ * @property {bool} spellCheck - (default: `false`) Whether to enable spell-checking.
+ * @property {string} text - (default: `""`) The text to show.
+ * @property {string} textColor - The text color.
+ */
 MouseBox {
     id: box
 

@@ -22,6 +22,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a scroll indicator or scroll bar.
+ *
+ * @memberof ui
+ * @name ScrollIndicator
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {mid.Item} target - The scrolling target.
+ * @property {ui.ScrollIndicator} other - The other scroll indicator, if there 
+ *                                        are two indicators, one for horizontal
+ *                                        scrolling, and one for vertical scrolling.
+ * @property {string} orientation - The scrolling orientation. One of: `horizontal|vertical`
+ * @property {number} size - The size of the indicator.
+ */
 MouseBox {
     id: box
 

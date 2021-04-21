@@ -23,6 +23,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 require "shellfish/low" as low;
 require "shellfish/ui";
 
+/**
+ * Element representing a drow-down menu.
+ *
+ * @memberof ui
+ * @name Menu
+ * @class
+ * @extends ui.Overlay
+ *
+ * @property {ui.Menu} thisMenu - [readonly] A reference to this menu visible to sub-elements.
+ * @property {bool} menuOpened - [readonly] Whether the menu is currently opened.
+ * @property {mid.Ruler} menuRuler - (default: `Ruler { }`) A ruler for layouting the menu items.
+ */
 Overlay {
     id: menu
 
@@ -32,6 +44,20 @@ Overlay {
     property menuOpened: visible
     property menuRuler: Ruler { }
 
+    /**
+     * Shows the menu next to a parent element.
+     *
+     * The menu is shown below or above the given parent element, depending
+     * on the screen space. If `{ horizontal: true }` is passed for options,
+     * the menu is instead shown right or left to the parent element.
+     *
+     * @memberof ui.Menu.prototype
+     * @name popup
+     * @method
+     *
+     * @param {mid.Item} parent - The parent element.
+     * @param {object} [options = { }] - A dictionary of options.
+     */
     function popup(parent, options)
     {
         options = options || { };

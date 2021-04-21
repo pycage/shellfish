@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a regular menu item.
+ *
+ * @memberof ui
+ * @name MenuItem
+ * @class
+ * @extends ui.MenuItemBase
+ *
+ * @property {string} icon - (default: `""`) The ID of an optional icon.
+ * @property {string} text - (default: `""`) The menu item label text.
+ * @property {string} shortcut - (default: `""`) A keyboard shortcut. Separate the modifer and key with `+`, e.g. `"Ctrl+N"`.
+ *                                               Valid modifiers are `Ctrl`, `Alt`, and `Shift`.
+ */
 MenuItemBase {
     id: item
 

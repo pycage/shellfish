@@ -108,6 +108,7 @@ Overlay {
                 bold: true
                 overflowBehavior: "ellipsis"
                 literal: true
+                color: theme.highlightColor
                 text: dialog.title
             }
 

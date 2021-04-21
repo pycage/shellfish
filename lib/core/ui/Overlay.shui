@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,12 +20,30 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
+/**
+ * Element representing a global UI overlay. User interactions are trapped within
+ * the overlay while it is being displayed.
+ *
+ * @memberof ui
+ * @name Overlay
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {bool} dim - (default: `false`) Whether to dim what's underneath the overlay.
+ */
 MouseBox {
     id: popup
 
     property dim: false
     property _opacity: 0
 
+    /**
+     * Shows the overlay.
+     *
+     * @memberof ui.Overlay.prototype
+     * @name show
+     * @method
+     */
     property show: () =>
     {
         visible = true;

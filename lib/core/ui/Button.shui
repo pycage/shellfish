@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a UI button.
+ *
+ * @memberof ui
+ * @name Button
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {string} icon - (default: `""`) The name of the icon to display.
+ * @property {string} secondaryIcon - (default: `""`) The name of the secondary icon to display.
+ * @property {string} text - (default: `""`) The label text to display.
+ * @property {bool} flat - (default: `false`) Whether the button flat, i.e. borderless.
+ * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
+ * @property {mid.Object} labelProfile - (default: `Object { }`) The profile that is applied to the labels.
+ */
 MouseBox {
     id: button
 
@@ -33,6 +48,7 @@ MouseBox {
     property labelProfile: Object { }
 
     property activated: false
+    property highlighted: checked || activated || containsMouse
 
     function format(t)
     {
@@ -47,9 +63,9 @@ MouseBox {
         }
     }
 
-    color: checked || activated || containsMouse ? theme.highlightBackgroundColor
-                                                 : flat ? "transparent"
-                                                        : theme.secondaryBackgroundColor
+    color: highlighted ? theme.highlightBackgroundColor
+                       : flat ? "transparent"
+                              : theme.contentBackgroundColor
 
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
@@ -114,6 +130,7 @@ MouseBox {
         marginRight: 4
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
+        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
 
         profiles: [button.labelProfile]
@@ -128,6 +145,7 @@ MouseBox {
         marginBottom: 2
         //overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
+        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.format(button.text)
 
         profiles: [button.labelProfile]
@@ -140,6 +158,7 @@ MouseBox {
         marginRight: 4
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
+        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 
         profiles: [button.labelProfile]

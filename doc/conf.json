@@ -1,4 +1,7 @@
 {
+	"meta": {
+		"title": "Shellfish"
+	},
 	"plugins": [
 		"plugins/markdown",
 		"doc/jsdoc-plugins/fengshui"
@@ -16,6 +19,14 @@
 		"includePattern": ".+\\.(js|shui)$"
 	},
 	"templates": {
-		"applicationName": "Shellfish"
+		"applicationName": "Shellfish",
+		"default": {
+			"staticFiles": {
+				"include": ["doc/static"]
+			}
+		}
+	},
+	"pixi": {
+		"styles": ["style.css"]
 	}
 }

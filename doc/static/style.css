@@ -1,0 +1,41 @@
+body {
+    color: #444;
+    background-color: #fafafa;
+}
+
+pre {
+    border: 2px solid #888;
+    -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}
+
+hr {
+    height: 2px;
+}
+
+.navigation {
+    color: #eee;
+    background-color: #333;
+}
+
+.navigation li.item .title .namespaceTag {
+    background-color: #606068;
+}
+
+.navigation li.item .subtitle {
+    color: #fff;
+}
+.main .subsection-title {
+    color: #000;
+}
+
+code {
+    color: #000;
+    font-weight: bold;
+}
+
+.main .access-signature.deprecated {
+    background-color: #f00;
+}

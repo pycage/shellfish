@@ -112,6 +112,7 @@ function updateBundle(path)
                         const shuiPath = resourcePath;
                         resourcePath = resourcePath + ".js";
                         const code = modFengshui.compile(shuiPath, fillPlaceholders(binary.toString("utf8")));
+                        sizeBefore = Math.ceil(code.length / 1024);
                         const result = modBabel.transform(code, BABEL_CONFIG);
                         bundle.aliases[shuiPath] = resourcePath;
                         data = result.code;

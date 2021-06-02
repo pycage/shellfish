@@ -86,7 +86,7 @@ MouseBox {
 
         Label {
             color: theme.primaryColor
-            text: "[icon:done]"
+            text: "[icon:core-done]"
         }
     }
 

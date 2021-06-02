@@ -152,7 +152,8 @@ MenuItemBase {
             marginRight: 2
             width: theme.paddingMedium
             fontSize: theme.fontSizeSmall
-            text: "[icon:navigate_next]"
+            color: label.color
+            text: "[icon:core-arrow_right]"
         }
 
         Box {

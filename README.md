@@ -39,13 +39,20 @@ to install the necessary dependencies of the SDK.
 
 Run
     npm run build-package
-to generate the `shellfish.pkg` bundle file for easy distribution.
+to generate the `shellfish.pkg` bundle file in `build/` for easy distribution.
+
+### Build the Core Icons Stylesheet
+
+Run
+    npm run build-icons
+to generate the stylesheet with the core icons from the SVG files
+in `icons/svg/`.
 
 ### Generate the Shellfish Documentation
 
 Run
     npm run generate-docs
-to generate Shellfish's documentation in `doc/html`.
+to generate Shellfish's documentation in `build/doc/`.
 
 # Bundles
 

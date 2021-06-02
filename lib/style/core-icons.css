@@ -1,0 +1,122 @@
+/* Shellfish Icons Stylesheet
+ *
+ * Powered by Webfont - Awesome generator of webfont
+ * https://github.com/itgalaxy/webfont
+ */
+
+@font-face {
+    font-family: shellfish-icons-core;
+    src: url(data:font/woff2;charset=utf-8;base64,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) format('woff2');
+}
+
+[class^="sh-icon-core"], [class*=" sh-icon-core"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: shellfish-icons-core !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+.sh-icon-core-arrow_down:before {
+    content: "\ea01";
+}
+
+.sh-icon-core-arrow_left:before {
+    content: "\ea02";
+}
+
+.sh-icon-core-arrow_right:before {
+    content: "\ea03";
+}
+
+.sh-icon-core-arrow_up:before {
+    content: "\ea04";
+}
+
+.sh-icon-core-bug:before {
+    content: "\ea05";
+}
+
+.sh-icon-core-done:before {
+    content: "\ea06";
+}
+
+.sh-icon-core-drag_indicator:before {
+    content: "\ea07";
+}
+
+.sh-icon-core-drive:before {
+    content: "\ea08";
+}
+
+.sh-icon-core-file-empty:before {
+    content: "\ea09";
+}
+
+.sh-icon-core-file-image:before {
+    content: "\ea0a";
+}
+
+.sh-icon-core-file-music:before {
+    content: "\ea0b";
+}
+
+.sh-icon-core-file-openoffice:before {
+    content: "\ea0c";
+}
+
+.sh-icon-core-file-pdf:before {
+    content: "\ea0d";
+}
+
+.sh-icon-core-file-play:before {
+    content: "\ea0e";
+}
+
+.sh-icon-core-file-text:before {
+    content: "\ea0f";
+}
+
+.sh-icon-core-file-video:before {
+    content: "\ea10";
+}
+
+.sh-icon-core-folder:before {
+    content: "\ea11";
+}
+
+.sh-icon-core-info:before {
+    content: "\ea12";
+}
+
+.sh-icon-core-menu:before {
+    content: "\ea13";
+}
+
+.sh-icon-core-minus:before {
+    content: "\ea14";
+}
+
+.sh-icon-core-notification:before {
+    content: "\ea15";
+}
+
+.sh-icon-core-plus:before {
+    content: "\ea16";
+}
+
+.sh-icon-core-question:before {
+    content: "\ea17";
+}
+
+.sh-icon-core-warning:before {
+    content: "\ea18";
+}
+

@@ -93,7 +93,7 @@ MouseBox {
 
         Label {
             color: parent.containsMouse ? theme.highlightColor : theme.secondaryColor;
-            text: "[icon:drag_indicator]"
+            text: "[icon:core-drag_indicator]"
         }
     }
 

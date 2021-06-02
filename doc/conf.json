@@ -12,7 +12,7 @@
 		"recurse": true,
 		"verbose": true,
 		"readme": "doc/Main.md",
-		"destination": "doc/html"
+		"destination": "build/doc"
 	},
 	"source": {
 		"include": ["lib"],

@@ -85,8 +85,8 @@ Box {
         Button {
             marginLeft: node.indentation * theme.paddingLarge
             flat: true
-            icon: node.collapsed ? "arrow_right"
-                                 : "arrow_drop_down"
+            icon: node.collapsed ? "core-arrow_right"
+                                 : "core-arrow_down"
 
             onClick: (ev) =>
             {
@@ -97,8 +97,8 @@ Box {
 
         Label {
             color: parent.highlighted ? theme.highlightColor : theme.primaryColor
-            text: node.path === "/" ? "[icon:drive]"
-                                    : "[icon:folder]"
+            text: node.path === "/" ? "[icon:core-drive]"
+                                    : "[icon:core-folder]"
         }
 
         Label {

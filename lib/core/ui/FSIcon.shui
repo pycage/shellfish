@@ -27,44 +27,44 @@ Label {
 
     text: (() =>
     {
-        let icon = "file-empty";
+        let icon = "core-file-empty";
         switch (mimeType)
         {
         case "application/x-folder":
-            return "[icon:folder]";
+            return "[icon:core-folder]";
             break;
         case "application/java-archive":
         case "application/x-gzip":
         case "application/zip":
-            icon = "file-zip";
+            icon = "core-file-zip";
             break;
         case "application/pdf":
-            icon = "file-pdf";
+            icon = "core-file-pdf";
             break;
         case "application/vnd.oasis.opendocument.text":
-            icon = "file-openoffice";
+            icon = "core-file-openoffice";
             break;
         case "audio/flac":
         case "audio/mp3":
         case "audio/ogg":
-            icon = "file-music";
+            icon = "core-file-music";
             break;
         case "image/gif":
         case "image/jpeg":
         case "image/png":
         case "image/svg+xml":
-            icon = "file-picture";
+            icon = "core-file-image";
             break;
         case "text/plain":
         case "text/rtf":
-            icon = "file-text2";
+            icon = "core-file-text";
             break;
         case "video/mp4":
         case "video/mpeg":
         case "video/webm":
         case "video/x-flv":
         case "video/x-msvideo":
-            icon = "file-play";
+            icon = "core-file-play";
             break;
         }
         return "[icon:" + icon + "]";

@@ -47,7 +47,7 @@ mid.Document {
      * Shows a generic modal message dialog.
      *
      * @example
-     * showMessageDialog("Error opening file", "bug", "The file could not be opened.", [
+     * showMessageDialog("Error opening file", "core-bug", "The file could not be opened.", [
      *     { label: "Retry", callback: retryCallback },
      *     { label: "Cancel", callback: cancelCallback }
      * ]);
@@ -87,7 +87,7 @@ mid.Document {
      */
     function showInfoDialog(title, message, callback)
     {
-        return showMessageDialog(title, "info1", message, [
+        return showMessageDialog(title, "core-info", message, [
             { label: "Ok", callback: callback }
         ]);
     }
@@ -106,7 +106,7 @@ mid.Document {
      */
     function showWarningDialog(title, message, callback)
     {
-        return showMessageDialog(title, "warning1", message, [
+        return showMessageDialog(title, "core-warning", message, [
             { label: "Ok", callback: callback }
         ]);
     }
@@ -125,7 +125,7 @@ mid.Document {
      */
     function showErrorDialog(title, message, callback)
     {
-        return showMessageDialog(title, "notification", message, [
+        return showMessageDialog(title, "core-notification", message, [
             { label: "Ok", callback: callback }
         ]);
     }
@@ -145,7 +145,7 @@ mid.Document {
      */
     function showQuestionDialog(title, message, yesCallback, noCallback)
     {
-        return showMessageDialog(title, "question", message, [
+        return showMessageDialog(title, "core-question", message, [
             { label: "Yes", callback: yesCallback },
             { label: "No", callback: noCallback }
         ]);

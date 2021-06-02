@@ -1,0 +1,30 @@
+/* Shellfish Icons Stylesheet
+ *
+ * Powered by Webfont - Awesome generator of webfont
+ * https://github.com/itgalaxy/webfont
+ */
+
+@font-face {
+    font-family: shellfish-icons-{{ className }};
+    src: url(data:font/woff2;charset=utf-8;base64,FONT_DATA_GOES_HERE) format('woff2');
+}
+
+[class^="sh-icon-{{ className }}"], [class*=" sh-icon-{{ className }}"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: shellfish-icons-{{ className }} !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+{% for glyph in glyphs %}
+.sh-icon-{{ className }}-{{ glyph.name }}:before {
+    content: "\{{ glyph.unicode[0].charCodeAt(0).toString(16) }}";
+}
+{% endfor %}

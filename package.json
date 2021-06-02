@@ -7,10 +7,12 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@pixi/jsdoc-template": "^2.6.0",
-    "jsdoc": "~3.6.6"
+    "jsdoc": "~3.6.6",
+    "webfont": "~10.1.0"
   },
   "scripts": {
-    "build-package": "node tools/make-bundle.js shellfish.pkg lib",
+    "build-icons": "node icons/webfont.js",
+    "build-package": "npm run build-icons && node tools/make-bundle.js build/shellfish.pkg lib",
     "generate-docs": "jsdoc -c doc/conf.json"
   }
 }

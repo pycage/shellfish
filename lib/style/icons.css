@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2019 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2019 - 2021 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,26 +22,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* Shellfish Icon Library
  *
- * Powered by IcoMoon - https://icomoon.io
- *
  * Icon Fonts:
  *  - IcoMoon (https://icomoon.io/#icons-icomoon, Designer: Keyamoon, License: CC BY 4.0)
  *  - Material Icons (https://material.io/tools/icons/, Designer: Google, License: Apache Lincense 2.0)
  */
-
-[class^="sh-icon-"], [class*=" sh-icon-"] {
-    /* use !important to prevent issues with browser extensions that change fonts */
-    font-family: 'shellfish-icons' !important;
-    speak: none;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-  
-    /* Better Font Rendering =========== */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
 
 .sh-fw-icon {
     display: inline-block;

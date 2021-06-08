@@ -34,18 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
 /* animate the spinners */
-.sh-icon-spinner1,
-.sh-icon-spinner2,
-.sh-icon-spinner3,
-.sh-icon-spinner4,
-.sh-icon-spinner5,
-.sh-icon-spinner6,
-.sh-icon-spinner7,
-.sh-icon-spinner8,
-.sh-icon-spinner9,
-.sh-icon-spinner10,
-.sh-icon-spinner11
-{
+[class^="sh-icon-ui-spinner"], [class*=" sh-icon-ui-spinner"] {
     width: 1em;
     line-height: 1em;
     animation: sh-rotation-animation 1.5s infinite linear;

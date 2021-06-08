@@ -23,100 +23,28 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-
-.sh-icon-core-arrow_down:before {
-    content: "\ea01";
-}
-
-.sh-icon-core-arrow_left:before {
-    content: "\ea02";
-}
-
-.sh-icon-core-arrow_right:before {
-    content: "\ea03";
-}
-
-.sh-icon-core-arrow_up:before {
-    content: "\ea04";
-}
-
-.sh-icon-core-bug:before {
-    content: "\ea05";
-}
-
-.sh-icon-core-done:before {
-    content: "\ea06";
-}
-
-.sh-icon-core-drag_indicator:before {
-    content: "\ea07";
-}
-
-.sh-icon-core-drive:before {
-    content: "\ea08";
-}
-
-.sh-icon-core-file-empty:before {
-    content: "\ea09";
-}
-
-.sh-icon-core-file-image:before {
-    content: "\ea0a";
-}
-
-.sh-icon-core-file-music:before {
-    content: "\ea0b";
-}
-
-.sh-icon-core-file-openoffice:before {
-    content: "\ea0c";
-}
-
-.sh-icon-core-file-pdf:before {
-    content: "\ea0d";
-}
-
-.sh-icon-core-file-play:before {
-    content: "\ea0e";
-}
-
-.sh-icon-core-file-text:before {
-    content: "\ea0f";
-}
-
-.sh-icon-core-file-video:before {
-    content: "\ea10";
-}
-
-.sh-icon-core-folder:before {
-    content: "\ea11";
-}
-
-.sh-icon-core-info:before {
-    content: "\ea12";
-}
-
-.sh-icon-core-menu:before {
-    content: "\ea13";
-}
-
-.sh-icon-core-minus:before {
-    content: "\ea14";
-}
-
-.sh-icon-core-notification:before {
-    content: "\ea15";
-}
-
-.sh-icon-core-plus:before {
-    content: "\ea16";
-}
-
-.sh-icon-core-question:before {
-    content: "\ea17";
-}
-
-.sh-icon-core-warning:before {
-    content: "\ea18";
-}
+.sh-icon-core-arrow_down:before { content: "\ea01"; }
+.sh-icon-core-arrow_left:before { content: "\ea02"; }
+.sh-icon-core-arrow_right:before { content: "\ea03"; }
+.sh-icon-core-arrow_up:before { content: "\ea04"; }
+.sh-icon-core-bug:before { content: "\ea05"; }
+.sh-icon-core-done:before { content: "\ea06"; }
+.sh-icon-core-drag_indicator:before { content: "\ea07"; }
+.sh-icon-core-drive:before { content: "\ea08"; }
+.sh-icon-core-file-empty:before { content: "\ea09"; }
+.sh-icon-core-file-image:before { content: "\ea0a"; }
+.sh-icon-core-file-music:before { content: "\ea0b"; }
+.sh-icon-core-file-openoffice:before { content: "\ea0c"; }
+.sh-icon-core-file-pdf:before { content: "\ea0d"; }
+.sh-icon-core-file-play:before { content: "\ea0e"; }
+.sh-icon-core-file-text:before { content: "\ea0f"; }
+.sh-icon-core-file-video:before { content: "\ea10"; }
+.sh-icon-core-folder:before { content: "\ea11"; }
+.sh-icon-core-info:before { content: "\ea12"; }
+.sh-icon-core-menu:before { content: "\ea13"; }
+.sh-icon-core-minus:before { content: "\ea14"; }
+.sh-icon-core-notification:before { content: "\ea15"; }
+.sh-icon-core-plus:before { content: "\ea16"; }
+.sh-icon-core-question:before { content: "\ea17"; }
+.sh-icon-core-warning:before { content: "\ea18"; }
 

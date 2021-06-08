@@ -23,8 +23,5 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-{% for glyph in glyphs %}
-.sh-icon-{{ className }}-{{ glyph.name }}:before {
-    content: "\{{ glyph.unicode[0].charCodeAt(0).toString(16) }}";
-}
+{% for glyph in glyphs %}.sh-icon-{{ className }}-{{ glyph.name }}:before { content: "\{{ glyph.unicode[0].charCodeAt(0).toString(16) }}"; }
 {% endfor %}

@@ -3,9 +3,14 @@ const fs = require("fs");
 
 const items = [
     { name: "core", target: "lib/style" },
+
+    { name: "camera", target: "build/icons" },
+    { name: "comm", target: "build/icons" },
     { name: "emote", target: "build/icons" },
     { name: "fs", target: "build/icons" },
+    { name: "input", target: "build/icons" },
     { name: "map", target: "build/icons" },
+    { name: "media", target: "build/icons" },
     { name: "text", target: "build/icons" },
     { name: "ui", target: "build/icons" }
 ];

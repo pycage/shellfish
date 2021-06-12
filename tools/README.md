@@ -7,7 +7,7 @@ Run
 ```
 npm install
 ```
-in the tools directory first in order to install the additional dependencies.
+in the shellfish directory first in order to install the additional dependencies.
 
 **Note:** You do not require Node.js to use Shellfish. This requirement is only
 for working with the Developer Tools.

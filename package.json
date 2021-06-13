@@ -7,7 +7,7 @@
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@pixi/jsdoc-template": "^2.6.0",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "~3.6.7",
     "webfont": "~10.1.0"
   },
   "scripts": {

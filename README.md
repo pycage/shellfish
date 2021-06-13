@@ -41,12 +41,11 @@ Run
     npm run build-package
 to generate the `shellfish.pkg` bundle file in `build/` for easy distribution.
 
-### Build the Core Icons Stylesheet
+### Build the Icons Stylesheets
 
 Run
     npm run build-icons
-to generate the stylesheet with the core icons from the SVG files
-in `icons/svg/`.
+to generate stylesheets with the icons from the SVG files in `icons/`.
 
 ### Generate the Shellfish Documentation
 

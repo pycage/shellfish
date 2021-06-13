@@ -99,6 +99,8 @@ MouseBox {
         fontFamily: box.fontFamily
         bold: box.bold
         color: box.textColor
+        selectionBackgroundColor: theme.highlightBackgroundColor
+        selectionColor: theme.highlightColor
         spellCheck: box.spellCheck
         text: box.text
 

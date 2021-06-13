@@ -75,6 +75,8 @@ Box {
         marginRight: theme.paddingSmall
         fontSize: theme.fontSizeMedium
         color: theme.primaryColor
+        selectionBackgroundColor: theme.highlightBackgroundColor
+        selectionColor: theme.highlightColor
         password: box.password
         pattern: box.pattern
 

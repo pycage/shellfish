@@ -20,6 +20,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
+:root {
+    --sh-selection-color: white;
+    --sh-selection-background-color: navy;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -93,6 +98,11 @@ textarea {
 
 .sh-disabled {
     pointer-events: none;
+}
+
+.sh-text-selectable::selection {
+    color: var(--sh-selection-color);
+    background-color: var(--sh-selection-background-color);
 }
 
 .sh-blur {

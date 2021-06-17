@@ -39,6 +39,7 @@ Theme {
 
     highlightColor: colorName("#ffffff")
     highlightBackgroundColor: colorName("#606068")
+    hoverBackgroundColor: highlightBackgroundColor.saturation(0.2).brightness(0.5)
 
     disabledColor: colorName("#707070")
 

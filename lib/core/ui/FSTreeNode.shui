@@ -57,15 +57,18 @@ Box {
     }
 
     MouseBox {
+        property hovered: node.path !== target.path &&
+                          (containsMouse && documentRoot.inputDevice !== "touch") &&
+                          ! pressed
         property highlighted: node.path === target.path ||
-                              (containsMouse && documentRoot.inputDevice !== "touch") ||
                               pressed
 
         fillWidth: true
         height: theme.itemHeightSmall
 
-        color: highlighted ? theme.highlightBackgroundColor
-                           : "transparent"
+        color: hovered ? theme.hoverBackgroundColor
+                       : highlighted ? theme.highlightBackgroundColor
+                                     : "transparent"
 
         layout: "center-row"
 
@@ -96,7 +99,7 @@ Box {
         }
 
         Label {
-            color: parent.highlighted ? theme.highlightColor : theme.primaryColor
+            color: parent.highlighted || parent.hovered ? theme.highlightColor : theme.primaryColor
             text: node.path === "/" ? "[icon:core-drive]"
                                     : "[icon:core-folder]"
         }
@@ -106,7 +109,7 @@ Box {
             marginLeft: theme.paddingSmall
             bold: node.target && node.target.path === node.path
             literal: true
-            color: parent.highlighted ? theme.highlightColor : theme.primaryColor
+            color: parent.highlighted || parent.hovered ? theme.highlightColor : theme.primaryColor
             text: node.name
         }
     }

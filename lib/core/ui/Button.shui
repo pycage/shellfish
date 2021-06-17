@@ -47,8 +47,13 @@ MouseBox {
     property checked: false
     property labelProfile: Object { }
 
-    property activated: false
-    property highlighted: checked || activated || containsMouse
+    Object {
+        id: priv
+
+        property highlighted: button.checked ||
+                              button.containsMouse ||
+                              pressed
+    }
 
     function format(t)
     {
@@ -63,9 +68,10 @@ MouseBox {
         }
     }
 
-    color: highlighted ? theme.highlightBackgroundColor
-                       : flat ? "transparent"
-                              : theme.contentBackgroundColor
+    color: checked || pressed ? theme.highlightBackgroundColor
+                              : containsMouse ? theme.hoverBackgroundColor
+                                              : flat ? "transparent"
+                                                     : theme.contentBackgroundColor
 
     borderWidth: flat ? 0 : 1
     borderRadius: flat ? 0 : theme.borderRadius
@@ -81,7 +87,6 @@ MouseBox {
     onClick: () =>
     {
         focus = true;
-        activated = true;
     }
 
     shortcutReceiver.onKeyDown: (ev) =>
@@ -110,19 +115,6 @@ MouseBox {
         }
     }
 
-    Timer {
-        id: activateTimer
-
-        interval: 300
-        running: button.activated
-        repeat: false
-
-        onTimeout: () =>
-        {
-            button.activated = false;
-        }
-    }
-
     Label {
         visible: button.icon !== ""
         marginTop: 2
@@ -130,7 +122,7 @@ MouseBox {
         marginRight: 4
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
-        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
 
         profiles: [button.labelProfile]
@@ -145,7 +137,7 @@ MouseBox {
         marginBottom: 2
         //overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
-        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.format(button.text)
 
         profiles: [button.labelProfile]
@@ -158,48 +150,11 @@ MouseBox {
         marginRight: 4
         marginBottom: 2
         fontSize: parent.bbox.height * 0.6
-        color: parent.highlighted ? theme.highlightColor : theme.primaryColor
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 
         profiles: [button.labelProfile]
     }
 
-    FocusIndicator {
-        id: focusIndicator
-        visible: button.focus
-
-        /*
-        property flashing: false
-
-        property flash: () =>
-        {
-            if (! flashing)
-            {
-                flashing = true;
-                flashAnim.start();
-            }
-        }
-
-        visible: button.focus || flashing
-
-        NumberAnimation {
-            id: flashAnim
-
-            duration: 500
-            from: 1
-            to: 0
-
-            onNext: (value) =>
-            {
-                focusIndicator.opacity = value;
-            }
-
-            onFinish: () =>
-            {
-                focusIndicator.flashing = false;
-                focusIndicator.opacity = 1;
-            }
-        }
-        */
-    }
+    FocusIndicator { visible: button.focus }
 }

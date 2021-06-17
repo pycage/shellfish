@@ -38,13 +38,16 @@ ListView {
     delegate: template MouseBox {
         id: fileItem
 
-        property highlighted: modelData.index === fsview.currentIndex
+        property selected: modelData.index === fsview.currentIndex
+        property hovered: containsMouse && ! selected
+        property highlighted: selected || hovered
 
         width: fsview.cellWidth
         height: fsview.cellHeight
 
-        color: highlighted ? theme.highlightBackgroundColor
-                           : "transparent"
+        color: hovered ? theme.hoverBackgroundColor
+                       : highlighted ? theme.highlightBackgroundColor
+                                     : "transparent"
 
         layout: fsview.displayMode === 0 ? "center-row" : "center-column"
 
@@ -121,6 +124,7 @@ ListView {
                 fillWidth: true
                 fontSize: parent.bbox.height * 0.6
                 horizontalAlignment: "center"
+                color: parent.parent.highlighted ? theme.highlightColor : theme.primaryColor
                 mimeType: fileItem.modelData.value.mimetype
             }
         }

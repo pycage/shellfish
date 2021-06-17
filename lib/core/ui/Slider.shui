@@ -67,8 +67,9 @@ MouseBox {
         borderColor: theme.borderColor
         borderRadius: theme.borderRadius
 
-        color: containsMouse ? theme.highlightBackgroundColor
-                             : theme.contentBackgroundColor
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
 
         x: (slider.bbox.width - width) * percents
         xTransition: NumberAnimation { enabled: handle.animated; duration: 300; easing: "InOutQuad" }

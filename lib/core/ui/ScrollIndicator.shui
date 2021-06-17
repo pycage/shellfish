@@ -152,8 +152,9 @@ MouseBox {
         fillWidth: box.orientation === "vertical" ? true : false
         fillHeight: box.orientation === "vertical" ? false : true
 
-        color: containsMouse ? theme.highlightBackgroundColor
-                             : theme.primaryBackgroundColor
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor
         borderRadius: 3

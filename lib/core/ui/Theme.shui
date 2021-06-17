@@ -34,6 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @property {mid.Color} secondaryBackgroundColor - The secondary background color.
  * @property {mid.Color} highlightColor - The color for highlighted text.
  * @property {mid.Color} highlightBackgroundColor - The highlighted background color.
+ * @property {mid.Color} hoverBackgroundColor - The hover-highlighted background color (usually less strong than `highlightBackgroundColor`).
  * @property {mid.Color} disabledColor - The color for disabled text.
  * @property {mid.Color} contentBackgroundColor - The color for content areas, such as list views.
  * @property {mid.Color} contentAltBackgroundColor - The alternating color for content areas, e.g. for alternating backgrounds in a list view.
@@ -61,7 +62,8 @@ Object {
     property secondaryBackgroundColor: colorName("#e0e0e0")
 
     property highlightColor: colorName("#fafafa")
-    property highlightBackgroundColor: colorName("#9fcad7")
+    property highlightBackgroundColor: colorName("#23527c")
+    property hoverBackgroundColor: highlightBackgroundColor.saturation(0.2).brightness(2.0)
 
     property disabledColor: colorName("#808080")
 

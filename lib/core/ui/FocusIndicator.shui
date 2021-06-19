@@ -37,12 +37,35 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @extends mid.Box
  */
 Box {
+    id: indicator
+
     position: "free"
     fillWidth: true
     fillHeight: true
     enabled: false
     color: "transparent"
-    borderWidth: 1
+    borderWidth: 0
     borderColor: theme.borderColor
     borderStyle: "dotted"
+
+    documentRoot.onKeyDown: (ev) =>
+    {
+        if (ev.key === "Tab")
+        {
+            borderWidth = 3;
+            timer.start();
+        }
+    }
+
+    Timer {
+        id: timer
+
+        interval: 1000
+        repeat: false
+
+        onTimeout: () =>
+        {
+            indicator.borderWidth = 0;
+        }
+    }
 }

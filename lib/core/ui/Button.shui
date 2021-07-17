@@ -117,10 +117,8 @@ MouseBox {
 
     Label {
         visible: button.icon !== ""
-        marginTop: 2
         marginLeft: 4
         marginRight: 4
-        marginBottom: 2
         fontSize: parent.bbox.height * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
@@ -131,10 +129,8 @@ MouseBox {
     Label {
         visible: button.text !== ""
         fillWidth: true
-        marginTop: 2
         marginLeft: button.icon !== "" ? 4 : theme.paddingSmall
         marginRight: button.secondaryIcon !== "" ? 4 : theme.paddingSmall
-        marginBottom: 2
         //overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
@@ -145,10 +141,8 @@ MouseBox {
 
     Label {
         visible: button.secondaryIcon !== ""
-        marginTop: 2
         marginLeft: 4
         marginRight: 4
-        marginBottom: 2
         fontSize: parent.bbox.height * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""

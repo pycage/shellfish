@@ -45,6 +45,13 @@ Overlay {
 
     property title: ""
 
+    /**
+     * Closes the dialog window.
+     *
+     * @method
+     * @name close
+     * @memberof ui.Dialog.prototype
+     */
     function close()
     {
         parent = null;

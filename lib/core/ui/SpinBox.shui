@@ -74,7 +74,7 @@ Box {
         enabled: spinBox.value > spinBox.minValue
         flat: true
         checked: pressed
-        icon: "minus"
+        icon: "core-minus"
 
         onClick: () =>
         {
@@ -140,7 +140,7 @@ Box {
         enabled: spinBox.value < spinBox.maxValue
         flat: true
         checked: pressed
-        icon: "plus"
+        icon: "core-plus"
 
         onClick: () =>
         {

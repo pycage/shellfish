@@ -56,7 +56,7 @@ MouseBox {
             return;
         }
 
-        _menu = menu.create();
+        _menu = menu();
 
         // unhighlight when menu clicked away
         _menu.get().onVisibleChanged = () =>

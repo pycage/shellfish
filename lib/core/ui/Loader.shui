@@ -63,7 +63,7 @@ Box {
         else if (sourceTemplate)
         {
             loading = true;
-            item = sourceTemplate.create(__rslv__);
+            item = sourceTemplate();
             add(item);
             loading = false;
         }

@@ -48,7 +48,7 @@ Button {
 
     function _createMenu()
     {
-        _menu = _menuT.create();
+        _menu = _menuT();
     }
 
     minWidth: theme.itemWidthLarge

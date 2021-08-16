@@ -83,7 +83,7 @@ mid.Document {
      */
     function showMessageDialog(title, icon, message, buttons)
     {
-        const dlg = _messageDialogT.create(__rslv__);
+        const dlg = _messageDialogT();
         dlg.title = title;
         dlg.icon = icon;
         dlg.message = message;
@@ -187,7 +187,7 @@ mid.Document {
      */
     function showProgressDialog(title, message)
     {
-        const dlg = _progressDialogT.create(__rslv__);
+        const dlg = _progressDialogT();
         dlg.title = title;
         dlg.message = message;
         dlg.show();

@@ -61,9 +61,9 @@ Object {
      */
     function pushPage(target, props)
     {
-        if (target.create)
+        if (typeof target === "function")
         {
-            const page = target.create(__rslv__);
+            const page = target();
             loading = false;
             if (pages.length > 0)
             {
@@ -80,7 +80,7 @@ Object {
                 }
             }
 
-            documentRoot.add(page);
+            documentRoot.get().add(page);
             pages.push(page);
             page.show(pages.length === 1);
             page.currentPage = true;
@@ -92,6 +92,7 @@ Object {
         loading = true;
         fengshui.load(url, null, __rslv__, (page) =>
         {
+            page = page.get();
             loading = false;
             if (pages.length > 0)
             {
@@ -108,7 +109,7 @@ Object {
                 }
             }
 
-            documentRoot.add(page);
+            documentRoot.get().add(page);
             pages.push(page);
             page.show(pages.length === 1);
             page.currentPage = true;

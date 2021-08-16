@@ -97,9 +97,9 @@ MouseBox {
 
     function loadContent()
     {
-        const item = contentTemplate.create(__rslv__);
+        const item = contentTemplate();
         loading = false;
-        contentArea.add(item);
+        contentArea.get().add(item);
     }
 
     Object {

@@ -1,0 +1,180 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+Button {
+    id: dateButton
+
+    property menuT: template Menu {
+        function setDate(date)
+        {
+            cal.date = date;
+        }
+
+        MouseBox {
+            width: theme.itemWidthSmall * 7
+            height: theme.itemHeightMedium * 7
+            color: theme.contentBackgroundColor
+            
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            Box {
+                fillWidth: true
+                height: theme.itemHeightMedium
+                color: theme.secondaryBackgroundColor
+                layout: "row"
+
+                Button {
+                    labelProfile: Object { property bold: true }
+                    fillHeight: true
+                    flat: true
+                    text: ["Jan", "Feb", "Mar", "Apr",
+                           "May", "Jun", "Jul", "Aug",
+                           "Sep", "Oct", "Nov", "Dec"][cal.date[1]]
+
+                    onClick: (ev) =>
+                    {
+                        cal.pickMonth();
+                        ev.accepted = true;
+                    }
+                }
+
+                Button {
+                    labelProfile: Object { property bold: true }
+                    fillHeight: true
+                    flat: true
+                    text: "" + cal.date[0]
+
+                    onClick: (ev) =>
+                    {
+                        cal.pickYear();
+                        ev.accepted = true;
+                    }
+                }
+
+                Box { fillWidth: true }
+
+                Button {
+                    icon: "core-calendar"
+                    fillHeight: true
+                    flat: true
+                    onClick: (ev) =>
+                    {
+                        cal.toToday();
+                        ev.accepted = true;
+                    }
+                }
+
+                Button {
+                    icon: "core-arrow_up"
+                    fillHeight: true
+                    flat: true
+                    onClick: (ev) =>
+                    {
+                        cal.toPreviousMonth();
+                        ev.accepted = true;
+                    }
+                }
+
+                Button {
+                    icon: "core-arrow_down"
+                    fillHeight: true
+                    flat: true
+                    onClick: (ev) =>
+                    {
+                        cal.toNextMonth();
+                        ev.accepted = true;
+                    }
+                }
+            }
+
+            Calendar {
+                id: cal
+
+                function isToday(year, month, day)
+                {
+                    const now = new Date();
+                    return now.getFullYear() === year &&
+                        now.getMonth() === month &&
+                        now.getDate() === day;
+                }
+
+                fillWidth: true
+                fillHeight: true
+
+                dayDelegate: template Button {
+                    id: dayButton
+
+                    labelProfile: Object {
+                        property horizontalAlignment: "right"
+                        property fontSize: theme.fontSizeSmall
+                        property bold: cal.isToday(dayButton.modelData.value.year,
+                                                   dayButton.modelData.value.month,
+                                                   dayButton.modelData.value.day)
+                    }
+
+                    visible: modelData.value.day !== 0
+                    opacity: modelData.value.month === cal.date[1] ? 1.0 : 0.4
+
+                    flat: true
+                    text: "" + modelData.value.day
+
+                    onClick: (ev) =>
+                    {
+                        dateButton.date = [modelData.value.year,
+                                           modelData.value.month,
+                                           modelData.value.day];
+                        thisMenu.parent = null;
+                        /*
+                        cal.dateSelected(modelData.value.year,
+                                        modelData.value.month,
+                                        modelData.value.day);
+                        */
+                        ev.accepted = true;
+                    }
+                }
+
+                /*
+                onDateSelected: (y, m, d) =>
+                {
+                    dateButton.date = [y, m, d];
+                    thisMenu.parent = null;
+                }
+                */
+            }
+        }
+    }
+
+    property date: cal.date
+
+    icon: "core-calendar"
+    text: new Date(...date).toLocaleDateString()
+
+    onClick: (ev) =>
+    {
+        const m = menuT();
+        m.setDate(date);
+        m.popup(self);
+        ev.accepted = true;
+    }
+}

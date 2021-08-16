@@ -22,9 +22,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a calendar view with customizable day panels.
+ *
+ * @memberof ui
+ * @name Calendar
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {number} firstDay - (default: `0`) The first day of the week. A value between `0` (Sunday) and `6` (Saturday).
+ * @property {number[]} date - (default: *today*) A tuple of `[year, month, date]` for the currently selected date.
+ * @property {fengshui.Template} - A custom day panel delegate.
+ */
 MouseBox {
     id: cal
 
+    property firstDay: 0
     property date: (() =>
                    {
                        const d = new Date();
@@ -32,21 +45,125 @@ MouseBox {
                    })()
 
     property dayDelegate: template Button {
-        labelProfile: Object { property horizontalAlignment: "right" }
-        fillWidth: true
-        fillHeight: true
-        visible: parent.day !== 0
-        checked: parent.isToday
+        id: dayButton
+
+        labelProfile: Object {
+            property horizontalAlignment: "right"
+            property fontSize: theme.fontSizeSmall
+            property bold: priv.isToday(dayButton.modelData.value.year,
+                                        dayButton.modelData.value.month,
+                                        dayButton.modelData.value.day)
+        }
+
+        visible: modelData.value.day !== 0
+        opacity: modelData.value.month === cal.date[1] ? 1.0 : 0.4
+
         flat: true
-        text: parent.day !== 0 ? "" + parent.day : ""
+        text: "" + modelData.value.day
 
         onClick: (ev) =>
         {
-            cal.dateSelected(parent.year, parent.month, parent.day);
+            cal.dateSelected(modelData.value.year,
+                             modelData.value.month,
+                             modelData.value.day);
             ev.accepted = true;
         }
     }
 
+    /**
+     * Goes to the previous month.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name toPreviousMonth
+     * @method
+     */
+    function toPreviousMonth()
+    {
+        let y = cal.date[0];
+        let m = cal.date[1];
+        let d = cal.date[2];
+        if (m === 0)
+        {
+            --y;
+            m= 11;
+        }
+        else
+        {
+            --m;
+        }
+        cal.date = [y, m, d];
+    }
+
+    /**
+     * Goes to the next month.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name toNextMonth
+     * @method
+     */
+    function toNextMonth()
+    {
+        let y = cal.date[0];
+        let m = cal.date[1];
+        let d = cal.date[2];
+        if (m === 11)
+        {
+            ++y;
+            m = 0;
+        }
+        else
+        {
+            ++m;
+        }
+        cal.date = [y, m, d];
+    }
+
+    /**
+     * Goes to the current day.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name toToday
+     * @method
+     */
+    function toToday()
+    {
+        const d = new Date();
+        cal.date = [d.getFullYear(), d.getMonth(), d.getDate()];
+        priv.mode = 0;
+    }
+
+    /**
+     * Goes to the month picker.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name pickMonth
+     * @method
+     */
+    function pickMonth()
+    {
+        priv.mode = 1;
+    }
+
+    /**
+     * Goes to the year picker.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name pickYear
+     * @method
+     */
+    function pickYear()
+    {
+        priv.mode = 2;
+    }
+
+    /**
+     * Is triggered when the user selected a date.
+     *
+     * @memberof ui.Calendar.prototype
+     * @name dateSelected
+     * @event
+     * @param {number[]} A `[year, month, day]` tuple of the selected date.
+     */
     event dateSelected
 
     width: theme.itemWidthMedium * 7
@@ -62,6 +179,23 @@ MouseBox {
         ev.accepted = true;
     }
 
+    onWheel: (ev) =>
+    {
+        if (priv.mode === 0)
+        {
+            if (ev.deltaY < 0)
+            {
+                toPreviousMonth();
+            }
+            else if (ev.deltaY > 0)
+            {
+                toNextMonth();
+            }
+            ev.accepted = true;
+        }
+    }
+
+    onFirstDayChanged: () => { daysModel.setMonth(date[0], date[1]); }
     onDateChanged: () => { daysModel.setMonth(date[0], date[1]); }
 
     Object {
@@ -78,142 +212,54 @@ MouseBox {
         }
     }
 
-    Object {
+    ListModel {
         id: daysModel
-
-        property offset: 0
-        property days: 31
 
         function setMonth(year, month)
         {
-            const date = new Date(year, month);
-
-            let weekDay = 0;
-            while (weekDay < date.getDay())
+            if (size === 0)
             {
-                ++weekDay;
-            }
-            offset = weekDay;
-
-            let count = 0;
-            while (date.getMonth() === month)
-            {
-                date.setDate(date.getDate() + 1);
-                ++count;
-            }
-            days = count;
-        }
-    }
-
-    Box {
-        enabled: priv.mode === 0
-
-        fillWidth: true
-        height: theme.itemHeightSmall
-        color: theme.secondaryBackgroundColor
-        layout: "row"
-
-        Button {
-            labelProfile: Object { property bold: true }
-            flat: true
-            text: ["January", "February", "March", "April",
-                   "May", "June", "July", "August",
-                   "September", "October", "November", "December"][cal.date[1]]
-
-            onClick: (ev) =>
-            {
-                priv.mode = 1;
-                ev.accepted = true;
-            }
-        }
-
-        Button {
-            labelProfile: Object { property bold: true }
-            flat: true
-            text: "" + cal.date[0]
-
-            onClick: (ev) =>
-            {
-                priv.mode = 2;
-                ev.accepted = true;
-            }
-        }
-
-        Box { fillWidth: true }
-
-        Button {
-            icon: "core-calendar"
-            flat: true
-            onClick: (ev) =>
-            {
-                const d = new Date();
-                cal.date = [d.getFullYear(), d.getMonth(), d.getDate()];
-                ev.accepted = true;
-            }
-        }
-
-        Button {
-            icon: "core-arrow_up"
-            flat: true
-            onClick: (ev) =>
-            {
-                let y = cal.date[0];
-                let m = cal.date[1];
-                let d = cal.date[2];
-                if (m === 0)
+                // initialize
+                const d = [];
+                for (let i = 0; i < 6 * 7; ++i)
                 {
-                    --y;
-                    m= 11;
+                    d.push({ year: 0, month: 0, day: 0, dayOfWeek: 0 });
                 }
-                else
-                {
-                    --m;
-                }
-                cal.date = [y, m, d];
-                ev.accepted = true;
+                reset(d);
             }
-        }
 
-        Button {
-            icon: "core-arrow_down"
-            flat: true
-            onClick: (ev) =>
+            // last day of prev month
+            const prevDate = new Date(year, month, 0);
+            // first day of this month
+            const date = new Date(year, month, 1);
+
+            // month and year of the previous and next month
+            const lastPrevDay = prevDate.getDate();
+            const prevMonth = month === 0 ? 11 : month - 1;
+            const nextMonth = (month + 1) % 12;
+            const prevYear = month === 0 ? year - 1 : year;
+            const nextYear = month === 11 ? year + 1 : year;
+
+            const offset = (date.getDay() + (7 - cal.firstDay)) % 7;
+
+            // last day of month
+            date.setMonth(month + 1, 0);
+            const lastDay = date.getDate();
+
+            for (let i = 0; i < 6 * 7; ++i)
             {
-                let y = cal.date[0];
-                let m = cal.date[1];
-                let d = cal.date[2];
-                if (m === 11)
-                {
-                    ++y;
-                    m = 0;
-                }
-                else
-                {
-                    ++m;
-                }
-                cal.date = [y, m, d];
-                ev.accepted = true;
-            }
-        }
-    }
-
-    Box {
-        fillWidth: true
-        height: theme.itemHeightSmall
-        layout: "row"
-
-        Repeater {
-            model: ListModel { data: sequence(0, 7) }
-            delegate: template Box {
-                width: parent.bbox.width / 7
-                fillHeight: true
-                layout: "center"
-
-                Label {
-                    fontSize: theme.fontSizeSmall
-                    color: theme.secondaryColor
-                    text: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][parent.modelData.index]
-                }
+                replace(i, {
+                    year: i < offset ? prevYear 
+                                     : i >= offset + lastDay ? nextYear
+                                                             : year,
+                    month: i < offset ? prevMonth
+                                      : i >= offset + lastDay ? nextMonth
+                                                              : month,
+                    day: i < offset ? lastPrevDay - (offset - i) + 1
+                                    : i >= offset + lastDay ? i - (offset + lastDay) + 1
+                                                            : i - offset + 1,
+                    dayOfWeek: (i + cal.firstDay) % 7
+                });
             }
         }
     }
@@ -225,48 +271,39 @@ MouseBox {
         fillHeight: true
 
         // day picker
-        Box {
-            id: daysBox
+        ListView {
+            id: daysView
 
             visible: priv.mode === 0
 
+            position: "free"
             fillWidth: true
             fillHeight: true
-            overflowBehavior: "wrap"
-            layout: "row"
 
-            Repeater {
-                model: ListModel { data: sequence(0, 6 * 7) }
+            model: daysModel
 
-                delegate: template Loader {
-                    property year: cal.date[0]
-                    property month: cal.date[1]
-                    property day: modelData.index >= daysModel.offset &&
-                                  modelData.index < daysModel.offset + daysModel.days ? 1 + modelData.index - daysModel.offset
-                                                                                      : 0
-                    property dayOfWeek: (daysModel.offset + day - 1) % 7
-                    property isToday: priv.isToday(cal.date[0], cal.date[1], day)
+            cellWidth: Math.floor(box.bbox.width / 7)
+            cellHeight: box.bbox.height / 6
 
-                    width: Math.floor(box.bbox.width / 7)
-                    height: box.bbox.height / 6
-
-                    sourceTemplate: cal.dayDelegate
-                }
-            }
+            delegate: cal.dayDelegate
         }
 
         // month picker
         ListView {
+            id: monthPicker
+
             visible: priv.mode === 1
 
+            position: "free"
             fillWidth: true
             fillHeight: true
 
             model: ListModel {
-                data: ["Jan", "Feb", "Mar",
-                    "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep",
-                    "Oct", "Nov", "Dec"]
+                data: monthPicker.visible ?
+                    ["Jan", "Feb", "Mar",
+                     "Apr", "May", "Jun",
+                     "Jul", "Aug", "Sep",
+                     "Oct", "Nov", "Dec"] : []
             }
             cellWidth: Math.floor(box.bbox.width / 3)
             cellHeight: box.bbox.height / 4
@@ -287,8 +324,11 @@ MouseBox {
 
         // year picker
         ListView {
+            id: yearPicker
+
             visible: priv.mode === 2
 
+            position: "free"
             fillWidth: true
             fillHeight: true
 
@@ -319,6 +359,12 @@ MouseBox {
                     positionViewAt(cal.date[0] - 1900);
                 }
             }
+        }
+
+        ScrollIndicator {
+            visible: yearPicker.visible
+            target: yearPicker
+            size: theme.paddingSmall
         }
     }
 }

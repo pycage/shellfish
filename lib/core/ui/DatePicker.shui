@@ -22,6 +22,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a date picker button.
+ *
+ * @memberof ui
+ * @name DatePicker
+ * @class
+ * @extends ui.Button
+ *
+ * @property {number[]} date - The currently selected date as a tuple of `[year, month, day]`.
 Button {
     id: dateButton
 
@@ -145,22 +154,9 @@ Button {
                                            modelData.value.month,
                                            modelData.value.day];
                         thisMenu.parent = null;
-                        /*
-                        cal.dateSelected(modelData.value.year,
-                                        modelData.value.month,
-                                        modelData.value.day);
-                        */
                         ev.accepted = true;
                     }
                 }
-
-                /*
-                onDateSelected: (y, m, d) =>
-                {
-                    dateButton.date = [y, m, d];
-                    thisMenu.parent = null;
-                }
-                */
             }
         }
     }

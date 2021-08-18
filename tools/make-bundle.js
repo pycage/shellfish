@@ -140,7 +140,7 @@ function updateBundle(path)
                 {
                     console.error(`Failed to read file: ${fullPath}`);
                     console.error(err);
-                    return;
+                    modProcess.exit(1);
                 }
             }
         });

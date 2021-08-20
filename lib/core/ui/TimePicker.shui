@@ -1,0 +1,163 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a time picker button.
+ *
+ * @memberof ui
+ * @name TimePicker
+ * @class
+ * @extends ui.Button
+ *
+ * @property {number[]} time - The currently selected time as a tuple of `[hours, minutes]`.
+ * @property {bool} twentyFourHours - (default: `false`) Whether to display the time in 24h mode.
+ */
+Button {
+    id: timeButton
+
+    property menuT: template Menu {
+        id: menu
+
+        function setTime(h, m)
+        {
+            hoursSlider.value = h;
+            minutesSlider.value = m;
+        }
+
+        onCascadingClose: () =>
+        {
+            timeButton.time = [
+                Math.floor(hoursSlider.value),
+                Math.floor(minutesSlider.value)
+            ];
+        }
+
+        MouseBox {
+            width: theme.itemWidthLarge * 2
+            color: theme.primaryBackgroundColor
+
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            Box {
+                fillWidth: true
+                height: theme.itemHeightMedium
+                color: theme.secondaryBackgroundColor
+                layout: "center-row"
+
+                Label {
+                    fillWidth: true
+                    marginLeft: theme.paddingSmall
+                    bold: true
+                    text: timeButton.formatTime(hoursSlider.value | 0,
+                                                minutesSlider.value | 0,
+                                                timeButton.twentyFourHours)
+                }
+
+                Button {
+                    fillHeight: true
+                    icon: "core-time"
+                    flat: true
+
+                    onClick: () =>
+                    {
+                        const now = new Date();
+                        menu.setTime(now.getHours(), now.getMinutes());
+                    }
+                }
+
+                Button {
+                    enabled: Math.floor(hoursSlider.value) !== timeButton.time[0] ||
+                             Math.floor(minutesSlider.value) !== timeButton.time[1]
+                    fillHeight: true
+                    icon: "core-reset"
+                    flat: true
+
+                    onClick: () =>
+                    {
+                        menu.setTime(timeButton.time[0], timeButton.time[1]);
+                    }
+                }
+            }
+
+            Slider {
+                id: hoursSlider
+
+                fillWidth: true
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                minValue: 0
+                maxValue: 23
+                value: 0
+            }
+
+            Slider {
+                id: minutesSlider
+
+                fillWidth: true
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall
+                minValue: 0
+                maxValue: 59
+                value: 0
+            }
+        }
+    }
+
+    property time: (() =>
+                   {
+                       const d = new Date();
+                       return [d.getHours(), d.getMinutes()];
+                   })()
+
+    property twentyFourHours: false
+
+    function formatTime(h, m, mode24h)
+    {
+        let h2 = h;
+        if (! mode24h && h > 12)
+        {
+            h2 = h % 12;
+        }
+        return (h2 <= 9 ? "0" : "") +
+               h2 +
+               ":" +
+               (m <= 9 ? "0" : "") +
+               m +
+               (! mode24h ? (h < 12 ? " am" : " pm") : "");
+    }
+
+    icon: "core-time"
+    text: formatTime(time[0], time[1], twentyFourHours)
+
+    onClick: (ev) =>
+    {
+        const m = menuT();
+        m.setTime(time[0], time[1]);
+        m.popup(self);
+        ev.accepted = true;
+    }
+}

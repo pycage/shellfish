@@ -162,10 +162,20 @@ Button {
         }
     }
 
-    property date: cal.date
+    property date: (() =>
+                   {
+                       const d = new Date();
+                       return [d.getFullYear(), d.getMonth(), d.getDate()];
+                   })()
+
+    function formatDate(y, m, d)
+    {
+        const n = new Date(y, m, d);
+        return n.toLocaleDateString();
+    }
 
     icon: "core-calendar"
-    text: new Date(...date).toLocaleDateString()
+    text: formatDate(...date)
 
     onClick: (ev) =>
     {

@@ -107,10 +107,9 @@ Overlay {
 
     onPointerDown: (ev) =>
     {
-        visible = false;
         ev.accepted = true;
-        
         cascadingClose();
+        visible = false;
     }
 
     // cheap shadow box
@@ -157,10 +156,10 @@ Overlay {
 
             onClick: (ev) =>
             {
-                menu.visible = false;
                 ev.accepted = true;
 
                 menu.cascadingClose();
+                menu.visible = false;
             }
 
             onKeyDown: (ev) =>
@@ -169,10 +168,10 @@ Overlay {
 
                 if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
                 {
-                    menu.visible = false;
                     ev.accepted = true;
 
                     menu.cascadingClose();
+                    menu.visible = false;
                     return;
                 }
 

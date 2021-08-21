@@ -111,6 +111,7 @@ MenuItemBase {
             marginLeft: theme.paddingSmall
             width: label.bbox.height
             height: width
+            color: label.color
             text: visible ? "[icon:" + item.icon + "]" : ""
         }
 

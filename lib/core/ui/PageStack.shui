@@ -80,7 +80,7 @@ Object {
                 }
             }
 
-            documentRoot.get().add(page);
+            documentRoot.add(page);
             pages.push(page);
             page.show(pages.length === 1);
             page.currentPage = true;
@@ -92,7 +92,6 @@ Object {
         loading = true;
         fengshui.load(url, null, __rslv__, (page) =>
         {
-            page = page.get();
             loading = false;
             if (pages.length > 0)
             {
@@ -109,7 +108,7 @@ Object {
                 }
             }
 
-            documentRoot.get().add(page);
+            documentRoot.add(page);
             pages.push(page);
             page.show(pages.length === 1);
             page.currentPage = true;

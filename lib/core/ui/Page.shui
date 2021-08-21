@@ -99,7 +99,7 @@ MouseBox {
     {
         const item = contentTemplate();
         loading = false;
-        contentArea.get().add(item);
+        contentArea.add(item);
     }
 
     Object {

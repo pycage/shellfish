@@ -46,7 +46,20 @@ MouseBox {
      */
     property show: () =>
     {
+        documentRoot.add(self);
         visible = true;
+    }
+
+    /**
+     * Closes the overlay.
+     *
+     * @memberof ui.Overlay.prototype
+     * @name close
+     * @method
+     */
+    function close()
+    {
+        parent = null;
     }
 
     position: "global"
@@ -61,13 +74,9 @@ MouseBox {
 
     onVisibleChanged: () =>
     {
-        if (visible)
+        if (! visible && self.parent)
         {
-            documentRoot.add(self);
-        }
-        else
-        {
-            self.parent = null;
+            close();
         }
     }
 

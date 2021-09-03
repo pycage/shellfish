@@ -154,7 +154,7 @@ Button {
                         dateButton.date = [modelData.value.year,
                                            modelData.value.month,
                                            modelData.value.day];
-                        thisMenu.parent = null;
+                        thisMenu.close();
                         ev.accepted = true;
                     }
                 }

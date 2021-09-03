@@ -214,7 +214,7 @@ mid.Document {
                 onClick: () =>
                 {
                     const cb = modelData.value.callback;
-                    dialog.parent = null;
+                    dialog.close();
                     if (cb)
                     {
                         cb();

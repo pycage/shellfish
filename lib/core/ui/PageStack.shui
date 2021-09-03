@@ -128,9 +128,9 @@ Object {
         if (pages.length > 1)
         {
             const p = pages.pop();
-            p.close(function ()
+            p.close(() =>
             {
-                p.parent = null;
+                p.releaseLater(); // later as we're still in the callback context of p
                 pages[pages.length - 1].frozen = false;
                 pages[pages.length - 1].currentPage = true;
 

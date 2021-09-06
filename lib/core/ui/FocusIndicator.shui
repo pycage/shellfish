@@ -44,28 +44,7 @@ Box {
     fillHeight: true
     enabled: false
     color: "transparent"
-    borderWidth: 0
+    borderWidth: documentRoot.inputDevice === "keyboard" ? 3 : 0
     borderColor: theme.borderColor
     borderStyle: "dotted"
-
-    documentRoot.onKeyDown: (ev) =>
-    {
-        if (ev.key === "Tab")
-        {
-            borderWidth = 3;
-            timer.start();
-        }
-    }
-
-    Timer {
-        id: timer
-
-        interval: 1000
-        repeat: false
-
-        onTimeout: () =>
-        {
-            indicator.borderWidth = 0;
-        }
-    }
 }

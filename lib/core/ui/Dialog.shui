@@ -55,6 +55,8 @@ Overlay {
         position: "free"
         x: (parent.bbox.width - bbox.width) / 2
         y: (parent.bbox.height - bbox.height) / 2 - (offset * theme.itemHeightLarge)
+        maxWidth: documentRoot.windowWidth - 2 * theme.paddingLarge
+        maxHeight: documentRoot.windowHeight - 2 * theme.paddingLarge
 
         offsetTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
@@ -120,6 +122,13 @@ Overlay {
             marginRight: theme.paddingLarge
             marginBottom: theme.paddingLarge
             color: theme.primaryBackgroundColor
+            overflowBehavior: "scroll"
+        }
+
+        ScrollIndicator {
+            marginTop: titlebar.bbox.height
+            marginBottom: theme.itemHeightMedium + theme.paddingSmall
+            target: contentArea
         }
 
         // buttons

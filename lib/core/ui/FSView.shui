@@ -39,15 +39,15 @@ ListView {
         id: fileItem
 
         property selected: modelData.index === fsview.currentIndex
-        property hovered: containsMouse && ! selected
-        property highlighted: selected || hovered
+        property itemHovered: containsMouse && ! selected
+        property highlighted: selected || itemHovered
 
         width: fsview.cellWidth
         height: fsview.cellHeight
 
-        color: hovered ? theme.hoverBackgroundColor
-                       : highlighted ? theme.highlightBackgroundColor
-                                     : "transparent"
+        color: itemHovered ? theme.hoverBackgroundColor
+                           : highlighted ? theme.highlightBackgroundColor
+                                         : "transparent"
 
         layout: fsview.displayMode === 0 ? "center-row" : "center-column"
 

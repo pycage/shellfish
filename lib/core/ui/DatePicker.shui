@@ -177,7 +177,7 @@ Button {
     icon: "core-calendar"
     text: formatDate(...date)
 
-    onClick: (ev) =>
+    onPointerDown: (ev) =>
     {
         const m = menuT();
         m.setDate(date);

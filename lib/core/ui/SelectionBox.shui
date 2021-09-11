@@ -56,7 +56,7 @@ Button {
     secondaryIcon: "core-menu"
     text: model.size > selection ? model.at(selection) : "?"
 
-    onClick: (ev) =>
+    onPointerDown: (ev) =>
     {
         ev.accepted = true;
         

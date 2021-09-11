@@ -355,7 +355,7 @@ MouseBox {
         }
     }
 
-    onClick: (ev) =>
+    onPointerDown: (ev) =>
     {
         if (thisMenu)
         {
@@ -373,7 +373,6 @@ MouseBox {
             }
             else if (menuOpened)
             {
-                _menu.visible = false;
                 ev.accepted = true;
             }
         }

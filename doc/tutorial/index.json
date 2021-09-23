@@ -1,0 +1,16 @@
+{
+    "tutorial": {
+        "title": "Tutorial Articles",
+        "children": {
+            "setup": { "title": "Setup the SDK" },
+            "concepts": { "title": "Concepts of Shellfish" },
+            "levels":  { "title": "Levels of Abstraction" },
+            "modules": { "title": "Module Management" },
+            "shui-elements": { "title": "Elements, Properties, and Comments" },
+            "shui-events": { "title": "Events and Event Handlers" },
+            "shui-methods": { "title": "Methods" },
+            "shui-code": { "title": "Code Blocks" },
+            "shui-modules": { "title": "Modules and Components" }
+        }
+    }
+}

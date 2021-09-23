@@ -11,6 +11,10 @@ pre {
 
 }
 
+.main .readme h3 {
+    color: #444;
+}
+
 hr {
     height: 2px;
 }

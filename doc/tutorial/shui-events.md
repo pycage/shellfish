@@ -1,0 +1,69 @@
+# Events and Handlers
+
+Some elements provide events that are triggered under certain circumstances,
+e.g. {@link mid.MouseBox MouseBox} has a `click` event that is fired whenever
+the user clicked the mouse button inside the element.
+
+Connecting a handler function to an event works like assigning to a property
+with the first character of the event's name being capitalized and prepended
+by `on`. E.g. the handler for the `click` event is assigned to the `onClick`
+property.
+
+    MouseBox {
+        onClick: () =>
+        {
+            // some code
+        }
+    }
+
+Some events call their handler function with parameters which you can name and access by
+using function parameters.
+
+    MouseBox {
+        onClick: (ev) =>
+        {
+            console.log("You clicked at (" + ev.x + ", " + ev.y + ").");
+            ev.accepted = true;
+        }
+    }
+
+# Custom Events
+
+You may define custom events on an element by using the `event` keyword together with a valid identifier name.
+Trigger the event by invoking it like a function.
+
+    MouseBox {
+        event somethingHappened
+
+        onClick: (ev) =>
+        {
+            somethingHappened(ev.x, ev.y);
+        }
+
+        onSomethingHappened: (x, y) =>
+        {
+            console.log("You clicked at (" + x + ", " + y + ").");
+        }
+    }
+
+# Foreign Events
+
+Elements may connect handler functions to events of another element. To do so,
+use the identifier of the other element.
+
+    MouseBox {
+        id: mbox
+    }
+
+    Box {
+        mbox.onClick: (ev) =>
+        {
+            console.log("You clicked a button.");
+        }
+    }
+
+# Multiple Event Handlers
+
+Event handlers are different from properties in that assigning a new handler function will
+not replace the previous handler function. Instead, both functions will be called when
+the event triggers. This way you can monitor the same event at various locations.

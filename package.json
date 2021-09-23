@@ -13,6 +13,6 @@
   "scripts": {
     "build-icons": "node icons/webfont.js",
     "build-package": "node tools/make-bundle.js build/shellfish.pkg lib",
-    "generate-docs": "jsdoc -c doc/conf.json"
+    "generate-docs": "jsdoc -c doc/conf.json -u doc/tutorial"
   }
 }

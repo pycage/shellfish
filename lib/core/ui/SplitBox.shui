@@ -27,13 +27,13 @@ require "shellfish/ui";
  * containers, one for each side.
  *
  * Containers:
- * * `box1` - The first container.
- * * `box2` - The second container.
+ * * `first` - The first container.
+ * * `second` - The second container.
  *
  * @example
  * SplitBox {
- *     into box1 Placeholder { text: "Left Side" }
- *     into box2 Placeholder { text: "Right Side" }
+ *     into first Placeholder { text: "Left Side" }
+ *     into second Placeholder { text: "Right Side" }
  * }
  *
  * @memberof ui

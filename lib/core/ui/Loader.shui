@@ -53,10 +53,17 @@ Box {
         if (source !== "")
         {
             loading = true;
-            fengshui.load(source, null, __rslv__, (root) =>
+            fengshui.load(source, __rslv__)
+            .then(root =>
             {
                 item = root;
                 add(item);
+                loading = false;
+            })
+            .catch(err =>
+            {
+                console.error("Failed to load item: " + err);
+                console.log(err);
                 loading = false;
             });
         }

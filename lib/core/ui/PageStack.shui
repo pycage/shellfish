@@ -90,7 +90,8 @@ Object {
 
         const url = target;
         loading = true;
-        fengshui.load(url, null, __rslv__, (page) =>
+        fengshui.load(url, __rslv__)
+        .then(page =>
         {
             loading = false;
             if (pages.length > 0)

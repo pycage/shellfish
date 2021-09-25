@@ -32,7 +32,7 @@ require "shellfish/ui";
  *
  * @property {number} firstDay - (default: `0`) The first day of the week. A value between `0` (Sunday) and `6` (Saturday).
  * @property {number[]} date - (default: *today*) A tuple of `[year, month, date]` for the currently selected date.
- * @property {fengshui.Template} - A custom day panel delegate.
+ * @property {fengshui.Template} dayDelegate - A custom day panel delegate.
  */
 MouseBox {
     id: cal

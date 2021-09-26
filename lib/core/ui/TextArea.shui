@@ -55,6 +55,11 @@ MouseBox {
     property row: input.row
     property spellCheck: false
 
+    property insertAt: input.insertAt
+    property eraseAt: input.eraseAt
+    property setCursor: input.setCursor
+    property positionAt: input.positionAt
+
     width: theme.itemWidthLarge * 2
     height: theme.itemHeightLarge * 2
     opacity: enabled && ancestorsEnabled ? 1 : 0.6
@@ -107,6 +112,8 @@ MouseBox {
         canFocus: true
 
         onTextChanged: { box.text = text; }
+
+        onKeyDown: (ev) => parent.keyDown(ev)
     }
 
     ScrollIndicator { id: siA; other: siB; target: input; orientation: "vertical" }

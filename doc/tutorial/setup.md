@@ -86,3 +86,7 @@ This does the following:
 Besides that, this `index.html` checks the environment for proper JavaScript
 support and shows progress while the application is being initialized.
 Edit the entry point `index.html` to your likings.
+
+<div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-next">
+{@tutorial concepts}
+</span></div>

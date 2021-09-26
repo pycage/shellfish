@@ -1,4 +1,4 @@
-Modules are external files loaded by a Shui file. These are
+Modules are external files loaded by a Shui file. This can be:
 * other Shui files (i.e. Shui components)
 * files with JavaScript code
 * CSS files
@@ -12,7 +12,7 @@ element to load modules from other files.
 require "./MyElement.shui";
 
 Document {
-    ...
+
 }
 ```
 
@@ -62,7 +62,7 @@ under the aliases `mid` and `high`, respectively, without having to import them 
 CSS stylesheets may be loaded as modules as well. But since stylesheets work
 globally, it is advisable to only load them at the beginning of the main Shui document.
 
-The main use for loading CSS stylesheets is for providing icon sets.
+The main use for loading CSS stylesheets is to provide icon sets.
 
 ```
 require "./custom-icons.css";
@@ -117,6 +117,8 @@ When loading a JavaScript file, only exported functions are accessible from
 outside. To export a function, assign it to the predefined `exports` object.
 
 ```
+// somecode.js
+
 function internalFunction()
 {
     // this function is internal only
@@ -130,13 +132,25 @@ exports.foo = foo;
 ```
 
 ```
+// main.js
+
 require "./somecode.js" as code;
 
-MouseBox {
-    onClick: () => { code.foo(42); }
+Document {
+
+    MouseBox {
+        onClick: () => { code.foo(42); }
+    }
+
 }
 ```
 
 **Note:** Code in JavaScript files does not know how to handle dynamic values (such as
 element properties) or element identifiers. Without this overhead (or magic, actually),
 it runs a tiny bit faster than code blocks inside of a Shui document.
+
+<div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
+{@tutorial shui-code}
+</span><span class="go-next">
+{@tutorial shui-containers}
+</span></div>

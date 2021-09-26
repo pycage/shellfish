@@ -38,7 +38,7 @@ Example:
 
 Remember the spreadsheet application example from above? Besides fields with simple
 values, there were also fields holding formula expressions.
-In Shellfish, the analogy to such a field is be a *binding*.
+In Shellfish, the analogy to such a field is a *binding*.
 
 Bindings may hold complex expressions dealing with many dynamic values or
 constant values and yield a result that changes whenever one of the dynamic
@@ -87,7 +87,7 @@ dependency:
 
 Note how `label2` incorporates the value of a property of `label1` in its own
 `text` property. The value of `label2`'s `text` property is a binding, expressed
-by a line of code written in JavaScript.
+by code written in JavaScript.
 
 Elements that may contain other elements nested inside are called *container elements*.
 Let's nest a label inside a box:
@@ -97,3 +97,9 @@ Let's nest a label inside a box:
             text: "I'm a label in a box."
         }
     }
+
+<div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
+{@tutorial setup}
+</span><span class="go-next">
+{@tutorial levels}
+</span></div>

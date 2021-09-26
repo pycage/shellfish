@@ -8,7 +8,6 @@ pre {
     -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
 }
 
 .main .readme h3 {
@@ -42,4 +41,67 @@ code {
 
 .main .access-signature.deprecated {
     background-color: #f00;
+}
+
+.main footer {
+    padding-bottom: 2em;
+}
+
+.navstrip {
+    position: fixed;
+    left: 25%;
+    right: 0px;
+    bottom: 0px;
+    background-color: #333;
+}
+
+@media screen and (max-width: 1000px)
+{
+    .navstrip {
+        left: 250px;
+    }
+}
+
+@media screen and (max-width: 768px)
+{
+    .navstrip {
+        top: unset;
+        left: 0px;
+        bottom: 0px;
+    }
+}
+
+.navstrip a {
+    display: inline-block;
+    padding: 0.5em;
+    color: #fff;
+}
+
+.navstrip a::before {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    padding: 3px;
+    margin-right: 0.5em;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    border-radius: 3px;
+    background-color: #606068;
+    color: #fff;
+}
+
+.navstrip .go-home a::before {
+    content: "\e043";
+}
+
+.navstrip .go-previous a::before {
+    content: "\e079";
+}
+
+.navstrip .go-next a::before {
+    content: "\e080";
 }

@@ -49,17 +49,19 @@ Shui is the declarative UI description language used by Shellfish.
 * {@tutorial shui-methods}
 * {@tutorial shui-code}
 * {@tutorial shui-modules}
-* Component Containers *(work in progress)*
-* Templates *(work in progress)*
-* Multiline Strings *(work in progress)*
+* {@tutorial shui-containers}
+* {@tutorial shui-templates}
+* {@tutorial shui-scope}
 
 ### Layout
 
 Layouting elements on screen is intuitive, yet powerful.
 
-* *(work in progress)*
+* {@tutorial layout-size}
+* {@tutorial layout-flow}
+* {@tutorial layout-position}
+* {@tutorial layout-scrolling}
 <!--
-* Controlling the Flow
 * Visbility
 * Positioning Freely
 * Controlling the Size
@@ -95,8 +97,12 @@ These articles show you how to achieve things with Shellfish.
 ## News
 
 ### September 2021
-* {@link mid.FpsMeter} has new property `manual` and method `takeFrame()` for manual
-  frame counting.
+* {@link mid.TextArea} has new methods {@link mid.TextArea#eraseAt eraseAt},
+  {@link mid.TextArea#insertAt insertAt}, {@link mid.TextArea#positionAt positionAt},
+  and {@link mid.TextArea#setCursor setCursor}.
+* The function {@link fengshui.load} returns a Promise object now.
+* {@link mid.FpsMeter} has new property `manual` and method
+  {@link mid.FpsMeter#takeFrame takeFrame} for manual frame counting.
 * The `await` keyword may now be used in JavaScript sections of Shui files.
 * {@link mid.Item} has the new property `aspectRatio` for maintaining a fixed aspect
   ratio when resizing an element.

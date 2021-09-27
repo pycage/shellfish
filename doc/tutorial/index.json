@@ -16,10 +16,13 @@
             "shui-templates": { "title": "Templates" },
             "shui-scope": { "title": "Understanding Identifier Scope and Namespaces" },
 
+            "layout-visible": { "title": "Visibility" },
             "layout-size": { "title": "Controlling the Size" },
             "layout-flow": { "title": "Controlling the Layout Flow" },
+            "layout-margin": { "title": "Margins around Elements" },
             "layout-position": { "title": "Positioning Elements" },
-            "layout-scrolling": { "title": "Scrolling" }
+            "layout-scrolling": { "title": "Scrolling" },
+            "layout-ruler": { "title": "Aligning with Rulers" }
         }
     }
 }

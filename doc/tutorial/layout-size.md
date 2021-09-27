@@ -104,7 +104,7 @@ The aspect ratio is the width divided by the height.
 # The Bounding Box
 
 Since the `width` and `height` properties are size constraints rather than absolute
-size values, they cannot be used for determining an elements true size in general.
+size values, they cannot be used for determining an element's true size in general.
 
 Every element has the read-only `bbox` property containing the element's bounding box for
 accessing the actual size and position on screen.
@@ -134,6 +134,10 @@ Box {
 }
 ```
 
-<div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-next">
-{@tutorial layout-flow}
-</span></div>
+The bounding box of invisible elements is of width and height `0`.
+
+<div class="navstrip">
+<span class="go-home"><a href="index.html">Contents</a></span>
+<span class="go-previous">{@tutorial layout-visible}</span>
+<span class="go-next">{@tutorial layout-flow}</span>
+</div>

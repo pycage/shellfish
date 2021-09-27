@@ -97,6 +97,11 @@ Box {
 
 Centered layout is just an alias for centered column layout.
 
+# Invisible Elements
+
+Elements with their `visible` property set to `false` are taken out of the
+layout flow and do not occupy space.
+
 # Overflow Behavior
 
 If the child elements exceed the space inside their parent box, an overflow
@@ -154,5 +159,5 @@ Box {
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
 <span class="go-previous">{@tutorial layout-size}</span>
-<span class="go-next">{@tutorial layout-position}</span>
+<span class="go-next">{@tutorial layout-margin}</span>
 </div>

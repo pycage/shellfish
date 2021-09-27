@@ -90,6 +90,6 @@ Box {
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
-<span class="go-previous">{@tutorial layout-flow}</span>
+<span class="go-previous">{@tutorial layout-margin}</span>
 <span class="go-next">{@tutorial layout-scrolling}</span>
 </div>

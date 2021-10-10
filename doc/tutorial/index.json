@@ -22,7 +22,13 @@
             "layout-margin": { "title": "Margins around Elements" },
             "layout-position": { "title": "Positioning Elements" },
             "layout-scrolling": { "title": "Scrolling" },
-            "layout-ruler": { "title": "Aligning with Rulers" }
+            "layout-ruler": { "title": "Aligning with Rulers" },
+
+            "ui-colors": { "title": "Working with Colors" },
+            "ui-theme": { "title": "Using the Theme for a Uniform Look" },
+            "ui-profiles": { "title": "Using Profiles" },
+            "ui-transitions": { "title": "Transitions" },
+            "ui-animations": { "title": "Complex Animations" }
         }
     }
 }

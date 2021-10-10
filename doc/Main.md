@@ -40,7 +40,7 @@ or even by shipping only pre-translated code. It's your choice.
 * {@tutorial concepts}
 * {@tutorial levels}
 
-### Shui
+### Introduction to Shui
 
 Shui is the declarative UI description language used by Shellfish.
 
@@ -64,6 +64,14 @@ Layouting elements on screen is intuitive, yet powerful.
 * {@tutorial layout-position}
 * {@tutorial layout-scrolling}
 * {@tutorial layout-ruler}
+
+### UI
+
+* {@tutorial ui-colors}
+* {@tutorial ui-theme}
+* {@tutorial ui-profiles}
+* {@tutorial ui-transitions}
+* {@tutorial ui-animations}
 
 <!--
 ### UI
@@ -123,6 +131,11 @@ Layouting elements on screen is intuitive, yet powerful.
 
 
 ## News
+
+### October 2021
+* {@link mid.DavFS} has a new property `fetchManager` for using a {@link low.FetchManager}
+  instance.
+* The `click` event of {@link mid.MouseBox} reports the pressed buttons now.
 
 ### September 2021
 * {@link mid.TextArea} has new methods {@link mid.TextArea#eraseAt eraseAt},

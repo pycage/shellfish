@@ -133,6 +133,9 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### October 2021
+* The new function {@link low.later} returns a Promise object that resolves when
+  idle.
+* {@link mid.DavFS} has a new property `cache` for caching list results.
 * {@link mid.DavFS} has a new property `fetchManager` for using a {@link low.FetchManager}
   instance.
 * The `click` event of {@link mid.MouseBox} reports the pressed buttons now.

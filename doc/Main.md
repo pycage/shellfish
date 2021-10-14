@@ -133,6 +133,9 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### October 2021
+* The new elements {@link mid.LocalStorage} and {@link mid.FileStorage} persist any of their
+  custom properties to the HTML5 local storage or a file on a {@link mid.Filesystem} automatically.
+* The new element {@link mid.History} allows to control the browser history.
 * The new function {@link low.later} returns a Promise object that resolves when
   idle.
 * {@link mid.DavFS} has a new property `cache` for caching list results.

@@ -133,6 +133,16 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### October 2021
+* The JavaScript regular expressions syntax (e.g. `/abc.*[0-9]/i`) may now be used
+  in Shui files.
+* There are new elements {@link mid.SyntaxHighlighter} and {@link mid.SyntaxToken}
+  for defining syntax highlighting rules for text.
+* The element {@link ui.TextArea} has a new property `syntaxHighlighter` for assigning
+  a {@link mid.SyntaxHighlighter} object.
+* The element {@link mid.Label} has a new property `filter` for implementing advanced
+  text processing, e.g. syntax highlighting.
+* The element {@link mid.TextArea} has a new property `caretColor` for changing the
+  caret color.
 * The new elements {@link mid.LocalStorage} and {@link mid.FileStorage} persist any of their
   custom properties to the HTML5 local storage or a file on a {@link mid.Filesystem} automatically.
 * The new element {@link mid.History} allows to control the browser history.

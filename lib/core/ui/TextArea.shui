@@ -38,6 +38,7 @@ require "shellfish/ui";
  * @property {number} selectionEnd - [readonly] The ending position of the text selection. This value is the same as `selectionStart` if no text is selected.
  * @property {number} selectionStart - [readonly] The starting position of the text selection.
  * @property {bool} spellCheck - (default: `false`) Whether to enable spell-checking.
+ * @property {mid.SyntaxHighlighter} syntaxHighlighter - (default: `null`) An optional syntax highlighter.
  * @property {string} text - (default: `""`) The text to show.
  * @property {string} textColor - The text color.
  */
@@ -54,6 +55,7 @@ MouseBox {
     property selectionEnd: input.selectionEnd
     property row: input.row
     property spellCheck: false
+    property syntaxHighlighter: null
 
     property insertAt: input.insertAt
     property eraseAt: input.eraseAt
@@ -91,33 +93,59 @@ MouseBox {
         }
     }
 
-    mid.TextArea {
-        id: input
-
+    Box {
         fillWidth: true
         fillHeight: true
-        marginTop: theme.paddingSmall
-        marginLeft: theme.paddingSmall
-        marginRight: theme.paddingSmall
-        marginBottom: theme.paddingSmall
-        fontSize: box.fontSize
-        fontFamily: box.fontFamily
-        bold: box.bold
-        color: box.textColor
-        selectionBackgroundColor: theme.highlightBackgroundColor
-        selectionColor: theme.highlightColor
-        spellCheck: box.spellCheck
-        text: box.text
+        marginTop: theme.paddingSmall / 2
+        marginLeft: theme.paddingSmall / 2
+        marginRight: theme.paddingSmall / 2
+        marginBottom: theme.paddingSmall / 2
 
-        canFocus: true
+        Label {
+            position: "free"
+            fillWidth: true
+            fillHeight: true
+            marginTop: -input.contentY
+            marginLeft: -input.contentX
+            //marginRight: theme.paddingSmall
+            //marginBottom: theme.paddingSmall
+            fontSize: box.fontSize
+            fontFamily: box.fontFamily
+            bold: box.bold
 
-        onTextChanged: { box.text = text; }
+            color: box.textColor
 
-        onKeyDown: (ev) => parent.keyDown(ev)
+            literal: box.syntaxHighlighter === null
+            text: input.text
+
+            filter: !! box.syntaxHighlighter ? box.syntaxHighlighter.filter : null
+        }
+
+        mid.TextArea {
+            id: input
+
+            fillWidth: true
+            fillHeight: true
+            fontSize: box.fontSize
+            fontFamily: box.fontFamily
+            bold: box.bold
+            color: "transparent"
+            caretColor: box.textColor
+            selectionBackgroundColor: theme.highlightBackgroundColor
+            selectionColor: theme.highlightColor
+            spellCheck: box.spellCheck
+            text: box.text
+
+            canFocus: true
+
+            onTextChanged: { box.text = text; }
+
+            onKeyDown: (ev) => box.keyDown(ev)
+        }
     }
 
-    ScrollIndicator { id: siA; other: siB; target: input; orientation: "vertical" }
-    ScrollIndicator { id: siB; other: siA; target: input; orientation: "horizontal" }
+    ScrollIndicator { id: siA; other: siB; target: input; orientation: "vertical"; size: theme.paddingSmall }
+    ScrollIndicator { id: siB; other: siA; target: input; orientation: "horizontal"; size: theme.paddingSmall }
 
     FocusIndicator { visible: input.focus }
 }

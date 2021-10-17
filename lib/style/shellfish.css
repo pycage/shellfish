@@ -36,10 +36,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 }
 
 body {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-
     cursor: default;
     
     font-size: 0.5cm;
@@ -66,7 +62,7 @@ textarea {
     background-color: transparent;
     background-image: none;
     resize: none;
-    overflow: hidden;
+    overflow: scroll;
     font-size: 100%;
 }
 

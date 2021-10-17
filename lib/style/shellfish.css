@@ -49,6 +49,10 @@ div {
     touch-action: inherit;
 }
 
+img {
+    user-select: none;
+}
+
 input[type=text], input[type=password] {
     border: none;
     background-color: transparent;

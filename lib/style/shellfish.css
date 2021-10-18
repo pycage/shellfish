@@ -51,6 +51,7 @@ div {
 
 img {
     user-select: none;
+    -webkit-user-select: none;
 }
 
 input[type=text], input[type=password] {

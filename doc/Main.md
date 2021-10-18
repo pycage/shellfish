@@ -133,12 +133,16 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### October 2021
+* The element {@link mid.TextArea} has a new method {@link mid.TextArea#rowAt rowAt}
+  for retrieving the row number at a given text position.
+* The element {@link ui.TextArea} has new containers `backgroundContainer`,
+  `bottomMarginContainer`, `topMarginContainer`, `leftMarginContainer`, and
+  `rightMarginContainer` for decorations such as line numbers, syntax highlighting,
+  etc.
 * The JavaScript regular expressions syntax (e.g. `/abc.*[0-9]/i`) may now be used
   in Shui files.
 * There are new elements {@link mid.SyntaxHighlighter} and {@link mid.SyntaxToken}
   for defining syntax highlighting rules for text.
-* The element {@link ui.TextArea} has a new property `syntaxHighlighter` for assigning
-  a {@link mid.SyntaxHighlighter} object.
 * The element {@link mid.Label} has a new property `filter` for implementing advanced
   text processing, e.g. syntax highlighting.
 * The element {@link mid.TextArea} has a new property `caretColor` for changing the

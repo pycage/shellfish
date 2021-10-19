@@ -43,15 +43,13 @@ body {
 
     /* disable Chrome's annoying back swipe gesture */
     overscroll-behavior: contain;
+
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 div {
     touch-action: inherit;
-}
-
-img {
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 input[type=text], input[type=password] {

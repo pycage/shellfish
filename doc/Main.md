@@ -133,6 +133,8 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### October 2021
+* The element {@link mid.Repeater} has a new property `count` that tells the number
+  of spawned items.
 * The element {@link mid.TextArea} has a new method {@link mid.TextArea#rowAt rowAt}
   for retrieving the row number at a given text position.
 * The element {@link ui.TextArea} has new containers `backgroundContainer`,

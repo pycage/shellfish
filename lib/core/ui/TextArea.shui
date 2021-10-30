@@ -75,6 +75,7 @@ MouseBox {
 
     property insertAt: input.insertAt
     property eraseAt: input.eraseAt
+    property shiftRows: input.shiftRows
     property setCursor: input.setCursor
     property positionAt: input.positionAt
     property rowAt: input.rowAt

@@ -132,6 +132,13 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### November 2021
+* The element {@link mid.MouseBox} can now detect clicks even if a drag handler
+  is connected. Compatibility issues with the Sailfish Browser have been fixed.
+* The element {@link ui.SplitBox} has the new properties `orientation` for
+  changing the layout orientation, and `flip` for flipping both containers.
+  The new property `splitRatio` lets you change the split ratio programmatically.
+
 ### October 2021
 * The element {@link mid.Repeater} has a new property `count` that tells the number
   of spawned items.

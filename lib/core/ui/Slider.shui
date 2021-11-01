@@ -22,6 +22,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a UI value slider.
+ *
+ * `value` is a decimal number within the range of `minValue` and `maxValue`.
+ * Remember to round or truncate it if you need integer values.
+ *
+ * @memberof ui
+ * @name Slider
+ * @class
+ * @extends mid.MouseBox
+ *
+ * @property {number} minValue - (default: `0`) The minimum allowed value.
+ * @property {number} maxValue - (default: `100`) The maximum allowed value.
+ * @property {number} value - (default: `0`) The current value.
+ * @property {number} stepSize - (default: `5`) The step size between value changes. The step size only applies to value changes with the PgUp/PgDown keyboard keys.
+ */
 MouseBox {
     id: slider
 
@@ -29,6 +45,28 @@ MouseBox {
     property maxValue: 100
     property value: 0
     property stepSize: 5
+
+    /**
+     * Sets the current value.
+     *
+     * @memberof ui.Slider.prototype
+     * @name setValue
+     * @method
+     *
+     * @param {number} v - The new value.
+     */
+    function setValue(v)
+    {
+        const nv = Math.max(minValue, Math.min(maxValue, v));
+        if (nv !== value)
+        {
+            value = nv;
+        }
+    }
+
+    onMinValueChanged: () => { setValue(value); }
+    onMaxValueChanged: () => { setValue(value); }
+    onValueChanged: () => { setValue(value); }
 
     canFocus: true
 
@@ -93,7 +131,8 @@ MouseBox {
         }
 
         Label {
-            color: parent.containsMouse ? theme.highlightColor : theme.secondaryColor;
+            color: parent.containsMouse || parent.pressed ? theme.highlightColor
+                                                          : theme.secondaryColor;
             text: "[icon:core-drag_indicator]"
         }
     }

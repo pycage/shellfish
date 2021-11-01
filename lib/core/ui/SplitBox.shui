@@ -32,6 +32,9 @@ require "shellfish/ui";
  *
  * @example
  * SplitBox {
+ *     splitRatio: 0.3
+ *     orientation: "vertical"
+ *
  *     into first Placeholder { text: "Left Side" }
  *     into second Placeholder { text: "Right Side" }
  * }
@@ -40,6 +43,10 @@ require "shellfish/ui";
  * @name SplitBox
  * @class
  * @extends mid.Box
+ *
+ * @property {bool} flip - (default: `false`) If `true`, the first and second containers are swapped.
+ * @property {string} orientation - (default: `horizontal`) The orientation of the splitter. Either `horizontal` or `vertical`.
+ * @property {number} splitRatio - (default: `0.5`) The split ratio as a value between `0.0` and `1.0`.
  */
 Box {
     id: splitBox
@@ -47,15 +54,56 @@ Box {
     container first: box1
     container second: box2
 
-    layout: "row"
+    property orientation: "horizontal"
+    property flip: false
+    property splitRatio: 0.5
+
+    event click
+    event doubleClick
+
+    Object {
+        id: priv
+
+        property isHorizontal: splitBox.orientation === "horizontal"
+        property isVertical: ! isHorizontal
+        property secondBox: splitBox.flip ? box2 : box1
+    }
+
+    Object {
+        id: positionProfile1
+
+        property marginTop: 0
+        property marginLeft: 0
+
+        property width: priv.isHorizontal ? gutter.x
+                                          : -1
+        property height: priv.isVertical ? gutter.y
+                                         : -1
+
+        property fillWidth: priv.isVertical
+        property fillHeight: priv.isHorizontal
+    }
+
+    Object {
+        id: positionProfile2
+
+        property marginTop: priv.isVertical ? priv.secondBox.height + gutter.height
+                                            : 0
+        property marginLeft: priv.isHorizontal ? priv.secondBox.width + gutter.width
+                                               : 0
+
+        property width: -1
+        property height: -1
+
+        property fillWidth: true
+        property fillHeight: true
+    }
 
     Box {
         id: box1
 
         position: "free"
-
-        width: gutter.x
-        fillHeight: true
+        profiles: [splitBox.flip ? positionProfile2 : positionProfile1]
     }
 
     MouseBox {
@@ -64,22 +112,47 @@ Box {
         canFocus: true
 
         position: "free"
-        layout: "center-column"
+        layout: priv.isHorizontal ? "center-column"
+                                  : "center-row"
 
-        x: splitBox.bbox.width / 2
-        width: theme.paddingLarge
-        fillHeight: true
+        x: priv.isHorizontal ? splitBox.bbox.width * splitBox.splitRatio
+                             : 0
+        y: priv.isVertical ? splitBox.bbox.height * splitBox.splitRatio
+                           : 0
 
-        cursor: "col-resize"
+        width: priv.isHorizontal ? theme.paddingLarge
+                                 : -1
+        height: priv.isVertical ? theme.paddingLarge
+                                : -1
+
+        fillWidth: priv.isVertical
+        fillHeight: priv.isHorizontal
+
+        cursor: priv.isHorizontal ? "col-resize"
+                                  : "row-resize"
         
         onDrag: (ev) =>
         {
             const w = splitBox.bbox.width;
+            const h = splitBox.bbox.height;
 
-            x = Math.max(16, Math.min(w - width - 16, x + ev.deltaX));
+            if (priv.isHorizontal && w > 0)
+            {
+                splitBox.splitRatio = Math.max(16, Math.min(w - width - 16, x + ev.deltaX)) / w;
+            }
+            else if (h > 0)
+            {
+                splitBox.splitRatio = Math.max(16, Math.min(h - height - 16, y + ev.deltaY)) / h;
+            }
 
-            ev.accepted = true;
+            if (ev.buttons === 1)
+            {
+                ev.accepted = true;
+            }
         }
+
+        onClick: (ev) => { splitBox.click(ev); ev.accepted = true; }
+        onDoubleClick: (ev) => { splitBox.doubleClick(ev); ev.accepted = true; }
 
         onPointerDown: (ev) =>
         {
@@ -90,30 +163,55 @@ Box {
         onKeyDown: (ev) =>
         {
             const w = splitBox.bbox.width;
+            const h = splitBox.bbox.height;
             
-            if (ev.key === "ArrowLeft")
+            if (priv.isHorizontal && w > 0)
             {
-                x = Math.max(16, Math.min(w - width - 16, x - 32));
-                ev.accepted = true;
+                if (ev.key === "ArrowLeft")
+                {
+                    splitBox.splitRatio = Math.max(16, Math.min(w - width - 16, x - 32)) / w;
+                    ev.accepted = true;
+                }
+                if (ev.key === "ArrowRight")
+                {
+                    splitBox.splitRatio = Math.max(16, Math.min(w - width - 16, x + 32)) / w;
+                    ev.accepted = true;
+                }
             }
-            if (ev.key === "ArrowRight")
+            else if (h > 0)
             {
-                x = Math.max(16, Math.min(w - width - 16, x + 32));
-                ev.accepted = true;
+                if (ev.key === "ArrowUp")
+                {
+                    splitBox.splitRatio = Math.max(16, Math.min(h - height - 16, y - 32)) / h;
+                    ev.accepted = true;
+                }
+                if (ev.key === "ArrowDown")
+                {
+                    splitBox.splitRatio = Math.max(16, Math.min(h - height - 16, y + 32)) / h;
+                    ev.accepted = true;
+                }
             }
         }
 
         Box {
-            width: 1
-            fillHeight: true
+            width: priv.isHorizontal ? 1 : -1
+            height: priv.isVertical ? 1 : -1
+            fillWidth: priv.isVertical
+            fillHeight: priv.isHorizontal
             color: theme.borderColor
         }
 
         Box {
-            fillWidth: true
-            height: theme.itemHeightLarge
-            marginLeft: 2
-            marginRight: 2
+            fillWidth: priv.isHorizontal
+            fillHeight: priv.isVertical
+            
+            width: priv.isVertical ? theme.itemHeightLarge : -1
+            height: priv.isHorizontal ? theme.itemHeightLarge : -1
+
+            marginTop: priv.isVertical ? 2 : 0
+            marginLeft: priv.isHorizontal ? 2 : 0
+            marginRight: priv.isHorizontal ? 2 : 0
+            marginBottom: priv.isVertical ? 2 : 0
 
             color: parent.pressed ? theme.highlightBackgroundColor
                                   : parent.containsMouse ? theme.hoverBackgroundColor
@@ -125,14 +223,17 @@ Box {
             layout: "center"
 
             Label {
-                fontSize: parent.bbox.width
-                text: "[icon:drag_indicator]"
+                rotationAngle: priv.isVertical ? 90 : 0
+                fontSize: Math.min(parent.bbox.width, parent.bbox.height)
+                text: "[icon:ui-drag_indicator]"
             }
         }
 
         Box {
-            width: 1
-            fillHeight: true
+            width: priv.isHorizontal ? 1 : -1
+            height: priv.isVertical ? 1 : -1
+            fillWidth: priv.isVertical
+            fillHeight: priv.isHorizontal
             color: theme.borderColor
         }
 
@@ -143,9 +244,6 @@ Box {
         id: box2
 
         position: "free"
-        marginLeft: box1.width + gutter.width
-
-        fillWidth: true
-        fillHeight: true
+        profiles: [splitBox.flip ? positionProfile1 : positionProfile2]
     }
 }

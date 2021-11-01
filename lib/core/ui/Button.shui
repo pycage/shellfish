@@ -52,7 +52,7 @@ MouseBox {
 
         property highlighted: button.checked ||
                               button.containsMouse ||
-                              pressed
+                              button.pressed
     }
 
     function format(t)

@@ -54,6 +54,8 @@ canvas {
 
 div {
     touch-action: inherit;
+    /* boxes have their own local stacking context */
+    z-index: 0;
 }
 
 input[type=text], input[type=password] {

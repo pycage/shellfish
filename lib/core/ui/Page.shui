@@ -31,6 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * @class
  * @name Page
+ * @extends mid.MouseBox
  * @memberof ui
  *
  * @property {fengshui.Container} header - A container for displaying a page header.

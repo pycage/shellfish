@@ -30,7 +30,7 @@ require "shellfish/ui";
  * @class
  * @extends mid.MouseBox
  *
- * @property {mid.Item} target - The scrolling target.
+ * @property {mid.Item} target - (default: `parent`) The scrolling target.
  * @property {ui.ScrollIndicator} other - The other scroll indicator, if there 
  *                                        are two indicators, one for horizontal
  *                                        scrolling, and one for vertical scrolling.
@@ -40,7 +40,7 @@ require "shellfish/ui";
 MouseBox {
     id: box
 
-    property target: null
+    property target: parent
     property other: null
     property orientation: "vertical"
     property size: theme.paddingLarge
@@ -119,7 +119,7 @@ MouseBox {
     width: orientation === "vertical" ? size : -1
     height: orientation === "vertical" ? -1 : size
 
-    color: rgba(0, 0, 0, 0.3)
+    color: theme.primaryColor.alpha(0.1)
 
     onParentChanged: () =>
     {
@@ -154,9 +154,7 @@ MouseBox {
 
         color: pressed ? theme.highlightBackgroundColor
                        : containsMouse ? theme.hoverBackgroundColor
-                                       : theme.primaryBackgroundColor
-        borderWidth: 1
-        borderColor: theme.borderColor
+                                       : theme.primaryColor.alpha(0.4)
         borderRadius: 3
 
         onPointerDown: (ev) =>

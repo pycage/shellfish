@@ -80,7 +80,6 @@ Button {
         {
             ++selection;
         }
-        ev.accepted = true;
     }
 
     onKeyDown: (ev) =>

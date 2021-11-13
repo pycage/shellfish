@@ -52,12 +52,6 @@ canvas {
     pointer-events: none;
 }
 
-div {
-    touch-action: inherit;
-    /* boxes have their own local stacking context */
-    z-index: 0;
-}
-
 input[type=text], input[type=password] {
     border: none;
     background-color: transparent;
@@ -73,6 +67,14 @@ textarea {
     resize: none;
     overflow: scroll;
     font-size: 100%;
+}
+
+.sh-type-box {
+    pointer-events: none;
+    touch-action: pan-x pan-y;
+
+    /* boxes have their own local stacking context */
+    z-index: 0;
 }
 
 .sh-underline {
@@ -101,9 +103,21 @@ textarea {
     display: none !important;
 }
 
-.sh-disabled {
-    pointer-events: none;
+.sh-interactive {
+    pointer-events: all;
+    touch-action: initial;
 }
+
+.sh-disabled {
+    pointer-events: none !important;
+    touch-action: none !important;
+}
+
+.sh-disabled * {
+    pointer-events: none !important;
+    touch-action: none !important;
+}
+
 
 .sh-text-selectable::selection {
     color: var(--sh-selection-color);

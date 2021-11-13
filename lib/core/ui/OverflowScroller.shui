@@ -1,0 +1,298 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+/**
+ * Element representing a decoration for overflowing boxes, which allows to
+ * scroll the box. This is useful for toolbars or side panels.
+ *
+ * @example
+ * // a toolbar
+ * Box {
+ *     fillWidth: true
+ *     layout: "center-row"
+ *
+ *     Button {
+ *         icon: "ui-cut"
+ *     }
+ *
+ *     Button {
+ *         icon: "ui-copy"
+ *     }
+ *
+ *     Button {
+ *         icon: "ui-paste"
+ *     }
+ *
+ *     OverflowScroller { }
+ * }
+ *
+ * @memberof ui
+ * @name OverflowScroller
+ * @class
+ * @extends mid.Box
+ *
+ * @property {number} stepSize - (default: `theme.paddingMedium`) The step size for scrolling.
+ * @property {mid.Box} target - (default: `parent`) The target box.
+ */
+Box {
+    id: box
+
+    property stepSize: theme.paddingMedium
+
+    property target: parent
+
+    function scroll(axis, amount)
+    {
+        if (axis === "x")
+        {
+            if (amount < 0)
+            {
+                target.contentX = Math.max(0, target.contentX + amount);
+            }
+            else
+            {
+                const maxX = target.contentWidth - target.bbox.width;
+                target.contentX = Math.min(maxX, target.contentX + amount);
+            }
+        }
+        else
+        {
+            if (amount < 0)
+            {
+                target.contentY = Math.max(0, target.contentY + amount);
+            }
+            else
+            {
+                const maxY = target.contentHeight - target.bbox.height;
+                target.contentY = Math.min(maxY, target.contentY + amount);
+            }
+        }
+    }
+
+    visible: target.contentWidth > target.bbox.width ||
+             target.contentHeight > target.bbox.height
+
+    position: "free"
+    x: parent.contentX
+    y: parent.contentY
+    width: parent.bbox.width
+    height: parent.bbox.height
+
+    onInitialization: () =>
+    {
+        css("pointer-events", "none");
+    }
+
+    MouseBox {
+        visible: target.contentX > 0
+        position: "free"
+        width: theme.paddingLarge
+        fillHeight: true
+        layout: "center"
+        style: "sh-dropshadow"
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
+
+        onInitialization: () =>
+        {
+            css("pointer-events", "all");
+        }
+
+        // what a hack, but well...
+        onDrag: (ev) => { ev.accepted = true; }
+
+        onWheel: (ev) =>
+        {
+            if (ev.deltaX > 0 || ev.deltaY > 0)
+            {
+                box.scroll("x", box.stepSize);
+            }
+            else if (ev.deltaX < 0 || ev.deltaY < 0)
+            {
+                box.scroll("x", -box.stepSize);
+            }
+            ev.accepted = true;
+        }
+
+        Label { text: "[icon:core-arrow_left]" }
+
+        Timer {
+            running: parent.pressed
+            repeat: true
+            interval: 50
+
+            onTimeout: () =>
+            {
+                box.scroll("x", -box.stepSize);
+            }
+        }
+    }
+
+    MouseBox {
+        visible: target.bbox.width < target.contentWidth &&
+                 target.contentX + 0.5 < target.contentWidth - target.bbox.width
+        position: "free"
+        origin: "top-right"
+        width: theme.paddingLarge
+        fillHeight: true
+        layout: "center"
+        style: "sh-dropshadow"
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
+
+        onInitialization: () =>
+        {
+            css("pointer-events", "all");
+        }
+
+        // what a hack, but well...
+        onDrag: (ev) => { ev.accepted = true; }
+
+        onWheel: (ev) =>
+        {
+            if (ev.deltaX > 0 || ev.deltaY > 0)
+            {
+                box.scroll("x", box.stepSize);
+            }
+            else if (ev.deltaX < 0 || ev.deltaY < 0)
+            {
+                box.scroll("x", -box.stepSize);
+            }
+            ev.accepted = true;
+        }
+
+        Label { text: "[icon:core-arrow_right]" }
+
+        Timer {
+            running: parent.pressed
+            repeat: true
+            interval: 50
+
+            onTimeout: () =>
+            {
+                box.scroll("x", box.stepSize);
+            }
+        }
+    }
+
+    MouseBox {
+        visible: target.contentY > 0
+        position: "free"
+        fillWidth: true
+        height: theme.paddingLarge
+        layout: "center"
+        style: "sh-dropshadow"
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
+
+        onInitialization: () =>
+        {
+            css("pointer-events", "all");
+        }
+
+        // what a hack, but well...
+        onDrag: (ev) => { ev.accepted = true; }
+
+        onWheel: (ev) =>
+        {
+            if (ev.deltaX > 0 || ev.deltaY > 0)
+            {
+                box.scroll("y", box.stepSize);
+            }
+            else if (ev.deltaX < 0 || ev.deltaY < 0)
+            {
+                box.scroll("y", -box.stepSize);
+            }
+            ev.accepted = true;
+        }
+
+        Label { text: "[icon:core-arrow_up]" }
+
+        Timer {
+            running: parent.pressed
+            repeat: true
+            interval: 50
+
+            onTimeout: () =>
+            {
+                box.scroll("y", -box.stepSize);
+            }
+        }
+    }
+
+    MouseBox {
+        visible: target.bbox.height < target.contentHeight &&
+                 target.contentY + 0.5 < target.contentHeight - target.bbox.height
+        position: "free"
+        origin: "bottom-left"
+        fillWidth: true
+        height: theme.paddingLarge
+        layout: "center"
+        style: "sh-dropshadow"
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
+
+        onInitialization: () =>
+        {
+            css("pointer-events", "all");
+        }
+
+        // what a hack, but well...
+        onDrag: (ev) => { ev.accepted = true; }
+
+        onWheel: (ev) =>
+        {
+            if (ev.deltaX > 0 || ev.deltaY > 0)
+            {
+                box.scroll("y", box.stepSize);
+            }
+            else if (ev.deltaX < 0 || ev.deltaY < 0)
+            {
+                box.scroll("y", -box.stepSize);
+            }
+            ev.accepted = true;
+        }
+
+        Label { text: "[icon:core-arrow_down]" }
+
+        Timer {
+            running: parent.pressed
+            repeat: true
+            interval: 50
+
+            onTimeout: () =>
+            {
+                box.scroll("y", box.stepSize);
+            }
+        }
+    }
+
+    //Label { text: target.contentX + ", " + target.contentY + " @ " + target.contentWidth + " x " + target.contentHeight }
+}

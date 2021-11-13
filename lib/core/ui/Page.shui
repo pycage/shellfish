@@ -44,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @property {bool} frozen - [readonly] Whether the page is currently frozen. All pages on the page stack except for the current page are frozen.
  * @property {number} openingPercentage - [readonly] The transitioning opening percentage as a value between `0.0` and `1.0`. You may use this value for implementing custom opening animations.
  */
-Box {
+MouseBox {
     id: page
 
     container default: contentArea

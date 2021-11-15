@@ -45,9 +45,9 @@ MouseBox {
     property orientation: "vertical"
     property size: theme.paddingLarge
 
-    position: "free"
-    origin: orientation === "vertical" ? "top-right"
-                                       : "bottom-left"
+    position: "global"
+    x: parent.bbox.x + (orientation === "vertical" ? parent.bbox.width - width : 0)
+    y: parent.bbox.y + (orientation === "horizontal" ? parent.bbox.height - height : 0)
 
     visible: handle.sizePercents < 0.99
 
@@ -65,6 +65,9 @@ MouseBox {
                                       : 1
 
         property direction: 0
+
+        property otherMargin: box.other && box.other.visible ? (orientation === "vertical" ? width : height)
+                                                             : 0
     }
 
 
@@ -110,14 +113,11 @@ MouseBox {
 
     canFocus: true
 
-    fillWidth: orientation === "vertical" ? false : true
-    fillHeight: orientation === "vertical" ? true : false
-
     marginRight: orientation === "horizontal" && other && other.visible ? other.bbox.width : 0
     marginBottom: orientation === "vertical" && other && other.visible ? other.bbox.height : 0
     
-    width: orientation === "vertical" ? size : -1
-    height: orientation === "vertical" ? -1 : size
+    width: orientation === "vertical" ? size : parent.bbox.width - priv.otherMargin
+    height: orientation === "vertical" ? parent.bbox.height - priv.otherMargin : size
 
     color: theme.primaryColor.alpha(0.1)
 
@@ -155,7 +155,6 @@ MouseBox {
         color: pressed ? theme.highlightBackgroundColor
                        : containsMouse ? theme.hoverBackgroundColor
                                        : theme.primaryColor.alpha(0.4)
-        borderRadius: 3
 
         onPointerDown: (ev) =>
         {

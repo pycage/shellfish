@@ -359,12 +359,9 @@ MouseBox {
                     positionViewAt(cal.date[0] - 1900);
                 }
             }
+
+            ScrollIndicator { size: theme.paddingSmall }
         }
 
-        ScrollIndicator {
-            visible: yearPicker.visible
-            target: yearPicker
-            size: theme.paddingSmall
-        }
     }
 }

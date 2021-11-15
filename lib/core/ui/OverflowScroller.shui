@@ -91,9 +91,9 @@ Box {
     visible: target.contentWidth > target.bbox.width ||
              target.contentHeight > target.bbox.height
 
-    position: "free"
-    x: parent.contentX
-    y: parent.contentY
+    position: "global"
+    x: parent.bbox.x
+    y: parent.bbox.y
     width: parent.bbox.width
     height: parent.bbox.height
 

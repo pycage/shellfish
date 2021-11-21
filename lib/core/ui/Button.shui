@@ -35,7 +35,7 @@ require "shellfish/ui";
  * @property {string} text - (default: `""`) The label text to display.
  * @property {bool} flat - (default: `false`) Whether the button flat, i.e. borderless.
  * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
- * @property {mid.Object} labelProfile - (default: `Object { }`) The profile that is applied to the labels.
+ * @property {mid.Object} labelProfile - (default: `null`) The profile that is applied to the labels.
  */
 MouseBox {
     id: button
@@ -45,7 +45,7 @@ MouseBox {
     property text: ""
     property flat: false
     property checked: false
-    property labelProfile: Object { }
+    property labelProfile: null
 
     Object {
         id: priv
@@ -123,7 +123,7 @@ MouseBox {
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
 
-        profiles: [button.labelProfile]
+        profiles: button.labelProfile ? [button.labelProfile] : []
     }
 
     Label {
@@ -136,7 +136,7 @@ MouseBox {
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.format(button.text)
 
-        profiles: [button.labelProfile]
+        profiles: button.labelProfile ? [button.labelProfile] : []
     }
 
     Label {
@@ -147,7 +147,7 @@ MouseBox {
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 
-        profiles: [button.labelProfile]
+        profiles: button.labelProfile ? [button.labelProfile] : []
     }
 
     FocusIndicator { visible: button.focus }

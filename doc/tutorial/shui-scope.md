@@ -4,7 +4,7 @@ Identifiers may reference
 * element properties, events, and methods,
 * modules (by alias).
 
-# Identifier Lookup Strategy
+### Identifier Lookup Strategy
 
 Looking for an identifier when resolving a reference starts in the element where the reference occured
 and follows this strategy:
@@ -25,7 +25,7 @@ All locations thus searchable specify the identifier scope.
 **Advanced:** The function `__rslv__` is Shui's resolver function implementing the lookup strategy.
 It takes the identifier as a string value and has everything else it needs in its function closure.
 
-# Identifier Namespaces
+### Identifier Namespaces
 
 The same element may hold different identifiers in different namespaces. For instance,
 when creating a component file, the identifiers used inside the file are not visible

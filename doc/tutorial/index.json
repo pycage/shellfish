@@ -28,7 +28,10 @@
             "ui-theme": { "title": "Using the Theme for a Uniform Look" },
             "ui-profiles": { "title": "Using Profiles" },
             "ui-transitions": { "title": "Transitions" },
-            "ui-animations": { "title": "Complex Animations" }
+            "ui-animations": { "title": "Complex Animations" },
+            "ui-timer": { "title": "Timers" },
+            "ui-defered": { "title": "Defered Creation of UI Elements" },
+            "ui-listmodel": { "title": "List Models" }
         }
     }
 }

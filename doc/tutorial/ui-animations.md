@@ -1,6 +1,6 @@
 Shellfish's animation elements let you create complex animation storyboards.
 
-# Simple Animations
+### Simple Animations
 
 In {@tutorial ui-transitions} you already learned about using {@link mid.NumberAnimation}
 and easing curves for transitions. But {@link mid.NumberAnimation} also works as
@@ -36,7 +36,7 @@ Document {
 }
 ```
 
-# Sequential Animations
+### Sequential Animations
 
 The element {@link mid.SequentialAnimation} runs a number of child animations in
 sequence.
@@ -79,7 +79,7 @@ Document {
 }
 ```
 
-# Parallel Animations
+### Parallel Animations
 
 The element {@link mid.ParallelAnimation} runs a number of child animations simultaneously.
 
@@ -121,7 +121,7 @@ Document {
 }
 ```
 
-# Complex Animations
+### Complex Animations
 
 Because {@link mid.ParallelAnimation} and {@link mid.SequentialAnimation} are
 animation elements as well, you may put them as child animations into other parallel
@@ -261,5 +261,5 @@ Document {
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
 <span class="go-previous">{@tutorial ui-transitions}</span>
-<!-- <span class="go-next">{@tutorial ui-profiles}</span> -->
+<span class="go-next">{@tutorial ui-timer}</span>
 </div>

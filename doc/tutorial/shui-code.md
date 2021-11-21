@@ -1,7 +1,7 @@
 Method functions and event handlers are code blocks inside a Shui document. Code
 blocks are written in JavaScript language.
 
-# Accessing Elements
+### Accessing Elements
 
 Elements may be accessed by their identifier and used like normal objects.
 
@@ -39,7 +39,7 @@ code block. `self` may be omitted in this case, though.
 self.width = 100;
 ```
 
-# Local Variables
+### Local Variables
 
 Local variables may be declared with the JavaScript keywords `var`, `let`, and `const`.
 

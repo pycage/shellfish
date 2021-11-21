@@ -3,11 +3,19 @@ body {
     background-color: #fafafa;
 }
 
-pre {
+pre, img {
+    margin-left: 2rem;
+    margin-right: 2rem;
     border: 2px solid #888;
-    -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.main pre code {
+    white-space: pre;
+}
+
+.main img {
+    border-radius: 4px;
+    max-width: 20rem;
 }
 
 .main .readme h3 {

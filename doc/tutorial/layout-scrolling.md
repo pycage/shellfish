@@ -1,4 +1,4 @@
-# The Content Area
+### The Content Area
 
 The content area is the total area occuppied by the content of an overflowing box
 (see `overflowBehavior` in {@tutorial layout-position}), of which
@@ -7,7 +7,7 @@ only the portion inside the viewport is visible at a time.
 The read-only properties `contentWidth` and `contentHeight` tell the current
 size of the content area.
 
-# The Viewport
+### The Viewport
 
 The properties `contentX`, `contentY` specify the current top-left position of the
 scrolling viewport inside a box.
@@ -17,7 +17,7 @@ are updated automatically as the user scrolls.
 
 The size of the viewport is described by the read-only `bbox` property.
 
-# Scrollbars
+### Scrollbars
 
 The boolean `scrollbars` property of {@link mid.Box} controls if the HTML runtime
 environment shall provide native scrollbars automatically. The default value is `false`,

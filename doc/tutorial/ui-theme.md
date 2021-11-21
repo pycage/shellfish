@@ -1,7 +1,7 @@
 The module {@link ui shellfish/ui} is thoroughly using a {@link ui.Theme} element for
 maintaining a uniform look, and so should you.
 
-# Theme in the Document
+### Theme in the Document
 
 If you import {@link ui shellfish/ui} into your code, the element
 used for `Document` will be {@link ui.Document} (instead of {@link mid.Document}),
@@ -56,10 +56,12 @@ Document {
 }
 ```
 
+![](images/ui-theme-01.png)
+
 See {@link ui.Theme} for a description of the properties provided by themes.
 
 
-# Custom Themes
+### Custom Themes
 
 You may define custom themes by overriding the properties of {@link ui.Theme}
 that you want to change.
@@ -103,7 +105,7 @@ Document {
 }
 ```
 
-# Local Themes
+### Local Themes
 
 Elements may declare a local `theme` property, which will then be valid within
 the element and all of its children and descendents, since it overshadows the
@@ -137,10 +139,12 @@ Document {
 }
 ```
 
+![](images/ui-theme-02.png)
+
 Note that because {@link mid.Box} has no own property `theme`, you have to declare it with
 the `property` keyword.
 
-# Automatic Bright Mode / Dark Mode Switch
+### Automatic Bright Mode / Dark Mode Switch
 
 Some OS such as Windows, MacOS, or Android allow the user to switch between
 a bright mode and a dark mode in recent versions.

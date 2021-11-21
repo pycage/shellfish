@@ -1,7 +1,7 @@
-The {@link mid.Box} element is the base for all container items. Its property
+The {@link mid.Box Box} element is the base for all container items. Its property
 `layout` controls the flow of layouting child elements.
 
-# Column Layout
+### Column Layout
 
 In column layout, child elements are laid out in a flow from top to bottom.
 
@@ -17,6 +17,8 @@ Box {
 }
 ```
 
+![](images/layout-flow-01.png)
+
 Since `column` is the default value of the `layout` property, it may be
 omitted.
 
@@ -31,7 +33,7 @@ Box {
 }
 ```
 
-# Centered Column Layout
+### Centered Column Layout
 
 In centered column layout, the child elements are centered within the box and laid
 out in a flow from top to bottom.
@@ -48,7 +50,9 @@ Box {
 }
 ```
 
-# Row Layout
+![](images/layout-flow-02.png)
+
+### Row Layout
 
 In row layout, child elements are laid out in a flow from left to right.
 
@@ -64,7 +68,9 @@ Box {
 }
 ```
 
-# Centered Column Layout
+![](images/layout-flow-03.png)
+
+### Centered Row Layout
 
 In centered row layout, the child elements are centered within the box and laid
 out in a flow from left to right.
@@ -81,7 +87,9 @@ Box {
 }
 ```
 
-# Centered Layout
+![](images/layout-flow-04.png)
+
+### Centered Layout
 
 Centered layout centers the child element.
 
@@ -97,12 +105,12 @@ Box {
 
 Centered layout is just an alias for centered column layout.
 
-# Invisible Elements
+### Invisible Elements
 
 Elements with their `visible` property set to `false` are taken out of the
 layout flow and do not occupy space.
 
-# Overflow Behavior
+### Overflow Behavior
 
 If the child elements exceed the space inside their parent box, an overflow
 occurs. The property `overflowBehavior` of {@link mid.Box} controls how
@@ -155,6 +163,8 @@ Box {
     }
 }
 ```
+
+![](images/layout-flow-05.png)
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>

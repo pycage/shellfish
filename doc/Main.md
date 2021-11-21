@@ -53,7 +53,7 @@ Shui is the declarative UI description language used by Shellfish.
 * {@tutorial shui-templates}
 * {@tutorial shui-scope}
 
-### Layout
+### Layout Concepts
 
 Layouting elements on screen is intuitive, yet powerful.
 
@@ -72,6 +72,11 @@ Layouting elements on screen is intuitive, yet powerful.
 * {@tutorial ui-profiles}
 * {@tutorial ui-transitions}
 * {@tutorial ui-animations}
+* {@tutorial ui-timer}
+* {@tutorial ui-defered}
+<!--
+* {@tutorial ui-listmodel}
+-->
 
 <!--
 ### UI
@@ -133,6 +138,18 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### November 2021
+* Some rendering issues in the {@link mid.ListView} element have been fixed.
+* The superfluous `dataChange` event has been removed from {@link mid.Object}.
+  In case of delegate items, the `modelDataChanged` event does the same.
+* The new elements {@link ui.Window} and {@link ui.WindowTitle} provide a way
+  to put draggable and resizable floating windows into a parent box.
+* The {@link mid.Repeater} element now arranges spawned items in the order
+  given by its model when modifying the model.
+* The new element {@link ui.OverflowScroller} provides a way for the user to
+  scroll overflowing toolbars and other boxes.
+* The filesystem implementations {@link mid.DavFS} and {@link mid.OfflineFS}
+  have a move operation now, and file info objects have `ctime` and `mtime` fields
+  for the creation time and modification time, respectively.
 * The element {@link mid.MouseBox} can now detect clicks even if a drag handler
   is connected. Compatibility issues with the Sailfish Browser have been fixed.
 * The element {@link ui.SplitBox} has the new properties `orientation` for

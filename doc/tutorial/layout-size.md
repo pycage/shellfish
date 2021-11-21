@@ -1,7 +1,7 @@
 All visual element derive from {@link mid.Item} and have properties for controlling
 their size.
 
-# Width and Height
+### Width and Height
 
 The properties `width` and `height` control the width and height requested by
 the element.
@@ -31,7 +31,7 @@ Box {
 }
 ```
 
-# Filling Space
+### Filling Space
 
 The boolean properties `fillWidth` and `fillHeight` make elements fill the
 entire space available, overruling `width` and `height`. The available space
@@ -52,10 +52,12 @@ Box {
 }
 ```
 
+![](images/layout-size-01.png)
+
 If more than one child element uses `fillWidth` or `fillHeight`, the space
 is distributed equally.
 
-# Size Constraints
+### Size Constraints
 
 The properties `minWidth` and `minHeight` dictate the minimum size of an element.
 It is under no circumstances allowed to shrink smaller.
@@ -79,7 +81,7 @@ Box {
 }
 ```
 
-# Fixed Aspect Ratio
+### Fixed Aspect Ratio
 
 The property `aspectRatio` maintains a fixed side aspect ratio while sizing
 an element. The `width` and `height` properties constrain the area in which
@@ -101,7 +103,7 @@ Box {
 
 The aspect ratio is the width divided by the height.
 
-# The Bounding Box
+### The Bounding Box
 
 Since the `width` and `height` properties are size constraints rather than absolute
 size values, they cannot be used for determining an element's true size in general.
@@ -133,6 +135,8 @@ Box {
     }
 }
 ```
+
+![](images/layout-size-02.png)
 
 The bounding box of invisible elements is of width and height `0`.
 

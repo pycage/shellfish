@@ -1,4 +1,4 @@
-# Events and Handlers
+### Events and Handlers
 
 Some elements provide events that are triggered under certain circumstances,
 e.g. {@link mid.MouseBox MouseBox} has a `click` event that is fired whenever
@@ -42,7 +42,7 @@ onClick: () =>
 }
 ```
 
-# Custom Events
+### Custom Events
 
 You may define custom events on an element by using the `event` keyword together with a valid identifier name.
 Trigger the event by invoking it like a function.
@@ -63,7 +63,7 @@ MouseBox {
 }
 ```
 
-# Foreign Events
+### Foreign Events
 
 Elements may connect handler functions to events of another element. To do so,
 use the identifier of the other element.
@@ -85,7 +85,7 @@ Document {
 }
 ```
 
-# Assigning Multiple Event Handlers
+### Assigning Multiple Event Handlers
 
 Event handlers are different from properties in that assigning a new handler function will
 not replace the previous handler function. Instead, both functions will be called when

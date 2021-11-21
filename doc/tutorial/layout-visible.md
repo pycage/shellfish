@@ -20,6 +20,8 @@ Document {
 }
 ```
 
+![](images/layout-visible-01.png)
+
 The default value for `visible` is `true`.
 
 If an element containing child elements becomes invisible, the child elements

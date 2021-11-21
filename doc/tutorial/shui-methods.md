@@ -1,4 +1,4 @@
-# Declaring Methods
+### Declaring Methods
 
 Functions declared inside an element act as element methods. Use the `function`
 keyword to declare a method function.
@@ -14,7 +14,7 @@ Box {
 }
 ```
 
-# Invoking Methods
+### Invoking Methods
 
 To invoke a method function, call it as usual from within a block of code.
 

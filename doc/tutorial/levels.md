@@ -1,5 +1,3 @@
-# The Abstraction Levels of Shellfish
-
 In the article {@tutorial concepts}, you learned about the basic concepts of
 Shellfish's declarative nature. This is quite a high-level abstraction of
 code programming, compared to procedural code.
@@ -7,7 +5,7 @@ code programming, compared to procedural code.
 Shellfish itself is structured into three *levels of abstraction* with an API for
 each level.
 
-## low
+### low
 
 The low level (see {@link low}) provides a procedural API for dealing with the HTML
 DOM and CSS inside the browser or a similar runtime environment.
@@ -15,7 +13,7 @@ DOM and CSS inside the browser or a similar runtime environment.
 This is the foundation the higher levels build upon. As a programmer, you
 rarely have to use the low level API directly.
 
-## mid
+### mid
 
 The mid level (see {@link mid}) provides an object-oriented toolkit of UI elements.
 
@@ -39,7 +37,7 @@ The mid level builds the foundation for Shellfish's high level. Only when you in
 to implement new custom mid level elements derived from other elements, the mid level may
 concern you.
 
-## high
+### high
 
 The high level (see {@link high}) is a declarative wrapper for the mid level. This is
 the level where concepts such as dynamic values or bindings are introduced.
@@ -72,7 +70,7 @@ myDocument.init();
 
 This is where *Shui* -- short for Shellfish UI -- comes into play.
 
-## Shui
+### Shui
 
 Did I say there were three levels? Well, *Shui* is not a level, but a language
 different from JavaScript. It was designed for creating declarative high level code

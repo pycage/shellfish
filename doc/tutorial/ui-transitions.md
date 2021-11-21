@@ -1,7 +1,7 @@
 Some element properties are transitionable. This means, that when changing their
 value, the property will transition smoothly interpolated to the new value.
 
-# The `~Transition` Property
+### The `~Transition` Property
 
 For each transitionable property of an element, there is another property with
 the name of that property suffixed by `Transition` for describing the desired
@@ -13,7 +13,7 @@ means that the property changes its value abruptly without transitioning.
 Custom properties are always transitionable if they have a numeric value
 assigned at declaration time.
 
-# The `NumberAnimation` Element
+### The `NumberAnimation` Element
 
 The element `NumberAnimation` is used for describing transitions by assigning
 it to the `~Transition` property.
@@ -34,7 +34,7 @@ Document {
 }
 ```
 
-## Duration
+#### Duration
 
 The `duration` property specifies how long the transition will take to complete
 in milliseconds. By default, this is `300` ms.
@@ -55,7 +55,7 @@ Document {
 }
 ```
 
-## Easing Curves
+#### Easing Curves
 
 The `easing` property specifies the type of easing curve used for interpolating
 the transition. By default, this is `InOutQuad`.

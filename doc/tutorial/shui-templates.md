@@ -27,7 +27,7 @@ Document {
 }
 ```
 
-# Templates are Functions
+### Templates are Functions
 
 Technically, a template is a function that creates and returns a tree of elements when
 invoked. You may assign templates to properties and call them directly in JavaScript blocks.
@@ -61,7 +61,9 @@ Document {
 }
 ```
 
-# Templates are Components
+![](images/shui-templates-01.png)
+
+### Templates are Components
 
 Templates behave like components. This means they form their own scope for
 element identifiers. Element identifiers defined inside a template are not
@@ -110,9 +112,7 @@ Document {
 **Note:** If you try this example, you will notice that the `Label` elements appear underneath
 the `MouseBox`, even though the `Repeater` is placed before it. Why is this so?
 The repeater is an abstract element that puts the spawned child elements into its
-parent container. Since the children are spawned dynamically **after** the document was
-created, the `Label` elements are placed underneath the `MouseBox`. If you want to avoid this,
-put the `Repeater` into an extra `Box`.
+parent container. This will be explained later in {@tutorial ui-defered}.
 
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-containers}

@@ -1,7 +1,7 @@
 Profiles allow you to share a common set of properties between elements or
 to implement UI states.
 
-# The `profiles` Property
+### The `profiles` Property
 
 Every element has the `profiles` property which takes a list of profile objects.
 Profile objects are plain objects with some properties declared.
@@ -25,7 +25,7 @@ Document {
 }
 ```
 
-# Shared Changes
+### Shared Changes
 
 When the property value of a profile object changes, all elements sharing that profile
 will change accordingly.
@@ -60,7 +60,7 @@ Document {
 }
 ```
 
-# States
+### States
 
 You may implement varying UI states by exchanging the profiles at runtime.
 

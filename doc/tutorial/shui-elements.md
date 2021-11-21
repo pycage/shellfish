@@ -1,4 +1,4 @@
-# Elements
+### Elements
 
 A Shui file (or document) consists of a tree of nested elements. To create an element,
 put its class name with curly braces.
@@ -26,7 +26,7 @@ Document {
 Every Shui file consists of exactly one root element, which in turn may contain child elements.
 The root element of the main file must be `Document` for things to appear on screen.
 
-# Properties
+### Properties
 
 Elements are parameterized by properties. In order to assign a value to a property,
 name that property inside its element, and put a colon (`:`) followed by the
@@ -57,7 +57,7 @@ Label {
 }
 ```
 
-# Custom Properties
+### Custom Properties
 
 You may define custom properties on any element by using the `property` keyword before
 the assignment.
@@ -68,7 +68,7 @@ Label {
 }
 ```
 
-# Identifiers
+### Identifiers
 
 The `id` property is a special property for assigning a document-unique name to an element.
 Its value must be a valid identifier consisting of alphanumeric characters and the
@@ -115,7 +115,7 @@ Label {
 }
 ```
 
-# Property Bindings
+### Property Bindings
 
 Instead of values you may also assign JavaScript expressions to properties.
 
@@ -170,7 +170,7 @@ Box {
 }
 ```
 
-# Parent and Children
+### Parent and Children
 
 The elements placed inside an element are child elements. Each child element references
 the element it is contained in by the `parent` property.
@@ -198,7 +198,7 @@ Box {
 }
 ```
 
-# Comments
+### Comments
 
 Comments in Shui are written in JavaScript style (i.e. C++ style).
 

@@ -31,6 +31,8 @@ Document {
 }
 ```
 
+![](images/layout-ruler-01.png)
+
 This does not quite look the way it should. The labels and input boxes are
 not aligned. For a proper alignment, you would have to stretch every label
 to the width of the longest label. An elegant way of doing this is by using
@@ -100,6 +102,8 @@ Document {
 }
 ```
 
+![](images/layout-ruler-02.png)
+
 Finally, let's apply what you have learned so far, to make this a really fine
 layout.
 
@@ -161,6 +165,8 @@ Document {
 
 }
 ```
+
+![](images/layout-ruler-03.png)
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>

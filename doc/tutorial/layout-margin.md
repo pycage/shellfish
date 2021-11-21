@@ -55,6 +55,8 @@ Document {
 }
 ```
 
+![](images/layout-margin-01.png)
+
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
 <span class="go-previous">{@tutorial layout-flow}</span>

@@ -3,7 +3,7 @@ Modules are external files loaded by a Shui file. This can be:
 * files with JavaScript code
 * CSS files
 
-# Loading a Module
+### Loading a Module
 
 The `require` keyword may be used at the top of a Shui document before the root
 element to load modules from other files.
@@ -22,7 +22,7 @@ relative to the path of the current Shui document.
 Paths beginning with `/` are absolute paths on the web server serving the current
 Shui document.
 
-# Module Aliases
+### Module Aliases
 
 When loading a module, you may use the `as` keyword to assign an alias by which
 the module can be addressed. This, for instance, is required if you want to invoke
@@ -57,7 +57,7 @@ Document {
 The {@link mid mid} and {@link high high} modules are always available in a Shui document
 under the aliases `mid` and `high`, respectively, without having to import them explicitly.
 
-# Loading Stylesheets
+### Loading Stylesheets
 
 CSS stylesheets may be loaded as modules as well. But since stylesheets work
 globally, it is advisable to only load them at the beginning of the main Shui document.
@@ -70,7 +70,7 @@ require "./custom-icons.css";
 
 No module alias is used when loading a CSS stylesheet.
 
-# Shortcut Paths
+### Shortcut Paths
 
 Internal modules are available under shortcut paths, so you don't have to specify
 a path on the filesystem.
@@ -88,7 +88,7 @@ Use the shortcut together with the `require` keyword.
 require "shellfish/ui";
 ```
 
-# Shui Components
+### Shui Components
 
 Shui components are other Shui files that can be used just like elements.
 When loading components as modules, the filename determines the name of the component.
@@ -111,7 +111,7 @@ Document {
 
 Therefore, the filename of a component must begin with a capital letter.
 
-# JavaScript Files
+### JavaScript Files
 
 When loading a JavaScript file, only exported functions are accessible from
 outside. To export a function, assign it to the predefined `exports` object.

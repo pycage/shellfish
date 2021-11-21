@@ -20,7 +20,7 @@ which may not always be the place you want to put them.
 
 With containers, Shui gives you control over where child elements go.
 
-# The Default Container
+### The Default Container
 
 When adding child elements to a component, as shown in the example code above,
 the elements are placed into the default container. Usually, this is the
@@ -56,7 +56,7 @@ Document {
 }
 ```
 
-# Named Containers
+### Named Containers
 
 In addition to the default container, you may define various named containers with the
 `container` keyword.

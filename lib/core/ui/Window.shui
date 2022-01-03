@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -94,19 +94,19 @@ MouseBox {
         {
             dh = parent.bbox.height - (y + height);
         }
-        if (width + dw < minWidth)
+        if (bbox.width + dw < minWidth)
         {
             dw = minWidth - width;
         }
-        if (height + dh < minHeight)
+        if (bbox.height + dh < minHeight)
         {
             dh = minHeight - height;
         }
 
         const wx = x + dx;
         const wy = y + dy;
-        const ww = width + dw;
-        const wh = height + dh;
+        const ww = bbox.width + dw;
+        const wh = bbox.height + dh;
 
         if (wx !== x)
         {

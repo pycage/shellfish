@@ -123,6 +123,7 @@ Object {
                 marginRight: 2
                 marginBottom: 2
                 fontSize: theme.fontSizeSmall
+                literal: true
                 text: tooltip.text
             }
         }

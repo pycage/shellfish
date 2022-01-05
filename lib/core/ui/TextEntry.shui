@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -41,6 +41,10 @@ Box {
     property password: false
     property pattern: ".*"
 
+    property active: false
+
+    property selectRange: input.selectRange
+
     width: theme.itemWidthLarge
     height: theme.itemHeightSmall
     opacity: enabled && ancestorsEnabled ? 1 : 0.6
@@ -49,6 +53,14 @@ Box {
     borderWidth: 1
     borderRadius: theme.borderRadius
     layout: "center-row"
+    
+    onActiveChanged: () =>
+    {
+        if (active && ! input.focus)
+        {
+            input.focus = true;
+        }
+    }
 
     onTextChanged: () =>
     {
@@ -84,6 +96,18 @@ Box {
 
         onTextChanged: { box.text = text; }
         onReject: { flashAnimation.start(); }
+
+        onFocusChanged: () =>
+        {
+            if (focus)
+            {
+                box.active = true;
+            }
+            else
+            {
+                box.active = false;
+            }
+        }
     }
 
     NumberAnimation {

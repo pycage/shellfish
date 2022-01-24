@@ -227,11 +227,20 @@ MouseBox {
         fillWidth: true
     }
 
-    Box {
+    MouseBox {
         id: contentArea
 
         fillWidth: true
         fillHeight: true
+
+        onPointerDown: ev =>
+        {
+            if (! ev.directTarget)
+            {
+                // filter out clicks that did not target the window directly
+                ev.accepted = true;
+            }
+        }
     }
 
     // glass pane for intercepting clicks

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -47,7 +47,7 @@ Overlay {
 
     dim: true
 
-    MouseBox {
+    Window {
         id: win
 
         property offset: 1.0
@@ -55,17 +55,15 @@ Overlay {
         position: "free"
         x: (parent.bbox.width - bbox.width) / 2
         y: (parent.bbox.height - bbox.height) / 2 - (offset * theme.itemHeightLarge)
+        width: -1
+        height: -1
         maxWidth: documentRoot.windowWidth - 2 * theme.paddingLarge
         maxHeight: documentRoot.windowHeight - 2 * theme.paddingLarge
 
         offsetTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 
-        borderWidth: 2
-        borderColor: theme.borderColor
-        borderRadius: 3
-
         color: theme.primaryBackgroundColor
-        opacity: titlebar.pressed ? 0.4 : 1 * (1.0 - offset)
+        opacity: win.pressed ? 0.4 : 1 * (1.0 - offset)
 
         onInitialization: () =>
         {
@@ -78,37 +76,12 @@ Overlay {
         }
 
         // titlebar
-        MouseBox {
-            id: titlebar
+        into title WindowTitle {
+            showClose: false
+            showMaximize: false
+            showMinimize: false
 
-            fillWidth: true
-            height: theme.itemHeightMedium
-            color: theme.highlightBackgroundColor
-            layout: "center"
-
-            onMouseDown: (ev) =>
-            {
-                ev.accepted = true;
-            }
-
-            onMouseUp: (ev) =>
-            {
-                ev.accepted = true;
-            }
-
-            Label {
-                position: "free"
-                y: (parent.bbox.height - bbox.height) / 2
-                marginLeft: 8
-                marginRight: 8
-                fillWidth: true
-                bold: true
-                overflowBehavior: "ellipsis"
-                literal: true
-                color: theme.highlightColor
-                text: dialog.title
-            }
-
+            text: dialog.title
         }
 
         // content
@@ -126,8 +99,7 @@ Overlay {
         }
 
         ScrollIndicator {
-            marginTop: titlebar.bbox.height
-            marginBottom: theme.itemHeightMedium + theme.paddingSmall
+            height: contentArea.bbox.height + 2 * theme.paddingLarge
             target: contentArea
         }
 

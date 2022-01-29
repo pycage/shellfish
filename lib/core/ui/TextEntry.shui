@@ -34,7 +34,7 @@ require "shellfish/ui";
  * @property {bool} password - (default: `false`) Whether this is a password entry, i.e. the actual text is not displayed.
  * @property {string} pattern - (default: `".*"`) A regular expression for limiting the allowed text input, e.g. `"[0-9]*"` would allow entering numbers only.
  */
-Box {
+MouseBox {
     id: box
 
     property text: ""
@@ -69,6 +69,8 @@ Box {
             input.text = text;
         }
     }
+
+    onPointerDown: ev => { ev.accepted = true; }
 
     Box {
         id: flashBox

@@ -137,6 +137,23 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### February 2022
+* The method {@link ui.Menu#popup} accepts `null` as the `parent` parameter to
+  open the menu near the mouse pointer.
+* The element {@link mid.Document} has the new non-notifyable properties `pointerX`
+  and `pointerY` for accessing the document-global pointer coordinates.
+
+### January 2022
+* The new mthod {@link mid.ListModel#insertOrdered} inserts items into a list
+  model according to a custom comparator function. 
+* The new method {@link mid.Object#wait} lets you delay actions asynchronously.
+* The elements {@link mid.TextInput} and {@link mid.TextArea} have a new method
+  {@link mid.TextArea#selectRange selectRange} for selecting a range of text
+  programmatically.
+* The `PointerEvent` of {@link mid.MouseBox} has a new boolean property `directTarget`,
+  which tells if the MouseBox was targeted directly, i.e. the event did not come
+  through another MouseBox.
+
 ### November 2021
 * Some rendering issues in the {@link mid.ListView} element have been fixed.
 * The superfluous `dataChange` event has been removed from {@link mid.Object}.

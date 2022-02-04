@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -51,36 +51,48 @@ Overlay {
      * on the screen space. If `{ horizontal: true }` is passed for options,
      * the menu is instead shown right or left to the parent element.
      *
+     * If `null` is passed for the parent element, the menu is positioned near
+     * the mouse pointer.
+     *
      * @memberof ui.Menu.prototype
      * @name popup
      * @method
      *
-     * @param {mid.Item} parent - The parent element.
+     * @param {mid.Item} parent - The parent element, or `null`.
      * @param {object} [options = { }] - A dictionary of options.
      */
     function popup(parent, options)
     {
         options = options || { };
 
-        const parentBbox = parent.bbox;
-        if (options.horizontal)
+        if (parent)
         {
-            menuBox.anchorX = parentBbox.x + parentBbox.width;
-            menuBox.anchorY = parentBbox.y;
-            menuBox.anchorHeight = 0;
+            const parentBbox = parent.bbox;
+            if (options.horizontal)
+            {
+                menuBox.anchorX = parentBbox.x + parentBbox.width;
+                menuBox.anchorY = parentBbox.y;
+                menuBox.anchorHeight = 0;
+            }
+            else
+            {
+                menuBox.anchorX = parentBbox.x;
+                menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
+                menuBox.anchorHeight = parentBbox.height * 0.96;
+            }
+            menuRuler.request({
+                x: 0,
+                y: 0,
+                width: parentBbox.width - 2 * 1 /* border */,
+                height: 0
+            });
         }
         else
         {
-            menuBox.anchorX = parentBbox.x;
-            menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
-            menuBox.anchorHeight = parentBbox.height * 0.96;
+            menuBox.anchorX = documentRoot.pointerX + 4;
+            menuBox.anchorY = documentRoot.pointerY + 4;
+            menuBox.anchorHeight = 0;
         }
-        menuRuler.request({
-            x: 0,
-            y: 0,
-            width: parentBbox.width - 2 * 1 /* border */,
-            height: 0
-        });
 
         show();
 

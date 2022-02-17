@@ -1,9 +1,9 @@
 Templates in Shui are trees of elements that are created on demand.
 
 Some elements that spawn children dynamically make use of templates.
-The {@link mid.Repeater} element, for instance, creates a number of child
+The {@link html.Repeater} element, for instance, creates a number of child
 elements by applying a template assigned to the `delegate` property
-according to a {@link mid.ListModel list model}.
+according to a {@link html.ListModel list model}.
 
 Templates must be marked with the `template` keyword.
 

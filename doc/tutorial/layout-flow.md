@@ -1,4 +1,4 @@
-The {@link mid.Box Box} element is the base for all container items. Its property
+The {@link html.Box Box} element is the base for all container items. Its property
 `layout` controls the flow of layouting child elements.
 
 ### Column Layout
@@ -113,7 +113,7 @@ layout flow and do not occupy space.
 ### Overflow Behavior
 
 If the child elements exceed the space inside their parent box, an overflow
-occurs. The property `overflowBehavior` of {@link mid.Box} controls how
+occurs. The property `overflowBehavior` of {@link html.Box} controls how
 overflows are handled.
 
 `overflowBehavior` may have one of these values:

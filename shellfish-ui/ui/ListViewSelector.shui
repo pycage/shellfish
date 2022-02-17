@@ -1,0 +1,215 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Abstract element representing a selection decorator for list views.
+ *
+ * Adding this element to a {@link html.ListView} element adds item selection
+ * with or without multi-selection. Use the `selection` property in
+ * the list delegate to determine if the item should be highlighted.
+ *
+ * Make the list view focusable in order to enable keyboard navigation.
+ *
+ * Use the {@link ui.ListViewSelector#select} method to change the selection.
+ *
+ * @memberof ui
+ * @name ListViewSelector
+ * @class
+ * @extends html.Object
+ *
+ * @example
+ * ListView {
+ *     canFocus: true
+ *     cellWidth: bbox.width
+ *     cellHeight: theme.itemHeightSmall
+ *     model: myModel
+ *     delegate: template MouseBox {
+ *         color: selector.selection.has(modelData.index) ? theme.highlightBackgroundColor
+ *                                                        : theme.contentBackgroundColor
+ *
+ *         onClick: ev =>
+ *         {
+ *             selector.select(modelData.index, ev.ctrlKey ? "toggle" : "replace");
+ *             ev.accepted = true;
+ *         }
+ *     }
+ *
+ *     ListViewSelector { id: selector }
+ * }
+ *
+ * @property {bool} multiple - (default: `false`) If `true`, multiple list items may be selected.
+ * @property {Set} selection - [readonly] The set of the indexes of the currently selected items.
+ * @property {html.ListView} target - (default: `parent`) The target list view.
+ */
+Object {
+
+    property target: parent
+    property multiple: false
+    property selection: new Set()
+
+    Object {
+        id: priv
+        property selectionAnchor: -1
+        property lastSelected: -1
+        property itemsPerRow: Math.max(1, Math.floor(target.bbox.width / target.cellWidth))
+    }
+
+    /**
+     * Clears the selection.
+     *
+     * @memberof ui.ListViewSelector.prototype
+     * @name clear
+     * @method
+     */
+    function clear()
+    {
+        priv.selectionAnchor = -1;
+        priv.lastSelected = -1;
+        selection.clear();
+        selectionChanged();
+    }
+
+    /**
+     * Selects items depending on the given mode.
+     *
+     * Modes:
+     *  * `"range"` - Selects a range of items up to the given item.
+     *  * `"replace"` - Replaces the selection with the given item.
+     *  * `"toggle"` - Toggles the selection state of the given item.
+     *
+     * @memberof ui.ListViewSelector.prototype
+     * @name select
+     * @method
+     *
+     * @param {number} idx - The index of the item.
+     * @param {string} mode - The selection mode. One of `range|replace|toggle`
+     */
+    function select(idx, mode)
+    {
+        if (! target)
+        {
+            return;
+        }
+
+        if (multiple && mode === "toggle")
+        {
+            if (selection.has(idx))
+            {
+                selection.delete(idx);
+            }
+            else
+            {
+                selection.add(idx);
+            }
+            priv.selectionAnchor = idx;
+            priv.lastSelected = idx;
+            selectionChanged();
+        }
+        else if (multiple && mode === "range" && priv.selectionAnchor !== -1)
+        {
+            const begin = Math.min(idx, priv.selectionAnchor);
+            const end = Math.max(idx, priv.selectionAnchor);
+
+            for (let i = 0; i < target.count; ++i)
+            {
+                if (i >= begin && i <= end)
+                {
+                    selection.add(i);
+                }
+                else
+                {
+                    selection.delete(i);
+                }
+            }
+            priv.lastSelected = idx;
+            selectionChanged();
+        }
+        else if (mode === "replace")
+        {
+            priv.selectionAnchor = idx;
+            priv.lastSelected = idx;
+            selection.clear();
+            selection.add(idx);
+            selectionChanged();
+        }
+        target.positionViewAt(idx);
+    }
+
+    target.onCountChanged: () =>
+    {
+        clear();
+    }
+
+    target.onFocusChanged: () =>
+    {
+        if (target.focus && selection.size === 0 && target.count > 0)
+        {
+            select(0, "replace");
+        }
+    }
+
+    target.onKeyDown: ev =>
+    {
+        const pos = priv.lastSelected;
+
+        if (ev.key === "ArrowUp" && selection.size > 0)
+        {
+            const newPos = Math.max(0, pos - priv.itemsPerRow);
+            select(newPos, (multiple && ev.shiftKey) ? "range" : "replace");
+            priv.lastSelected = newPos;
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowDown" && selection.size > 0)
+        {
+            const newPos = Math.min(target.count - 1, pos + priv.itemsPerRow);
+            select(newPos, (multiple && ev.shiftKey) ? "range" : "replace");
+            priv.lastSelected = newPos;
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowLeft" && priv.itemsPerRow > 1)
+        {
+            const newPos = Math.max(0, pos - 1);
+            select(newPos, (multiple && ev.shiftKey) ? "range" : "replace");
+            priv.lastSelected = newPos;
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowRight" && priv.itemsPerRow > 1)
+        {
+            const newPos = Math.min(target.count - 1, pos + 1);
+            select(newPos, (multiple && ev.shiftKey) ? "range" : "replace");
+            priv.lastSelected = newPos;
+            ev.accepted = true;
+        }
+        else if (ev.key === "a" && ev.ctrlKey && multiple)
+        {
+            for (let i = 0; i < target.count; ++i)
+            {
+                selection.add(i);
+            }
+            selectionChanged();
+            ev.accepted = true;
+        }
+    }
+
+}

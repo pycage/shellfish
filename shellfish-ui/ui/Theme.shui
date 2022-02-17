@@ -1,0 +1,91 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+/**
+ * Element representing the default UI theme. Custom themes derive from this element.
+ *
+ * @class
+ * @name Theme
+ * @extends html.Object
+ * @memberof ui
+ *
+ * @property {html.Color} primaryColor - The primary foreground (text) color.
+ * @property {html.Color} primaryBackgroundColor - The primary background color.
+ * @property {html.Color} secondaryColor - The secondary foreground (text) color.
+ * @property {html.Color} secondaryBackgroundColor - The secondary background color.
+ * @property {html.Color} highlightColor - The color for highlighted text.
+ * @property {html.Color} highlightBackgroundColor - The highlighted background color.
+ * @property {html.Color} hoverBackgroundColor - The hover-highlighted background color (usually less strong than `highlightBackgroundColor`).
+ * @property {html.Color} disabledColor - The color for disabled text.
+ * @property {html.Color} contentBackgroundColor - The color for content areas, such as list views.
+ * @property {html.Color} contentAltBackgroundColor - The alternating color for content areas, e.g. for alternating backgrounds in a list view.
+ * @property {html.Color} borderColor - The color for UI borders.
+ * @property {number} borderRadius - The radius of rounded UI borders.
+ * @property {number} itemWidthSmall - The width of small UI items.
+ * @property {number} itemWidthMedium - The width of medium UI items.
+ * @property {number} itemWidthLarge - The width of large UI items.
+ * @property {number} itemHeightSmall - The height of small UI items.
+ * @property {number} itemHeightMedium - The height of medium UI items.
+ * @property {number} itemHeightLarge - The height of large UI items.
+ * @property {number} paddingSmall - A small amount of padding between UI items.
+ * @property {number} paddingMedium - A medium amount of padding between UI items.
+ * @property {number} paddingLarge - A large amount of padding between UI items.
+ * @property {number} fontSizeSmall - The font size for small text.
+ * @property {number} fontSizeMedium - The font size for regular text.
+ * @property {number} fontSizeLarge - The font size for large text.
+ */
+Object {
+
+    property primaryColor: colorName("#404040")
+    property primaryBackgroundColor: colorName("#fafafa")
+    
+    property secondaryColor: colorName("#606060")
+    property secondaryBackgroundColor: colorName("#e0e0e0")
+
+    property highlightColor: colorName("#fafafa")
+    property highlightBackgroundColor: colorName("#23527c")
+    property hoverBackgroundColor: highlightBackgroundColor.saturation(0.2).brightness(2.0)
+
+    property disabledColor: colorName("#808080")
+
+    property contentBackgroundColor: colorName("#ffffff")
+    property contentAltBackgroundColor: colorName("#f0f0f0")
+
+    property borderColor: colorName("#808080")
+    property borderRadius: 3
+    
+    property itemWidthSmall: 32
+    property itemWidthMedium: 64
+    property itemWidthLarge: 128
+
+    property itemHeightSmall: 24
+    property itemHeightMedium: 32
+    property itemHeightLarge: 42
+
+    property paddingSmall: 8
+    property paddingMedium: 12
+    property paddingLarge: 16
+
+    property fontSizeSmall: 12
+    property fontSizeMedium: 16
+    property fontSizeLarge: 32
+}

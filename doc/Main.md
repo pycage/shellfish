@@ -138,47 +138,53 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### February 2022
+* The `function` keyword may now be used in JavaScript sections of Shui files.
+* Shellfish is expanding its reach to the server-side to allow full-stack
+  implementations with declarative Shui code and the new `shellfish-server` API.
+* **API Break:** The module `shellfish/mid` is now named `shellfish/html` and is
+  no longer imported by default in Shui documents. Shui modules with UI code
+  should import `shellfish/ui` (which includes `shellfish/html`).
 * The method {@link ui.Menu#popup} accepts `null` as the `parent` parameter to
   open the menu near the mouse pointer.
-* The element {@link mid.Document} has the new non-notifyable properties `pointerX`
+* The element {@link html.Document} has the new non-notifyable properties `pointerX`
   and `pointerY` for accessing the document-global pointer coordinates.
 
 ### January 2022
-* The new mthod {@link mid.ListModel#insertOrdered} inserts items into a list
+* The new method {@link html.ListModel#insertOrdered} inserts items into a list
   model according to a custom comparator function. 
-* The new method {@link mid.Object#wait} lets you delay actions asynchronously.
-* The elements {@link mid.TextInput} and {@link mid.TextArea} have a new method
-  {@link mid.TextArea#selectRange selectRange} for selecting a range of text
+* The new method {@link html.Object#wait} lets you delay actions asynchronously.
+* The elements {@link html.TextInput} and {@link html.TextArea} have a new method
+  {@link html.TextArea#selectRange selectRange} for selecting a range of text
   programmatically.
-* The `PointerEvent` of {@link mid.MouseBox} has a new boolean property `directTarget`,
+* The `PointerEvent` of {@link html.MouseBox} has a new boolean property `directTarget`,
   which tells if the MouseBox was targeted directly, i.e. the event did not come
   through another MouseBox.
 
 ### November 2021
-* Some rendering issues in the {@link mid.ListView} element have been fixed.
-* The superfluous `dataChange` event has been removed from {@link mid.Object}.
+* Some rendering issues in the {@link html.ListView} element have been fixed.
+* The superfluous `dataChange` event has been removed from {@link html.Object}.
   In case of delegate items, the `modelDataChanged` event does the same.
 * The new elements {@link ui.Window} and {@link ui.WindowTitle} provide a way
   to put draggable and resizable floating windows into a parent box.
-* The {@link mid.Repeater} element now arranges spawned items in the order
+* The {@link html.Repeater} element now arranges spawned items in the order
   given by its model when modifying the model.
 * The new element {@link ui.OverflowScroller} provides a way for the user to
   scroll overflowing toolbars and other boxes.
-* The filesystem implementations {@link mid.DavFS} and {@link mid.OfflineFS}
+* The filesystem implementations {@link html.DavFS} and {@link html.OfflineFS}
   have a move operation now, and file info objects have `ctime` and `mtime` fields
   for the creation time and modification time, respectively.
-* The element {@link mid.MouseBox} can now detect clicks even if a drag handler
+* The element {@link html.MouseBox} can now detect clicks even if a drag handler
   is connected. Compatibility issues with the Sailfish Browser have been fixed.
 * The element {@link ui.SplitBox} has the new properties `orientation` for
   changing the layout orientation, and `flip` for flipping both containers.
   The new property `splitRatio` lets you change the split ratio programmatically.
 
 ### October 2021
-* The element {@link mid.Repeater} has a new property `count` that tells the number
+* The element {@link html.Repeater} has a new property `count` that tells the number
   of spawned items.
-* The element {@link mid.TextArea} has a new method {@link mid.TextArea#shiftRows shiftRows}
+* The element {@link html.TextArea} has a new method {@link html.TextArea#shiftRows shiftRows}
   for shifting a block of rows.
-* The element {@link mid.TextArea} has a new method {@link mid.TextArea#rowAt rowAt}
+* The element {@link html.TextArea} has a new method {@link html.TextArea#rowAt rowAt}
   for retrieving the row number at a given text position.
 * The element {@link ui.TextArea} has new containers `backgroundContainer`,
   `bottomMarginContainer`, `topMarginContainer`, `leftMarginContainer`, and
@@ -186,36 +192,36 @@ Layouting elements on screen is intuitive, yet powerful.
   etc.
 * The JavaScript regular expressions syntax (e.g. `/abc.*[0-9]/i`) may now be used
   in Shui files.
-* There are new elements {@link mid.SyntaxHighlighter} and {@link mid.SyntaxToken}
+* There are new elements {@link html.SyntaxHighlighter} and {@link html.SyntaxToken}
   for defining syntax highlighting rules for text.
-* The element {@link mid.Label} has a new property `filter` for implementing advanced
+* The element {@link html.Label} has a new property `filter` for implementing advanced
   text processing, e.g. syntax highlighting.
-* The element {@link mid.TextArea} has a new property `caretColor` for changing the
+* The element {@link html.TextArea} has a new property `caretColor` for changing the
   caret color.
-* The new elements {@link mid.LocalStorage} and {@link mid.FileStorage} persist any of their
-  custom properties to the HTML5 local storage or a file on a {@link mid.Filesystem} automatically.
-* The new element {@link mid.History} allows to control the browser history.
+* The new elements {@link html.LocalStorage} and {@link html.FileStorage} persist any of their
+  custom properties to the HTML5 local storage or a file on a {@link html.Filesystem} automatically.
+* The new element {@link html.History} allows to control the browser history.
 * The new function {@link low.later} returns a Promise object that resolves when
   idle.
-* {@link mid.DavFS} has a new property `cache` for caching list results.
-* {@link mid.DavFS} has a new property `fetchManager` for using a {@link low.FetchManager}
+* {@link html.DavFS} has a new property `cache` for caching list results.
+* {@link html.DavFS} has a new property `fetchManager` for using a {@link low.FetchManager}
   instance.
-* The `click` event of {@link mid.MouseBox} reports the pressed buttons now.
+* The `click` event of {@link html.MouseBox} reports the pressed buttons now.
 
 ### September 2021
-* {@link mid.TextArea} has new methods {@link mid.TextArea#eraseAt eraseAt},
-  {@link mid.TextArea#insertAt insertAt}, {@link mid.TextArea#positionAt positionAt},
-  and {@link mid.TextArea#setCursor setCursor}.
+* {@link html.TextArea} has new methods {@link html.TextArea#eraseAt eraseAt},
+  {@link html.TextArea#insertAt insertAt}, {@link html.TextArea#positionAt positionAt},
+  and {@link html.TextArea#setCursor setCursor}.
 * The function {@link fengshui.load} returns a Promise object now.
-* {@link mid.FpsMeter} has new property `manual` and method
-  {@link mid.FpsMeter#takeFrame takeFrame} for manual frame counting.
+* {@link html.FpsMeter} has new property `manual` and method
+  {@link html.FpsMeter#takeFrame takeFrame} for manual frame counting.
 * The `await` keyword may now be used in JavaScript sections of Shui files.
-* {@link mid.Item} has the new property `aspectRatio` for maintaining a fixed aspect
+* {@link html.Item} has the new property `aspectRatio` for maintaining a fixed aspect
   ratio when resizing an element.
 * There is a new element {@link ui.Tooltip} for tooltips.
-* The property `inputDevice` of {@link mid.Document} shows the state `keyboard` now
+* The property `inputDevice` of {@link html.Document} shows the state `keyboard` now
   during keyboard-based navigation.
-* {@link mid.Item} has new properties `maxWidth` and `maxHeight`.
+* {@link html.Item} has new properties `maxWidth` and `maxHeight`.
 * Improved performance of element creation.
 
 ### August 2021

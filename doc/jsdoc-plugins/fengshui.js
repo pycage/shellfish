@@ -1,6 +1,6 @@
 // JSDoc plugin for compiling Shui to JavaScript
 
-const modFengshui = require("./../../lib/fengshui.js");
+const modFengshui = require("./../../shellfish-core/fengshui.js");
 const modPath = require("path");
 
 exports.handlers = {

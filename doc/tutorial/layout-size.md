@@ -1,4 +1,4 @@
-All visual element derive from {@link mid.Item} and have properties for controlling
+All visual element derive from {@link html.Item} and have properties for controlling
 their size.
 
 ### Width and Height
@@ -18,8 +18,8 @@ Box {
 ```
 
 If `width` or `height` is set to `-1` (which is the default value), the element
-adjusts its size automatically. For example, {@link mid.Label} elements span
-to fit their text this way and {@link mid.Box} elements span to fit their children.
+adjusts its size automatically. For example, {@link html.Label} elements span
+to fit their text this way and {@link html.Box} elements span to fit their children.
 
 ```
 Box {

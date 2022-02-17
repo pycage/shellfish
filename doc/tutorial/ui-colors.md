@@ -1,9 +1,9 @@
-The base class {@link mid.Object} provides several functions to create colors
+The base class {@link html.Object} provides several functions to create colors
 for assigning them to elements.
 
 ### Color by Name
 
-The function {@link mid.Object#colorName colorName} creates a {@link mid.Color color}
+The function {@link html.Object#colorName colorName} creates a {@link html.Color color}
 object from a name string. Shellfish supports the standard set of
 {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value CSS color names.},
 including `transparent`, which is invisible with the background shining through.
@@ -56,7 +56,7 @@ Box {
 
 ### Color by RGBA
 
-The function {@link mid.Object#rgba rgba} creates a {@link mid.Color color}
+The function {@link html.Object#rgba rgba} creates a {@link html.Color color}
 object from red, green, blue, and alpha values ranging between `0.0` and `1.0`.
 
 ```
@@ -69,7 +69,7 @@ Box {
 
 ### Color by RGB
 
-The function {@link mid.Object#rgb rgb} creates a {@link mid.Color color}
+The function {@link html.Object#rgb rgb} creates a {@link html.Color color}
 object from red, green, and blue values ranging between `0.0` and `1.0`.
 
 
@@ -83,7 +83,7 @@ Box {
 
 ### Color Modifications
 
-The {@link mid.Color color} object has methods for modifying colors.
+The {@link html.Color color} object has methods for modifying colors.
 
 #### Changing the Alpha Channel
 

@@ -1,0 +1,171 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a UI spinbox for setting a numeric value within a certain range.
+ *
+ * @memberof ui
+ * @name SpinBox
+ * @class
+ * @extends html.Box
+ *
+ * @property {number} minValue - (default: `0`) The minimum allowed value.
+ * @property {number} maxValue - (default: `100`) The maximum allowed value.
+ * @property {number} value - (default: `0`) The current value.
+ * @property {number} stepSize - (default: `5`) The step size between value changes when pressing one of the step buttons.
+ */
+Box {
+    id: spinBox
+
+    property minValue: 0
+    property maxValue: 100
+    property value: 0
+    property stepSize: 5
+
+    /**
+     * Sets the current value.
+     *
+     * @memberof ui.SpinBox.prototype
+     * @name setValue
+     * @method
+     *
+     * @param {number} v - The new value.
+     */
+    function setValue(v)
+    {
+        const nv = Math.max(minValue, Math.min(maxValue, v));
+        if (nv !== value)
+        {
+            value = nv;
+        }
+    }
+
+    onMinValueChanged: () => { setValue(value); }
+    onMaxValueChanged: () => { setValue(value); }
+    onValueChanged: () => { setValue(value); }
+
+    width: theme.itemWidthLarge
+    height: theme.itemHeightSmall
+
+    layout: "center-row"
+
+    Button {
+        enabled: spinBox.value > spinBox.minValue
+        flat: true
+        checked: pressed
+        icon: "core-minus"
+
+        onClick: () =>
+        {
+            spinBox.setValue(spinBox.value - spinBox.stepSize);
+        }
+
+        Timer {
+            running: parent.pressed && parent.enabled
+            repeat: true
+
+            onRunningChanged: () =>
+            {
+                interval = 300;
+            }
+
+            onTimeout: () =>
+            {
+                spinBox.setValue(spinBox.value - spinBox.stepSize);
+
+                if (interval > 1)
+                {
+                    interval = interval * 0.9;
+                }
+            }
+
+        }
+    }
+
+    TextEntry {
+        property value: spinBox.value
+
+        fillWidth: true
+        pattern: "-?[0-9]*"
+        text: "" + spinBox.value
+
+        onValueChanged: () =>
+        {
+            const t = "" + value;
+            if (t !== text)
+            {
+                text = t;
+            }
+        }
+
+        onTextChanged: () =>
+        {
+            if (text !== "" && text !== "-")
+            {
+                spinBox.setValue(Number.parseInt(text));
+                if (text !== "" + spinBox.value)
+                {
+                    text = "" + spinBox.value;
+                }
+            }
+            else
+            {
+                text = "" + spinBox.minValue;
+            }
+        }
+    }
+
+    Button {
+        enabled: spinBox.value < spinBox.maxValue
+        flat: true
+        checked: pressed
+        icon: "core-plus"
+
+        onClick: () =>
+        {
+            spinBox.setValue(spinBox.value + spinBox.stepSize);
+        }
+
+        Timer {
+            running: parent.pressed && parent.enabled
+            repeat: true
+
+            onRunningChanged: () =>
+            {
+                interval = 300;
+            }
+
+            onTimeout: () =>
+            {
+                spinBox.setValue(spinBox.value + spinBox.stepSize);
+
+                if (interval > 1)
+                {
+                    interval = interval * 0.9;
+                }
+            }
+
+        }
+    }
+}

@@ -1,0 +1,287 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing the document. This is an extension of the {@link html.Document Document class}
+ * and adds theming as well as some modal standard dialogs.
+ *
+ * The document is accessible anywhere from within its subtree by the `documentRoot`
+ * property.
+ *
+ * The current theme is accessed by the `theme` property. The theme may be changed
+ * at run-time.
+ *
+ * The shortcut receiver is a component for receiving keyboard shortcuts. By default,
+ * the document is the shortcut receiver. Sub-elements, however, may redefine the
+ * `shortcutReceiver` property for handling keyboard shortcuts. This way, different
+ * scopes of keyboard shortcuts can be implemented and even nested.
+ *
+ * Keyboard shortcuts may be defined by any component by connecting to the `keyDown`
+ * event of the effective shortcut receiver, accessed by the `shortcutReceiver` reference.
+ *
+ *     shortcutReceiver.onKeyDown: (ev) =>
+ *     {
+ *         // handle the shortcuts...
+ *     }
+ *
+ * @memberof ui
+ * @name Document
+ * @class
+ * @extends html.Document
+ *
+ * @property {ui.Document} documentRoot - [readonly] A reference to this document. Elements within the document may use this reference.
+ * @property {ui.Document} shortcutReceiver - [readonly] A reference to this document for functioning as a receiver of keyboard shortcuts.
+ * @property {ui.Theme} theme - (default: `Theme { }`) The current UI theme.
+ */
+html.Document {
+
+    // the Document element can be accessed from anywhere by 'documentRoot'
+    property documentRoot: self
+    property shortcutReceiver: self
+
+    property theme: Theme { }
+
+    /**
+     * Shows a generic modal message dialog.
+     *
+     * @example
+     * showMessageDialog("Error opening file", "core-bug", "The file could not be opened.", [
+     *     { label: "Retry", callback: retryCallback },
+     *     { label: "Cancel", callback: cancelCallback }
+     * ]);
+     *
+     * @memberof ui.Document.prototype
+     * @name showMessageDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} icon - The name of the icon on the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {object[]} buttons - The dialog buttons. Each item in the list is a `{ label, callback }` object.
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showMessageDialog(title, icon, message, buttons)
+    {
+        const dlg = _messageDialogT();
+        dlg.title = title;
+        dlg.icon = icon;
+        dlg.message = message;
+        dlg.buttons = buttons;
+        dlg.show();
+        return dlg;
+    }
+
+    /**
+     * Shows a modal info message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showInfoDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showInfoDialog(title, message, callback)
+    {
+        return showMessageDialog(title, "core-info", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    /**
+     * Shows a modal warning message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showWarningDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showWarningDialog(title, message, callback)
+    {
+        return showMessageDialog(title, "core-warning", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    /**
+     * Shows a modal error message dialog.
+     *
+     * @memberof ui.Document.prototype
+     * @name showErrorDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} callback - The callback that is invoked when the user closes the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showErrorDialog(title, message, callback)
+    {
+        return showMessageDialog(title, "core-notification", message, [
+            { label: "Ok", callback: callback }
+        ]);
+    }
+
+    /**
+     * Shows a modal question dialog with buttons for answering "Yes" or "No".
+     *
+     * @memberof ui.Document.prototype
+     * @name showQuestionDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @param {function} yesCallback - The callback that is invoked when the user chooses "Yes".
+     * @param {function} noCallback - The callback that is invoked when the user chooses "No".
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showQuestionDialog(title, message, yesCallback, noCallback)
+    {
+        return showMessageDialog(title, "core-question", message, [
+            { label: "Yes", callback: yesCallback },
+            { label: "No", callback: noCallback }
+        ]);
+    }
+
+    /**
+     * Shows a modal progress dialog.
+     *
+     * The returned dialog instance has a property `progress` for changing the
+     * progress value (a value between 0.0 and 1.0), and a property `message`
+     * for changing the current message text.
+     *
+     * @memberof ui.Document.prototype
+     * @name showProgressDialog
+     * @method
+     *
+     * @param {string} title - The title of the dialog.
+     * @param {string} message - The message text of the dialog.
+     * @return {ui.Dialog} The dialog instance.
+     */
+    function showProgressDialog(title, message)
+    {
+        const dlg = _progressDialogT();
+        dlg.title = title;
+        dlg.message = message;
+        dlg.show();
+        return dlg;
+    }
+
+    property _messageDialogT: template Dialog {
+        id: dialog
+
+        property buttons: []
+
+        property icon: ""
+        property message: ""
+
+        into buttons Repeater {
+            id: buttonsRepeater
+
+            model: ListModel { data: dialog.buttons }
+
+            delegate: template Button {
+                marginLeft: theme.paddingSmall
+                icon: modelData.value.icon || ""
+                text: modelData.value.label
+                onClick: () =>
+                {
+                    const cb = modelData.value.callback;
+                    dialog.close();
+                    if (cb)
+                    {
+                        cb();
+                    }
+                }
+
+                dialog.onKeyDown: (ev) =>
+                {
+                    if (buttonsRepeater.model.size === 1 &&
+                        (ev.key === "Enter" || ev.key === "Escape"))
+                    {
+                        click(ev);
+                    }
+                    else if (modelData.index === 0 && ev.key === "Enter")
+                    {
+                        click(ev);
+                    }
+                    else if (modelData.index === 1 && ev.key === "Escape")
+                    {
+                        click(ev);
+                    }
+                }
+            }
+        }
+
+        Box {
+            layout: "row"
+
+            Label {
+                visible: dialog.icon !== ""
+                marginRight: theme.paddingLarge
+                fontSize: theme.itemHeightLarge
+                text: visible ? "[icon:" + dialog.icon + "]" : ""
+            }
+
+            Label {
+                fillWidth: true
+                overflowBehavior: "wrap"
+                text: dialog.message
+            }
+        }
+    }
+
+    property _progressDialogT: template Dialog {
+        id: dialog
+
+        property message: ""
+        property progress: 0  /* between 0 and 1 */
+        
+        Box {
+            width: 400
+
+            Label {
+                fillWidth: true
+                overflowBehavior: "wrap"
+                text: message
+            }
+            
+            Box {
+                marginTop: theme.paddingMedium
+                marginRight: parent.bbox.width * (1.0 - dialog.progress)
+                marginBottom: theme.paddingMedium
+                fillWidth: true
+                height: theme.paddingSmall
+                color: theme.primaryColor
+            }
+        }
+
+    }
+}

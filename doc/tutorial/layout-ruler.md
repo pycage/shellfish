@@ -36,9 +36,9 @@ Document {
 This does not quite look the way it should. The labels and input boxes are
 not aligned. For a proper alignment, you would have to stretch every label
 to the width of the longest label. An elegant way of doing this is by using
-a {@link mid.Ruler} element.
+a {@link html.Ruler} element.
 
-The {@link mid.Ruler} is an abstract element that collects bounding boxes and computes
+The {@link html.Ruler} is an abstract element that collects bounding boxes and computes
 maximum and minimum bounding boxes from the collected values, exposed as read-only
 properties `min` and `max`.
 

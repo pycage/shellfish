@@ -4,8 +4,8 @@ maintaining a uniform look, and so should you.
 ### Theme in the Document
 
 If you import {@link ui shellfish/ui} into your code, the element
-used for `Document` will be {@link ui.Document} (instead of {@link mid.Document}),
-which is an extension of {@link mid.Document}.
+used for `Document` will be {@link ui.Document} (instead of {@link html.Document}),
+which is an extension of {@link html.Document}.
 
 It has a property `theme` holding the default theme.
 By assigning another theme to this property, you may change the application
@@ -141,7 +141,7 @@ Document {
 
 ![](images/ui-theme-02.png)
 
-Note that because {@link mid.Box} has no own property `theme`, you have to declare it with
+Note that because {@link html.Box} has no own property `theme`, you have to declare it with
 the `property` keyword.
 
 ### Automatic Bright Mode / Dark Mode Switch
@@ -149,7 +149,7 @@ the `property` keyword.
 Some OS such as Windows, MacOS, or Android allow the user to switch between
 a bright mode and a dark mode in recent versions.
 The current preference is represented by the boolean property `systemDarkMode`
-of {@link mid.Document}.
+of {@link html.Document}.
 
 If you make the application's theme depend on this property, the application will switch
 along with the OS automatically.

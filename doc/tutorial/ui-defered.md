@@ -7,10 +7,10 @@ Here are some ways of how to defer element creation.
 
 ### Repeating Elements
 
-The {@link mid.Repeater Repeater} element spawns new elements from a
+The {@link html.Repeater Repeater} element spawns new elements from a
 template dynamically and places them in its parent container.
 
-The property `model` accepts a {@link mid.ListModel ListModel} element,
+The property `model` accepts a {@link html.ListModel ListModel} element,
 which is described in detail in {@tutorial ui-listmodel},
 but for simplicity, the model may also be a plain number.
 
@@ -102,10 +102,10 @@ Document {
 
 ### List of Elements
 
-If you are spawning a lot of elements, the {@link mid.Repeater Repeater} element might not be a good choice as it creates all
+If you are spawning a lot of elements, the {@link html.Repeater Repeater} element might not be a good choice as it creates all
 of its elements at once, even if they are out of view.
 
-The {@link mid.ListView ListView} element, on the other hand,
+The {@link html.ListView ListView} element, on the other hand,
 is specialized in dynamically creating elements as they come
 into view, and destroying (or recycling) them as they disappear
 from view. This lets you handle thousands of elements.

@@ -2,7 +2,7 @@ const webfont = require("webfont");
 const fs = require("fs");
 
 const items = [
-    { name: "core", target: "lib/style" },
+    { name: "core", target: "shellfish-ui/style" },
 
     { name: "camera", target: "build/icons" },
     { name: "comm", target: "build/icons" },
@@ -12,7 +12,9 @@ const items = [
     { name: "map", target: "build/icons" },
     { name: "media", target: "build/icons" },
     { name: "text", target: "build/icons" },
-    { name: "ui", target: "build/icons" }
+    { name: "ui", target: "build/icons" },
+
+    { name: "app", target: "build/icons" }
 ];
 
 async function makeIconSet(name, target)

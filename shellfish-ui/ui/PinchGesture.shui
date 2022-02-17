@@ -1,0 +1,91 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+/**
+ * Element for detecting pinch gestures on a touchscreen.
+ *
+ * This element requires a target {@link html.MouseBox MouseBox} element for detecting events.
+ *
+ * @memberof ui
+ * @name PinchGesture
+ * @class
+ *
+ * @property {number} distance - [readonly] The current distance between the two touchpoints.
+ * @property {number} previousDistance - [readonly] The previous distance between the two touchpoints.
+ *                                       This value is `0` at the start of a pinch gesture.
+ * @property {bool} pinching - [readonly] Whether the user is currently making a pinch gesture.
+ * @property {html.MouseBox} target - (default: `parent`) The target for detecting the touchpoints.
+ * @property {number} x1 - [readonly] The X coordinate of the first touchpoint.
+ * @property {number} x2 - [readonly] The X coordinate of the second touchpoint.
+ * @property {number} y1 - [readonly] The Y coordinate of the first touchpoint.
+ * @property {number} y2 - [readonly] The Y coordinate of the second touchpoint.
+ */
+Object {
+    property target: parent
+
+    property pinching: false
+    property x1: 0
+    property y1: 0
+    property x2: 0
+    property y2: 0
+    property distance: 0
+    property previousDistance: 0
+
+    property _touchPoints: target.touchPoints
+
+    onInitialization: () =>
+    {
+        target.onPointerMove = (ev) =>
+        {
+            if (_touchPoints === 2)
+            {
+                const tp1 = target.touchPoint(0);
+                const tp2 = target.touchPoint(1);
+                x1 = tp1.x;
+                y1 = tp1.y;
+                x2 = tp2.x;
+                y2 = tp2.y;
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                distance = Math.sqrt(dx * dx + dy * dy);
+                previousDistance = distance;
+            }
+        };
+    }
+
+    on_touchPointsChanged: () =>
+    {
+        if (_touchPoints === 2)
+        {
+            pinching = true;
+        }
+        else
+        {
+            previousDistance = 0;
+        }
+        
+        if (_touchPoints === 0)
+        {
+            pinching = false;
+        }
+    }
+}

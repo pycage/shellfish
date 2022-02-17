@@ -1,0 +1,421 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/low" as low;
+require "shellfish/html";
+
+/**
+ * Element representing a UI window.
+ *
+ * Containers:
+ * * `title` - The title bar area.
+ *
+ * @memberof ui
+ * @name Window
+ * @class
+ * @extends html.MouseBox
+ *
+ * @property {bool} draggable - (default: `true`) If `true`, the window may be dragged by the user.
+ * @property {bool} dragging - [readonly] `true` if the window is currently being dragged by the user.
+ * @property {bool} maximized - (default: `false`) If `true`, the window is maximized within its parent box.
+ * @property {bool} resizable - (default: `true`) If `true`, the window may be resized by the user.
+ * @property {bool} resizing - [readonly] `true` if the window is currently being resized by the user.
+ * @property {bool} selected - [readonly] `true` if the window is the currently selected/focused one.
+ * @property {ui.Window} thisWindow - [readonly] A reference to this window visible to sub-elements.
+ */
+MouseBox {
+    id: win
+
+    container default: contentArea
+    container title: titleArea
+
+    property resizable: true
+    property draggable: true
+
+    property maximized: false
+    property selected: false
+    property resizing: false
+    property dragging: false
+
+    property isWindow: true
+    property thisWindow: self
+
+    function moveAndResize(dx, dy, dw, dh)
+    {
+        if (dx < 0 && dw === 0 && x + dx < 0)
+        {
+            dx = -x;
+        }
+        if (dx < 0 && dw > 0 && x + dx < 0)
+        {
+            dx = -x;
+            dw = -dx;
+        }
+        if (dy < 0 && dh === 0 && y + dy < 0)
+        {
+            dy = -y;
+        }
+        if (dy < 0 && dh > 0 && y + dy < 0)
+        {
+            dy = -y;
+            dh = -dy;
+        }
+        if (dx > 0 && dw === 0 && x + width + dx > parent.bbox.width)
+        {
+            dx = parent.bbox.width - (x + width);
+        }
+        if (dx === 0 && dw > 0 && x + width + dw > parent.bbox.width)
+        {
+            dw = parent.bbox.width - (x + width);
+        }
+        if (dy > 0 && dh === 0 && y + height + dy > parent.bbox.height)
+        {
+            dy = parent.bbox.height - (y + height);
+        }
+        if (dy === 0 && dh > 0 && y + height + dh > parent.bbox.height)
+        {
+            dh = parent.bbox.height - (y + height);
+        }
+        if (bbox.width + dw < minWidth)
+        {
+            dw = minWidth - width;
+        }
+        if (bbox.height + dh < minHeight)
+        {
+            dh = minHeight - height;
+        }
+
+        const wx = x + dx;
+        const wy = y + dy;
+        const ww = bbox.width + dw;
+        const wh = bbox.height + dh;
+
+        if (wx !== x)
+        {
+            x = wx;
+        }
+        if (wy !== y)
+        {
+            y = wy;
+        }
+        if (ww !== width)
+        {
+            width = ww;
+        }
+        if (wh !== height)
+        {
+            height = wh;
+        }
+    }
+
+    /**
+     * Raises the window above sibling windows.
+     *
+     * @memberof ui.Window.prototype
+     * @name raise
+     * @method
+     */
+    function raise()
+    {
+        if (! parent)
+        {
+            return;
+        }
+
+        let maxZ = 0;
+        parent.children()
+        .filter(c => c.isWindow === true)
+        .forEach(c =>
+        {
+            c.selected = c === self;
+            const z = Number.parseInt(low.css(c.get().get(), "z-index")) || 0;
+            if (z > maxZ)
+            {
+                maxZ = z;
+            }
+        });
+        css("z-index", maxZ + 1);
+    }
+
+    position: "free"
+    width: 320
+    height: 200
+    minWidth: 100
+    minHeight: theme.itemHeightMedium
+    fillWidth: maximized
+    fillHeight: maximized
+
+    color: theme.contentBackgroundColor
+    borderRadius: theme.borderRadius
+    style: "sh-dropshadow"
+
+    onParentChanged: () =>
+    {
+        if (parent)
+        {
+            raise();
+        }
+    }
+
+    onDrag: (ev) =>
+    {
+        if (draggable)
+        {
+            dragTimer.deltaX += ev.deltaX;
+            dragTimer.deltaY += ev.deltaY;
+            if (! dragTimer.running)
+            {
+                win.dragging = true;
+                dragTimer.running = true;
+            }
+            ev.accepted = true;
+        }
+    }
+
+    onDragEnd: () => { win.dragging = false; }
+
+    onPointerDown: () => { raise(); }
+
+    onDoubleClick: (ev) =>
+    {
+        if (resizable && ev.y < titleArea.bbox.height)
+        {
+            maximized = ! maximized;
+            ev.accepted = true;
+        }
+    }
+
+    FrameTimer {
+        id: dragTimer
+
+        property deltaX: 0
+        property deltaY: 0
+
+        repeat: false
+        running: false
+        fps: 24
+
+        onTimeout: () => {
+            win.moveAndResize(deltaX, deltaY, 0, 0);
+            deltaX = 0;
+            deltaY = 0;
+            running = false;
+        }
+    }
+
+    Box {
+        id: titleArea
+
+        fillWidth: true
+    }
+
+    MouseBox {
+        id: contentArea
+
+        fillWidth: true
+        fillHeight: true
+
+        onPointerDown: ev =>
+        {
+            if (! ev.directTarget)
+            {
+                // filter out clicks that did not target the window directly
+                ev.accepted = true;
+            }
+        }
+    }
+
+    // glass pane for intercepting clicks
+    MouseBox {
+        visible: ! win.selected || win.pressed || win.resizing
+        position: "free"
+        marginTop: titleArea.bbox.height
+        fillWidth: true
+        fillHeight: true
+        //color: colorName(win.resizing ? "yellow" : "red").alpha(0.3)
+    }
+
+    // north
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        fillWidth: true
+        height: theme.paddingSmall
+        cursor: "ns-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(0, ev.deltaY, 0, -ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // south
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        origin: "bottom-left"
+        fillWidth: true
+        height: theme.paddingSmall
+        cursor: "ns-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(0, 0, 0, ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // west
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        width: theme.paddingSmall
+        fillHeight: true
+        cursor: "ew-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(ev.deltaX, 0, -ev.deltaX, 0);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // east
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        origin: "top-right"
+        width: theme.paddingSmall
+        fillHeight: true
+        cursor: "ew-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(0, 0, ev.deltaX, 0);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // north-west
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        width: theme.paddingSmall
+        height: theme.paddingSmall
+        cursor: "nwse-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(ev.deltaX, ev.deltaY, -ev.deltaX, -ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // north-east
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        origin: "top-right"
+        width: theme.paddingSmall
+        height: theme.paddingSmall
+        cursor: "nesw-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(0, ev.deltaY, ev.deltaX, -ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // south-east
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        origin: "bottom-right"
+        width: theme.paddingSmall
+        height: theme.paddingSmall
+        cursor: "nwse-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(0, 0, ev.deltaX, ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+
+    // sout-west
+    MouseBox {
+        visible: win.resizable && ! win.maximized
+        position: "free"
+        origin: "bottom-left"
+        width: theme.paddingSmall
+        height: theme.paddingSmall
+        cursor: "nesw-resize"
+
+        onPointerDown: () => { win.raise(); }
+
+        onDrag: (ev) =>
+        {
+            win.resizing = true;
+            win.moveAndResize(ev.deltaX, 0, -ev.deltaX, ev.deltaY);
+            ev.accepted = true;
+        }
+
+        onDragEnd: () => { win.resizing = false; }
+    }
+}

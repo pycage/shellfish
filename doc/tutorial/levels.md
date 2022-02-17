@@ -20,12 +20,12 @@ The mid level (see {@link mid}) provides an object-oriented toolkit of UI elemen
 This is an example of code using the mid level:
 
 ```
-const myDocument = new mid.Document();
+const myDocument = new html.Document();
 
-const myBox = new mid.Box();
+const myBox = new html.Box();
 myDocument.add(myBox);
 
-const myLabel = new mid.Label();
+const myLabel = new html.Label();
 myLabel.text = "I am a label";
 myBox.add(myLabel);
 ```
@@ -46,17 +46,17 @@ However, writing declarative code in plain JavaScript can be quite ugly, especia
 when dealing with bindings:
 
 ```
-const myDocument = high.element(mid.Document);
+const myDocument = high.element(html.Document);
 myDocument
 .add(
-    high.element(mid.Box)
+    high.element(html.Box)
     .add(
-        high.element(mid.Label)
+        high.element(html.Label)
         .id("label1")
         .set("text", "I am Label 1")
     )
     .add(
-        high.element(mid.Label)
+        high.element(html.Label)
         .set("text", high.binding([high.chainRef(myDocument, ["label1", "text"], __rslv__)],
                 t =>
         {

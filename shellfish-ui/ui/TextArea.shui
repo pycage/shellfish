@@ -1,0 +1,182 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a multi-line text area.
+ *
+ * Containers:
+ * * `backgroundContainer` - The background (e.g. for syntax highlighting or line highlighting).
+ * * `bottomMarginContainer` - The bottom margin (e.g. for a status bar).
+ * * `leftMarginContainer` - The left margin (e.g. for line numbers).
+ * * `rightMarginContainer` - The right margin.
+ * * `topMarginContainer` - The top margin.
+ *
+ * @memberof ui
+ * @name TextArea
+ * @class
+ * @extends html.MouseBox
+ *
+ * @property {bool} bold - (default: `false`) Show text in bold face.
+ * @property {html.Color} caretColor - The caret color.
+ * @property {number} column - [readonly] The column of the current cursor position.
+ * @property {string} fontFamily - The font family.
+ * @property {number} fontSize - The font size in CSS pixels.
+ * @property {number} row - The row of the current cursor position.
+ * @property {number} selectionEnd - [readonly] The ending position of the text selection. This value is the same as `selectionStart` if no text is selected.
+ * @property {number} selectionStart - [readonly] The starting position of the text selection.
+ * @property {bool} spellCheck - (default: `false`) Whether to enable spell-checking.
+ * @property {string} text - (default: `""`) The text to show.
+ * @property {html.Color} textColor - The text color.
+ */
+MouseBox {
+    id: box
+
+    container topMarginContainer: topMargin
+    container leftMarginContainer: leftMargin
+    container rightMarginContainer: rightMargin
+    container bottomMarginContainer: bottomMargin
+    container backgroundContainer: backgroundBox
+
+    property text: ""
+    property textColor: theme.primaryColor
+    property caretColor: theme.primaryColor
+    property fontSize: theme.fontSizeMedium
+    property fontFamily: "sans-serif"
+    property bold: false
+    property column: input.column
+    property selectionStart: input.selectionStart
+    property selectionEnd: input.selectionEnd
+    property row: input.row
+    property spellCheck: false
+
+    property scrollX: input.contentX
+    property scrollY: input.contentY
+
+    property selectRange: input.selectRange
+    property insertAt: input.insertAt
+    property eraseAt: input.eraseAt
+    property shiftRows: input.shiftRows
+    property setCursor: input.setCursor
+    property positionAt: input.positionAt
+    property rowAt: input.rowAt
+
+
+    width: theme.itemWidthLarge * 2
+    height: theme.itemHeightLarge * 2
+    opacity: enabled && ancestorsEnabled ? 1 : 0.6
+    color: theme.contentBackgroundColor
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: theme.borderRadius
+
+    onWheel: {
+        const ev = arguments[0];
+        ev.accepted = true;
+
+        if (ev.deltaX < 0)
+        {
+            input.contentX = Math.max(0, input.contentX - theme.itemHeightMedium);
+        }
+        else if (ev.deltaX > 0)
+        {
+            input.contentX = Math.min(input.contentWidth - input.bbox.width, input.contentX + theme.itemHeightMedium);
+        }
+
+        if (ev.deltaY < 0)
+        {
+            input.contentY = Math.max(0, input.contentY - theme.itemHeightMedium);
+        }
+        else if (ev.deltaY > 0)
+        {
+            input.contentY = Math.min(input.contentHeight - input.bbox.height, input.contentY + theme.itemHeightMedium);
+        }
+    }
+
+    Box {
+        id: topMargin
+        fillWidth: true
+    }
+
+    Box {
+        fillWidth: true
+        fillHeight: true
+        layout: "row"
+
+        Box {
+            id: leftMargin
+            fillHeight: true
+        }
+
+        Box {
+            fillWidth: true
+            fillHeight: true
+
+            Box {
+                id: backgroundBox
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+            }
+
+            html.TextArea {
+                id: input
+
+                fillWidth: true
+                fillHeight: true
+                fontSize: box.fontSize
+                fontFamily: box.fontFamily
+                bold: box.bold
+                color: box.textColor
+                caretColor: box.caretColor
+                selectionBackgroundColor: theme.highlightBackgroundColor
+                selectionColor: theme.highlightColor
+                spellCheck: box.spellCheck
+                text: box.text
+
+                canFocus: true
+
+                onTextChanged: { box.text = text; }
+
+                onKeyDown: (ev) => box.keyDown(ev)
+            }
+
+            ScrollIndicator { id: siA; other: siB; target: input; orientation: "vertical"; size: theme.paddingSmall }
+            ScrollIndicator { id: siB; other: siA; target: input; orientation: "horizontal"; size: theme.paddingSmall }
+
+            FocusIndicator { visible: input.focus }
+        }
+
+        Box {
+            id: rightMargin
+            fillHeight: true
+        }
+    }
+
+    Box {
+        id: bottomMargin
+        fillWidth: true
+    }
+
+}

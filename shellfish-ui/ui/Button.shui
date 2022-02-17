@@ -1,0 +1,154 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a UI button.
+ *
+ * @memberof ui
+ * @name Button
+ * @class
+ * @extends html.MouseBox
+ *
+ * @property {string} icon - (default: `""`) The name of the icon to display.
+ * @property {string} secondaryIcon - (default: `""`) The name of the secondary icon to display.
+ * @property {string} text - (default: `""`) The label text to display.
+ * @property {bool} flat - (default: `false`) Whether the button flat, i.e. borderless.
+ * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
+ * @property {html.Object} labelProfile - (default: `null`) The profile that is applied to the labels.
+ */
+MouseBox {
+    id: button
+
+    property icon: ""
+    property secondaryIcon: ""
+    property text: ""
+    property flat: false
+    property checked: false
+    property labelProfile: null
+
+    Object {
+        id: priv
+
+        property highlighted: button.checked ||
+                              button.containsMouse ||
+                              button.pressed
+    }
+
+    function format(t)
+    {
+        const pos = t.indexOf("&");
+        if (pos === -1)
+        {
+            return t;
+        }
+        else
+        {
+            return t.substr(0, pos) + "_" + t[pos + 1] + "_" + t.substr(pos + 2);
+        }
+    }
+
+    color: checked || pressed ? theme.highlightBackgroundColor
+                              : containsMouse ? theme.hoverBackgroundColor
+                                              : flat ? "transparent"
+                                                     : theme.contentBackgroundColor
+
+    borderWidth: flat ? 0 : 1
+    borderRadius: flat ? 0 : theme.borderRadius
+    borderColor: theme.borderColor
+    layout: "center-row"
+
+    height: theme.itemHeightSmall
+
+    opacity: ancestorsEnabled && enabled ? 1 : 0.6
+
+    canFocus: true
+
+    onClick: () =>
+    {
+        focus = true;
+    }
+
+    shortcutReceiver.onKeyDown: (ev) =>
+    {
+        if (ev.altKey)
+        {
+            const idx = text.indexOf("&");
+            if (idx !== -1)
+            {
+                const key = text[idx + 1].toLowerCase();
+                if (ev.key === key)
+                {
+                    click(ev);
+                    ev.accepted = true;
+                }
+            }
+        }
+    }
+
+    onKeyDown: (ev) =>
+    {
+        if (ev.key === " " || ev.key === "Enter")
+        {
+            click(ev);
+            ev.accepted = true;
+        }
+    }
+
+    Label {
+        visible: button.icon !== ""
+        marginLeft: 4
+        marginRight: 4
+        fontSize: parent.bbox.height * 0.6
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
+        text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
+
+        profiles: button.labelProfile ? [button.labelProfile] : []
+    }
+
+    Label {
+        visible: button.text !== ""
+        fillWidth: true
+        marginLeft: button.icon !== "" ? 4 : theme.paddingSmall
+        marginRight: button.secondaryIcon !== "" ? 4 : theme.paddingSmall
+        //overflowBehavior: "ellipsis"
+        horizontalAlignment: "center"
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
+        text: button.format(button.text)
+
+        profiles: button.labelProfile ? [button.labelProfile] : []
+    }
+
+    Label {
+        visible: button.secondaryIcon !== ""
+        marginLeft: 4
+        marginRight: 4
+        fontSize: parent.bbox.height * 0.6
+        color: priv.highlighted ? theme.highlightColor : theme.primaryColor
+        text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
+
+        profiles: button.labelProfile ? [button.labelProfile] : []
+    }
+
+    FocusIndicator { visible: button.focus }
+}

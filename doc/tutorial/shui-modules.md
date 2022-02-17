@@ -76,11 +76,10 @@ Internal modules are available under shortcut paths, so you don't have to specif
 a path on the filesystem.
 
 * `shellfish/low`: The {@link low low} module.
-* `shellfish/mid`: The {@link mid mid} module (already loaded).
 * `shellfish/high`: The {@link high high} module (already loaded).
-* `shellfish/ui`: The {@link ui ui} module with lots of elements implemented in Shui.
+* `shellfish/ui`: The {@link ui ui} module with lots of UI elements.
 * `shellfish/fengshui`: The {@link fengshui fengshui} module.
-* `shellfish/matrix`: The {@link matrix matrix} module for matrix and vector algebra.
+* `shellfish/core/matrix`: The {@link matrix matrix} module for matrix and vector algebra.
 
 Use the shortcut together with the `require` keyword.
 

@@ -1,0 +1,249 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/low" as low;
+require "shellfish/ui";
+
+/**
+ * Element representing a drow-down menu.
+ *
+ * @memberof ui
+ * @name Menu
+ * @class
+ * @extends ui.Overlay
+ *
+ * @property {ui.Menu} thisMenu - [readonly] A reference to this menu visible to sub-elements.
+ * @property {bool} menuOpened - [readonly] Whether the menu is currently opened.
+ * @property {html.Ruler} menuRuler - (default: `Ruler { }`) A ruler for layouting the menu items.
+ */
+Overlay {
+    id: menu
+
+    container default: menuBoxContent
+
+    property thisMenu: self
+    property menuOpened: visible
+    property menuRuler: Ruler { }
+
+    /**
+     * Shows the menu next to a parent element.
+     *
+     * The menu is shown below or above the given parent element, depending
+     * on the screen space. If `{ horizontal: true }` is passed for options,
+     * the menu is instead shown right or left to the parent element.
+     *
+     * If `null` is passed for the parent element, the menu is positioned near
+     * the mouse pointer.
+     *
+     * @memberof ui.Menu.prototype
+     * @name popup
+     * @method
+     *
+     * @param {html.Item} parent - The parent element, or `null`.
+     * @param {object} [options = { }] - A dictionary of options.
+     */
+    function popup(parent, options)
+    {
+        options = options || { };
+
+        if (parent)
+        {
+            const parentBbox = parent.bbox;
+            if (options.horizontal)
+            {
+                menuBox.anchorX = parentBbox.x + parentBbox.width;
+                menuBox.anchorY = parentBbox.y;
+                menuBox.anchorHeight = 0;
+            }
+            else
+            {
+                menuBox.anchorX = parentBbox.x;
+                menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
+                menuBox.anchorHeight = parentBbox.height * 0.96;
+            }
+            menuRuler.request({
+                x: 0,
+                y: 0,
+                width: parentBbox.width - 2 * 1 /* border */,
+                height: 0
+            });
+        }
+        else
+        {
+            menuBox.anchorX = documentRoot.pointerX + 4;
+            menuBox.anchorY = documentRoot.pointerY + 4;
+            menuBox.anchorHeight = 0;
+        }
+
+        show();
+
+        if (menuBox.children().length > 0)
+        {
+            const handle = low.addFrameHandler(safeCallback(() =>
+            {
+                handle.cancel();
+                const cs = menuBox.children().filter((c) => { return c.canFocus && c.enabled && c.visible; });
+                if (cs.length > 0)
+                {
+                    cs[0].focus = true;
+                }
+            }), objectType + "@" + objectLocation);
+        }
+    }
+
+    // is triggered when the menu cascade is closing
+    event cascadingClose
+
+    visible: false
+    //opacity: visible ? 1 : 0
+    //opacityTransition: NumberAnimation { duration: 400; easing: "InOutQuad" }
+
+    onPointerDown: (ev) =>
+    {
+        ev.accepted = true;
+        cascadingClose();
+        visible = false;
+    }
+
+    // cheap shadow box
+    Box {
+        position: "global"
+        x: menuBox.bbox.x + 2
+        y: menuBox.bbox.y + 2
+        width: menuBox.bbox.width
+        height: menuBox.bbox.height
+        color: "black"
+        opacity: 0.2
+    }
+
+    Box {
+        id: menuBox
+
+        property anchorX: 0
+        property anchorY: 0
+        property anchorHeight: 0
+
+        property spaceAbove: anchorY - anchorHeight
+        property spaceBelow: menu.bbox.height - anchorY
+        property showBelow: spaceBelow > 5 * theme.itemHeightMedium ? true
+                                                                    : spaceBelow > spaceAbove
+
+        position: "global"
+        overflowBehavior: "scroll"
+
+        x: anchorX + bbox.width < menu.bbox.width ? anchorX
+                                                  : menu.bbox.width - bbox.width
+        y: showBelow ? anchorY : anchorY - anchorHeight - height
+
+        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bbox.height + 2 /* borders */)
+        color: theme.primaryBackgroundColor
+        borderWidth: 1
+        borderColor: theme.borderColor
+
+        MouseBox {
+            id: menuBoxContent
+
+            property isMenu: true
+
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            onClick: (ev) =>
+            {
+                ev.accepted = true;
+
+                menu.cascadingClose();
+                menu.visible = false;
+            }
+
+            onKeyDown: (ev) =>
+            {
+                console.log("menu key down " + ev.key);
+
+                if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
+                {
+                    ev.accepted = true;
+
+                    menu.cascadingClose();
+                    menu.visible = false;
+                    return;
+                }
+
+                let current = -1;
+                const cs = children().filter((c) => { return c.isMenuItem && c.enabled && c.visible; });
+                for (let i = 0; i < cs.length; ++i)
+                {
+                    if (cs[i].selected)
+                    {
+                        current = i;
+                        break;
+                    }
+                }
+
+                console.log("current " + current + " of " + cs.length);
+
+                if (ev.key === "ArrowUp")
+                {
+                    if (current !== -1)
+                    {
+                        current = (cs.length + current - 1) % cs.length;
+                    }
+                    else
+                    {
+                        current = cs.length - 1;
+                    }
+                    ev.accepted = true;
+                }
+                else if (ev.key === "ArrowDown")
+                {
+                    if (current !== -1)
+                    {
+                        current = (current + 1) % cs.length;
+                    }
+                    else
+                    {
+                        current = 0;
+                    }
+                    ev.accepted = true;
+                }
+                if (current !== -1)
+                {
+                    cs[current].selectItem(false);
+                }
+            }
+        }
+
+    }
+
+    Box {
+        position: "free"
+        x: menuBox.x + menuBox.bbox.width - width
+        y: menuBox.y
+        width: theme.paddingSmall
+        height: menuBox.height
+
+        ScrollIndicator {
+            target: menuBox
+            width: parent.width
+        }
+    }
+
+}

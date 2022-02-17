@@ -15,7 +15,7 @@
 		"destination": "build/doc"
 	},
 	"source": {
-		"include": ["lib"],
+		"include": ["shellfish-core", "shellfish-ui", "shellfish-3d", "shellfish-server"],
 		"includePattern": ".+\\.(js|shui)$"
 	},
 	"templates": {

@@ -1,0 +1,322 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a scroll indicator or scroll bar.
+ *
+ * @memberof ui
+ * @name ScrollIndicator
+ * @class
+ * @extends html.MouseBox
+ *
+ * @property {html.Item} target - (default: `parent`) The scrolling target.
+ * @property {ui.ScrollIndicator} other - The other scroll indicator, if there 
+ *                                        are two indicators, one for horizontal
+ *                                        scrolling, and one for vertical scrolling.
+ * @property {string} orientation - The scrolling orientation. One of: `horizontal|vertical`
+ * @property {number} size - The size of the indicator.
+ */
+MouseBox {
+    id: box
+
+    property target: parent
+    property other: null
+    property orientation: "vertical"
+    property size: theme.paddingMedium * (documentRoot.inputDevice === "touch" ? 3 : 1)
+
+    position: "global"
+    x: parent.bbox.x + (orientation === "vertical" ? parent.bbox.width - width : 0)
+    y: parent.bbox.y + (orientation === "horizontal" ? parent.bbox.height - height : 0)
+
+    visible: handle.sizePercents < 0.99
+
+    Object {
+        id: priv
+
+        property contentPos: box.target ? (box.orientation === "vertical" ? box.target.contentY
+                                                                          : box.target.contentX)
+                                        : 0
+        property contentSize: box.target ? (box.orientation === "vertical" ? box.target.contentHeight
+                                                                           : box.target.contentWidth)
+                                         : 1
+        property viewSize: box.target ? (box.orientation === "vertical" ? box.target.bbox.height
+                                                                        : box.target.bbox.width)
+                                      : 1
+
+        property direction: 0
+
+        property otherMargin: box.other && box.other.visible ? (orientation === "vertical" ? width : height)
+                                                             : 0
+    }
+
+
+    property lineUp: () =>
+    {
+        scrollTo(priv.contentPos - theme.itemHeightMedium);
+    }
+
+    property lineDown: () =>
+    {
+        scrollTo(priv.contentPos + theme.itemHeightMedium);
+    }
+
+    property pageUp: () =>
+    {
+        scrollTo(priv.contentPos - priv.viewSize);
+    }
+
+    property pageDown: () =>
+    {
+        scrollTo(priv.contentPos + priv.viewSize);
+    }
+
+    property firstPage: () =>
+    {
+        scrollTo(0);
+    }
+
+    property lastPage: () =>
+    {
+        scrollTo(priv.contentSize - priv.viewSize);
+    }
+
+    function scrollTo(pos)
+    {
+        if (! scrollAnimation.busy)
+        {
+            scrollAnimation.from = priv.contentPos;
+            scrollAnimation.to = Math.max(0, Math.min(priv.contentSize - priv.viewSize, pos));
+            scrollAnimation.start();
+        }
+    }
+
+    canFocus: true
+   
+    width: orientation === "vertical" ? size : parent.bbox.width - priv.otherMargin
+    height: orientation === "vertical" ? parent.bbox.height - priv.otherMargin : size
+
+    color: theme.primaryColor.alpha(0.1)
+
+    onParentChanged: () =>
+    {
+        if (parent)
+        {
+            parent.get().connect("destruction", self.get(), () =>
+            {
+                // break cycle
+                other = null;
+            });
+        }
+    }
+
+    MouseBox {
+        id: handle
+
+        position: "free"
+
+        property sizePercents: Math.max(0, Math.min(1, priv.viewSize / priv.contentSize))
+        property posPercents: priv.contentSize > priv.viewSize ? priv.contentPos / (priv.contentSize - priv.viewSize)
+                                                               : 0
+        
+        x: box.orientation === "vertical" ? 0
+                                          : posPercents * (box.bbox.width - bbox.width)
+        y: box.orientation === "vertical" ? posPercents * (box.bbox.height - bbox.height)
+                                          : 0
+        width: box.orientation === "vertical" ? 0 : Math.max(16, sizePercents * box.bbox.width)
+        height: box.orientation === "vertical" ? Math.max(16, sizePercents * box.bbox.height) : 0
+
+        fillWidth: box.orientation === "vertical" ? true : false
+        fillHeight: box.orientation === "vertical" ? false : true
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.primaryColor.alpha(0.4)
+
+        onPointerDown: (ev) =>
+        {
+            ev.accepted = true;
+            box.focus = true;
+        }
+
+        onDrag: (ev) =>
+        {
+            ev.accepted = true;
+
+            if (box.orientation === "vertical")
+            {
+                const scale = box.bbox.height / Math.max(1, priv.contentSize);
+                target.contentY = priv.contentPos + ev.deltaY / scale;
+            }
+            else
+            {
+                const scale = box.bbox.width / Math.max(1, priv.contentSize);
+                target.contentX = priv.contentPos + ev.deltaX / scale;
+            }
+        }
+
+        FocusIndicator { visible: box.focus }
+    }
+
+    onPointerDown: (ev) =>
+    {
+        const x = ev.x;
+        const y = ev.y;
+        ev.accepted = true;
+
+        if (orientation === "vertical")
+        {
+            if (y < handle.y)
+            {
+                priv.direction = 0;
+            }
+            else if (y > handle.y + handle.height)
+            {
+                priv.direction = 1;
+            }
+        }
+        else
+        {
+            if (x < handle.x)
+            {
+                priv.direction = 0;
+            }
+            else if (x > handle.x + handle.width)
+            {
+                priv.direction = 1;
+            }
+        }
+
+        if (priv.direction === 0)
+        {
+            pageUp();
+        }
+        else
+        {
+            pageDown();
+        }
+
+        focus = true;
+    }
+
+    onPointerUp: (ev) =>
+    {
+        ev.accepted = true;
+    }
+
+    onPointerMove: (ev) =>
+    {
+        ev.accepted = true;
+    }
+
+    onPointerOut: (ev) =>
+    {
+        ev.accepted = true;
+    }
+
+    onClick: (ev) =>
+    {
+        ev.accepted = true;
+    }
+
+    onKeyDown: (ev) =>
+    {
+        switch (ev.key)
+        {
+        case "ArrowUp":
+        case "ArrowLeft":
+            lineUp();
+            ev.accepted = true;
+            break;
+        case "ArrowDown":
+        case "ArrowRight":
+            lineDown();
+            ev.accepted = true;
+            break;
+        case "PageUp":
+            pageUp();
+            ev.accepted = true;
+            break;
+        case "PageDown":
+            pageDown();
+            ev.accepted = true;
+            break;
+        case "Home":
+            firstPage();
+            ev.accepted = true;
+            break;
+        case "End":
+            lastPage();
+            ev.accepted = true;
+            break;
+        }
+    }
+
+    Timer {
+        id: pullTimer
+
+        interval: 500
+        repeat: true
+        running: box.pressed
+
+        onTimeout: () =>
+        {
+            if (priv.direction === 0)
+            {
+                pageUp();
+            }
+            else
+            {
+                pageDown();
+            }
+        }
+    }
+
+    NumberAnimation {
+        id: scrollAnimation
+
+        duration: 300
+        easing: "InOutQuad"
+
+        onNext: value =>
+        {
+            if (box.orientation === "vertical")
+            {
+                target.contentY = value;
+            }
+            else
+            {
+                target.contentX = value;
+            }
+        }
+    }
+
+    /*
+    Label {
+        visible: box.visible
+        position: "global"
+        origin: "top-right"
+        text: "ch: " + priv.contentSize + " vh: " + priv.viewSize + " pos: " + handle.posPercents + ", size: " + handle.sizePercents
+    }
+    */
+}

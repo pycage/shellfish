@@ -27,7 +27,7 @@ const modChildProcess = require("child_process"),
       modPath = require("path"),
       modProcess = require("process"),
       modBabel = require("@babel/core"),
-      modFengshui = require("../lib/fengshui.js");
+      modFengshui = require("../shellfish-core/fengshui.js");
 
 const BABEL_CONFIG = {
     ast: false,

@@ -1,0 +1,132 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a list view specialized for displaying file system
+ * models.
+ *
+ * This element has a default delegate, which may be overwritten if needed.
+ *
+ * @memberof ui
+ * @name FSView
+ * @class
+ * @extends html.ListView
+ *
+ * @property {string} displayMode - (default: `"list"`) The display mode. One of `list|grid`
+ * @property {html.Filesystem} filesystem - (default: null) If the filesystem is set, it is used for icon thumbnails.
+ * @property {number} iconScale - (default: `1`) The scaling factor of icons.
+ */
+ListView {
+    id: fsview
+
+    property iconScale: 1
+    property displayMode: "list"
+    property filesystem: null
+
+    property selector: ListViewSelector {
+        target: fsview
+        multiple: true
+    }
+
+    event fileOpen
+
+    cellWidth: fsview.displayMode === "list" ? fsview.bbox.width - 1
+                                             : theme.itemWidthLarge * iconScale
+
+    cellHeight: fsview.displayMode === "list" ? theme.itemHeightMedium * iconScale
+                                              : cellWidth
+
+    canFocus: true
+
+    model.onPathChanged: () =>
+    {
+        selector.clear();
+    }
+
+    property delegate: template Draggable {
+        onDragStart: ev =>
+        {
+            console.log("drag start");
+            const uris = [];
+            fsview.selector.selection.forEach(idx =>
+            {
+                uris.push(fsview.model.at(idx).path);
+            });
+            /*
+            const uris = fsview.selector.selection.map(idx =>
+            {
+                return fsview.model.at(idx).path;
+            });
+            */
+
+            if (uris.length > 0)
+            {
+                console.log(JSON.stringify(uris));
+
+                ev.setData("text/uri-list", uris.join("\r\n"));
+                ev.setData("text/plain", uris.join("\r\n"));
+                ev.accepted = true;
+            }
+        }
+
+        FSItem {
+            id: fsitem
+
+            fillWidth: true
+            fillHeight: true
+            displayMode: fsview.displayMode
+            highlighted: fsview.selector.selection.has(parent.modelData.index)
+
+            file: parent.modelData.value
+            filesystem: fsview.filesystem
+
+            onPointerDown: (ev) =>
+            {
+                const idx = parent.modelData.index;
+
+                if (ev.original.ctrlKey)
+                {
+                    fsview.selector.select(idx, "toggle");
+                }
+                else if (ev.original.shiftKey)
+                {
+                    fsview.selector.select(idx, "range");
+                }
+                else
+                {
+                    fsview.selector.select(idx, "replace");
+                }
+            }
+
+            onDoubleClick: (ev) =>
+            {
+                fsview.fileOpen(parent.modelData.value);
+                ev.accepted = true;
+            }
+        }
+
+        //Label { text: parent.modelData.index; color: "red"; fontSize: theme.fontSizeSmall }
+    }
+
+}

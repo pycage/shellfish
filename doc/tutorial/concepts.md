@@ -66,7 +66,7 @@ Elements are configured by a number of properties, which they expose as dynamic 
 By assigning bindings to properties, you may model complex UI dependencies that
 would otherwise be a pain to maintain in procedural or object-oriented code.
 
-This is an example of a {@link mid.Label Label} element with a `text` property:
+This is an example of a {@link html.Label Label} element with a `text` property:
 
     Label {
         text: "I am a label."

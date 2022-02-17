@@ -5,14 +5,19 @@
   "author": "Martin Grimme",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@pixi/jsdoc-template": "^2.6.0",
-    "jsdoc": "~3.6.7",
+    "@babel/core": "~7.9.0",
+    "@pixi/jsdoc-template": "~2.6.0",
+    "jsdoc": "~3.6.10",
+    "npm-run-all": "~4.1.5",
     "webfont": "~10.1.0"
   },
   "scripts": {
+    "generate-docs": "jsdoc -c doc/conf.json -u doc/tutorial",
     "build-icons": "node icons/webfont.js",
-    "build-package": "node tools/make-bundle.js build/shellfish.pkg lib",
-    "generate-docs": "jsdoc -c doc/conf.json -u doc/tutorial"
+    "build-all": "npm-run-all build-icons build-shellfish-core build-shellfish-ui build-shellfish-3d build-shellfish-server",
+    "build-shellfish-core": "node tools/make-bundle.js build/shellfish.pkg shellfish-core",
+    "build-shellfish-ui": "node tools/make-bundle.js build/shellfish-ui.pkg shellfish-ui",
+    "build-shellfish-3d": "node tools/make-bundle.js build/shellfish-3d.pkg shellfish-3d",
+    "build-shellfish-server": "node tools/make-bundle.js build/shellfish-server.pkg shellfish-server"
   }
 }

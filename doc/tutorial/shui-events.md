@@ -1,7 +1,7 @@
 ### Events and Handlers
 
 Some elements provide events that are triggered under certain circumstances,
-e.g. {@link mid.MouseBox MouseBox} has a `click` event that is fired whenever
+e.g. {@link html.MouseBox MouseBox} has a `click` event that is fired whenever
 the user clicked the mouse button inside the element.
 
 Connecting a handler function to an event works like assigning to a property

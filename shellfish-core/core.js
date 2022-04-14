@@ -41,6 +41,7 @@ const mods = [
 ];
 
 const includes = [
+    "filestorage",
     "filesystem",
     "fsmodel",
     "listmodel",

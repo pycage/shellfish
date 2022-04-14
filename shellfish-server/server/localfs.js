@@ -67,6 +67,11 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                 return modFs.createReadStream(this.path);
             }
         }
+
+        text()
+        {
+            return this.arrayBuffer();
+        }
     }
 
     function makeFileItem(path, filePath, name, stats)
@@ -378,20 +383,29 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                     }
 
                     const writeStream = modFs.createWriteStream("", { fd });
-                    stream.on("data", data =>
-                    {
-                        writeStream.write(data);
-                    });
-
-                    stream.on("end", () =>
-                    {
-                        writeStream.end();
-                    });
 
                     writeStream.on("finish", () =>
                     {
                         resolve();
                     });
+
+                    if (typeof stream === "string")
+                    {
+                        writeStream.write(stream);
+                        writeStream.end();
+                    }
+                    else
+                    {
+                        stream.on("data", data =>
+                        {
+                            writeStream.write(data);
+                        });
+    
+                        stream.on("end", () =>
+                        {
+                            writeStream.end();
+                        });
+                    }
                 });
             });
         }

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,8 +22,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire([__dirname + "/object.js"], obj =>
 {
+    class StringStream
+    {
+        constructor(s)
+        {
+            this.data = s;
+        }
+
+
+    }
+
     const d = new WeakMap();
 
     /**
@@ -33,12 +43,12 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * and their values must be JSON-serializable.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof core
      * 
      * @property {core.Filesystem} filesystem - (default: `null`) The filesystem to use.
      * @property {string} path - (default: `""`) The path of the storage file.
      */
-    class FileStorage extends core.Object
+    class FileStorage extends obj.Object
     {
         constructor()
         {
@@ -101,7 +111,16 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             const priv = d.get(this);
             if (priv.filesystem !== null && priv.path !== "")
             {
-                const blob = new Blob([JSON.stringify(priv.doc)], { type: "application/json" });
+                let blob = null;
+                if (typeof Blob !== "undefined")
+                {
+                    blob = new Blob([JSON.stringify(priv.doc)], { type: "application/json" });
+                }
+                else
+                {
+                    blob = JSON.stringify(priv.doc);
+                }
+
                 priv.filesystem.write(priv.path, blob)
                 .then(() =>
                 {

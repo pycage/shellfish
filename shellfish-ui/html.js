@@ -58,8 +58,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * * {@link html.DavFS} - Access WebDAV filesystems
  * * {@link html.OfflineFS} - Access a private offline filesystem (based on Indexed DB)
  * * {@link html.LocalStorage} - Persist property values across sessions using the HTML5 local storage.
- * * {@link html.FileStorage} - Persist property values across sessions using a file on a {@link html.Filesystem}.
- * * {@link html.FSModel} - A list model for listing file system contents.
+  * * {@link html.FSModel} - A list model for listing file system contents.
  * 
  * ### Drag and Drop
  * * {@link html.Draggable} - Make an element draggable by mouse
@@ -125,7 +124,6 @@ const mods = [
     "draggable",
     "droparea",
     "fileselector",
-    "filestorage",
     "fpsmeter",
     "frametimer",
     "gamepad",

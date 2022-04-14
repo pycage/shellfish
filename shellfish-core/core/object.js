@@ -1199,6 +1199,24 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         }
 
         /**
+         * Sends a log message to the parent element if there is one.
+         * Override this method to handle logging. By default, logging is not
+         * handled in any way.
+         * 
+         * @param {string} domain - The name of the logging domain.
+         * @param {string} level - The log level. One of `trace|debug|info|warning|error|fatal`
+         * @param {string} message - The log message.
+         */
+        log(domain, level, message)
+        {
+            const priv = d.get(this);
+            if (priv.parent && priv.parent.log)
+            {
+                priv.parent.log(domain, level, message);
+            }
+        }
+
+        /**
          * Adds a child object to this object.
          * 
          * @param {core.Object} child - The child object.

@@ -5,9 +5,11 @@ exports.__id = "shellfish/server";
 const includes = [
     "davsession",
     "httpauth",
+    "httproute",
     "httpserver",
     "httpsession",
-    "localfs"
+    "localfs",
+    "websession"
 ];
 
 shRequire(includes.map(m => __dirname + "/server/" + m + ".js"), (...args) =>

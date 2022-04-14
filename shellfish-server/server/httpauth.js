@@ -80,8 +80,6 @@ shRequire(["shellfish/core"], core =>
         }
         else
         {
-            console.log("[" + new Date().toLocaleString() + "] [HttpBasicAuth] " +
-                        "DENY user = " + userName);
             return null;
         }
     }
@@ -98,8 +96,6 @@ shRequire(["shellfish/core"], core =>
         if (! users[params.username])
         {
             // unknown user
-            console.log("[" + new Date().toLocaleString() + "] [HttpDigestAuth] " +
-                        "DENY user = " + params.username);
             return null;
         }
 
@@ -110,8 +106,6 @@ shRequire(["shellfish/core"], core =>
         if (params.response !== expected)
         {
             // invalid client response
-            console.log("[" + new Date().toLocaleString() + "] [HttpDigestAuth] " +
-                        "DENY user = " + params.username);
             return null;
         }
 
@@ -128,7 +122,6 @@ shRequire(["shellfish/core"], core =>
      * @extends core.Object
      * @memberof server
      * 
-     * @property {function} filter - [default: `(method, url) => false`] A filter function to allow unauthorized access to certain resources.
      * @property {string} mode - [default: `"basic"`] The HTTP authentication mode. One of `basic|digest`
      * @property {string} realm - [default: `""`] The name of the authentication realm.
      * @property {object} users - [default: `{ }`] The map of users and password hashes.
@@ -141,21 +134,12 @@ shRequire(["shellfish/core"], core =>
             d.set(this, {
                 mode: "basic",
                 realm: "",
-                users: { },
-                filter: (method, url) => { return false; }
+                users: { }
             });
 
-            this.notifyable("filter");
             this.notifyable("mode");
             this.notifyable("realm");
             this.notifyable("users");
-        }
-
-        get filter() { return d.get(this).filter; }
-        set filter(f)
-        {
-            d.get(this).filter = f;
-            this.filterChanged();
         }
 
         get mode() { return d.get(this).mode; }
@@ -193,6 +177,13 @@ shRequire(["shellfish/core"], core =>
             return md5(`${user}:${realm}:${password}`);
         }
         
+        /**
+         * Authorizes the given HTTP request and returns a user name, or `null`
+         * if the request is not authorized.
+         * 
+         * @param {HTTPRequest} request - The request to authorize.
+         * @returns {string} The user name, or `null`.
+         */
         authorize(request)
         {
             const priv = d.get(this);
@@ -204,11 +195,13 @@ shRequire(["shellfish/core"], core =>
             }
             else if (priv.mode === "basic")
             {
-                return basicAuth(authHeader, priv.realm, priv.users);
+                const user = basicAuth(authHeader, priv.realm, priv.users);
+                return user;
             }
             else if (priv.mode === "digest")
             {
-                return digestAuth(authHeader, request.method, priv.users);
+                const user = digestAuth(authHeader, request.method, priv.users);
+                return user;
             }
             else
             {
@@ -216,15 +209,17 @@ shRequire(["shellfish/core"], core =>
             }
         }
     
+        /**
+         * Adds an authorization request to the given HTTP response.
+         * 
+         * @param {HTTPResponse} response - The response object.
+         */
         requestAuthorization(response)
         {
             const priv = d.get(this);
     
             if (priv.mode === "basic")
             {
-                console.log("[" + new Date().toLocaleString() + "] [HttpBasicAuth] " +
-                            "AUTH REQUEST");
-    
                 response.writeHead(401,
                                    {
                                        "WWW-Authenticate": "Basic realm=\"" + priv.realm + "\""
@@ -232,8 +227,6 @@ shRequire(["shellfish/core"], core =>
             }
             else if (priv.mode === "digest")
             {
-                console.log("[" + new Date().toLocaleString() + "] [HttpDigestAuth] " +
-                            "AUTH REQUEST");
                 const nonce = Math.random();
                 const opaque = md5(priv.realm);
                 response.writeHead(401,

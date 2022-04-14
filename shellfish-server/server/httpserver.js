@@ -31,11 +31,12 @@ shRequire(["shellfish/core"], core =>
     /**
      * Class representing a HTTP server.
      * 
+     * The HTTP server passes requests to its {@link server.HTTPRoute} child
+     * elements.
+     * 
      * @extends core.Object
      * @memberof server
      * 
-     * @property {server.HTTPAuth} authentication - (default: `null`) The authentication method, or `null`.
-     * @property {function} generateSessionId - A function for generating a session ID out of a request.
      * @property {string} host - (default: `"0.0.0.0"`) The host address to listen at.
      * @property {number} keepAlive - (default: `5000`) The time in ms to keep a client connection alive, if the client requested so.
      * @property {number} port - (default: `8000`) The port number to listen at.
@@ -46,33 +47,21 @@ shRequire(["shellfish/core"], core =>
         {
             super();
             d.set(this, {
-                authentication: null,
                 host: "0.0.0.0",
                 port: 8000,
-                delegate: () => null,
-                requests: new Map(),
                 server: null,
                 keepAlive: 5000,
-                connecting: false,
-                sessions: new Map(),
-                generateSessionId: request =>
-                {
-                    return request.connection.remoteAddress + ":" + request.connection.remotePort;
-                }
+                connecting: false
             });
 
-            this.notifyable("authentication");
             this.notifyable("host");
             this.notifyable("keepAlive");
             this.notifyable("port");
-        }
 
-        get authentication() { return d.get(this).authentication; }
-        set authentication(a)
-        {
-            d.get(this).authentication = a;
-            this.authenticationChanged();
-            this.listen();
+            this.onInitialization = () =>
+            {
+                this.listen();
+            };
         }
 
         get host() { return d.get(this).host; }
@@ -80,7 +69,6 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).host = h;
             this.hostChanged();
-            this.listen();
         }
 
         get keepAlive() { return d.get(this).keepAlive; }
@@ -101,49 +89,6 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).port = p;
             this.portChanged();
-            this.listen();
-        }
-
-        get generateSessionId() {return d.get(this).generateSessionId; }
-        set generateSessionId(f)
-        {
-            d.get(this).generateSessionId = f;
-        }
-
-        get delegate() { return d.get(this).delegate; }
-        set delegate(del)
-        {
-            d.get(this).delegate = del;
-        }
-
-        /**
-         * Returns the {@link server.HTTPSession} for the given ID. Creates a
-         * new session, if necessary.
-         * 
-         * @param {string} id - The session ID. 
-         * @returns {server.HTTPSession} The session.
-         */
-        getSession(id)
-        {
-            const priv = d.get(this);
-
-            if (priv.sessions.has(id))
-            {
-                return priv.sessions.get(id);
-            }
-            else
-            {
-                const session = priv.delegate();
-                session.parent = this;
-                session.sessionId = id;
-                session.onDestruction = () =>
-                {
-                    console.log("Session Closed: " + id);
-                    priv.sessions.delete(id);
-                };
-                priv.sessions.set(id, session);
-                return session;
-            }
         }
 
         listen()
@@ -165,11 +110,6 @@ shRequire(["shellfish/core"], core =>
         {
             const priv = d.get(this);
 
-            if (! priv.delegate)
-            {
-                return;
-            }
-
             if (priv.server)
             {
                 priv.server.close();
@@ -177,39 +117,31 @@ shRequire(["shellfish/core"], core =>
 
             priv.server = modHttp.createServer();
             priv.server.keepAliveTimeout = priv.keepAlive;
+
             priv.server.on("request", (request, response) =>
             {
-                console.log(request.method + " " + request.url);
-
-                let user = "";
-                if (priv.authentication)
+                let handled = false;
+                this.children
+                .filter(c => c.when !== undefined && c.handleRequest !== undefined)
+                .filter(c => c.when(request))
+                .forEach((route, idx) =>
                 {
-                    user = priv.authentication.authorize(request);
-                    if (user === null)
+                    if (idx === 0)
                     {
-                        if (! priv.authentication.filter(request.method, request.url))
-                        {
-                            priv.authentication.requestAuthorization(response);
-                            response.end();
-                            return;
-                        }
-                        else
-                        {
-                            user = "";
-                        }
+                        route.handleRequest(request, response);
+                        handled = true;
                     }
-                }
-                
-                console.log("User: " + JSON.stringify(user));
-                console.log(request.socket == response.socket);
-                console.log(response.socket.shfRequest);
+                });
 
-                const sessionId = priv.generateSessionId(request);
-                console.log("Session ID: " + sessionId);
-                const session = this.getSession(sessionId);
-                session.handleRequest(request, response, user);
+                if (! handled)
+                {
+                    this.log("HTTPServer", "warning", "No HTTP route available: " + request.method + " " + request.url);
+                    response.writeHead(404, "Not Found");
+                    response.end();
+                }
             });
             priv.server.listen(priv.port, priv.host);
+            this.log("HTTPServer", "info", "Listen at " + priv.host + ":" + priv.port);
         }
     }
     exports.HTTPServer = HTTPServer;

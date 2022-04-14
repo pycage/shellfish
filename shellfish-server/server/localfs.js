@@ -26,6 +26,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
 {
     const modFs = require("fs");
     const modOs = require("os");
+    const modPath = require("path");
 
     class File
     {
@@ -83,6 +84,41 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
         return item;
     }
 
+    function fsCopy(sourcePath, destPath)
+    {
+        return new Promise(async (resolve, reject) =>
+        {
+            const stats = await fsStat(sourcePath);
+            if (stats.isDirectory())
+            {
+                await fsMkdir(destPath);
+
+                const files = await fsList(sourcePath);
+                for (let i = 0; i < files.length; ++i)
+                {
+                    await fsCopy(modPath.join(sourcePath, files[i]),
+                                 modPath.join(destPath, files[i]));
+                }
+
+                resolve();
+            }
+            else
+            {
+                modFs.copyFile(sourcePath, destPath, err =>
+                {
+                    if (err)
+                    {
+                        reject(err);
+                    }
+                    else
+                    {
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
+
     function fsExist(path)
     {
         return new Promise((resolve, reject) =>
@@ -130,6 +166,26 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
         });
     }
 
+    function fsRename(sourcePath, destPath)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            console.log("MOVE " + sourcePath + " -> " + destPath);
+            modFs.rename(sourcePath, destPath, err =>
+            {
+                if (err)
+                {
+                    console.error(err);
+                    reject(err);
+                }
+                else
+                {
+                    resolve();
+                }
+            });
+        });
+    }
+
     function fsStat(path)
     {
         return new Promise((resolve, reject) =>
@@ -145,6 +201,50 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                     resolve(stats);
                 }
             });
+        });
+    }
+
+    function fsRemove(path)
+    {
+        path = modPath.normalize(path);
+
+        return new Promise(async (resolve, reject) =>
+        {
+            const stats = await fsStat(path);
+            if (stats.isDirectory())
+            {
+                const files = await fsList(path);
+                for (let i = 0; i < files.length; ++i)
+                {
+                    await fsRemove(modPath.join(path, files[i]));
+                }
+
+                modFs.rmdir(path, err =>
+                {
+                    if (err)
+                    {
+                        reject(err);
+                    }
+                    else
+                    {
+                        resolve();
+                    }
+                });
+            }
+            else
+            {
+                modFs.unlink(path, err =>
+                {
+                    if (err)
+                    {
+                        reject(err);
+                    }
+                    else
+                    {
+                        resolve();
+                    }
+                });
+            }
         });
     }
 
@@ -168,6 +268,12 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
 
     const d = new WeakMap();
 
+    /**
+     * Class for accessing the local filesystem.
+     * 
+     * @extends core.Filesystem
+     * @memberof server
+     */
     class LocalFS extends core.Filesystem
     {
         constructor()
@@ -232,6 +338,23 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             return fsMkdir(path);
         }
 
+        move(sourcePath, destPath)
+        {
+            return fsRename(modPath.normalize(sourcePath),
+                            modPath.normalize(destPath));
+        }
+
+        copy(sourcePath, destPath)
+        {
+            return fsCopy(modPath.normalize(sourcePath),
+                          modPath.normalize(destPath));
+        }
+
+        remove(path)
+        {
+            return fsRemove(path);
+        }
+
         read(path)
         {
             const f = async () =>
@@ -240,6 +363,37 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             };
 
             return f();
+        }
+
+        write(path, stream)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                modFs.open(path, "w", (err, fd) =>
+                {
+                    if (err)
+                    {
+                        reject(err);
+                        return;
+                    }
+
+                    const writeStream = modFs.createWriteStream("", { fd });
+                    stream.on("data", data =>
+                    {
+                        writeStream.write(data);
+                    });
+
+                    stream.on("end", () =>
+                    {
+                        writeStream.end();
+                    });
+
+                    writeStream.on("finish", () =>
+                    {
+                        resolve();
+                    });
+                });
+            });
         }
     }
     exports.LocalFS = LocalFS;

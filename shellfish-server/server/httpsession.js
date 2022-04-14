@@ -91,6 +91,7 @@ shRequire(["shellfish/core"], core =>
             method: request.method,
             range: headers.has("range") ? parseRange(headers.get("range")) : [],
             body: () => { return readRequest(request); },
+            stream: request,
             url: request.url,
             user: user
         };
@@ -164,7 +165,6 @@ shRequire(["shellfish/core"], core =>
          * @param {ReadableStream} s - The stream.
          * @param {string} mimetype - The MIME type of the data.
          * @param {number} dataSize - The expected size of data in bytes, or -1 for unknown size.
-         * @returns 
          */
         stream(s, mimetype, dataSize)
         {
@@ -261,7 +261,6 @@ shRequire(["shellfish/core"], core =>
             }
             priv.timeoutHandler = setTimeout(() =>
             {
-                console.log("Session Timeout " + priv.timeout);
                 this.close();
             }, priv.timeout);
         }
@@ -275,6 +274,12 @@ shRequire(["shellfish/core"], core =>
          */
         response(code, status)
         {
+            this.log("HTTP",
+                     "info",
+                     d.get(this).sessionId + " - " +
+                     d.get(this).request.method + " " +
+                     d.get(this).request.url + ": " +
+                     code + " " + status);
             const r = new HTTPResponse(d.get(this).response,
                                        code,
                                        status);
@@ -286,6 +291,7 @@ shRequire(["shellfish/core"], core =>
          */
         close()
         {
+            this.log("HTTPSession", "info", "Session closed: " + d.get(this).sessionId);
             this.parent = null;
         }
     }

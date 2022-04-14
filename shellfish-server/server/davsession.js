@@ -36,7 +36,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 '>': '&gt;'
             }[a];
         });
-    };
+    }
 
     function formatDate(d)
     {
@@ -139,7 +139,15 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
 
     function hrefToPath(href)
     {
-        return decodeURIComponent(href);
+        if (href.startsWith("http://") || href.startsWith("https://"))
+        {
+            const url = new URL(href);
+            return decodeURIComponent(url.pathname);
+        }
+        else
+        {
+            return decodeURIComponent(href);
+        }
     }
 
     function makeIndexDocument(root, path, files)
@@ -172,6 +180,15 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
 
     const d = new WeakMap();
 
+    /**
+     * Class representing a WebDAV session serving a filesystem.
+     * 
+     * @extends server.HTTPSession
+     * @memberof server
+     * 
+     * @property {core.Filesystem} - (default: `null`) The filesystem to serve.
+     * @property {string} root - (default: `"/"`) The path in the filesystem to use as the root folder.
+     */
     class DAVSession extends httpSession.HTTPSession
     {
         constructor()
@@ -211,6 +228,12 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
 
             switch (ev.method)
             {
+            case "COPY":
+                this.davCopy(ev);
+                break;
+            case "DELETE":
+                this.davDelete(ev);
+                break;
             case "GET":
                 this.davGet(ev);
                 break;
@@ -220,13 +243,68 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             case "MKCOL":
                 this.davMkcol(ev);
                 break;
+            case "MOVE":
+                this.davMove(ev);
+                break;
             case "OPTIONS":
                 this.davOptions(ev);
                 break;
             case "PROPFIND":
                 this.davPropfind(ev);
                 break;
+            case "PROPPATCH":
+                this.davProppatch(ev);
+                break;
+            case "PUT":
+                this.davPut(ev);
+                break;
+            default:
+                this.response(500, "Unsupported")
+                .send();
             }
+        }
+
+        davCopy(ev)
+        {
+            const priv = d.get(this);
+
+            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const destination = rootPath(priv.root, hrefToPath(ev.headers.get("destination") || ""));
+            this.log("DAV", "info", "COPY " + path + " -> " + destination);
+
+            priv.filesystem.copy(path, destination)
+            .then(() =>
+            {
+                this.response(201, "Copied")
+                .send();
+            })
+            .catch(err =>
+            {
+                this.response(401, "Forbidden")
+                .body("" + err)
+                .send();
+            });
+        }
+
+        davDelete(ev)
+        {
+            const priv = d.get(this);
+
+            const path = rootPath(priv.root, hrefToPath(ev.url));
+            this.log("DAV", "info", "DELETE " + path);
+
+            this.filesystem.remove(path)
+            .then(() =>
+            {
+                this.response(204, "No Content")
+                .send();
+            })
+            .catch(err =>
+            {
+                this.response(403, "Forbidden")
+                .body("" + err)
+                .send();
+            });
         }
 
         davGet(ev)
@@ -234,7 +312,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             const priv = d.get(this);
 
             const path = rootPath(priv.root, hrefToPath(ev.url));
-            console.log("get file " + path);
+            this.log("DAV", "info", "GET " + path);
             const range = ev.range;
 
             this.filesystem.fileInfo(path)
@@ -269,7 +347,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         const to = Math.min(range[1] !== -1 ? range[1]
                                                             : finfo.size - 1,
                                             finfo.size - 1);
-                        console.debug("Bytes Range: " + from + "-" + to + "/" + finfo.size);
+                        this.log("DAV", "info", "Bytes Range: " + from + "-" + to + "/" + finfo.size);
                         this.response(206, "Partital Content")
                         .header("Accept-Ranges", "bytes")
                         .header("Content-Range", "bytes " + from + "-" + to + "/" + finfo.size)
@@ -297,6 +375,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             const priv = d.get(this);
 
             const path = rootPath(priv.root, hrefToPath(ev.url));
+            this.log("DAV", "info", "HEAD " + path);
 
             this.filesystem.fileInfo(path)
             .then(finfo =>
@@ -319,6 +398,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             const priv = d.get(this);
 
             const path = rootPath(priv.root, hrefToPath(ev.url));
+            this.log("DAV", "info", "MKCOL " + path);
             priv.filesystem.mkdir(path)
             .then(() =>
             {
@@ -333,8 +413,31 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             });
         }
 
+        davMove(ev)
+        {
+            const priv = d.get(this);
+
+            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const destination = rootPath(priv.root, hrefToPath(ev.headers.get("destination") || ""));
+            this.log("DAV", "info", "MOVE " + path + " -> " + destination);
+
+            priv.filesystem.move(path, destination)
+            .then(() =>
+            {
+                this.response(201, "Moved")
+                .send();
+            })
+            .catch(err =>
+            {
+                this.response(409, "Conflict")
+                .body("" + err)
+                .send();
+            });
+        }
+
         davOptions(ev)
         {
+            this.log("DAV", "info", "OPTIONS");
             this.response(200, "OK")
             .header("DAV", "1, 2")
             .send();
@@ -349,8 +452,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             {
                 const depth = ev.headers.get("depth") || "infinity";
                 const path = rootPath(priv.root, hrefToPath(ev.url));
-
-                console.log("PROPFIND: " + path);
+                this.log("DAV", "info", "PROPFIND " + path);
 
                 if (xml === "")
                 {
@@ -361,7 +463,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 const saxParser = new xmlsax.Parser(saxHandler);
                 saxParser.parseString(xml);
 
-                console.log(saxHandler);
                 const doc = saxHandler.document();
                 if (! doc)
                 {
@@ -389,8 +490,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                     }
                 });
 
-                console.debug("Props: " + props);
-
                 priv.filesystem.fileInfo(path)
                 .then(finfo =>
                 {
@@ -404,7 +503,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         
                             files.forEach(cfinfo =>
                             {
-                                console.log("- " + cfinfo.path);
                                 const unrootedPath = unrootPath(priv.root, cfinfo.path);
                                 xml += makeResponseXml(pathToHref(unrootedPath),
                                                        cfinfo,
@@ -442,6 +540,98 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                     this.response(404, "Resource Not Available")
                     .send();
                 });
+            });
+        }
+
+        davProppatch(ev)
+        {
+            const priv = d.get(this);
+            this.log("DAV", "info", "PROPPATCH");
+            
+            ev.body()
+            .then(xml =>
+            {
+                console.log(xml);
+
+                const saxHandler = new xmlsax.Handler();
+                const saxParser = new xmlsax.Parser(saxHandler);
+                saxParser.parseString(xml);
+
+                const doc = saxHandler.document();
+                if (! doc)
+                {
+                    this.response(500, "Internal Error")
+                    .send();
+                    return;
+                }
+
+                let out = "<?xml version='1.0' encoding='utf-8'?>" +
+                          "<D:multistatus xmlns:D='DAV:'>";
+
+                doc.children.forEach(updateNode =>
+                {
+                    if (updateNode.name === "DAV::set")
+                    {
+                        const propsNode = updateNode.children[0];
+
+                        updateNode.children[0].children.forEach(propNode =>
+                        {
+                            const propName = propNode.name;
+                            const propValue = propNode.children[0].data;
+
+                            console.log("SET " + propName + " = " + propValue);
+
+                            out += "<D:propstat>" +
+                                   "<D:prop><" + propName + "/></D:prop>" +
+                                   "<D:status>HTTP/1.1 424 Failed Dependency</D:status>" +
+                                   "</D:propstat>";
+                        });
+                    }
+                    else if (updateNode.name === "DAV::remove")
+                    {
+                        updateNode.children[0].children.forEach(propNode =>
+                        {
+                            const propName = propNode.name;
+
+                            console.log("REMOVE " + propName);
+
+                            out += "<D:propstat>" +
+                                    "<D:prop><" + propName + "/></D:prop>" +
+                                    "<D:status>HTTP/1.1 409 Conflict</D:status>" +
+                                    "</D:propstat>";
+                        });
+                    }
+
+                    console.log(out);
+                });
+
+                out += "</D:multistatus>";
+
+                this.response(207, "Multi-Status")
+                .body(out, "application/xml")
+                .send();
+            });
+
+        }
+
+        davPut(ev)
+        {
+            const priv = d.get(this);
+
+            const path = rootPath(priv.root, hrefToPath(ev.url));
+            this.log("DAV", "info", "PUT " + path);
+
+            priv.filesystem.write(path, ev.stream)
+            .then(() =>
+            {
+                this.response(200, "OK")
+                .send();
+            })
+            .catch(err =>
+            {
+                this.response(409, "Conflict")
+                .body("" + err)
+                .send();
             });
         }
     }

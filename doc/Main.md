@@ -137,6 +137,10 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### April 2022
+* The new method {@link core.Object#log} provides a simple means for controlling
+  application logging.
+
 ### February 2022
 * The `function` keyword may now be used in JavaScript sections of Shui files.
 * Shellfish is expanding its reach to the server-side to allow full-stack

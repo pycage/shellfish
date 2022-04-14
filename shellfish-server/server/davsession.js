@@ -74,7 +74,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         
         if (hasProperty(requestedProperties, "DAV::displayname"))
         {
-            xml += "<D:displayname>" + encodeURIComponent(fileInfo.name) + "</D:displayname>";
+            xml += "<D:displayname>" + escapeXml(fileInfo.name) + "</D:displayname>";
         }
         if (hasProperty(requestedProperties, "DAV::creationdate"))
         {

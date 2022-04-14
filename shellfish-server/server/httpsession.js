@@ -153,7 +153,7 @@ shRequire(["shellfish/core"], core =>
 
         body(s, mimetype)
         {
-            this.header("Content-Length", "" + s.length);
+            this.header("Content-Length", "" + Buffer.from(s).length);
             this.header("Content-Type", mimetype);
             this.data = s;
             return this;

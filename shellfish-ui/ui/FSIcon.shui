@@ -31,7 +31,7 @@ Label {
         switch (mimeType)
         {
         case "application/x-folder":
-            return "[icon:core-folder]";
+            icon = "core-folder";
             break;
         case "application/java-archive":
         case "application/x-gzip":

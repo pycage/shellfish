@@ -222,6 +222,7 @@ shRequire(["shellfish/core"], core =>
                 sessionId: "",
                 request: null,
                 response: null,
+                user: null,
                 timeout: 60000,
                 timeoutHandler: null
             });
@@ -252,6 +253,7 @@ shRequire(["shellfish/core"], core =>
 
             priv.request = request;
             priv.response = response;
+            priv.user = user;
 
             this.request(makeRequestEvent(request, user));
 
@@ -276,6 +278,7 @@ shRequire(["shellfish/core"], core =>
         {
             this.log("HTTP",
                      "info",
+                     (d.get(this).user ? d.get(this).user + "@" : "") +
                      d.get(this).sessionId + " - " +
                      d.get(this).request.method + " " +
                      d.get(this).request.url + ": " +

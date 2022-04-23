@@ -39,8 +39,9 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
      * @property {html.Filesystem} filesystem - (default: `null`) The filesystem to use.
      * @property {bool} loading - [readonly] `true` if the model is currently being loaded.
      * @property {string} path - (default: `""`) The path represented by the model.
-     * @property {bool} withFiles - (default: `true`) Whether to include files.
      * @property {bool} withDirectories - (default: `true`) Whether to include directories.
+     * @property {bool} withFiles - (default: `true`) Whether to include files.
+     * @property {bool} withHidden - (default: `false`) Whether to include hidden files and directories.
      */
     class FSModel extends lm.ListModel
     {
@@ -51,8 +52,9 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 fs: null,
                 path: "",
                 directoriesFirst: true,
-                withFiles: true,
                 withDirectories: true,
+                withFiles: true,
+                withHidden: false,
                 loading: false,
                 updating: false
             });
@@ -61,8 +63,9 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             this.notifyable("filesystem");
             this.notifyable("loading");
             this.notifyable("path");
-            this.notifyable("withFiles");
             this.notifyable("withDirectories");
+            this.notifyable("withFiles");
+            this.notifyable("withHidden");
         }
 
         get filesystem() { return d.get(this).fs; }
@@ -123,6 +126,14 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             d.get(this).withDirectories = value;
             this.update(false);
             this.withDirectoriesChanged();
+        }
+
+        get withHidden() { return d.get(this).withHidden; }
+        set withHidden(value)
+        {
+            d.get(this).withHidden = value;
+            this.update(false);
+            this.withHiddenChanged();
         }
 
         comparator(a, b)
@@ -206,7 +217,12 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             .then(items =>
             {
                 console.log(items);
-                const newItems = items.filter(item =>
+                const newItems = items
+                .filter(item =>
+                {
+                    return (! item.name.startsWith(".") || priv.withHidden);
+                })
+                .filter(item =>
                 {
                     return (item.type === "f" && priv.withFiles ||
                             item.type === "d" && priv.withDirectories);

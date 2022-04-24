@@ -32,7 +32,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * fully control the content inside.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {string} html - The HTML code to display.
      */

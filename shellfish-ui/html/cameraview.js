@@ -49,7 +49,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * Note that camera access is usually only available for HTTPS connections.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} active - (default: `false`) Toggles between active and inactive states.
      * @property {object[]} devices - [readonly] The available camera devices. Fingerprinting protection in browsers might block listing the particular devices.

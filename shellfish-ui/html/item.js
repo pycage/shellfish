@@ -79,7 +79,7 @@ shRequire(["shellfish/low",
      * Base class representing a visual mid-level object.
      * @abstract
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} ancestorsEnabled - [readonly] Whether all ancestors are enabled.
      * @property {bool} ancestorsVisible - [readonly] Whether all ancestors are visible.

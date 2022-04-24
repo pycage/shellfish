@@ -50,7 +50,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * }
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      * 
      * @property {BoundingBox} max - [readonly] The maximum bounding box.
      * @property {BoundingBox} min - [readonly] The minimum bounding box.

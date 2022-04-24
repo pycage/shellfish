@@ -29,7 +29,7 @@ shRequire(["shellfish/core"], function (core)
     /**
      * Class representing a gradient stop for use in gradient elements.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {string} color - (default: `"red"`) The color at this stop.

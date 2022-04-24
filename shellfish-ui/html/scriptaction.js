@@ -29,7 +29,7 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
     /**
      * Class representing a script action during an animation.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends html.Animation
      * 
      * @property {function} script - The function to execute.

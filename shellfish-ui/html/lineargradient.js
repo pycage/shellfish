@@ -29,7 +29,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
     /**
      * Class representing a linear color gradient consisting of {@link html.GradientStop} elements.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {number} angle - (default: `0`) The rotation angle of the gradient in degrees.

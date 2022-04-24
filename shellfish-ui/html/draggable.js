@@ -71,7 +71,7 @@ shRequire(["shellfish/low", __dirname + "/box.js", __dirname + "/droparea.js"], 
      * Class representing a draggable box for drag-and-drop operations.
      * 
      * @extends html.Box
-     * @memberof mid
+     * @memberof html
      */
     class Draggable extends box.Box
     {

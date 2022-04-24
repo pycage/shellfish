@@ -29,7 +29,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
     /**
      * Class representing a text input field.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends html.Item
      * 
      * @property {bool} bold - (default: `false`) Show text in bold face.

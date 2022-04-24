@@ -93,7 +93,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Class representing the root document.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      *
      * @property {bool} active - [readonly] Whether the document is currently active (the window and tab have focus).
      * @property {object} bbox - [readonly] The current bounding box.

@@ -105,7 +105,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * The drag source cannot be a descendant of this element.
      * 
      * @extends html.Box
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} accepted - [readonly] Whether the area would accept the current drop item.
      * @property {bool} hovering - [readonly] Whether a drop item is hovering the area.

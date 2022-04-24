@@ -125,7 +125,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
      * HTML5 Indexed DB.
      * 
      * @extends core.Filesystem
-     * @memberof mid
+     * @memberof html
      * 
      * @property {string} volume - (default: `""`) The name of the drive volume.
      */

@@ -224,7 +224,7 @@ shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"
      * for illustrations of the particular easing functions.
      * 
      * @extends html.Animation
-     * @memberof mid
+     * @memberof html
      * 
      * @property {number} duration - (default: `300`) The duration of the animation in ms.
      * @property {string} easing - (default: `"InOutQuad"`) The easing curve of the animation.

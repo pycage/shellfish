@@ -30,7 +30,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Class representing a frame timer that triggers in sync with the screen
      * refresh rate.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {number} fps (default: `60`) How many times the timer should trigger per second.

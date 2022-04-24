@@ -60,7 +60,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Console messages are globally redirected to this model if at least one
      * instance of this class exists.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      */
     class Console extends core.Object

@@ -674,8 +674,8 @@ shRequire([__dirname + "/object.js"], (obj) =>
      * 
      * This mechanism is comparable to the `std::move()` semantics of C++.
      * 
-     * @memberof mid
-     * @extends html.Object
+     * @memberof core
+     * @extends core.Object
      * 
      * @property {number} free - [readonly] The amount of free workers.
      * @property {number} hardwareConcurrency - [readonly] The maximum amount of concurrent threads supported by the hardware.

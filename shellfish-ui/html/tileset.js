@@ -30,7 +30,7 @@ shRequire(["shellfish/core"], (core) =>
      * Class representing an image-based tile set for use on a tile map.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} gpu - (default: `false`) Whether to store the image data on the GPU. This may not be supported by all environments.
      * @property {string} source - The image source URL.

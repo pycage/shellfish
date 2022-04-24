@@ -29,7 +29,7 @@ shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
     /**
      * Class representing a frames-per-second counter.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {number} fps - [readonly] The current frame rate.

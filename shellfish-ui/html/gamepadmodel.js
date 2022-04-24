@@ -32,7 +32,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Each game pad is represented by an item `{ index, name }`.
      * 
      * @extends core.ListModel
-     * @memberof mid
+     * @memberof html
      */
     class GamepadModel extends core.ListModel
     {

@@ -31,7 +31,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * Class representing an image.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {string} fitMode - (default: `"fill"`) The mode for fitting the original image into this element. One of: `fill|contain|cover|scale-down|none`
      * @property {number} originalWidth - [readonly] The original width of the image.

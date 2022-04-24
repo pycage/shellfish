@@ -29,7 +29,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
     /**
      * Base class for animations.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {bool} busy - [readonly] Whether the animation is currently running.

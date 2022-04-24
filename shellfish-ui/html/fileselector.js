@@ -29,7 +29,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
     /**
      * Class representing a file selector trigger.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @example

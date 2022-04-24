@@ -30,7 +30,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * Class representing a HTML5 canvas.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {object} context2d - [readonly] The 2D canvas context.
      * @property {number} originalHeight - (default: `100`) The original unscaled height.

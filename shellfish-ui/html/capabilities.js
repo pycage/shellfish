@@ -27,7 +27,7 @@ shRequire(["shellfish/core"], function (core)
     /**
      * Class for testing the capabilities of the runtime environment.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {bool} atomics - [readonly] Whether atomics are supported.

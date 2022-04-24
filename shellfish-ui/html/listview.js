@@ -227,7 +227,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
      * Class representing a list view or grid view fed from a {@link core.ListModel ListModel}.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {number} cacheMargin - (default: `0`) The size of the margin around the visible viewport that is kept in cache.
      * @property {number} cellHeight - The height of an item.

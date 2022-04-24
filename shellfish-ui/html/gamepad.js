@@ -30,7 +30,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Class representing a gamepad.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} connected - [readonly] Whether the gamepad is currently connected.
      * @property {bool} canRumble - [readonly] Whether the gamepad supports rumbling (force-feedback vibration).

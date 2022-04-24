@@ -32,7 +32,7 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
      * The WaitAction halts the animation until the passing condition is
      * fulfilled.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends html.Animation
      * 
      * @property {bool} pass - (default: `false`) The passing condition.

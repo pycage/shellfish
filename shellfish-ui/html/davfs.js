@@ -93,7 +93,7 @@ shRequire(["shellfish/core"], function (core)
      * Class representing a remote WebDAV filesystem.
      * 
      * @extends core.Filesystem
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} cache - (default: `false`) If `true`, list results are cached. Use the method {@link html.DavFS#clearCache} to clear the cache.
      * @property {low.FetchManager} fetchManager - (default: `null`) The fetch manager instance to use.

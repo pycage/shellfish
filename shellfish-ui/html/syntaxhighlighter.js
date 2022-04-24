@@ -34,7 +34,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
     /**
      * Class representing a syntax token defined by a regular expression.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      * 
      * @property {RegExp} regexp - (default: `/./`) The regular expression to match the token.
@@ -80,7 +80,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * remember that `.` never matches a line break (`\n`) and you should use
      * `[\s\S]` instead.
      *
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      */
     class SyntaxHighlighter extends core.Object

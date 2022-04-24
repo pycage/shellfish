@@ -38,8 +38,8 @@ shRequire([__dirname + "/object.js"], (obj) =>
      * Modularization of the runtime is taking place internally, so Emscripten
      * does not have to be instructed to build a modularized runtime.
      * 
-     * @memberof mid
-     * @extends html.Object
+     * @memberof core
+     * @extends core.Object
      *
      * @property {html.Canvas} canvas - (default: `null`) A canvas for graphical output.
      * @property {string} source - (default: `""`) The URL of the .wasm file. An accompanying .js file for setting up the runtime must be present.

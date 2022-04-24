@@ -42,7 +42,7 @@ shRequire(["shellfish/low", __dirname + "/canvas.js"], function (low, cnv)
      * The tile set implementation controls which mode to use.
      * 
      * @extends html.Canvas
-     * @memberof mid
+     * @memberof html
      * 
      * @property {number} contentHeight - [readonly] The current scrolling viewport height.
      * @property {number} contentWidth - [readonly] The current scrolling viewport width.

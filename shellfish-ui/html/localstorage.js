@@ -43,7 +43,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * instances will see changes made by other instances immediately.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      * 
      * @property {string} namespace - (default: `""`) A namespace for distinguishing multiple instances.
      */

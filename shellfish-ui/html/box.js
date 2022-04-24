@@ -46,7 +46,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * A box is a container item that holds and layouts child items.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {html.Color} borderColor - (default: `"black"`) The color of the border.
      * @property {number} borderRadius - (default: `0`) The border radius. The higher the value, the more round the corners are. A square with a border radius of half its width is a circle.

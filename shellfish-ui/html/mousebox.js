@@ -121,7 +121,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * a pen. Multitouch input is supported.
      * 
      * @extends html.Box
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} containsMouse - [readonly] Whether the mouse pointer is over the box.
      * @property {number} hoverDelay - (default: `500`) The hover delay in ms.

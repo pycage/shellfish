@@ -32,8 +32,8 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
     /**
      * Class representing a filesystem model.
      *
-     * @extends html.ListModel
-     * @memberof mid
+     * @extends core.ListModel
+     * @memberof core
      * 
      * @property {bool} directoriesFirst - (default: `true`) Whether to list directories first.
      * @property {html.Filesystem} filesystem - (default: `null`) The filesystem to use.

@@ -30,7 +30,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * Class representing a multiline area for text input.
      * 
      * @extends html.Item
-     * @memberof mid
+     * @memberof html
      * 
      * @property {bool} bold - (default: `false`) Show text in bold face.
      * @property {html.Color} color - The text color.

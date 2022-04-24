@@ -29,7 +29,7 @@ shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
     /**
      * Class representing a WebSocket for bi-directional communication.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends core.Object
      */    
     class WebSocket extends core.Object

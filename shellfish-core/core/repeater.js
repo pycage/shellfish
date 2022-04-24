@@ -46,7 +46,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      * }
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof core
      * 
      * @property {number} count - [readonly] The amount of items.
      * @property {fengshui.Template} delegate - (default: `null`) The delegate template. This does not need to be a visual element.

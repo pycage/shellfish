@@ -33,7 +33,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * make use of the Back and Forward buttons of the browser.
      * 
      * @extends core.Object
-     * @memberof mid
+     * @memberof html
      */
     class History extends core.Object
     {

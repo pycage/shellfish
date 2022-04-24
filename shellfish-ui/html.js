@@ -105,7 +105,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 exports.__id = "shellfish/html";
-exports.SHELLFISH_BUILD = "%PKG_GIT_SHORTHASH%-%PKG_DATE%";
 
 const css = [
     "shellfish",

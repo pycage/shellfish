@@ -29,7 +29,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
     /**
      * Class representing a video player component.
      * 
-     * @memberof mid
+     * @memberof html
      * @extends html.Item
      * 
      * @property {number} currentTime - The current time position in seconds.
@@ -40,6 +40,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
      * @property {bool} playing - [readonly] Whether the video is currently playing.
      * @property {string} source - The video source URL.
      * @property {string} status - [readonly] The current status. One of: `empty|loading|error|success`
+     * @property {number} volume - (default: `1.0`) The current audio volume as a value between `0.0` and `1.0`.
      */
     class Video extends item.Item
     {
@@ -71,6 +72,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
             this.notifyable("playing");
             this.notifyable("source");
             this.notifyable("status");
+            this.notifyable("volume");
 
             this.registerEvent("finish");
 
@@ -163,6 +165,14 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
 
         get originalWidth() { return d.get(this).item.videoWidth || 0; }
         get originalHeight() { return d.get(this).item.videoHeight || 0; }
+
+        get volume() { return d.get(this).item.volume; }
+        set volume(v)
+        {
+            d.get(this).item.muted = (v === 0);
+            d.get(this).item.volume = v;
+            this.volumeChanged();
+        }
 
         get currentTime()
         {

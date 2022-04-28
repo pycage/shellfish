@@ -61,7 +61,7 @@ shRequire(["shellfish/core"], core =>
         }
     }
 
-    function makeRequestEvent(request, user)
+    function makeRequestEvent(urlMapper, request, user)
     {
         const cookies = new Map();
         if (request.headers.cookie)
@@ -92,7 +92,7 @@ shRequire(["shellfish/core"], core =>
             range: headers.has("range") ? parseRange(headers.get("range")) : [],
             body: () => { return readRequest(request); },
             stream: request,
-            url: request.url,
+            url: urlMapper(request.url),
             user: user
         };
     }
@@ -212,6 +212,7 @@ shRequire(["shellfish/core"], core =>
      * 
      * @property {string} sessionId - [readonly] The ID that identifies this session. The ID is assigned by the {@link server.HTTPServer HTTP server}.
      * @property {number} timeout - (default: `60000`) The session inactivity timeout in ms. The session closes automatically after this time of inactivity.
+     * @property {function} urlMapper - (default: `url => url`) A function for mapping the request URL.
      */
     class HTTPSession extends core.Object
     {
@@ -224,10 +225,12 @@ shRequire(["shellfish/core"], core =>
                 response: null,
                 user: null,
                 timeout: 60000,
-                timeoutHandler: null
+                timeoutHandler: null,
+                urlMapper: url => url
             });
 
             this.notifyable("timeout");
+            this.notifyable("urlMapper");
 
             /**
              * Is triggered when a request comes in.
@@ -247,6 +250,13 @@ shRequire(["shellfish/core"], core =>
             this.timeoutChanged();
         }
 
+        get urlMapper() { return d.get(this).urlMapper; }
+        set urlMapper(f)
+        {
+            d.get(this).urlMapper = f;
+            this.urlMapperChanged();
+        }
+
         handleRequest(request, response, user)
         {
             const priv = d.get(this);
@@ -255,7 +265,7 @@ shRequire(["shellfish/core"], core =>
             priv.response = response;
             priv.user = user;
 
-            this.request(makeRequestEvent(request, user));
+            this.request(makeRequestEvent(priv.urlMapper, request, user));
 
             if (priv.timeoutHandler)
             {

@@ -121,6 +121,8 @@ exports.tools = {
 (function()
 {
     /**
+     * **Module ID:** `shellfish/fengshui`
+     * 
      * Feng Shui is the code processor for translating code written in Shui
      * to JavaScript code, either at runtime when loading the code, or at build
      * time. This module is compatible with Node.js for translating code on the

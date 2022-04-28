@@ -23,6 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
+ * **Module ID:** `shellfish/ui`
+ * 
  * This module provides various UI components written in Shui and support for
  * theming the UI.
  * 

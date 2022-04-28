@@ -23,6 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
+ * **Module ID:** `shellfish/low`
+ * 
  * This module provides the low-level Shellfish API for working directly on the
  * HTML DOM and CSS.
  * 

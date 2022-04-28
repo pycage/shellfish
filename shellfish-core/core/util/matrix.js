@@ -23,6 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
+ * **Module ID:** `shellfish/core/matrix`
+ * 
  * This module provides the Shellfish matrix toolbox for linear algebra, which is
  * useful when working with coordinates in a 2D or 3D space.
  * 

@@ -23,6 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
+ * **Module ID:** `shellfish/core`
+ * 
  * This module provides the Shellfish Core API.
  *
  * @namespace core

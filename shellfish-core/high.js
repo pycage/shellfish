@@ -23,6 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
+ * **Module ID:** `shellfish/high`
+ * 
  * This module provides a high-level API with tools for declarative programming
  * in JavaScript.
  * 

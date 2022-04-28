@@ -140,6 +140,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
      * @extends server.WebSession
      * @memberof server
      * 
+     * @property {core.Filesystem} - (default: `null`) The filesystem to serve.
      * @property {string} root - (default: `"/"`) The local path to use as the root folder.
      */
     class WebSession extends httpSession.HTTPSession
@@ -206,6 +207,12 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                     {
                         this.response(200, "OK")
                         .body(makeIndexDocument(priv.root, path, files), "text/html")
+                        .send();
+                    })
+                    .catch(err =>
+                    {
+                        this.response(500, "Internal Server Error")
+                        .body("" + err)
                         .send();
                     });
                     return;

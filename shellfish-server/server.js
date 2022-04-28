@@ -22,6 +22,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
+/**
+ * **Module ID:** `shellfish/3d`
+ * 
+ * This module provides elements for constructing server applications.
+ * The supported environment is currently Node.js.
+ * 
+ * @namespace server
+ */
+
 exports.__id = "shellfish/server";
 
 const includes = [

@@ -15,9 +15,10 @@
     "generate-docs": "jsdoc -c doc/conf.json -u doc/tutorial",
     "build-icons": "node icons/webfont.js",
     "build-all": "npm-run-all build-icons build-shellfish-core build-shellfish-ui build-shellfish-3d build-shellfish-server",
-    "build-shellfish-core": "node tools/make-bundle.js build/shellfish.pkg shellfish-core",
-    "build-shellfish-ui": "node tools/make-bundle.js build/shellfish-ui.pkg shellfish-ui",
-    "build-shellfish-3d": "node tools/make-bundle.js build/shellfish-3d.pkg shellfish-3d",
-    "build-shellfish-server": "node tools/make-bundle.js build/shellfish-server.pkg shellfish-server"
+    "build-shellfish-core": "node tools/make-bundle.js dist/shellfish.pkg shellfish-core",
+    "build-shellfish-ui": "node tools/make-bundle.js dist/shellfish-ui.pkg shellfish-ui",
+    "build-shellfish-3d": "node tools/make-bundle.js dist/shellfish-3d.pkg shellfish-3d",
+    "build-shellfish-server": "node tools/make-bundle.js dist/shellfish-server.pkg shellfish-server",
+    "run-gallery": "node dist/shui-node.js dist/shellfish.pkg dist/shellfish-server.pkg dist/require.js gallery/main.shui"
   }
 }

@@ -1,4 +1,4 @@
 node_modules
-build/doc
-build/icons
-build/*.pkg
+dist/doc
+dist/icons
+dist/*.pkg

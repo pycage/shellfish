@@ -1,0 +1,175 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/3d" as shf3d;
+require "./../Header.shui";
+require "./ControlPad.shui";
+require "./Dungeon.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Collision Detection"
+        subtitle: "Find a way out of the dungeon!"
+
+        codeUrls: [__filename, "Header.shui", "3d/ControlButton.shui", "3d/ControlPad.shui", "3d/Dungeon.shui"]
+    }
+
+    shf3d.View {
+        id: view
+
+        fillWidth: true
+        height: documentRoot.windowHeight
+        originalWidth: bbox.width
+        originalHeight: bbox.height
+
+        color: rgb(0.0, 0.0, 0.3)
+
+        scene: shf3d.Group {
+
+            shf3d.Group {
+                id: player
+
+                property mayMoveForward: frontCollider.collisions.length === 0
+                property mayMoveBackward: backCollider.collisions.length === 0
+                property mayMoveLeft: leftCollider.collisions.length === 0
+                property mayMoveRight: rightCollider.collisions.length === 0
+                
+                // walking-animation phase
+                property phase: 0
+
+                location: vec3(1.5, 0, 8.5)
+
+                // torch-light
+                shf3d.Light {
+                    location: vec3(0, 0.7, 0)
+                    range: 3.0
+                    color: rgb(0.6, 0.5, 0.4)
+                }
+
+                // eyes
+                shf3d.Camera {
+                    aspect: view.bbox.width / view.bbox.height
+                    location: vec3(0.03 * Math.cos(player.phase), 0.5 + 0.01 * Math.cos(player.phase * 2), 0)
+                    rotationAngle: Math.cos(player.phase)
+                    rotationAxis: vec3(1, 0, 0)
+                }
+
+                // Colliders
+                
+                shf3d.Collider {
+                    id: frontCollider
+                    location: vec3(0, 0.5, -0.35)
+                }
+
+                shf3d.Collider {
+                    id: backCollider
+                    location: vec3(0, 0.5, 0.35)
+                }
+
+                shf3d.Collider {
+                    id: leftCollider
+                    location: vec3(-0.35, 0.5, 0)
+                }
+
+                shf3d.Collider {
+                    id: rightCollider
+                    location: vec3(0.35, 0.5, 0)
+                }
+
+            }
+
+
+            Dungeon {
+
+            }
+
+            shf3d.Cube {
+                id: exit
+
+                property foundExit: frontCollider.collisions.indexOf(self.get()) !== -1
+
+                location: vec3(8.5, 0.5, -0.5)
+                material: shf3d.Material { color: colorName("black") }
+            }
+
+        }
+    }
+
+    ControlPad {
+        position: "free"
+        origin: "bottom-left"
+        x: theme.paddingMedium
+        y: theme.paddingMedium
+
+        target: player
+    }
+
+    // map
+    Box {
+        position: "free"
+        origin: "bottom-right"
+        x: theme.paddingMedium
+        y: theme.paddingMedium
+        width: (theme.itemWidthSmall / 2) * 10
+        height: width
+        borderWidth: 2
+        borderColor: "white"
+        borderRadius: 3
+        opacity: 0.6
+
+        Box {
+            position: "free"
+            width: theme.itemWidthSmall / 2
+            height: width
+            color: "white"
+            x: Math.floor(player.location.x) * width
+            y: Math.floor(player.location.z) * height
+            borderRadius: 3
+        }
+    }
+
+    Label {
+        visible: exit.foundExit
+
+        position: "global"
+        x: (view.bbox.width - bbox.width) / 2
+        y: (view.bbox.height - bbox.height) / 2
+        fontSize: theme.fontSizeLarge
+        color: "red"
+        text: "You found the exit!"
+    }
+
+    Label {
+        position: "global"
+        origin: "top-right"
+        x: theme.paddingSmall
+        y: header.height + theme.paddingSmall
+        overflowBehavior: "wrap"
+        color: "white"
+        text: "free textures from https://freestocktextures.com"
+    }
+}

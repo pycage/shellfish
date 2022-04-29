@@ -1,0 +1,338 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    scrollable: false
+
+    into header Header {
+        id: pageHeader
+
+        title: "WebSocket"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    contentTemplate: template Box {
+        fillWidth: true
+        fillHeight: true
+
+        WebSocket {
+            id: sock
+
+            url: urlEntry.text
+
+            onMessage: (msg) =>
+            {
+                responseModel.insert(responseModel.size, msg);
+            }
+
+            onError: (err) =>
+            {
+                const dlg = page.errorDialogT();
+                dlg.show();
+                dlg.text = err;
+            }
+        }
+
+        FileSelector {
+            id: fsel
+        }
+
+        ListModel {
+            id: responseModel
+        }
+        
+        Box {
+            marginTop: pageHeader.height
+            fillWidth: true
+            height: theme.itemHeightMedium
+            color: theme.secondaryBackgroundColor
+
+            layout: "center-row"
+
+            Label {
+                marginLeft: theme.paddingLarge
+                text: "Server URL"
+            }
+
+            TextEntry {
+                id: urlEntry
+
+                enabled: sock.status === "closed"
+                marginLeft: theme.paddingMedium
+                fillWidth: true
+                text: ""
+            }
+
+            Button {
+                enabled: urlEntry.text !== "" && sock.status !== "connecting"
+                marginLeft: theme.paddingMedium
+                marginRight: theme.paddingLarge
+                icon: sock.status === "connected" ? "comm-disconnected" : "comm-connected"
+                text: sock.status === "connected" ? "Disconnect" : "Connect"
+
+                onClick: () => {
+                    if (sock.status === "connected")
+                    {
+                        sock.close();
+                    }
+                    else
+                    {
+                        sock.connectSocket();
+                    }
+                }
+            }
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightSmall
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+
+            layout: "center-row"
+
+            Label {
+                bold: true
+                text: "Status:"
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: sock.status
+            }
+
+            Label {
+                marginLeft: theme.paddingLarge
+                bold: true
+                text: "Protocol:"
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: sock.protocol !== "" ? sock.protocol : "<unspecified>"
+            }
+
+            Label {
+                marginLeft: theme.paddingLarge
+                bold: true
+                text: "Unsent Bytes:"
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: sock.bufferedAmount
+            }
+
+            Box { fillWidth: true }
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightMedium
+            marginTop: theme.paddingLarge
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+            layout: "center-row"
+
+            Button {
+                enabled: sock.status === "connected" && messageBox.text !== ""
+                icon: "comm-chat"
+                text: "Send Message"
+
+                onClick: () =>
+                {
+                    sock.send(messageBox.text);
+                    messageBox.text = "";
+                }
+            }
+
+            Button {
+                enabled: sock.status === "connected"
+                marginLeft: theme.paddingMedium
+                icon: "fs-upload"
+                text: "Send File"
+
+                onClick: () =>
+                {
+                    fsel.open((files) =>
+                    {
+                        sock.send(files[0]);
+                    });
+                }
+            }
+
+            Box { fillWidth: true }
+        }
+
+        TextArea {
+            id: messageBox
+
+            enabled: sock.status === "connected"
+
+            marginTop: theme.paddingSmall
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+            fillWidth: true
+            height: theme.itemHeightLarge * 3
+        }
+
+        Box {
+            marginTop: theme.paddingLarge
+            fillWidth: true
+            height: theme.itemHeightMedium
+            layout: "center-row"
+
+            Label {
+                marginLeft: theme.paddingLarge
+                fillWidth: true
+                bold: true
+                text: "Server Messages"
+            }
+
+            Button {
+                marginRight: theme.paddingLarge
+                text: "Clear"
+
+                onClick: () =>
+                {
+                    responseModel.reset([]);
+                }
+            }
+        }
+
+        Box {
+            fillWidth: true
+            fillHeight: true
+
+            ListView {
+                id: responseView
+
+                marginTop: theme.paddingSmall
+                fillWidth: true
+                fillHeight: true
+                cellWidth: bbox.width
+                cellHeight: theme.itemHeightLarge * 3
+
+                model: responseModel
+
+                delegate: template Box {
+                    id: item
+
+                    color: theme.contentBackgroundColor
+
+                    Box {
+                        fillWidth: true
+                        height: theme.itemHeightSmall
+                        color: theme.secondaryBackgroundColor
+
+                        layout: "center-row"
+
+                        Label {
+                            marginLeft: theme.paddingLarge
+                            fontSize: theme.fontSizeSmall
+                            bold: true
+                            text: "Timestamp:"
+                        }
+
+                        Label {
+                            marginLeft: theme.paddingSmall
+                            fontSize: theme.fontSizeSmall
+                            text: item.modelData.value.timeStamp
+                        }
+
+                        Label {
+                            marginLeft: theme.paddingLarge
+                            fontSize: theme.fontSizeSmall
+                            bold: true
+                            text: "Origin:"
+                        }
+
+                        Label {
+                            marginLeft: theme.paddingSmall
+                            fontSize: theme.fontSizeSmall
+                            text: item.modelData.value.origin
+                        }
+
+                        Box { fillWidth: true }
+                    }
+
+                    Box {
+                        fillWidth: true
+                        fillHeight: true
+
+                        Label {
+                            marginLeft: theme.paddingLarge
+                            marginRight: theme.paddingLarge
+                            overflowBehavior: "wrap"
+                            text: (() =>
+                            {
+                                const data = item.modelData.value.data;
+                                console.log(typeof data);
+                                if (typeof data === "string")
+                                {
+                                    return data.length < 1024 ? data
+                                                                : "<String: " + data.length + " Bytes>"
+                                }
+                                else
+                                {
+                                    return "<Blob: " + data.size + " Bytes>";
+                                }
+                            })()
+                        }
+                    }
+
+                }
+            }//ListView
+
+            ScrollIndicator { target: responseView }
+
+        }//Box
+
+    }
+
+    Placeholder {
+        visible: page.loading
+        text: "[icon:ui-spinner5]"
+    }
+
+    property errorDialogT: template Dialog {
+        id: dlg
+
+        property text: ""
+
+        title: "Connection Error"
+
+        Label {
+            text: dlg.text
+        }
+
+        into buttons Button {
+            text: "Ok"
+            onClick: () => { dlg.parent = null; }
+        }
+    }
+}

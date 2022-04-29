@@ -1,0 +1,300 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Drag and Drop"
+        subtitle: listView.model.size + " items"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    DropArea {
+        fillWidth: true
+        minHeight: documentRoot.windowHeight
+
+        color: accepted ? theme.highlightBackgroundColor
+                        : theme.contentBackgroundColor
+
+        onDropAccept: (ev) =>
+        {
+            if (ev.types.includes("Files"))
+            {
+                ev.accepted = true;
+                ev.dropEffect = "copy";
+            }
+        }
+
+        onDrop: (ev) => {
+            for (let i = 0; i < ev.items.length; ++i)
+            {
+                const item = ev.items[i];
+                if (item.kind !== "file")
+                {
+                    continue;
+                }
+                const fileItem = item.getAsFile();
+
+                const data = {
+                    name: fileItem.name,
+                    size: fileItem.size,
+                    type: fileItem.type,
+                    obj: fileItem
+                };
+
+                listView.model.insert(listView.model.size, data);
+            }
+        }
+
+        Label {
+            visible: listView.model.size === 0
+            position: "free"
+            x: (parent.bbox.width - bbox.width) / 2
+            y: (parent.bbox.height - bbox.height) / 2
+            width: parent.bbox.width - 2 * theme.paddingLarge
+            fontSize: theme.fontSizeLarge
+            overflowBehavior: "wrap"
+            horizontalAlignment: "center"
+            text: "Drop files from your file manager here..."
+        }
+
+        ListView {
+            id: listView
+
+            property currentIndex: -1
+
+            marginTop: header.height
+            marginBottom: theme.itemHeightLarge * 2
+            fillWidth: true
+            height: contentHeight
+            cellWidth: bbox.width
+            cellHeight: theme.itemHeightLarge * 2
+
+            model: ListModel { }
+
+            delegate: template Draggable {
+                id: itemBox
+
+                property highlighted: modelData.index === listView.currentIndex
+
+                layout: "center-row"
+
+                color: highlighted ? theme.highlightBackgroundColor
+                                   : "transparent"
+
+                onDragStart: (ev) =>
+                {
+                    ev.accepted = true;
+                    ev.setData("application/x-shf-demo", "" + modelData.index);
+                    ev.effectAllowed = "copy";
+                }
+
+                Image {
+                    id: thumbnail
+
+                    visible: status === "success" && source !== ""
+                    width: bbox.height
+                    fillHeight: true
+                    fitMode: "cover"
+                    source: parent.modelData.value.type.startsWith("image/") ? blobUrl(parent.modelData.value.obj)
+                                                                             : ""
+                }
+
+                Label {
+                    id: icon
+
+                    visible: ! thumbnail.visible
+                    width: parent.bbox.height
+                    fontSize: theme.itemHeightLarge
+                    horizontalAlignment: "center"
+                    color: itemBox.highlighted ? theme.highlightColor
+                                               : theme.primaryColor
+
+                    // you may use an IIFE if you have a more complex binding
+                    // expression
+                    text: (() =>
+                    {
+                        const t = parent.modelData.value.type || "";
+                        if (t.startsWith("audio/"))
+                        {
+                            return "[icon:fs-file-music]";
+                        }
+                        else if (t.startsWith("image/"))
+                        {
+                            return "[icon:fs-file-image]";
+                        }
+                        else if (t.startsWith("text/"))
+                        {
+                            return "[icon:fs-file-text]";
+                        }
+                        else if (t.startsWith("video/"))
+                        {
+                            return "[icon:fs-file-video]";
+                        }
+                        else
+                        {
+                            return "[icon:fs-file-empty]";
+                        }
+                    })()
+                }
+
+                Box {
+                    marginLeft: theme.paddingLarge
+                    marginRight: theme.paddingLarge
+                    fillWidth: true
+
+                    Label {
+                        bold: true
+                        fillWidth: true
+                        overflowBehavior: "ellipsis"
+                        literal: true
+                        color: itemBox.highlighted ? theme.highlightColor
+                                                   : theme.primaryColor
+
+                        text: itemBox.modelData.value.name
+                    }
+
+                    Label {
+                        fillWidth: true
+                        marginTop: theme.paddingSmall
+                        fontSize: theme.fontSizeSmall
+                        color: itemBox.highlighted ? theme.highlightColor
+                                                   : theme.primaryColor
+                        text: itemBox.modelData.value.type
+                    }
+
+                    Label {
+                        fillWidth: true
+                        marginTop: theme.paddingSmall
+                        fontSize: theme.fontSizeSmall
+                        color: itemBox.highlighted ? theme.highlightColor
+                                                   : theme.primaryColor
+                        text: itemBox.modelData.value.size + " Bytes"
+                    }
+                }
+
+                MouseBox {
+                    position: "free"
+                    fillWidth: true
+                    fillHeight: true
+                    canFocus: true
+
+                    onMouseDown: () =>
+                    {
+                        listView.currentIndex = itemBox.modelData.index;
+                    }
+
+                    onDoubleClick: () =>
+                    {
+                        if (itemBox.modelData.value.type.startsWith("image/"))
+                        {
+                            const dlg = imageDialog();
+                            dlg.show();
+                            dlg.title = itemBox.modelData.value.name;
+                            dlg.file = itemBox.modelData.value.obj;
+                        }
+                    }
+                }
+            }
+
+        }//ListView
+
+    }//DropArea
+
+    DropArea {
+        id: deleteDropArea
+
+        position: "global"
+        origin: "bottom-left"
+        fillWidth: true
+        height: theme.itemHeightLarge * 2
+        layout: "center"
+
+        color: accepted ? theme.highlightBackgroundColor
+                        : theme.primaryBackgroundColor
+
+        onDropAccept: (ev) =>
+        {
+            if (ev.types.includes("application/x-shf-demo"))
+            {
+                ev.accepted = true;
+            }
+        }
+
+        onDrop: (ev) =>
+        {
+            for (let i = 0; i < ev.items.length; ++i)
+            {
+                const item = ev.items[i];
+                item.getAsString((s) =>
+                {
+                    listView.model.remove(parseInt(s));
+                });
+            }
+        }
+
+        Label {
+            color: parent.accepted ? theme.highlightColor
+                                   : theme.primaryColor
+            text: "[icon:delete] Drop here to remove from list."
+        }
+    }
+
+    ScrollIndicator { target: documentRoot; position: "global"; marginTop: header.height; marginBottom: deleteDropArea.height }
+
+
+    property imageDialog: template Dialog {
+        id: dialog
+
+        property file: null
+
+        into buttons Button {
+            text: "Close"
+            onClick: () => { dialog.parent = null; }
+        }
+
+        Image {
+            id: img
+
+            property maxWidth_: documentRoot.windowWidth - 4 * theme.paddingLarge
+            property maxHeight_: documentRoot.windowHeight - 8 * theme.paddingLarge
+            property ratio: originalWidth > 0 ? originalHeight / originalWidth
+                                              : 1                       
+            property goForHeight: maxWidth_ * maxWidth_ * ratio > (maxHeight_ / ratio) * maxHeight_
+
+            width: status !== "success" ? 100
+                                        : goForHeight ? maxHeight_ / ratio : maxWidth_
+            height: status !== "success" ? 100
+                                         : goForHeight ? maxHeight_ : maxWidth_ * ratio
+
+            fitMode: "contain"
+            source: !! dialog.file ? blobUrl(dialog.file) : ""
+        }
+
+    }
+}

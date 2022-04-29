@@ -1,0 +1,361 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    function loadMap()
+    {
+        window.fetch("tiles/tilemap.json")
+        .then((response) => { return response.text(); })
+        .then((data) =>
+        {
+            // we're reading the JSON format of Tiled (https://www.mapeditor.org)
+            const map = JSON.parse(data);
+            
+            const groundLayer = map.layers[0].data.map((a) => { return a - map.tilesets[0].firstgid; });
+            groundMap.model.reset(groundLayer);
+            groundMap.rowStride = map.layers[0].width;
+
+            const overlayLayer = map.layers[1].data.map((a) => { return a - map.tilesets[0].firstgid; });
+            overlayMap.model.reset(overlayLayer);
+            overlayMap.rowStride = map.layers[1].width;
+
+
+            const cloudLayer = map.layers[2].data.map((a) => { return a - map.tilesets[1].firstgid; });
+            cloudMap.model.reset(cloudLayer);
+            cloudMap.rowStride = map.layers[2].width;
+
+            cloudMap2.model.reset(cloudLayer);
+            cloudMap2.rowStride = map.layers[2].width;
+
+        });
+    }
+
+    scrollable: false
+
+    onInitialization: () => { loadMap(); }
+
+    into header Header {
+        id: header
+
+        title: "Tile Map"
+        subtitle: "running @ " + fpsMeter.fps.toFixed(1) + " fps"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    FpsMeter {
+        id: fpsMeter
+        running: true
+    }
+
+    TileSet {
+        id: mapTiles
+        source: "tiles/slates-v2-by-ivan-voirol.png"
+        tileSize: 32
+        gpu: true
+
+        Timer {
+            property count3: 0
+            property count4: 0
+            running: true
+            repeat: true
+            interval: 150
+
+            onTimeout: () =>
+            {
+                const water = [108, 109, 110, 111];
+                const waterfallTop = [744, 745, 746, 747];
+                const waterfallBottom = [800, 801, 802, 803];
+                const wheelTop = [1114, 1115, 1226, 1227];
+                const wheelBottom = [1170, 1171, 1282, 1283];
+                const flag1 = [1229, 1230, 1231, 1230];
+                const flag2 = [1285, 1286, 1287, 1286];
+
+                parent.setAlias(108, water[count4]);
+                parent.setAlias(109, water[count4]);
+                parent.setAlias(110, water[count4]);
+                parent.setAlias(111, water[count4]);
+
+                parent.setAlias(744, waterfallTop[count4]);
+                parent.setAlias(800, waterfallBottom[count4]);
+
+                parent.setAlias(1114, wheelTop[count4]);
+                parent.setAlias(1170, wheelBottom[count4]);
+
+                parent.setAlias(1229, flag1[count4]);
+                parent.setAlias(1285, flag2[count4]);
+
+                count3 = (count3 + 1) % 3;
+                count4 = (count4 + 1) % 4;
+
+
+            }
+        }
+    }
+
+    TileSet {
+        id: cloudTiles
+        source: "tiles/clouds.png"
+        tileSize: 32
+        gpu: true
+    }
+
+    Box {
+        marginTop: header.bbox.height
+        fillWidth: true
+        fillHeight: true
+        layout: "row"
+
+        MouseBox {
+            id: ma
+
+            property dx: 0
+            property dy: 0
+
+            fillWidth: true
+            fillHeight: true
+
+            onPointerMove: (ev) =>
+            {
+                const centerX = bbox.width / 2;
+                const centerY = bbox.height / 2;
+                dx = 2.0 * (ev.x - centerX) / centerX;
+                dy = 2.0 * (ev.y - centerY) / centerY;                
+            }
+
+            onContainsMouseChanged: () =>
+            {
+                if (! containsMouse)
+                {
+                    dx = 0;
+                    dy = 0;
+                }
+            }
+
+            TileMap {
+                id: groundMap
+
+                property posX: 0.0
+                property posY: 0.0
+
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+                originalWidth: tileSet.tileSize * 20
+                originalHeight: originalWidth * ratio
+
+                contentX: posX
+                contentY: posY
+
+                tileSet: mapTiles
+                model: ListModel { }
+            }
+
+            TileMap {
+                id: overlayMap
+
+                property posX: 0.0
+                property posY: 0.0
+
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+
+                originalWidth: tileSet.tileSize * 20
+                originalHeight: originalWidth * ratio
+
+                contentX: posX
+                contentY: posY
+
+                tileSet: mapTiles
+                model: ListModel { }
+            }
+
+            TileMap {
+                id: cloudMap
+
+                property posX: 0.0
+                property posY: 0.0
+
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+                opacity: 0.6
+
+                originalWidth: tileSet.tileSize * 20
+                originalHeight: originalWidth * ratio
+
+                contentX: posX
+                contentY: posY
+
+                tileSet: cloudTiles
+                model: ListModel { }
+            }
+
+            TileMap {
+                id: cloudMap2
+
+                property posX: 0.0
+                property posY: 0.0
+
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+                opacity: 0.6
+
+                originalWidth: tileSet.tileSize * 20
+                originalHeight: originalWidth * ratio
+
+                contentX: 128 + posX
+                contentY: 256 + posY
+
+                tileSet: cloudTiles
+                model: cloudMap.model
+            }
+
+            Placeholder {
+                visible: ! ma.containsMouse
+                text: "Move your mouse in this area to scroll."
+            }
+        }
+
+        Box {
+            width: 2 * theme.itemWidthLarge
+            fillHeight: true
+
+            Label {
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                fillWidth: true
+                overflowBehavior: "wrap"
+                text: "[icon:star-empty] The **TileMap** element renders graphics tiles provided " +
+                      "by a **TileSet** element according to a **ListModel**.\n" +
+                      "\n" +
+                      "[icon:star-empty] Multiple **TileMap** instances may be stacked for " +
+                      "overlay effects or parallax scrolling and are composited " +
+                      "by the GPU on most platforms.\n" +
+                      "\n" +
+                      "[icon:star-empty] By modifying tile number mappings on a **TileSet** repeatedly, "+
+                      "tiles can be animated effortlessly.\n" +
+                      "\n" +
+                      "[icon:star-empty] The **TileMap** element automatically wraps around at the " +
+                      "edges and is scrollable in all directions.\n" +
+                      "\n" +
+                      "[icon:star-empty] Rendering is synchronized with the screen refresh rate " +
+                      "for smoothness."
+
+            }
+
+            OverflowScroller { }
+        }
+    }
+
+    Box {
+        fillWidth: true
+
+        Box { height: theme.paddingSmall }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            fontSize: theme.fontSizeSmall
+            text: "Ground tiles from https://opengameart.org/content/slates-32x32px-orthogonal-tileset-by-ivan-voirol"
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            fontSize: theme.fontSizeSmall
+            text: "Cloud tiles from https://opengameart.org/content/clouds"
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            fontSize: theme.fontSizeSmall
+            text: "Map edited with Tiled from https://www.mapeditor.org"
+        }
+
+        Box { height: theme.paddingSmall }
+    }
+
+    FrameTimer {
+        property last: 0
+
+        running: true
+        repeat: true
+
+        onTimeout: () =>
+        {
+            const scroll = (target, dx, dy) =>
+            {
+                let newX = target.posX + dx;
+                if (newX < 0)
+                {
+                    newX += target.contentWidth;
+                }
+                if (newX >= target.contentWidth)
+                {
+                    newX -= target.contentWidth;
+                }
+                target.posX = newX;
+
+                let newY = target.posY + dy;
+                if (newY < 0)
+                {
+                    newY += target.contentHeight;
+                }
+                if (newY >= target.contentHeight)
+                {
+                    newY -= target.contentHeight;
+                }
+                target.posY = newY;
+            };
+
+            const now = Date.now();
+            if (last === 0)
+            {
+                last = now;
+            }
+            else
+            {
+                const diff = now - last;
+                scroll(groundMap, diff * ma.dx, diff * ma.dy);
+                scroll(overlayMap, diff * ma.dx, diff * ma.dy);
+                scroll(cloudMap, (diff * ma.dx - 0.06) * 1.3, (diff * ma.dy + 0.03) * 1.3);
+                scroll(cloudMap2, (diff * ma.dx - 0.06) * 1.5, (diff * ma.dy + 0.03) * 1.5);
+                last = now;
+            }
+
+        }
+    }
+}

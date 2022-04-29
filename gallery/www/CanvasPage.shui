@@ -1,0 +1,270 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    property penColor: "black"
+    property tool: "pencil"
+    property currentPressure: 0
+
+    into header Header {
+        id: header
+
+        title: "Paint on Canvas"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    property contentT: template Box {
+        marginTop: header.height
+        fillWidth: true
+        height: documentRoot.windowHeight - header.height
+
+        layout: "column"        
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+
+            color: theme.secondaryBackgroundColor
+
+            layout: "center-row"
+
+            Button {
+                flat: true
+                width: bbox.height
+                fillHeight: true
+                icon: "input-pen"
+                checked: page.tool === "pencil"
+                onClick: { page.tool = "pencil"; }
+            }
+
+            Button {
+                flat: true
+                width: bbox.height
+                fillHeight: true
+                icon: "input-quill"
+                checked: page.tool === "quill"
+                onClick: { page.tool = "quill"; }
+            }
+
+            Label {
+                visible: page.tool === "quill"
+                marginLeft: theme.paddingSmall
+                text: "Pressure: " + Math.floor(page.currentPressure * 100) + "%"
+            }
+
+            Box {
+                fillWidth: true
+            }
+
+            Button {
+                flat: true
+                width: bbox.height
+                fillHeight: true
+                icon: "ui-delete"
+
+                onClick: {
+                    const ctx = cnv.context2d;
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, cnv.originalWidth, cnv.originalHeight);
+                }
+            }
+
+            Label {
+                text: "Paint"
+            }
+
+            SelectionBox {
+                id: typeSelector
+
+                property type: ["", "mouse", "pen", "touch"][selection]
+
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                model: ListModel {
+                    data: [
+                        "With All",
+                        "[icon:input-mouse] Mouse Only",
+                        "[icon:input-pen] Pen Only",
+                        "[icon:input-touch] Touch Only"
+                    ]
+                }
+            }
+        }
+
+        MouseBox {
+            fillWidth: true
+            fillHeight: true
+
+            property lastX: 0
+            property lastY: 0
+
+            property penRadius: page.tool === "quill" ? 10 : 3
+
+            onContextMenu: {
+                const ev = arguments[0];
+                ev.accepted = true;
+            }
+
+            onPointerDown: {
+                const ev = arguments[0];
+
+                if (typeSelector.type === "" || typeSelector.type === ev.pointerType)
+                {
+                    ev.accepted = true;
+
+                    if (ev.buttons === 1)
+                    {
+                        const ctx = cnv.context2d;
+
+                        ctx.lineJoin = "round";
+                        page.currentPressure = ev.pressure;
+
+                        const pressure = page.tool === "quill" ? ev.pressure
+                                                               : 1;
+
+                        ctx.strokeStyle = page.penColor;
+                        ctx.lineWidth = penRadius * 2 * pressure;
+                        ctx.beginPath();
+                        ctx.moveTo(ev.x, ev.y);
+                        ctx.lineTo(ev.x, ev.y);
+                        ctx.stroke();
+
+                        lastX = ev.x;
+                        lastY = ev.y;
+                    }
+                }
+            }
+
+            onPointerMove: {
+                const ev = arguments[0];
+
+                if (typeSelector.type === "" || typeSelector.type === ev.pointerType)
+                {
+                    ev.accepted = true;
+
+                    if (ev.buttons === 1)
+                    {
+                        const ctx = cnv.context2d;
+                        page.currentPressure = ev.pressure;
+
+                        const pressure = page.tool === "quill" ? ev.pressure
+                                                               : 1;
+
+                        ctx.strokeStyle = page.penColor;
+                        ctx.lineWidth = penRadius * 2 * pressure;
+                        ctx.beginPath();
+                        ctx.moveTo(lastX, lastY);
+                        ctx.lineTo(ev.x, ev.y);
+                        ctx.stroke();
+
+                        lastX = ev.x;
+                        lastY = ev.y;
+                    }
+                }
+            }
+
+            onPointerUp: {
+                page.currentPressure = 0;
+            }
+
+            Canvas {
+                id: cnv
+
+                fillWidth: true
+                fillHeight: true
+
+                originalWidth: bbox.width
+                originalHeight: bbox.height
+            }
+
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+            color: theme.secondaryBackgroundColor
+            layout: "row"
+
+            Repeater {
+
+                model: ListModel {
+                    data: [
+                        "black", "white", "grey",
+                        "red", "green", "blue",
+                        "yellow", "magenta", "teal"
+                    ]
+                }
+
+                delegate: template MouseBox {
+                    id: swatch
+
+                    width: bbox.height
+                    fillHeight: true
+                    marginLeft: theme.paddingSmall
+                    marginTop: theme.paddingSmall
+                    marginBottom: theme.paddingSmall
+
+                    borderColor: page.penColor === modelData.value ? theme.primaryColor
+                                                                   : "transparent"
+                    borderWidth: 2
+
+                    onClick: { page.penColor = modelData.value; }
+
+                    Box {
+                        fillWidth: true
+                        fillHeight: true
+                        marginTop: 2
+                        marginLeft: 2
+                        marginRight: 2
+                        marginBottom: 2
+                        
+                        color: swatch.modelData.value
+                    }
+                }
+            }
+        }
+
+    }
+
+    onFrozenChanged: {
+        if (! frozen && ! loader.item)
+        {
+            loader.sourceTemplate = contentT;
+        }
+    }
+
+    Loader {
+        id: loader
+        fillWidth: true
+        height: item ? -1 : documentRoot.windowHeight
+        
+        Placeholder {
+            visible: ! parent.item
+            text: "[icon:spinner5]"
+        }
+    }
+}

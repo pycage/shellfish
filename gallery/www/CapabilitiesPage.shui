@@ -1,0 +1,82 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Platform Capabilities"        
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    Capabilities {
+        id: caps
+    }
+
+    Label {
+        marginTop: header.height + theme.paddingLarge
+        marginLeft: theme.paddingLarge
+        marginBottom: theme.paddingSmall
+        overflowBehavior: "wrap"
+        text: "The **Capabilities** element provides a clean way to check the " +
+              "capabilities of the environment in which your application is running.\n" +
+              "\nThis environment supports:"
+    }
+
+    Repeater {
+        model: ListModel {
+            data: [
+                ["**Canvas:** 2D pixel graphics", caps.canvas],
+                ["**Fullscreen Elements:** Fullscreen mode of elements", caps.fullscreen],
+                ["**Game Pad:** Support for attached game controllers", caps.gamePad],
+                ["**Indexed DB:** Offline storage of data", caps.indexedDB],
+                ["**Media Devices:** Camera, video, audio", caps.mediaDevices],
+                ["**PointerEvent:** Differentiating between mouse, pen, and touch input", caps.pointerEvent],
+                ["**WebAssembly:** Running compiled byte-code", caps.webAssembly],
+                ["**Workers:** Running asynchronous tasks in threads", caps.webWorkers],
+                ["**SharedArrayBuffer:** Sharing memory between threads (may require Cross Origin Isolation as well)", caps.sharedArrayBuffer],
+                ["**Atomics:** Lock-free communication between threads based on SharedArrayBuffer", caps.atomics],
+                ["**Cross Origin Isolation:** Unlocks potentially exploitable technologies that are locked for security reasons otherwise (requires explicit support by the web server and a secure context)", caps.crossOriginIsolated],
+                ["**WebXR:** Support for Virtual Reality headsets", caps.webXR],
+                ["**WebGL:** Hardware-accelerated 3D graphics", caps.webGL],
+                ["**WebGL 2:** Version 2 of WebGL", caps.webGL2]
+            ]
+        }
+
+        delegate: template Label {
+            marginTop: theme.paddingMedium
+            marginLeft: theme.paddingLarge * 2
+            fillWidth: true
+            overflowBehavior: "wrap"
+            color: modelData.value[1] ? theme.primaryColor : theme.secondaryColor
+            text: (modelData.value[1] ? "[icon:ui-check_box]" : "[icon:ui-check_box_blank]") +
+                  " " + modelData.value[0]
+        }
+
+    }
+
+}

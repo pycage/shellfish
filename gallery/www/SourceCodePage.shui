@@ -1,0 +1,144 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./ShuiSyntaxHighlighter.shui";
+
+Page {
+    id: page
+
+    property urls: []
+
+    property currentUrl: ""
+
+    property loadingCode: false
+
+    onUrlsChanged: () =>
+    {
+        if (urls.length > 0)
+        {
+            currentUrl = urls[0];
+        }
+    }
+
+    onCurrentUrlChanged: {
+        loadingCode = true;
+        window.fetch(currentUrl)
+        .then(response =>
+        {
+            return response.text();
+        })
+        .then(data =>
+        {
+            codeLabel.text = data;
+            loadingCode = false;
+        });
+    }
+
+    ShuiSyntaxHighlighter {
+        id: shuiHighlighter
+    }
+
+    Box {
+        visible: ! page.loadingCode
+        fillWidth: true
+        color: theme.contentBackgroundColor
+        cursor: "text"
+
+        Label {
+            id: codeLabel
+
+            marginTop: pageHeader.height + codeHeader.bbox.height + theme.paddingSmall
+            marginLeft: theme.paddingMedium
+            marginRight: theme.paddingMedium
+            fontFamily: "monospace"
+            selectable: true
+
+            filter: shuiHighlighter.filter
+        }
+    }
+
+
+    Label {
+        visible: page.loadingCode
+        text: "Loading..."
+    }
+
+    Header {
+        id: pageHeader
+        
+        title: "Source Code"
+    }
+
+    Box {
+        id: codeHeader
+
+        property wrapping: bbox.width / Math.max(1, page.urls.length) < theme.itemWidthLarge
+
+        visible: page.urls.length > 1
+        position: "global"
+        marginLeft: thisPage.marginLeft
+        y: pageHeader.height
+        fillWidth: true
+        color: theme.primaryBackgroundColor.alpha(0.8)
+        style: "sh-dropshadow"
+
+        layout: "row"
+        overflowBehavior: wrapping ? "wrap" : "none"
+
+        Box {
+            position: "free"
+            origin: "bottom-left"
+            fillWidth: true
+            height: 1
+            color: theme.borderColor
+        }
+
+        Repeater {
+            model: ListModel { data: page.urls }
+
+            delegate: template Button {
+                labelProfile: Object { property fontSize: theme.fontSizeSmall }
+                fillWidth: ! codeHeader.wrapping
+                width: codeHeader.wrapping ? theme.itemWidthLarge * 1.5 : -1
+                height: theme.itemHeightSmall
+                flat: true
+                checked: modelData.value === page.currentUrl
+                text: (() =>
+                {
+                    const p = modelData.value;
+                    const idx = p.lastIndexOf("/");
+                    return idx !== -1 ? p.substr(idx + 1) : p;
+                })()
+
+                onClick: (ev) =>
+                {
+                    ev.accepted = true;
+                    page.currentUrl = modelData.value;
+                }
+            }
+        }
+    }
+
+    ScrollIndicator { target: documentRoot; marginTop: pageHeader.height + codeHeader.bbox.height; fillHeight: true } // target: documentRoot; position: "global"; marginTop: pageHeader.height + codeHeader.bbox.height }
+}

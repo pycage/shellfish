@@ -1,0 +1,136 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    property loadingIcons: true
+
+    scrollable: false
+    color: theme.contentBackgroundColor
+
+    into header Header {
+        id: header
+
+        title: "Icon Gallery"
+        subtitle: page.loadingIcons ? "" : iconsModel.size + " icons"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    ListModel {
+        id: iconsModel
+
+        data: []
+    }
+
+    Timer {
+        interval: 500
+        running: ! page.frozen && iconsModel.size === 0
+
+        onTimeout: {
+            const m = [];
+
+            const css = document.styleSheets;
+            for (let i = 0; i < css.length; ++i)
+            {
+                const rules = css[i].cssRules;
+                for (let j = 0; j < rules.length; ++j)
+                {
+                    const selector = rules[j].selectorText;
+                    if (! selector)
+                    {
+                        continue;
+                    }
+                    if (selector.startsWith(".sh-icon-"))
+                    {
+                        let name = selector.replace(".sh-icon-", "");
+                        if (name.startsWith("core-"))
+                        {
+                            continue;
+                        }
+                        const pos = name.indexOf("::");
+                        name = name.substr(0, pos);
+                        m.push({ icon: name });
+                    }
+                }
+            }
+
+            iconsModel.reset(m);
+            page.loadingIcons = false;
+        }
+    }
+
+    ListView {
+        id: listView
+
+        visible: ! page.loadingIcons
+        marginTop: header.height
+        fillWidth: true
+        fillHeight: true
+
+        cacheMargin: bbox.height
+
+        model: iconsModel
+        cellWidth: cellHeight
+        cellHeight: theme.itemHeightLarge * 4
+
+        delegate: template Box {
+            id: item
+
+            layout: "center"
+
+            Label {
+                marginLeft: theme.paddingMedium
+                fontSize: item.height / 3
+                text: "[icon:" + item.modelData.value.icon + "]"
+            }
+
+            Box {
+                position: "free"
+                origin: "bottom-left"
+                fillWidth: true
+                marginLeft: 1
+                marginRight: 1
+                color: theme.primaryBackgroundColor
+
+                Label {
+                    fillWidth: true
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall
+                    fontSize: theme.fontSizeSmall
+                    overflowBehavior: "ellipsis"
+                    horizontalAlignment: "center"
+                    literal: true
+                    text: item.modelData.value.icon
+                }
+
+            }
+
+        }
+
+        ScrollIndicator { }
+    }
+
+}

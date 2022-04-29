@@ -1,0 +1,90 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Date and Time"
+        subtitle: ""
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    scrollable: false
+
+    Placeholder {
+        text: (() =>
+              {
+                  const d = new Date(datePicker.date[0],
+                                     datePicker.date[1],
+                                     datePicker.date[2],
+                                     timePicker.time[0],
+                                     timePicker.time[1]);
+                  return "The local time " + d.toLocaleString() +
+                         " is " + Math.floor(d.getTime() / 1000) + " in Unix Time"
+              })()
+    }
+
+    Box {
+        fillWidth: true
+        height: theme.itemHeightMedium
+        marginTop: pageHeader.height
+        color: theme.secondaryBackgroundColor
+        layout: "center-row"
+
+        Label {
+            marginLeft: theme.paddingMedium
+            text: "Time:"
+        }
+
+        DatePicker {
+            id: datePicker
+
+            marginLeft: theme.paddingMedium
+            flat: true
+        }
+
+        TimePicker {
+            id: timePicker
+
+            twentyFourHours: twentyFourCheckBox.checked
+            flat: true
+        }
+
+        Box { fillWidth: true }
+
+        CheckBox {
+            id: twentyFourCheckBox
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingMedium
+            text: "24h"
+        }
+    }
+}

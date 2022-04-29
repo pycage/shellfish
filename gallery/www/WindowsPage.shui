@@ -1,0 +1,331 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    scrollable: false
+
+    into header Header {
+        id: header
+
+        title: "Windows"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    Image {
+        position: "free"
+        fillWidth: true
+        fillHeight: true
+        fitMode: "cover"
+        source: "sample.jpg"
+    }
+
+    ListModel {
+        id: iconsModel
+
+        function update()
+        {
+            const m = [];
+            windowBox.children()
+            .filter(c => c.isWindow && ! c.visible)
+            .forEach(c =>
+            {
+                m.push(c);
+            });
+            console.log(m);
+            reset(m);
+        }
+    }
+
+    Box {
+        id: windowBox
+
+        marginTop: header.height + theme.paddingSmall
+        marginLeft: theme.paddingSmall
+        marginRight: theme.paddingSmall
+        marginBottom: theme.paddingSmall
+        fillWidth: true
+        fillHeight: true
+
+        property uiGalleryT: template Html {
+            fillWidth: true
+            fillHeight: true
+
+            html: """<iframe style="width: 100%; height: 100%;" src="/shellfish/ui-gallery/index.html">"""
+        }
+
+        property documentationT: template Html {
+            fillWidth: true
+            fillHeight: true
+
+            html: """<iframe style="width: 100%; height: 100%;" src="/shellfish/doc/index.html">"""
+        }
+
+        property calendarT: template Calendar {
+            fillWidth: true
+            fillHeight: true
+        }
+
+        Window {
+            resizable: resizableCheckBox.checked
+            draggable: draggableCheckBox.checked
+
+            x: parent.bbox.width - width
+            width: 300
+            height: 400
+
+            into title WindowTitle {
+                visible: titleCheckBox.checked
+                text: "Windows"
+                showMinimize: false
+                showClose: false
+            }
+
+            Box {
+                fillWidth: true
+                fillHeight: true
+                overflowBehavior: "scroll"
+                scrollbars: true
+
+                Box {
+                    marginTop: theme.paddingSmall
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall
+                    fillWidth: true
+
+                    Label {
+                        fillWidth: true
+                        overflowBehavior: "wrap"
+                        text: "The **Window** element is a box floating in a parent box, " +
+                              "but with some special features.\n\n" +
+                              "Windows can be resized and moved around by the user.\n\n" +
+                              "The **WindowTitle** element lets you put a common " +
+                              "titlebar into the window, in case you don't want " +
+                              "to implement your own titlebar."
+                    }
+
+                    Label {
+                        marginTop: theme.paddingSmall
+                        fillWidth: true
+                        overflowBehavior: "wrap"
+                        text: "This window ..."
+                    }
+
+                    Box {
+                        marginTop: theme.paddingSmall
+                        marginLeft: theme.paddingSmall
+                        layout: "center-row"
+                        CheckBox {
+                            id: resizableCheckBox
+                            checked: true
+                        }
+                        Label {
+                            marginLeft: theme.paddingSmall
+                            text: "is resizable"
+                        }
+                    }
+
+                    Box {
+                        marginTop: theme.paddingSmall
+                        marginLeft: theme.paddingSmall
+                        layout: "center-row"
+                        CheckBox {
+                            id: draggableCheckBox
+                            checked: true
+                        }
+                        Label {
+                            marginLeft: theme.paddingSmall
+                            text: "is draggable"
+                        }
+                    }
+
+                    Box {
+                        marginTop: theme.paddingSmall
+                        marginLeft: theme.paddingSmall
+                        layout: "center-row"
+                        CheckBox {
+                            id: titleCheckBox
+                            checked: true
+                        }
+                        Label {
+                            marginLeft: theme.paddingSmall
+                            text: "has a title"
+                        }
+                    }
+
+                }
+
+
+            }
+        }
+
+        Repeater {
+            id: windowRepeater
+
+            model: ListModel { }
+
+            delegate: template Window {
+                id: win
+
+                property contentType: modelData.value.type
+                property icon: modelData.value.icon
+
+                width: 600
+                height: 400
+
+                into title WindowTitle {
+                    icon: win.modelData.value.icon
+                    text: win.modelData.value.title
+
+                    onMinimize: () =>
+                    {
+                        win.visible = false;
+                        iconsModel.update();
+                    }
+
+                    onClose: () =>
+                    {
+                        windowRepeater.model.remove(win.modelData.index);
+                    }
+                }
+
+                Loader {
+                    id: loader
+
+                    fillWidth: true
+                    fillHeight: true
+
+                    sourceTemplate: (() =>
+                    {
+                        switch (win.contentType)
+                        {
+                        case "ui-gallery":
+                            return windowBox.uiGalleryT;
+                        case "documentation":
+                            return windowBox.documentationT;
+                        case "calendar":
+                            return windowBox.calendarT;
+                        }
+                    })()
+                }
+            }
+        }
+
+    }// window box
+
+    // application launcher
+    Box {
+        position: "free"
+        origin: "bottom-left"
+        x: (parent.bbox.width - bbox.width) / 2
+        y: -borderRadius - 1
+        height: theme.itemHeightLarge
+        color: theme.secondaryBackgroundColor
+        borderRadius: 4
+        borderWidth: 2
+        borderColor: theme.primaryColor
+        layout: "row"
+
+        Button {
+            fillHeight: true
+            flat: true
+            icon: "ui-view_grid"
+            text: "UI Gallery"
+
+            onClick: () =>
+            {
+                windowRepeater.model.insert(windowRepeater.model.size, {
+                    title: text,
+                    icon: icon,
+                    type: "ui-gallery"
+                });
+            }
+        }
+
+        Button {
+            fillHeight: true
+            flat: true
+            icon: "map-library"
+            text: "Shellfish Documentation"
+
+            onClick: () =>
+            {
+                windowRepeater.model.insert(windowRepeater.model.size, {
+                    title: text,
+                    icon: icon,
+                    type: "documentation"
+                });
+            }
+        }
+
+        Button {
+            fillHeight: true
+            flat: true
+            icon: "core-calendar"
+            text: "Calendar"
+
+            onClick: () =>
+            {
+                windowRepeater.model.insert(windowRepeater.model.size, {
+                    title: text,
+                    icon: icon,
+                    type: "calendar"
+                });
+            }
+        }
+
+        Box {
+            visible: iconsModel.size > 0
+            marginLeft: theme.paddingSmall
+            fillHeight: true
+            layout: "row"
+
+            Box {
+                width: 1
+                fillHeight: true
+                marginTop: 4
+                marginBottom: 4
+                color: theme.primaryColor
+            }
+
+            Repeater {
+                model: iconsModel
+                delegate: template Button {
+                    marginLeft: modelData.index === 0 ? theme.paddingSmall : 0
+                    fillHeight: true
+                    flat: true
+                    icon: modelData.value.icon
+                    onClick: () =>
+                    {
+                        modelData.value.visible = true;
+                        modelData.value.raise();
+                        iconsModel.update();
+                    }
+                }
+            }
+        }
+    }
+}

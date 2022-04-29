@@ -1,0 +1,220 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Labels"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui"]
+    }
+
+    property contentT: template Box {
+        fillWidth: true
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingLarge
+        marginRight: theme.paddingLarge
+
+        Label {
+            overflowBehavior: "wrap"
+            text: "Labels show text and may have inline [icon:ui-star] icons and _*simple* **markup**_."
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            literal: true
+            text: "Use [icon:<name>] for embedding an inline icon."
+        }
+
+        Label {
+            marginTop: theme.paddingLarge
+            overflowBehavior: "wrap"
+            bold: true
+            text: "Try out the various properties:"
+        }
+
+        Box {
+            fillWidth: true
+            height: 1
+            color: theme.primaryColor
+        }
+
+        Ruler { id: labelRuler }
+
+        Labeled {
+            marginTop: theme.paddingSmall
+            rulerObj: labelRuler
+            text: "Font Family"
+
+            SelectionBox {
+                id: fontSelectionBox
+                
+                model: ListModel {
+                    data: [
+                        "sans-serif",
+                        "serif",
+                        "monospace",
+                        "Arial",
+                        "Times New Roman",
+                        "Comic Sans MS"
+                    ]
+                }
+            }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Font Size"
+
+            Slider {
+                id: fontSizeSlider
+                minValue: 3
+                maxValue: 128
+                value: theme.fontSizeMedium
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: Math.floor(fontSizeSlider.value) + " px"
+            }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Overflow Behavior"
+
+            SelectionBox {
+                id: overflowSelectionBox
+                
+                model: ListModel {
+                    data: [
+                        "wrap",
+                        "clip",
+                        "ellipsis"
+                    ]
+                }
+            }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Alignment"
+
+            SelectionBox {
+                id: alignmentSelectionBox
+                
+                model: ListModel {
+                    data: [
+                        "left",
+                        "center",
+                        "right"
+                    ]
+                }
+            }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Bold"
+
+            CheckBox { id: boldSwitch }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Italic"
+
+            CheckBox { id: italicSwitch }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Literal"
+
+            CheckBox { id: literalSwitch }
+        }
+
+        Labeled {
+            rulerObj: labelRuler
+            text: "Color"
+
+            SelectionBox {
+                id: colorSelectionBox
+
+                model: ListModel {
+                    data: [
+                        "black",
+                        "white",
+                        "red",
+                        "green",
+                        "blue",
+                        "yellow",
+                        "cyan",
+                        "magenta"
+                    ]
+                }
+            }
+        }
+
+        Label {
+            id: playLabel
+
+            fillWidth: true
+            marginTop: theme.paddingLarge
+            fontFamily: fontSelectionBox.text
+            fontSize: fontSizeSlider.value
+            overflowBehavior: overflowSelectionBox.text
+            horizontalAlignment: alignmentSelectionBox.text
+            color: colorSelectionBox.text
+            bold: boldSwitch.checked
+            italic: italicSwitch.checked
+            literal: literalSwitch.checked
+
+            text: "[icon:ui-info] This is a rather *long* text label that you can play with. " +
+                  "Adjust the _properties_ [icon:ui-arrow_upward] above and see **how it affects** the label."
+        }
+    }
+
+    onFrozenChanged: {
+        if (! frozen && ! loader.item)
+        {
+            loader.sourceTemplate = contentT;
+        }
+    }
+
+    Loader {
+        id: loader
+        fillWidth: true
+        height: item ? -1 : documentRoot.windowHeight
+        
+        Placeholder {
+            visible: ! parent.item
+            text: "[icon:spinner5]"
+        }
+    }
+}

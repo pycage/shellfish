@@ -1,0 +1,220 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    // this is the implementation of the active object
+    property code: """
+        class Turtle
+        {
+            constructor(size, watcher)
+            {
+                this.x = 0;
+                this.y = 0;
+                this.angle = 210;
+                this.size = size;
+                this.confinementWidth = 100;
+                this.confinementHeight = 100;
+                this.callback = watcher;
+
+                watcher(this.x, this.y, this.angle);
+            }
+
+            confine(width, height)
+            {
+                this.confinementWidth = width;
+                this.confinementHeight = height;
+            }
+
+            left(a)
+            {
+                for (let i = 0; i < a; ++i)
+                {
+                    this.angle += 1;
+                    if (this.angle >= 360)
+                    {
+                        this.angle -= 360;
+                    }
+                    this.callback(this.x, this.y, this.angle);
+                    sleep(30);
+                }
+            }
+
+            right(a)
+            {
+                for (let i = 0; i < a; ++i)
+                {
+                    this.angle -= 1;
+                    if (this.angle < 0)
+                    {
+                        this.angle += 360;
+                    }
+                    this.callback(this.x, this.y, this.angle);
+                    sleep(30);
+                }
+            }
+
+            go()
+            {
+                for (let i = 0; i < 32; ++i)
+                {
+                    const dx = -Math.sin(this.angle / 180 * Math.PI);
+                    const dy = -Math.cos(this.angle / 180 * Math.PI);
+
+                    if (this.x + dx < 0 || this.x + dx > this.confinementWidth - this.size ||
+                        this.y + dy < 0 || this.y + dy > this.confinementHeight - this.size)
+                    {
+                        // hit a wall; stop walking and wiggle
+                        this.left(5);
+                        this.right(5);
+                        break;
+                    }
+
+                    this.x += dx;
+                    this.y += dy;
+                    this.callback(this.x, this.y, this.angle);
+                    sleep(30);
+                }
+            }
+        }
+
+        function run(size, watcher)
+        {
+            // return a thread-safe proxy object through which we can control
+            // the turtle
+            return proxyObject(new Turtle(size, watcher));
+        }
+    """
+
+    property turtleProxy: null
+
+    scrollable: false
+
+    onInitialization: () =>
+    {
+        // note how the turtle.update method is passed as a thread-safe callback
+        // function
+        threadPool.postTask(code, theme.itemWidthMedium, turtle.update)
+        .then(t =>
+        {
+            turtleProxy = t;
+            t.confine(confinement.bbox.width, confinement.bbox.height);
+        });
+    }
+
+    into header Header {
+        id: pageHeader
+
+        title: "Active Object Pattern"
+        subtitle: ""
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    ThreadPool {
+        id: threadPool
+        
+        size: 1
+    }
+
+    Label {
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        marginBottom: theme.paddingMedium
+        fillWidth: true
+        overflowBehavior: "wrap"
+        text: "Tasks may export object proxies for use by the UI thread.\n\n" +
+              "Control the turtle through its proxy and note how it processes " +
+              "one action after another in strict order. " +
+              "The turtle is slow, so each of its actions takes some time, but " +
+              "it will never be confused by savage button smashing (no race-conditions)."
+    }
+
+    Box {
+        enabled: !! page.turtleProxy
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        fillWidth: true
+        layout: "row"
+
+        Button {
+            text: "Left"
+            onPointerDown: () => { turtleProxy.left(30); }
+        }
+
+        Button {
+            marginLeft: theme.paddingSmall
+            text: "Go"
+            onPointerDown: () => { turtleProxy.go(); }
+        }
+
+        Button {
+            marginLeft: theme.paddingSmall
+            text: "Right"
+            onPointerDown: () => { turtleProxy.right(30); }
+        }
+    }
+
+    Box {
+        id: confinement
+
+        marginTop: theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        marginBottom: theme.paddingSmall
+        fillWidth: true
+        fillHeight: true
+
+        color: colorName("lightyellow")
+        borderColor: colorName("black")
+        borderWidth: 1
+
+        Image {
+            id: turtle
+
+            position: "free"
+
+            function update(tx, ty, angle)
+            {
+                x = Math.round(tx);
+                y = Math.round(ty);
+                rotationAngle = angle;
+            }
+
+            width: theme.itemWidthMedium
+            height: width
+            source: "turtle.png"
+        }
+    }
+
+    Html {
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        fillWidth: true
+
+        html: """<div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>"""
+    }
+}

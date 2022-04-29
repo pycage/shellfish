@@ -1,0 +1,201 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Calendar"
+        subtitle: ""
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    Box {
+        marginTop: pageHeader.height
+        fillWidth: true
+        height: theme.itemHeightMedium
+        color: theme.secondaryBackgroundColor
+        layout: "center-row"
+
+        Button {
+            labelProfile: Object { property bold: true }
+            fillHeight: true
+            flat: true
+            text: ["January", "February", "March", "April",
+                   "May", "June", "July", "August",
+                   "September", "October", "November", "December"][cal.date[1]]
+
+            onClick: (ev) =>
+            {
+                cal.pickMonth();
+                ev.accepted = true;
+            }
+        }
+
+        Button {
+            labelProfile: Object { property bold: true }
+            fillHeight: true
+            flat: true
+            text: "" + cal.date[0]
+
+            onClick: (ev) =>
+            {
+                cal.pickYear();
+                ev.accepted = true;
+            }
+        }
+
+        Box { fillWidth: true }
+
+        Button {
+            icon: "core-calendar"
+            text: "Today"
+            fillHeight: true
+            flat: true
+            onClick: (ev) =>
+            {
+                cal.toToday();
+                ev.accepted = true;
+            }
+        }
+
+        Button {
+            icon: "core-arrow_up"
+            fillHeight: true
+            flat: true
+            onClick: (ev) =>
+            {
+                cal.toPreviousMonth();
+                ev.accepted = true;
+            }
+        }
+
+        Button {
+            icon: "core-arrow_down"
+            fillHeight: true
+            flat: true
+            onClick: (ev) =>
+            {
+                cal.toNextMonth();
+                ev.accepted = true;
+            }
+        }
+    }
+
+    Box {
+        fillWidth: true
+        height: theme.itemHeightSmall
+        layout: "row"
+
+        Repeater {
+            model: ListModel { data: sequence(0, 7) }
+            delegate: template Box {
+                width: Math.floor(parent.bbox.width / 7)
+                fillHeight: true
+                color: (modelData.index + cal.firstDay) % 7 === 0 ? theme.contentAltBackgroundColor 
+                                                                  : theme.contentBackgroundColor
+                layout: "center"
+
+                Label {
+                    fillWidth: true
+                    fontSize: theme.fontSizeSmall
+                    color: theme.secondaryColor
+                    horizontalAlignment: "center"
+                    overflowBehavior: "ellipsis"
+                    text: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][(parent.modelData.index + cal.firstDay) % 7]
+                }
+            }
+        }
+    }
+
+    Calendar {
+        id: cal
+
+        fillWidth: true
+        height: documentRoot.windowHeight * 0.6
+
+        firstDay: firstDaySelector.selection
+
+        dayDelegate: template Box {
+            color: modelData.value.dayOfWeek === 0 ? theme.contentAltBackgroundColor
+                                                   : theme.contentBackgroundColor
+            layout: "center"
+
+            Label {
+                position: "free"
+                origin: "bottom-right"
+                opacity: parent.modelData.value.month === cal.date[1] ? 1
+                                                                      : 0.2
+                bold: (() =>
+                      {
+                          const now = new Date();
+                          const m = parent.modelData.value;
+                          return now.getFullYear() === m.year &&
+                                 now.getMonth() === m.month &&
+                                 now.getDate() === m.day;
+                      })()
+                text: "" + parent.modelData.value.day
+            }
+        }
+    }
+
+    Box {
+        fillWidth: true
+        height: theme.itemHeightMedium
+        color: theme.secondaryBackgroundColor
+        layout: "center-row"
+
+        Box { fillWidth: true }
+
+        Label {
+            marginLeft: theme.paddingMedium
+            text: "First Day"
+        }
+
+        SelectionBox {
+            id: firstDaySelector
+
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            model: ListModel { data: ["Sunday", "Monday"] }
+            selection: 1
+        }
+    }
+
+    Label {
+        fillWidth: true
+        marginTop: theme.paddingMedium
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        overflowBehavior: "wrap"
+        text: "The **Calendar** element provides a navigatable calendar view " +
+              "with customizable day fields.\n" +
+              "The navigation bar and week day bar are not part of the " +
+              "**Calendar** element."
+    }
+
+}

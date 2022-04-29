@@ -1,0 +1,220 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2018 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./fib.js" as fib;
+
+// This is a port of a QML demo application from a course on QML I gave
+// back in 2018.
+Page {
+    id: page
+
+    property generation: 1
+    property viewMode: 0
+
+    color: theme.contentBackgroundColor
+
+    onViewModeChanged: {
+        infoAnimation.start();
+    }
+
+    into header Header {
+        id: header
+        
+        title: "Rabbit Breeding"
+        subtitle: "Generation: " + page.generation + ", " + rabbitGrid.count + " rabbits"
+        codeUrls: [__filename, "Header.shui", "fib.js"]
+
+        into second Button {
+            height: header.height
+            flat: true
+            icon: page.viewMode === 0 ? "ui-view_list" : "ui-view_grid"
+            text: "View"
+
+            onClick: {
+                page.viewMode = (page.viewMode + 1) % 2;
+            }
+        }
+    }
+
+    Box {
+        marginTop: header.height
+        fillWidth: true
+        height: documentRoot.windowHeight - header.height
+
+        ListView {
+            id: rabbitGrid
+
+            fillWidth: true
+            fillHeight: true
+
+            cellWidth: page.viewMode === 0 ? bbox.width
+                                           : (documentRoot.windowWidth - theme.paddingSmall) / 5
+            cellHeight: page.viewMode === 0 ? theme.itemHeightLarge
+                                            : cellWidth
+
+            cacheMargin: 500
+
+            model: fib.fib(page.generation + 2)
+
+            delegate: template Box {
+                id: rabbitBox
+
+                color: page.viewMode === 0 && modelData.index % 2 ? theme.contentAltBackgroundColor 
+                                                                  : theme.contentBackgroundColor
+
+                layout: "center-row"
+
+                Image {
+                    fillWidth: page.viewMode === 1
+                    fillHeight: true
+                    width: parent.height
+                    marginTop: theme.paddingSmall
+                    marginLeft: theme.paddingSmall
+                    marginRight: page.viewMode === 0 ? theme.paddingLarge : 0
+                    marginBottom: page.viewMode === 0 ? theme.paddingSmall : 0
+
+                    source: __dirname + "/rabbit.svg"
+                }
+
+                Label {
+                    fillWidth: true
+                    position: page.viewMode === 0 ? "inline" : "free"
+                    text: "#" + (rabbitBox.modelData.index + 1)
+                }
+            }
+
+            ScrollIndicator { }
+        }
+
+        Box {
+            id: infoBox
+
+            position: "global"
+            x: (documentRoot.windowWidth - bbox.width) / 2
+            y: (documentRoot.windowHeight - bbox.height) / 2
+            visible: false
+            color: theme.secondaryColor
+            borderRadius: bbox.height / 5
+            layout: "center"
+
+            SequentialAnimation {
+                id: infoAnimation
+
+                ScriptAction {
+                    script: {
+                        infoBox.opacity = 0;
+                        infoBox.visible = true;
+                    }
+                }
+
+                NumberAnimation {
+                    from: 0
+                    to: 1
+                    duration: 300
+                    easing: "InOutQuad"
+                    onNext: { infoBox.opacity = arguments[0]; }
+                }
+
+                NumberAnimation { duration: 500 }
+
+                NumberAnimation {
+                    from: 1
+                    to: 0
+                    duration: 1000
+                    easing: "InOutQuad"
+                    onNext: { infoBox.opacity = arguments[0]; }
+                }
+
+                ScriptAction {
+                    script: {
+                        infoBox.visible = false;
+                    }
+                }
+            }
+
+            Label {
+                marginTop: theme.paddingLarge
+                marginLeft: theme.paddingLarge
+                marginRight: theme.paddingLarge
+                marginBottom: theme.paddingLarge
+                color: theme.secondaryBackgroundColor
+                fontSize: theme.fontSizeLarge
+                text: page.viewMode === 0 ? "View as List" : "View as Grid"
+            }
+
+        }
+
+        Box {
+            id: footer
+
+            fillWidth: true
+            color: theme.primaryBackgroundColor
+
+            Box {
+                fillWidth: true
+                height: theme.itemHeightLarge
+                layout: "row"
+
+                Button {
+                    fillWidth: true
+                    fillHeight: true
+                    marginTop: theme.paddingSmall
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall / 2
+
+                    text: "&Next Generation"
+
+                    onClick: {
+                        ++page.generation;
+                    }
+                }
+
+                Button {
+                    fillWidth: true
+                    fillHeight: true
+                    marginTop: theme.paddingSmall
+                    marginLeft: theme.paddingSmall / 2
+                    marginRight: theme.paddingSmall
+
+                    text: "&Cull"
+
+                    onClick: {
+                        page.generation = 1;
+                    }
+                }
+            }
+
+            Label {
+                fillWidth: true
+                height: fontSize * 2
+                marginRight: theme.paddingSmall
+                horizontalAlignment: "right"
+                fontSize: theme.fontSizeSmall
+                text: "free rabbit.svg taken from flaticon.com"
+            }
+        }
+
+    }
+
+}

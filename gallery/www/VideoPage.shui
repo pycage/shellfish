@@ -1,0 +1,365 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    property showControls: true
+
+    function formatTime(seconds)
+    {
+        let t = seconds;
+        const secs = Math.floor(t) % 60;
+        t /= 60;
+        const minutes = Math.floor(t) % 60;
+        t /= 60;
+        const hours = Math.floor(t);
+
+        let h = hours.toFixed(0);
+        let m = minutes.toFixed(0);
+        let s = secs.toFixed(0);
+
+        if (h.length === 1) h = "0" + h;
+        if (m.length === 1) m = "0" + m;
+        if (s.length === 1) s = "0" + s;
+
+        return (hours > 0 ? h + ":" : "") + m + ":" + s;
+    }
+
+    function openFileDialog()
+    {
+        fsel.open((files) =>
+        {
+            const url = URL.createObjectURL(files[0]);
+            video.source = url;
+            video.name = files[0].name;
+            page.showControls = true;
+            controlsTimer.start();
+        });
+    }
+
+    scrollable: false
+
+    into header Header {
+        id: pageHeader
+
+        visible: opacity > 0
+        
+        title: "Video Player Example"
+        codeUrls: [__filename, "Header.shui"]
+
+        opacity: page.showControls ? 1 : 0
+        opacityTransition: NumberAnimation { duration: 700; easing: "InOutQuad" }
+    }
+
+    Object {
+        id: buttonProfile
+        property flat: true
+        property fillHeight: true
+        property width: theme.itemHeightLarge
+    }
+
+    Object {
+        id: button2Profile
+        property flat: true
+        property fillHeight: true
+    }
+
+    Object {
+        id: buttonLabelProfile
+        property color: "white"
+    }
+
+    Object {
+        id: buttonSmallLabelProfile
+        property color: "white"
+        property fontSize: theme.fontSizeSmall
+    }
+
+    MouseBox {
+        fillWidth: true
+        fillHeight: true
+        color: "black"
+
+        layout: "center"
+
+        onClick: () =>
+        {
+            page.showControls = ! page.showControls;
+        }
+
+        Video {
+            id: video
+
+            property name: ""
+
+            width: parent.bbox.width
+            height: parent.bbox.height
+
+            fitMode: aspectRatio === 0 ? "contain" : "fill"
+        }
+    }
+
+    Box {
+        visible: opacity > 0
+        position: "free"
+        origin: "bottom-left"
+        y: 2 * theme.paddingLarge
+        x: (parent.bbox.width - bbox.width) / 2
+        width: 14 * theme.itemHeightMedium
+        color: "#000000a0"
+        borderWidth: 1
+        borderColor: "white"
+        borderRadius: theme.borderRadius
+        style: ["sh-dropshadow"]
+
+        opacity: page.showControls /*&& video.status === "success"*/ ? 1 : 0
+        opacityTransition: NumberAnimation { duration: 700; easing: "InOutQuad" }
+
+        Box {
+            fillWidth: true
+            color: "white"
+            layout: "center"
+
+            Label {
+                fillWidth: true
+                color: "black"
+                bold: true
+                fontSize: theme.fontSizeSmall
+                literal: true
+                overflowBehavior: "ellipsis"
+                text: video.name
+            }
+        }
+
+        MouseBox {
+            id: seekBar
+
+            property seekTime: 0
+            property seeking: false
+
+            marginTop: theme.paddingSmall
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            fillWidth: true
+            height: theme.paddingMedium
+
+            onPointerDown: (ev) =>
+            {
+                if (ev.buttons === 1)
+                {
+                    seeking = true;
+                    seekTime = (ev.x / bbox.width) * video.duration;
+                    ev.accepted = true;
+                }
+            }
+
+            onPointerMove: (ev) =>
+            {
+                if (seeking)
+                {
+                    seekTime = (ev.x / bbox.width) * video.duration;
+                    ev.accepted = true;
+                }
+            }
+
+            onPointerUp: (ev) =>
+            {
+                video.currentTime = seekTime;
+                seeking = false;
+                ev.accepted = true;
+            }
+
+            Box {
+                width: video.duration > 0 ? ((seekBar.seeking ? seekBar.seekTime : video.currentTime) / video.duration) * parent.bbox.width
+                                        : 0
+                fillHeight: true
+                
+                color: "white"
+            }
+
+        }
+
+        Label {
+            fillWidth: true
+            horizontalAlignment: "center"
+            color: "white"
+            fontSize: theme.fontSizeSmall
+            text: seekBar.seeking ? page.formatTime(seekBar.seekTime) + " / " +
+                                    page.formatTime(video.duration)
+                                  : page.formatTime(video.currentTime) + " / " +
+                                    page.formatTime(video.duration)
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+            layout: "center-row"
+
+            Button {
+                profiles: [buttonProfile]
+                labelProfile: buttonLabelProfile
+                icon: "media-eject"
+
+                onClick: () =>
+                {
+                    openFileDialog();
+                }
+            }
+
+            Button {
+                profiles: [buttonProfile]
+                labelProfile: buttonLabelProfile
+                icon: video.playing ? "media-pause" : "media-play"
+                onClick: () =>
+                {
+                    if (video.playing)
+                    {
+                        video.pause();
+                    }
+                    else
+                    {
+                        video.play();
+                    }
+                }
+            }
+
+            Button {
+                profiles: [buttonProfile]
+                labelProfile: buttonLabelProfile
+                icon: "media-replay_10"
+                onClick: () => 
+                {
+                    if (video.currentTime > 10)
+                    {
+                        video.currentTime -= 10;
+                    }
+                    else
+                    {
+                        video.currentTime = 0;
+                    }
+                }
+            }
+
+            Button {
+                profiles: [buttonProfile]
+                labelProfile: buttonLabelProfile
+                icon: "media-forward_30"
+                onClick: () =>
+                {
+                    if (video.currentTime < video.duration - 30)
+                    {
+                        video.currentTime += 30;
+                    }
+                    else
+                    {
+                        video.currentTime = video.duration;
+                    }
+                }
+            }
+
+            Box {
+                fillWidth: true
+            }
+
+            Label {
+                marginRight: theme.paddingSmall
+                color: "white"
+                fontSize: theme.fontSizeSmall
+                bold: true
+                text: "Aspect:"
+            }
+
+            Button {
+                profiles: [button2Profile]
+                labelProfile: buttonSmallLabelProfile
+                checked: video.aspectRatio === 0
+                text: "Auto"
+                onClick: () => { video.aspectRatio = 0; }
+            }
+
+            Button {
+                profiles: [button2Profile]
+                labelProfile: buttonSmallLabelProfile
+                width: bbox.height
+                checked: video.aspectRatio === 4/3
+                text: "4:3"
+                onClick: () => { video.aspectRatio = 4/3; }
+            }
+
+            Button {
+                profiles: [button2Profile]
+                labelProfile: buttonSmallLabelProfile
+                width: bbox.height
+                checked: video.aspectRatio === 16/9
+                text: "16:9"
+                onClick: () => { video.aspectRatio = 16/9; }
+            }
+
+            Button {
+                profiles: [buttonProfile]
+                labelProfile: buttonLabelProfile
+                width: bbox.height
+                icon: "ui-fullscreen"
+
+                onClick: () =>
+                {
+                    if (documentRoot.fullscreenItem)
+                    {
+                        documentRoot.fullscreenItem = null;
+                    }
+                    else
+                    {
+                        documentRoot.fullscreenItem = documentRoot;
+                    }
+                }
+            }
+        }
+
+    }
+
+
+    FileSelector {
+        id: fsel
+
+        accept: ["video/*"]
+    }
+
+    Timer {
+        id: controlsTimer
+        running: false
+        repeat: false
+        interval: 750
+        onTimeout: () => { page.showControls = false; }
+    }
+
+    onFrozenChanged: () =>
+    {
+        if (! frozen && video.status === "empty")
+        {
+            openFileDialog();
+        }
+    }
+}

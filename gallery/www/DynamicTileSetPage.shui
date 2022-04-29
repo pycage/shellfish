@@ -1,0 +1,217 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+require "./starstileset.js";
+
+Page {
+    id: page
+
+    scrollable: false
+
+    into header Header {
+        id: header
+
+        title: "Running Dynamic Tiles"
+        subtitle: "running @ " + fpsMeter.fps.toFixed(1) + " fps"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui", "starstileset.js"]
+    }
+
+    FpsMeter {
+        id: fpsMeter
+        running: true
+    }
+
+    StarsTileSet {
+        id: starsTiles
+
+        onInitialization: () =>
+        {
+            generate(0, 2000);
+        }
+    }
+
+    Box {
+        marginTop: header.bbox.height
+        fillWidth: true
+        fillHeight: true
+        layout: "row"
+
+        Box {
+            fillWidth: true
+            fillHeight: true
+            color: "black"
+
+            TileMap {
+                id: layer1
+
+                property pos: 0
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+                originalWidth: starsTiles.tileSize * rowStride
+                originalHeight: originalWidth * ratio
+
+                contentY: pos
+
+                tileSet: starsTiles
+                model: ListModel { data: sequence(0, 1000) }
+                rowStride: 20
+
+                onPosChanged: () =>
+                {
+                    if (pos < 0)
+                    {
+                        pos += contentHeight;
+                    }
+                }
+
+                onContentRowChanged: () =>
+                {
+                    let row = contentRow - 1;
+                    if (row < 0)
+                    {
+                        row += contentHeight / tileSet.tileSize;
+                    }
+                    tileSet.generate(row * rowStride, row * rowStride + rowStride - 1);
+                }
+            }
+
+            TileMap {
+                id: layer2
+
+                property pos: 0
+                property ratio: bbox.width > 0 ? bbox.height / bbox.width : 1
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+
+                originalWidth: starsTiles.tileSize * rowStride
+                originalHeight: originalWidth * ratio
+
+                contentY: pos
+
+                tileSet: starsTiles
+                model: ListModel { data: sequence(1000, 1000) }
+                rowStride: 20
+
+                onPosChanged: () =>
+                {
+                    if (pos < 0)
+                    {
+                        pos += contentHeight;
+                    }
+                }
+
+                onContentRowChanged: () =>
+                {
+                    let row = contentRow - 1;
+                    if (row < 0)
+                    {
+                        row += contentHeight / tileSet.tileSize;
+                    }
+                    tileSet.generate(1000 + row * rowStride, 1000 + row * rowStride + rowStride - 1);
+                }
+            }
+        }
+
+        Box {
+            width: 2 * theme.itemWidthLarge
+            fillHeight: true
+
+            Ruler {
+                id: labelRuler
+            }
+
+            Labeled {
+                rulerObj: labelRuler
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                text: "Velocity"
+
+                Box {
+                    layout: "center-row"
+
+                    Slider {
+                        id: velocitySlider
+                        minValue: 1
+                        maxValue: 100
+                        value: 8
+                    }
+
+                    Label {
+                        marginLeft: theme.paddingSmall
+                        text: Math.round(velocitySlider.value)
+                    }
+                }
+
+            }
+
+
+            Label {
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                fillWidth: true
+                overflowBehavior: "wrap"
+                text: "By implementing a custom tile set element, you can " +
+                      "generate tiles at runtime that can be fed from any " +
+                      "source imaginable.\n\n" +
+                      "Along with a map model of sequential tile IDs, you'll " +
+                      "get a ring buffer in which you can continuously generate " +
+                      "new content while scrolling over."
+            }
+
+            OverflowScroller { }
+        }
+    }
+
+    FrameTimer {
+        property last: 0
+
+        running: true
+        repeat: true
+
+        onTimeout: () =>
+        {
+            const now = Date.now();
+            if (last === 0)
+            {
+                last = now;
+            }
+            else
+            {
+                const diff = now - last;
+                layer1.pos = layer1.pos - diff * (velocitySlider.value / 100);
+                layer2.pos = layer2.pos - diff * (velocitySlider.value / 100) * 1.5;
+                last = now;
+            }
+
+        }
+    }
+}

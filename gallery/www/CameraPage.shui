@@ -1,0 +1,295 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./imagefilter.js" as filter;
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Camera"
+        subtitle: "Status: " + cam.status
+        codeUrls: [__filename, "Header.shui", "imagefilter.js"]
+    }
+
+    Box {
+        fillWidth: true
+        height: documentRoot.windowHeight
+
+        Box {
+            marginTop: header.height + theme.paddingSmall
+            fillWidth: true
+            height: theme.itemHeightSmall
+            layout: "center-row"
+
+            Label {
+                marginLeft: theme.paddingLarge
+                text: "Select Camera"
+            }
+
+            SelectionBox {
+                id: cameraSelector
+
+                property deviceId: cam.devices.length > 0 && selection ? cam.devices[selection].deviceId
+                                                                       : "user"
+
+
+                marginLeft: theme.paddingSmall
+                fillWidth: true
+                model: ListModel {
+                    data: cam.devices.map((dev) => { return dev.label; })
+                }
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: "Max Resolution"
+            }
+
+            SelectionBox {
+                id: resolutionSelector
+
+    	        property res: cam.resolutions[selection]
+                
+                marginLeft: theme.paddingSmall
+                model: ListModel { data: cam.resolutions }
+
+                selection: 2
+            }
+
+            Button {
+                enabled: cam.status !== "pending"
+                width: theme.itemWidthLarge
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingLarge
+                text: cam.active ? "Deactivate" : "Activate"
+                onClick: {
+                    cam.active = ! cam.active;
+                }
+            }
+
+            OverflowScroller { }
+        }
+
+        Box {
+            marginTop: theme.paddingSmall
+            fillWidth: true
+            fillHeight: true
+            color: "black"
+            layout: "center"
+
+            CameraView {
+                id: cam
+
+                visible: false
+                fillWidth: true
+                fillHeight: true
+
+                deviceId: cameraSelector.deviceId
+                maxResolution: resolutionSelector.res
+            }
+
+            Canvas {
+                id: camCnv
+
+                property filter: "identity"
+                property customKernel: [
+                    0, 0, 0,
+                    0, 1, 0,
+                    0, 0, 0
+                ]
+
+                aspectRatio: originalHeight > 0 ? originalWidth / originalHeight : 0
+                width: parent.bbox.width
+                height: parent.bbox.height
+                originalWidth: cam.originalWidth
+                originalHeight: cam.originalHeight
+
+                onFilterChanged: () =>
+                {
+                    if (camCnv.filter === "custom")
+                    {
+                        const dlg = kernelDialog();
+                        dlg.show();
+                    }
+                }
+            }
+
+            FrameTimer {
+                running: cam.active
+                repeat: true
+
+                onTimeout: {
+                    const ctx = camCnv.context2d;
+                    ctx.drawImage(cam.image, 0, 0, camCnv.originalWidth, camCnv.originalHeight);
+
+                    if (camCnv.filter === "identity")
+                    {
+                        return;
+                    }
+
+                    let buffer = ctx.getImageData(0, 0, camCnv.originalWidth, camCnv.originalHeight);
+                    let output = ctx.createImageData(buffer);
+
+                    switch (camCnv.filter)
+                    {
+                    case "grey":
+                        filter.grey(buffer.data, output.data);
+                        break;
+                    case "edge":
+                        filter.convolution(buffer.width, buffer.height, buffer.data, output.data, [
+                            -1, -1, -1,
+                            -1, 8, -1,
+                            -1, -1, -1
+                        ], 0);
+                        break;
+                    case "sharpen":
+                        filter.convolution(buffer.width, buffer.height, buffer.data, output.data, [
+                            0, -1, 0,
+                            -1, 5, -1,
+                            0, -1, 0
+                        ], 0);
+                        break;
+                    case "emboss":
+                        filter.convolution(buffer.width, buffer.height, buffer.data, output.data, [
+                            1, 1, 1,
+                            1, 0.7, -1,
+                            -1, -1, -1
+                        ], 0);
+                        break;
+                    case "custom":
+                        filter.convolution(buffer.width, buffer.height, buffer.data, output.data, camCnv.customKernel, 0);
+                        break;
+                    }
+
+                    ctx.putImageData(output, 0, 0);
+                }
+            }
+
+            Label {
+                visible: cam.status === "error" || cam.status === "inactive"
+                position: "free"
+                x: (parent.bbox.width - bbox.width) / 2
+                y: (parent.bbox.height - bbox.height) / 2
+                fontSize: theme.fontSizeLarge
+                color: "white"
+                text: cam.status === "error" ? "Camera Access Denied"
+                                             : "Camera Inactive"
+            }
+        }//Box
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightMedium
+            layout: "row"
+
+            Repeater {
+                model: ListModel {
+                    data: [
+                        ["identity", "Identity"],
+                        ["grey", "Grey"],
+                        ["edge", "Edges"],
+                        ["sharpen", "Sharpen"],
+                        ["emboss", "Emboss"],
+                        ["custom", "Custom"]
+                    ]
+                }
+
+                delegate: template Button {
+                    fillWidth: true
+                    fillHeight: true
+                    flat: true
+                    checked: camCnv.filter === modelData.value[0]
+                    text: modelData.value[1]
+                    onClick: () => { camCnv.filter = modelData.value[0]; }
+                }
+            }
+        }
+
+        Label {
+            marginTop: theme.paddingMedium
+            marginLeft: theme.paddingLarge
+            marginBottom: theme.paddingLarge
+            text: "Width: " + cam.originalWidth + " px, Height: " + cam.originalHeight + " px"
+        }
+
+    }//Box
+
+    property kernelDialog: template Dialog {
+        id: dialog
+
+        title: "Custom Filter"
+        height: 4 * theme.itemHeightMedium
+
+        Label {
+            text: "Enter convolution kernel:"
+        }
+
+        Box {
+            marginTop: theme.paddingMedium
+            width: 3 * theme.itemWidthMedium
+            //fillWidth: true
+            layout: "row"
+            TextEntry { id: m11
+             fillWidth: true; pattern: "-?[0-9]?"
+               text: camCnv.customKernel[0]
+               }
+            TextEntry { id: m12; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[1] }
+            TextEntry { id: m13; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[2] }
+        }
+
+        Box {
+            width: 3 * theme.itemWidthMedium
+            //fillWidth: true
+            layout: "row"
+            TextEntry { id: m21; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[3] }
+            TextEntry { id: m22; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[4] }
+            TextEntry { id: m23; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[5] }
+        }
+
+        Box {
+            width: 3 * theme.itemWidthMedium
+            //fillWidth: true
+            layout: "row"
+            TextEntry { id: m31; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[6] }
+            TextEntry { id: m32; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[7] }
+            TextEntry { id: m33; fillWidth: true; pattern: "-?[0-9]?"; text: camCnv.customKernel[8] }
+        }
+
+        into buttons Button {
+            text: "Ok"
+
+            onClick: {
+                camCnv.customKernel = [
+                    m11.text, m12.text, m13.text,
+                    m21.text, m22.text, m23.text,
+                    m31.text, m32.text, m33.text,
+                ];
+                dialog.parent = null;
+            }
+        }
+    }
+}

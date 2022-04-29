@@ -1,0 +1,137 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    scrollable: false
+
+    into header Header {
+        id: pageHeader
+
+        title: "Atomics"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    ThreadPool {
+        id: threadPool
+        
+        size: 1
+    }
+
+    Object {
+        id: task
+
+        property code: """
+            // this task counts endlessly until the abort flag is raised
+
+            function run(callback, abortFlag)
+            {
+                let count = 0;
+                while (! abortFlag.value)
+                {
+                    callback(count);
+                    ++count;
+                    sleep(500);
+                }
+            }
+        """
+
+        // have a shared atomic abort flag
+        property abortFlag: threadPool.atomicInt32(0)
+
+        function start()
+        {
+            abortFlag.value = 0;
+            threadPool.postTask(code, (v) => { output.text = v; }, abortFlag);
+        }
+
+        function stop()
+        {
+            // simply raise the abort flag
+            abortFlag.value = 1;
+        }
+    }
+
+    Capabilities {
+        id: caps
+    }
+
+    Label {
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        fillWidth: true
+        overflowBehavior: "wrap"
+        text: "Atomics are thread-safe integers shared between threads for " +
+              "lock-free communication. Shellfish provides **AtomicInt32** for " +
+              "this purpose.\n\n" +
+              "For security reasons, atomics are usually only available in a " +
+              "cross-origin-isolated environment.\n\n" +
+              "Atomics can be used to signal running tasks to stop, for instance."
+    }
+
+    Box {
+        visible: caps.sharedArrayBuffer && caps.atomics
+
+        marginTop: theme.paddingLarge
+        layout: "center-row"
+
+        Button {
+            enabled: threadPool.free === threadPool.size;
+            marginLeft: theme.paddingMedium
+            text: "Start counting"
+            onClick: () =>
+            {
+                task.start();
+            }
+        }
+
+        Button {
+            enabled: threadPool.free !== threadPool.size;
+            marginLeft: theme.paddingMedium
+            text: "Stop counting"
+            onClick: () =>
+            {
+                task.stop();
+            }
+        }
+
+        Label {
+            id: output
+
+            marginLeft: theme.paddingMedium
+            fillWidth: true            
+            bold: true
+            text: "0"
+        }
+
+    }
+
+    Placeholder {
+        visible: ! caps.sharedArrayBuffer || ! caps.atomics
+        text: "Atomics are not available in this environment."
+    }
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<script src="/shellfish/require.js"
+        data-bundle="/shellfish/shellfish.pkg, /shellfish/shellfish-ui.pkg, /shellfish/shellfish-3d.pkg"
+        data-main="shui-loader.js"
+        data-shui="/main.shui"></script>
+</head>
+<body>
+    <h1>This browser does not support ECMAScript version 6</h1>
+    <p>Please use a compliant browser.</p>
+    <script>
+        var ok = false;
+        try
+        {
+            if (eval("const a = 1; let b = ((...args) => 41)(); class C { }; let d = fetch; a + b;") === 42)
+            {
+                ok = true;
+            }
+        }
+        catch (err)
+        {
+
+        }
+        if (ok)
+        {
+            document.body.innerHTML = `
+                <p style="line-height: 100vh; font-family: sans-serif; font-size: 10pt; width: 100vw; text-align: center;">
+                    <span id="sh-require-status">Initializing</span>
+                    <span id="sh-require-progress" style="opacity: 0.6;"></span>
+                </p>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Profiles"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui"]
+    }
+
+    property contentT: template Box {
+        marginTop: header.height
+        marginLeft: theme.paddingLarge
+        marginRight: theme.paddingLarge
+        fillWidth: true
+
+        // Let's define a bunch of profiles here. They are nothing special,
+        // just objects with properties.
+
+        Object {
+            id: normalProfile
+            property marginTop: theme.paddingSmall
+            property marginLeft: theme.paddingSmall
+            property marginRight: theme.paddingSmall
+            property marginBottom: theme.paddingSmall
+            property rotationAngle: 0
+            property opacity: 1
+        }
+
+        Object {
+            id: bigMarginsProfile
+            property marginTop: theme.paddingLarge
+            property marginLeft: theme.paddingLarge
+            property marginRight: theme.paddingLarge
+            property marginBottom: theme.paddingLarge
+            property rotationAngle: 0
+            property opacity: 1
+        }
+
+        Object {
+            id: flipAroundProfile
+            property marginTop: theme.paddingSmall
+            property marginLeft: theme.paddingSmall
+            property marginRight: theme.paddingSmall
+            property marginBottom: theme.paddingSmall
+            property rotationAngle: rotationSlider.value
+            property opacity: 1
+        }
+
+        Object {
+            id: translucentProfile
+            property marginTop: theme.paddingSmall
+            property marginLeft: theme.paddingSmall
+            property marginRight: theme.paddingSmall
+            property marginBottom: theme.paddingSmall
+            property rotationAngle: 0
+            property opacity: opacitySlider.value
+        }
+
+        // to use a profile, just reference it in the element's "profiles"
+        // property
+
+        Label {
+            profiles: [profileSelector.currentProfile]
+            marginTop: theme.paddingSmall
+            fillWidth: true
+            overflowBehavior: "wrap"
+            text: "Profiles provide a way to apply a common set of properties " +
+                  "to a number of elements at the same time. Each element may " +
+                  "reference any number of profiles.\n\n" +
+                  "This way, you can apply a common style to your elements, or " +
+                  "even implement a number of element states."
+        }
+
+        Labeled {
+            profiles: [profileSelector.currentProfile]
+            marginTop: theme.paddingLarge
+            text: "Select a profile:"
+
+            SelectionBox {
+                id: profileSelector
+
+                property currentProfile: [
+                    normalProfile,
+                    bigMarginsProfile,
+                    flipAroundProfile,
+                    translucentProfile
+                ][selection]
+
+                model: ListModel {
+                    data: [
+                        "Normal",
+                        "Big Margins",
+                        "Flip Around",
+                        "Translucent"
+                    ]
+                }
+            }
+        }
+
+        Label {
+            visible: profileSelector.currentProfile === flipAroundProfile ||
+                     profileSelector.currentProfile === translucentProfile
+            marginTop: theme.paddingSmall
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            fillWidth: true
+            overflowBehavior: "wrap"
+            text: "Profiles may use dynamic bindings, too."
+        }
+
+        Labeled {
+            visible: profileSelector.currentProfile === flipAroundProfile
+            marginTop: theme.paddingSmall
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            text: "Set the angle:"
+
+            Slider {
+                id: rotationSlider
+
+                minValue: 175
+                maxValue: 185
+                value: 180
+            }
+        }
+
+        Labeled {
+            visible: profileSelector.currentProfile === translucentProfile
+            marginTop: theme.paddingSmall
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            text: "Set the opacity:"
+
+            Slider {
+                id: opacitySlider
+
+                minValue: 0.1
+                maxValue: 0.7
+                value: 0.5
+            }
+        }
+
+        Image {
+            profiles: [profileSelector.currentProfile]
+            fillWidth: true
+            height: documentRoot.windowHeight / 2
+            fitMode: "cover"
+            source: "sample.jpg"
+        }
+
+    }
+
+    onFrozenChanged: {
+        if (! frozen && ! loader.item)
+        {
+            loader.sourceTemplate = contentT;
+        }
+    }
+
+    Loader {
+        id: loader
+        fillWidth: true
+        height: item ? -1 : documentRoot.windowHeight
+        
+        Placeholder {
+            visible: ! parent.item
+            text: "[icon:spinner5]"
+        }
+    }
+}

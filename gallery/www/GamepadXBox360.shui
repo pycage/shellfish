@@ -1,0 +1,260 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./GamepadButton.shui";
+require "./GamepadDPad.shui";
+require "./GamepadStick.shui";
+require "./GamepadTrigger.shui";
+
+Box {
+
+    property index: -1
+
+    Gamepad {
+        id: gamepad
+        index: parent.index
+    }
+
+    Object {
+        id: xbox360
+        
+        property up: gamepad.buttons[12] || false
+        property down: gamepad.buttons[13] || false
+        property left: gamepad.buttons[14] || false
+        property right: gamepad.buttons[15] || false
+
+        property x1: gamepad.axes[0] || 0.0
+        property y1: gamepad.axes[1] || 0.0
+        property lsb: gamepad.buttons[10] || false
+
+        property x2: gamepad.axes[2] || 0.0
+        property y2: gamepad.axes[3] || 0.0
+        property rsb: gamepad.buttons[11] || false
+
+        property a: gamepad.buttons[0] || false
+        property b: gamepad.buttons[1] || false
+        property x: gamepad.buttons[2] || false
+        property y: gamepad.buttons[3] || false
+
+        property lb: gamepad.buttons[4] || false
+        property rb: gamepad.buttons[5] || false
+
+        property lt: gamepad.triggers[6] || 0.0
+        property rt: gamepad.triggers[7] || 0.0
+
+        property back: gamepad.buttons[8] || false
+        property start: gamepad.buttons[9] || false
+    }
+
+    Box {
+        layout: "row"
+
+        GamepadTrigger {
+            width: theme.itemWidthMedium
+
+            value: xbox360.lt
+            text: "LT"
+        }
+
+        Box { width: 2 * theme.itemWidthMedium }
+
+        GamepadTrigger {
+            width: theme.itemWidthMedium
+
+            value: xbox360.rt
+            text: "RT"
+        }
+
+    }
+
+    Box {
+        marginTop: theme.paddingSmall
+        layout: "row"
+
+        GamepadButton {
+            width: theme.itemWidthMedium
+
+            value: xbox360.lb
+            text: "LB"
+        }
+
+        Box { width: 2 * theme.itemWidthMedium }
+
+        GamepadButton {
+            width: theme.itemWidthMedium
+
+            value: xbox360.rb
+            text: "RB"
+        }
+    }
+
+    Box {
+        id: mainBox
+
+        marginTop: theme.paddingSmall
+        layout: "center-row"
+
+        GamepadStick {
+            width: theme.itemWidthMedium
+            height: theme.itemWidthMedium
+
+            xValue: xbox360.x1
+            yValue: xbox360.y1
+            value: xbox360.lsb
+        }
+
+        Box {
+            width: theme.itemWidthMedium * 2
+            layout: "row"
+
+            GamepadButton {
+                marginLeft: theme.paddingMedium
+                fillWidth: true
+                value: xbox360.back
+                text: "Back"
+            }
+
+            GamepadButton {
+                marginLeft: theme.paddingMedium
+                marginRight: theme.paddingMedium
+                fillWidth: true
+                value: xbox360.start
+                text: "Start"
+            }
+        }
+
+
+        Box {
+            layout: "center-column"
+
+            GamepadButton {
+                width: theme.itemWidthMedium / 3
+                height: width
+                value: xbox360.y
+                text: "Y"
+            }
+
+            Box {
+                layout: "row"
+
+                GamepadButton {
+                    width: theme.itemWidthMedium / 3
+                    height: width
+                    value: xbox360.x
+                    text: "X"
+                }
+
+                GamepadButton {
+                    marginLeft: theme.itemWidthMedium / 3
+                    width: theme.itemWidthMedium / 3
+                    height: width
+                    value: xbox360.b
+                    text: "B"
+                }
+
+            }
+
+            GamepadButton {
+                width: theme.itemWidthMedium / 3
+                height: width
+                value: xbox360.a
+                text: "A"
+            }
+        }
+
+    }
+
+    Box {
+        marginTop: theme.paddingSmall
+        width: mainBox.bbox.width
+        layout: "center-row"
+
+        GamepadDPad {
+            width: theme.itemWidthMedium
+            height: theme.itemWidthMedium
+
+            up: xbox360.up
+            down: xbox360.down
+            left: xbox360.left
+            right: xbox360.right
+        }
+
+        GamepadStick {
+            marginLeft: theme.itemWidthMedium / 2
+            width: theme.itemWidthMedium
+            height: theme.itemWidthMedium
+
+            xValue: xbox360.x2
+            yValue: xbox360.y2
+            value: xbox360.rsb
+        }
+    }
+
+    Box {
+        visible: gamepad.canRumble
+        marginTop: theme.paddingSmall
+        layout: "center-row"
+
+        Label {
+            text: "Intensity"
+        }
+
+        Slider {
+            id: rumbleIntensity
+            marginLeft: theme.paddingSmall
+            minValue: 0.0
+            maxValue: 1.0
+            value: 0.7
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            text: Math.floor(rumbleIntensity.value * 100) + "%"
+        }
+
+        Label {
+            marginLeft: theme.paddingLarge
+            text: "Duration"
+        }
+
+        Slider {
+            id: rumbleDuration
+            marginLeft: theme.paddingSmall
+            minValue: 100
+            maxValue: 3000
+            value: 300
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            text: Math.floor(rumbleDuration.value) + " ms"
+        }
+
+        Button {
+            marginLeft: theme.paddingLarge
+            text: "Rumble"
+            onClick: () => { gamepad.rumble(rumbleIntensity.value, rumbleDuration.value); }
+        }
+    }
+
+}

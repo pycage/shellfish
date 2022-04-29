@@ -1,0 +1,285 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    property offsetX: 1.5
+    property offsetY: 1.0
+    property scale: 1.0
+
+    // the task to execute in the thread pool
+    property mandelbrot: """
+        function run(buf, region, width, height, zoom)
+        {
+            let p = [0, 0];
+            let nextP = [0, 0];
+            let prevP = [0, 0];
+
+            const buffer = new Uint8Array(buf);
+
+            for (let x = 0; x < region.width; ++x)
+            {
+                for (let y = 0; y < region.height; ++y)
+                {
+                    p = [
+                        -1.0 * region.offsetX + 2.0 * (region.x + x) / (zoom * width),
+                        -1.0 * region.offsetY + 2.0 * (region.y + y) / (zoom * height)
+                    ];
+
+                    nextP = [0, 0];
+
+                    let i = 0;
+                    for (; i < 255; ++i)
+                    {
+                        prevP = nextP.slice();
+                        nextP = [
+                            prevP[0] * prevP[0] - prevP[1] * prevP[1] + p[0],
+                            2 * prevP[0] * prevP[1] + p[1]
+                        ];
+                        if (nextP[0] * nextP[0] + nextP[1] * nextP[1] > 4)
+                        {
+                            break;
+                        }
+                    }
+                    const offset = (y * region.width + x) * 4;
+                    buffer[offset] = i;
+                    buffer[offset + 1] = i;
+                    buffer[offset + 2] = i;
+                    buffer[offset + 3] = 0xff;
+                }
+            }
+
+            return transfer(buffer.buffer);
+        }
+    """
+
+    function render()
+    {
+        const totalWidth = cnv.originalWidth;
+        const totalHeight = cnv.originalHeight;
+
+        const blockSize = Math.floor(cnv.originalWidth / Math.ceil(Math.sqrt(threadPool.size)));
+
+        cnv.context2d.fillRect(0, 0, cnv.originalWidth, cnv.originalHeight);
+
+        // divide screen into regions to be computed in parallel
+        for (let x = 0; x < totalWidth; x += blockSize)
+        {
+            for (let y = 0; y < totalHeight; y += blockSize)
+            {
+                const buffer = new ArrayBuffer(blockSize * blockSize * 4);
+                const region = {
+                    x: x,
+                    y: y,
+                    offsetX: page.offsetX,
+                    offsetY: page.offsetY,
+                    width: blockSize,
+                    height: blockSize
+                };
+
+                // post a task for each region and render the result
+                threadPool.postTask(page.mandelbrot,
+                                    threadPool.transfer(buffer),
+                                    region,
+                                    totalWidth,
+                                    totalHeight,
+                                    page.scale)
+                .then((resultBuffer) =>
+                {
+                    const buffer = new Uint8ClampedArray(resultBuffer);
+                    const imgData = new ImageData(buffer, blockSize);
+                    cnv.context2d.putImageData(imgData, x, y);
+                })
+                .catch((err) =>
+                {
+                    console.log("Task failed: " + err);
+                });
+            }
+        }
+    }
+
+    scrollable: false
+
+    onInitialization: () =>
+    {
+        render();
+    }
+
+    into header Header {
+        id: pageHeader
+
+        title: "Thread Pool"
+        subtitle: "Workers: " + threadPool.size + ", " +
+                  "Free: " + threadPool.free + ", " +
+                  "Waiting: " + threadPool.waiting + ", " +
+                  "Hardware Concurrency: " + threadPool.hardwareConcurrency
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    ThreadPool {
+        id: threadPool
+
+        property busy: pending > 0
+        property beginTime: 0
+
+        size: Math.round(poolSizeSlider.value)
+
+        onBusyChanged: () =>
+        {
+            if (busy)
+            {
+                beginTime = Date.now();
+            }
+            else if (beginTime > 0)
+            {
+                finishedLabel.text = "Took " + (Date.now() - beginTime) + " ms";
+            }
+        }
+    }
+
+    Label {
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        fillWidth: true
+        overflowBehavior: "wrap"
+        text: "The **ThreadPool** element runs asynchronous tasks in " +
+              "parallel in a pool of worker threads. The hardware concurrency is the " +
+              "maximum number of threads your CPU is able to run simultaneously.\n\n" +
+              "Certain objects, such as **ArrayBuffer** instances, are transferable and may be " +
+              "transfered (moved) to the task instead of being copied when passed "+
+              "as a parameter with the **transfer()** marker."
+    }
+
+    Box {
+        fillWidth: true
+        marginTop: theme.paddingMedium
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        layout: "center-row"
+
+        Label {
+            text: "Size of Thread Pool:"
+        }
+
+        Slider {
+            id: poolSizeSlider
+
+            marginLeft: theme.paddingSmall
+            minValue: 1
+            maxValue: 2 * threadPool.hardwareConcurrency
+            value: threadPool.hardwareConcurrency
+        }
+
+        Label {
+            marginLeft: theme.paddingMedium
+            text: Math.round(poolSizeSlider.value) + " Tasks"
+        }
+
+        Box { fillWidth: true }
+    }
+
+    Button {
+        marginTop: theme.paddingMedium
+        marginLeft: theme.paddingMedium
+        text: "Reset View"
+
+        onClick: () =>
+        {
+            page.offsetX = 1.5;
+            page.offsetY = 1.0;
+            page.scale = 1.0;
+            page.render();
+        }
+    }
+
+    MouseBox {
+        fillWidth: true
+        fillHeight: true
+        marginTop: theme.paddingMedium
+
+        color: "black"
+
+        onPointerDown: (ev) =>
+        {
+            ev.accepted = true;
+            if (ev.buttons === 1)
+            {
+                const offX = ((ev.x - bbox.width * 0.1) / bbox.width) * 2.0;
+                const offY = ((ev.y - bbox.height * 0.1) / bbox.height) * 2.0;
+                page.offsetX -= offX / page.scale;
+                page.offsetY -= offY / page.scale;
+                page.scale *= 1.0 / 0.2;
+                page.render();
+            }
+        }
+
+        onPointerMove: (ev) =>
+        {
+            zoomBox.x = ev.x - zoomBox.width / 2;
+            zoomBox.y = ev.y - zoomBox.height / 2;
+        }
+
+        Canvas {
+            id: cnv
+
+            fillWidth: true
+            fillHeight: true
+
+            originalWidth: 1024 //bbox.width
+            originalHeight: 1024 //bbox.height
+        }
+
+        Box {
+            id: zoomBox
+
+            position: "free"
+            enabled: false
+            width: parent.bbox.width * 0.2
+            height: parent.bbox.height * 0.2
+            color: colorName("red").alpha(0.2)
+            borderColor: colorName("red")
+            borderWidth: 1
+        }
+
+        Label {
+            id: finishedLabel
+
+            visible: ! threadPool.busy
+            position: "free"
+            origin: "top-right"
+            marginTop: theme.paddingMedium
+            marginRight: theme.paddingMedium
+            color: "red"
+            text: ""
+        }
+
+        Placeholder {
+            visible: threadPool.busy
+            text: "Calculating..."
+        }
+    }
+}

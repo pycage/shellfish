@@ -1,0 +1,109 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/low" as low;
+
+// preload the icon fonts
+require "/shellfish/icons/camera-icons.css";
+require "/shellfish/icons/comm-icons.css";
+require "/shellfish/icons/emote-icons.css";
+require "/shellfish/icons/fs-icons.css";
+require "/shellfish/icons/input-icons.css";
+require "/shellfish/icons/map-icons.css";
+require "/shellfish/icons/media-icons.css";
+require "/shellfish/icons/text-icons.css";
+require "/shellfish/icons/ui-icons.css";
+
+Document {
+
+    property brightTheme: Theme { }
+    property darkTheme: DarkTheme { }
+    theme: brightTheme
+
+    title: "UI Gallery"
+
+    onContextMenu: (ev) =>
+    {
+        // prevent the default context menu from showing up
+        ev.accepted = true;
+    }
+
+    onKeyDown: (ev) =>
+    {
+        /*
+        if (ev.key === "ArrowLeft")
+        {
+            low.focusPrevious();
+            ev.accepted = true;
+        }
+        else if (ev.key === "ArrowRight")
+        {
+            low.focusNext();
+            ev.accepted = true;
+        }
+        */
+    }
+
+    PageStack {
+        id: pageStack
+
+        initialPage: __dirname + "/WelcomePage.shui"
+    }
+
+    Box {
+        visible: pageStack.loading
+        position: "free"
+        fillWidth: true
+        height: documentRoot.windowHeight
+
+        layout: "center"
+
+        Label {
+            fontSize: 64
+            text: "[icon:ui-spinner5]"
+        }
+
+        Box {
+            width: documentRoot.windowWidth - 2 * theme.paddingLarge
+            height: 1
+            marginTop: theme.paddingLarge
+            marginBottom: theme.paddingLarge
+            color: theme.primaryColor
+        }
+
+        Label {
+            text: "Loading " + documentRoot.title
+        }
+    }
+
+    onKeyDown: (ev) =>
+    {
+        // dump debug information
+        if (ev.key === "d" && ev.ctrlKey)
+        {
+            console.log("Objects Dump:");
+            console.log(mid.dumpStatus());
+            ev.accepted = true;
+        }
+    }
+}

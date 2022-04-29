@@ -1,0 +1,288 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./CodeEditorBehavior.shui";
+require "./ShuiSyntaxHighlighter.shui";
+
+Page {
+    id: page
+
+    property exampleCode: """require "shellfish/ui";
+
+Box {
+
+    Label {
+        rotationAxis: vec3(1, 0, 0)
+        fontSize: theme.fontSizeLarge
+        color: rotationAngle < 90 || rotationAngle > 270 ? "green"
+                                                         : "red"
+        text: "Hello World!"
+
+        NumberAnimation {
+            running: true
+            repeat: true
+            from: 0
+            to: 360
+            duration: 3000
+            easing: "Linear"
+            onNext: (v) => { parent.rotationAngle = v; }
+        }
+
+    }
+    
+}
+"""
+
+    into header Header {
+        id: pageHeader
+
+        title: "Fiddle Box"
+        subtitle: "Fiddle around with Shui code"
+        codeUrls: [__filename, "Header.shui", "CodeEditorBehavior.shui", "ShuiSyntaxHighlighter.shui"]
+    }
+
+    scrollable: false
+
+    ShuiSyntaxHighlighter {
+        id: shuiHighlighter
+    }
+
+    SplitBox {
+        marginTop: pageHeader.height
+        fillWidth: true
+        fillHeight: true
+
+        onClick: (ev) =>
+        {
+            if (ev.buttons === 2)
+            {
+                orientation = orientation === "horizontal" ? "vertical"
+                                                           : "horizontal";
+            }
+            else if (ev.buttons === 4)
+            {
+                flip = ! flip;
+            }
+        }
+
+        onDoubleClick: (ev) =>
+        {
+            if (ev.buttons === 1)
+            {
+                splitRatio = 0.5;
+            }
+        }
+
+        into first Box {
+            fillWidth: true
+            fillHeight: true
+
+            Label {
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                bold: true
+                text: "Shui Code"
+            }
+
+            Box {
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall
+                fillWidth: true
+                fillHeight: true
+                layout: "row"
+
+                // Let's create a fancy code editor with line numbers,
+                // syntax highlighting, current line highlighting, and
+                // auto indentation behavior.
+                TextArea {
+                    id: codeBox
+
+                    fillWidth: true
+                    fillHeight: true
+
+                    textColor: "transparent" // handled by the syntax highlighting label
+                    caretColor: theme.primaryColor
+
+                    fontFamily: "monospace"
+                    text: page.exampleCode
+
+                    // auto indentation, etc.
+                    CodeEditorBehavior { }
+
+                    // current line highlighting
+                    into backgroundContainer Label {
+                        position: "free"
+                        fillWidth: true
+                        fillHeight: true
+                        marginTop: -codeBox.scrollY
+                        fontSize: codeBox.fontSize
+                        fontFamily: codeBox.fontFamily
+                        bold: codeBox.bold
+                        color: codeBox.textColor
+                        literal: false
+                        text: codeBox.row && codeBox.bbox && codeBox.selectionStart === codeBox.selectionEnd ? codeBox.text : ""
+
+                        filter: (s) =>
+                        {
+                            const lines = s.split("\n");
+                            let maxLength = codeBox.bbox.width / (fontSize / 2);
+                            
+                            let out = "";
+                            lines.forEach((l, row) =>
+                            {
+                                if (row === codeBox.row)
+                                {
+                                    out += "<span style=\"background-color: " + theme.secondaryBackgroundColor.alpha(0.5).toCss() + "\">";
+                                    for (let i = 0; i < maxLength; ++i)
+                                    {
+                                        out += "&nbsp;";
+                                    }
+                                    out += "</span>";
+                                }
+                                out += "<br>";
+                            });
+                            return out;
+                        }
+                    }
+
+                    // syntax highlighting
+                    into backgroundContainer Label {
+                        position: "free"
+                        fillWidth: true
+                        fillHeight: true
+                        marginTop: -codeBox.scrollY
+                        marginLeft: -codeBox.scrollX
+                        fontSize: codeBox.fontSize
+                        fontFamily: codeBox.fontFamily
+                        bold: codeBox.bold
+                        color: theme.primaryColor
+                        literal: false
+                        text: codeBox.text
+
+                        filter: shuiHighlighter.filter
+                    }
+
+                    // line numbers
+                    into leftMarginContainer Box {
+                        width: lineNoLabel.bbox.width + 8
+                        fillHeight: true
+                        color: theme.secondaryBackgroundColor
+
+                        Label {
+                            id: lineNoLabel
+
+                            marginTop: -codeBox.scrollY
+                            marginLeft: 4
+                            fontSize: codeBox.fontSize
+                            fontFamily: codeBox.fontFamily
+                            horizontalAlignment: "right"
+                            color: theme.secondaryColor
+
+                            text: (() =>
+                            {
+                                let out = "";
+                                codeBox.text.split("\n").forEach((line, i) =>
+                                {
+                                    out += "" + (i + 1) + "\n";
+                                })
+                                return out;
+                            })()
+                        }
+                    }
+
+                    // status bar
+                    into bottomMarginContainer Box {
+                        fillWidth: true
+                        height: theme.itemHeightSmall
+                        layout: "center-row"
+
+                        Box { fillWidth: true }
+
+                        Label {
+                            marginRight: theme.paddingSmall
+                            fontSize: theme.fontSizeSmall
+                            text: "Line " + (codeBox.row + 1) + ", " +
+                                  "Column " + (codeBox.column + 1)
+                        }
+
+                    }
+
+                }//TextArea
+
+            }//Box
+
+        }//Box
+
+        into second Box {
+            fillWidth: true
+            fillHeight: true
+
+            Label {
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                bold: true
+                text: "Live View"
+            }
+
+            Loader {
+                id: fiddleLoader
+
+                fillWidth: true
+                fillHeight: true
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall
+
+                // a Loader is a Box...
+                borderColor: theme.borderColor
+                borderRadius: theme.borderRadius
+                borderWidth: 1
+                color: theme.contentBackgroundColor
+            }
+        }
+    }
+
+    codeBox.onTextChanged: () => fiddleTimer.start()
+    onInitialization: () => fiddleTimer.start()
+
+    Timer {
+        id: fiddleTimer
+        running: false
+        interval: 500
+        repeat: false
+
+        onTimeout: () =>
+        {
+            // for the time being, this is using private API. look away
+            const code = 'require "./EmbeddedDocument.shui"; ' +
+                         codeBox.text.replace(new RegExp("Document[\n ]*{"), "EmbeddedDocument {");
+            shRequire.registerData("__Fiddle.shui", code);
+            fiddleLoader.source = "";
+            fiddleLoader.source = "__Fiddle.shui";
+        }
+    }
+}

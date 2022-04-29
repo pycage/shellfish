@@ -1,0 +1,101 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/3d" as shf3d;
+
+shf3d.Group {
+
+    shf3d.Clone {
+        id: wall
+
+        visible: false
+
+        entity: shf3d.Cube {
+            material: shf3d.Material {
+                source: __dirname + "/brick-wall.jpg"
+                shininess: 16
+            }
+        }
+    }
+
+    Repeater {
+        model: ListModel {
+            data: [
+                1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+                1, 2, 0, 2, 1, 2, 0, 0, 0, 1,
+                1, 1, 1, 0, 1, 1, 2, 1, 1, 1,
+                1, 2, 1, 0, 0, 2, 0, 1, 2, 1,
+                1, 0, 1, 2, 1, 0, 1, 1, 0, 1,
+                1, 0, 1, 1, 1, 2, 0, 0, 2, 1,
+                1, 0, 0, 2, 0, 0, 1, 0, 1, 1,
+                1, 0, 1, 0, 1, 1, 1, 0, 1, 1,
+                1, 2, 1, 0, 0, 2, 0, 0, 2, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+            ]
+        }
+
+        delegate: template shf3d.Group {
+            id: block
+
+            property idx: modelData.index || 0
+            property type: modelData.value || 0
+
+            location: vec3(0.5 + idx % 10, 0.5, 0.5 + Math.floor(idx / 10))
+
+            Light {
+                visible: parent.type === 2
+                location: vec3(0, 0.49, 0)
+                range: 2.0
+                color: colorName("darkred")
+            }
+
+            shf3d.Clone {
+                visible: parent.type === 1
+                entity: wall.entity
+            }
+        }
+    }
+
+    shf3d.Cube {
+        location: vec3(5, -0.05, 5)
+        scale: vec3(10, 0.1, 10)
+
+        material: shf3d.Material {
+            rows: 3
+            columns: 3
+            source: __dirname + "/grunge-wall.jpg"
+        }
+    }
+
+    shf3d.Cube {
+        location: vec3(5, 1.05, 5)
+        scale: vec3(10, 0.1, 10)
+
+        material: shf3d.Material {
+            rows: 3
+            columns: 3
+            source: __dirname + "/grunge-wall.jpg"
+            shininess: 1024
+        }
+    }
+
+}

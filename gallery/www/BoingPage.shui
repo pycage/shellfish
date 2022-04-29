@@ -1,0 +1,284 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2018 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+// This is a port of a QML animations demo from a course on QML I gave
+// back in 2018.
+Page {
+    id: page
+
+    property wallX: documentRoot.windowWidth - (wall.bbox.width / 2 + rabbit.bbox.width)
+    property groundLevel: documentRoot.windowHeight * 0.9 - rabbit.bbox.height
+
+    into header Header {
+        id: pageHeader
+        
+        title: "Boing Boing Donk!"
+        subtitle: "Having fun with easing-curves..."
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    MouseBox {
+        id: box
+
+        fillWidth: true
+        height: documentRoot.windowHeight
+
+        color: "lightblue"
+
+        layout: "center"
+
+        onClick: {
+            if (! animation.busy)
+            {
+                animation.start();
+            }
+        }
+
+        Box {
+            id: sun
+            
+            position: "free"
+            x: box.bbox.width / 20
+            y: x
+            width: box.bbox.width / 10
+            height: width
+            color: "yellow"
+            borderRadius: width / 2
+        }
+
+        Box {
+            id: grass
+
+            position: "free"
+            origin: "bottom-left"
+            width: box.bbox.width
+            height: box.bbox.height * 0.2
+            color: "green"
+        }
+
+        Box {
+            id: wall
+
+            position: "free"
+            origin: "top-right"
+            width: box.bbox.width / 10
+            height: box.bbox.height * 0.85
+            color: "orange"
+        }
+
+        Image {
+            id: rabbit
+
+            position: "free"
+            x: 0
+            y: groundLevel
+            height: box.bbox.height * 0.3
+            source: __dirname + "/rabbit.svg"
+        }
+
+        Label {
+            id: ouch
+
+            visible: opacity > 0
+            color: "red"
+            bold: true
+            fontSize: box.bbox.height / 5
+            text: "Ouch!"
+            opacity: 0
+        }
+
+        Label {
+            id: infoLabel
+
+            position: "free"
+            x: (parent.bbox.width - bbox.width) / 2
+            y: theme.itemHeightLarge * 2
+            overflowBehavior: "wrap"
+            color: "black"
+            text: "Click to get hopping! [icon:emote-pets]"
+        }
+    }
+
+    SequentialAnimation {
+        id: animation
+
+        ScriptAction {
+            script: {
+                rabbit.rotationAngle = 0;
+                ouch.opacity = 0;
+
+                infoLabel.text = "Moving rabbit to the wall using:\n\n" +
+                                 " [icon:ui-arrow_right] x-easing: InCubic\n"+
+                                 " [icon:ui-arrow_right] y-easing: InBounce";
+            }
+        }
+
+        // charge
+        ParallelAnimation {
+
+            // move rabbit horizontally
+            NumberAnimation {
+                from: 0
+                to: wallX
+                duration: 1000
+                easing: "InCubic"
+
+                onNext: {
+                    rabbit.x = arguments[0];
+                }
+            }
+
+            // move rabbit vertically
+            NumberAnimation {
+                from: groundLevel
+                to: 0
+                duration: 1000
+                easing: "InBounce"
+
+                onNext: {
+                    rabbit.y = arguments[0];
+                }
+            }
+
+        }
+
+        // Donk!
+        ScriptAction {
+            script: {
+                ouch.opacity = 1;
+
+                infoLabel.text = "Dropping rabbit to the ground using:\n\n" +
+                                 " [icon:ui-arrow_right] rotation-easing: Linear\n"+
+                                 " [icon:ui-arrow_right] x-easing: OutQuad\n" +
+                                 " [icon:ui-arrow_right] y-easing: InQuad";
+            }
+        }
+
+        // wait a moment
+        NumberAnimation {
+            duration: 100
+        }
+
+        // hit the ground
+        ParallelAnimation {
+
+            NumberAnimation {
+                from: 0
+                to: 180
+                duration: 800
+                easing: "Linear"
+
+                onNext: {
+                    rabbit.rotationAngle = arguments[0];
+                }
+            }
+
+            NumberAnimation {
+                from: wallX
+                to: wallX * 0.8
+                duration: 800
+                easing: "OutQuad"
+
+                onNext: {
+                    rabbit.x = arguments[0];
+                }
+            }
+
+            NumberAnimation {
+                from: 0
+                to: groundLevel
+                duration: 800
+                easing: "InQuad"
+
+                onNext: {
+                    rabbit.y = arguments[0];
+                }
+            }
+        }
+
+        ScriptAction {
+            script: {
+                infoLabel.text = "Rolling rabbit back:\n\n" +
+                                 " [icon:ui-arrow_right] rotation-easing: OutQuad\n" +
+                                 " [icon:ui-arrow_right] y-easing: OutQuad";
+            }
+        }
+
+        // roll back
+        ParallelAnimation {
+
+            NumberAnimation {
+                from: 1
+                to: 0
+                duration: 1200
+                easing: "OutQuad"
+
+                onNext: {
+                    ouch.opacity = arguments[0];
+                }
+            }
+
+            NumberAnimation {
+                from: wallX * 0.8
+                to: 0
+                duration: 1200
+                easing: "OutQuad"
+
+                onNext: {
+                    rabbit.x = arguments[0];
+                }
+            }
+
+            NumberAnimation {
+                from: 180
+                to: 720
+                duration: 1200
+                easing: "OutQuad"
+
+                onNext: {
+                    rabbit.rotationAngle = arguments[0];
+                }
+            }
+
+        }
+
+        ScriptAction {
+            script: {
+                infoLabel.text = "Click to get hopping again! [icon:emote-evil]";
+            }
+        }
+    }
+
+    Label {
+        position: "free"
+        origin: "bottom-right"
+        marginRight: theme.paddingSmall
+        marginBottom: theme.paddingSmall
+        fontSize: theme.fontSizeSmall
+        color: "black"
+        text: "free rabbit.svg taken from flaticon.com"
+    }
+
+}

@@ -1,0 +1,85 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/3d" as shf3d;
+require "./../Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Scene with a Light Source"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    shf3d.View {
+        id: view
+
+        fillWidth: true
+        height: documentRoot.windowHeight
+        originalWidth: bbox.width
+        originalHeight: bbox.height
+
+        ambience: rgb(0.1, 0.1, 0.1)
+        color: rgb(0.0, 0.0, 0.3)
+
+        scene: shf3d.Group {
+
+            shf3d.Light {
+                location: vec3(10, 5, 1)
+            }
+
+            shf3d.Camera {
+                aspect: view.bbox.width / view.bbox.height
+                location: vec3(0, 0, 5)
+            }
+
+            shf3d.Cube {
+                rotationAxis: vec3(1, 1, 1)
+                rotationAngle: 0
+                rotationAngleTransition: NumberAnimation { duration: 10000 * 100; easing: "Linear" }
+                material: shf3d.Material { source: __dirname + "/brick-wall.jpg" }
+
+                onInitialization: () => { rotationAngle = 360 * 100; }
+            }
+
+            shf3d.Cube {
+                location: vec3(0, -1, 0)
+                scale: vec3(10, 0.1, 10)
+                material: shf3d.Material { source: __dirname + "/grunge-wall.jpg" }
+            }
+        }
+    }
+
+    Label {
+        position: "global"
+        origin: "bottom-left"
+        x: theme.paddingSmall
+        y: theme.paddingSmall
+        overflowBehavior: "wrap"
+        color: "black"
+        text: "free textures from https://freestocktextures.com"
+    }
+}

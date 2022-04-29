@@ -1,0 +1,208 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "File Selector"
+        subtitle: filesRepeater.model.size + " items"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui"]
+    }
+
+    FileSelector {
+        id: fsel
+        multiple: multipleSwitch.checked
+        directory: directorySwitch.checked
+        accept: filterEntry.text.split(",")
+    }
+
+    Box {
+        fillWidth: true
+        marginTop: header.height + theme.paddingLarge
+        marginLeft: theme.paddingLarge
+        marginRight: theme.paddingLarge
+
+        Label {
+            bold: true
+            text: "Configure File Selector"
+        }
+
+        Ruler { id: itemRuler }
+
+        Labeled {
+            enabled: ! directorySwitch.checked
+            marginTop: theme.paddingLarge
+            rulerObj: itemRuler
+            text: "Allow multi-selection"
+            Switch { id: multipleSwitch }
+        }
+
+        Labeled {
+            enabled: ! multipleSwitch.checked
+            rulerObj: itemRuler
+            text: "Select directory"
+            Switch { id: directorySwitch }
+        }
+
+        Labeled {
+            rulerObj: itemRuler
+            text: "Filter type"
+            TextEntry { id: filterEntry; text: "image/*" }
+        }
+
+        Button {
+            marginTop: theme.paddingLarge
+            text: fsel.multiple ? "Select Files"
+                                : fsel.directory ? "Select Directory"
+                                                 : "Select File"
+            onClick: () =>
+            {
+                fsel.open((files) =>
+                {
+                    const items = [];
+                    for (let i = 0; i < files.length; ++i)
+                    {
+                        const f = files[i];
+                        items.push({
+                            name: f.name,
+                            size: f.size,
+                            type: f.type,
+                            obj: f
+                        });
+                    }
+
+                    filesRepeater.model.reset(items);
+                });
+            }
+        }
+    }
+
+    Box {
+        fillWidth: true
+        height: 1
+        marginTop: theme.paddingLarge
+        marginLeft: theme.paddingLarge
+        marginRight: theme.paddingLarge
+        marginBottom: theme.paddingLarge
+
+        color: "black"
+    }
+
+    Repeater {
+        id: filesRepeater
+
+        model: ListModel { }
+
+        delegate: template Box {
+            id: itemBox
+
+            fillWidth: true
+            height: theme.itemHeightLarge * 3
+            layout: "center-row"
+
+            Image {
+                id: thumbnail
+
+                visible: status === "success"
+                width: bbox.height
+                fillHeight: true
+                fitMode: "cover"
+
+                source: parent.modelData.value.type.startsWith("image/") ? blobUrl(parent.modelData.value.obj)
+                                                                         : ""
+            }
+
+            Label {
+                id: icon
+
+                visible: ! thumbnail.visible
+                width: parent.bbox.height
+                fontSize: theme.itemHeightLarge
+                horizontalAlignment: "center"
+
+                // you may use an IIFE if you have a more complex binding
+                // expression
+                text: (() =>
+                {
+                    const t = parent.modelData.value.type || "";
+                    if (t.startsWith("audio/"))
+                    {
+                        return "[icon:fs-file-music]";
+                    }
+                    else if (t.startsWith("image/"))
+                    {
+                        return "[icon:fs-file-image]";
+                    }
+                    else if (t.startsWith("text/"))
+                    {
+                        return "[icon:fs-file-text]";
+                    }
+                    else if (t.startsWith("video/"))
+                    {
+                        return "[icon:fs-file-video]";
+                    }
+                    else
+                    {
+                        return "[icon:fs-file-empty]";
+                    }
+                })()
+            }
+
+            Box {
+                marginLeft: theme.paddingLarge
+                marginRight: theme.paddingLarge
+                fillWidth: true
+
+                Label {
+                    bold: true
+                    fillWidth: true
+                    overflowBehavior: "ellipsis"
+                    literal: true
+                    text: itemBox.modelData.value.name
+                }
+
+                Label {
+                    fillWidth: true
+                    marginTop: theme.paddingSmall
+                    fontSize: theme.fontSizeSmall
+                    text: itemBox.modelData.value.type
+                }
+
+                Label {
+                    fillWidth: true
+                    marginTop: theme.paddingSmall
+                    fontSize: theme.fontSizeSmall
+                    text: itemBox.modelData.value.size + " Bytes"
+                }
+            }
+
+        }
+    }
+
+}

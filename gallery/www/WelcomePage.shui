@@ -1,0 +1,278 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./PageButtons.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Shellfish Gallery"
+        subtitle: "[icon:ui-copyright] 2020 - 2022 Martin Grimme"
+        codeUrls: [__filename, "Header.shui", "PageButtons.shui"]
+    }
+
+    into header Label {
+        id: hint
+
+        property offset: 0
+
+        position: "global"
+        origin: "top-right"
+        marginTop: pageHeader.height + offset
+        marginRight: theme.paddingMedium
+        color: theme.secondaryColor
+        fontSize: theme.fontSizeSmall
+        text: "Look at the Shui code of each example. [icon:ui-bold_arrow_up]"
+
+        SequentialAnimation {
+            running: ! page.frozen
+            repeat: true
+
+            NumberAnimation {
+                from: 0
+                to: 16
+                duration: 1000
+                onNext: (value) => { hint.offset = value; }
+            }
+
+            NumberAnimation {
+                from: 16
+                to: 0
+                duration: 1000
+                onNext: (value) => { hint.offset = value; }
+            }
+        }
+    }
+
+    Box {
+        property landscapeMode: documentRoot.windowWidth > documentRoot.windowHeight
+
+        marginTop: pageHeader.height + theme.paddingLarge
+        fillWidth: true
+        layout: landscapeMode ? "row" : "column"
+
+        Label {
+            fillWidth: ! parent.landscapeMode
+            width: parent.landscapeMode ? theme.itemWidthLarge * 1.5 : -1
+            marginTop: theme.paddingLarge
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+            overflowBehavior: "wrap"
+            text: "**Shellfish** lets you build **modern application user interfaces**, " +
+                    "that are **truly cross-platform**, because they " +
+                    "**run in the browser** or a HTML5 runtime such as Electron.\n\n" +
+                    "**Shui** is a **declarative modeling language** " +
+                    "that transpiles to efficient JavaScript code, either on-the-fly " +
+                    "as the code gets loaded, or by precompiling.\n\n" +
+                    "See what Shellfish has to offer and take a look at the " +
+                    "Shui source code of each example."
+        }
+
+        Box {
+            id: box
+
+            fillWidth: true
+            marginLeft: theme.paddingLarge
+            marginRight: theme.paddingLarge
+
+            layout: "center-column"
+
+            Ruler {
+                id: btnRuler
+            }
+
+            Repeater {
+                model: ListModel {
+                    data: [
+                        {
+                            section: "Try It Out Live",
+                            description: "Fiddle around with Shui code and see the results live.",
+                            pages: [
+                                ["Fiddle Box", "FiddlePage", "media-equalizer"]
+                            ]
+                        },
+                        {
+                            section: "Platform Capabilities",
+                            description: "Easily check the capabilities of the environment your application " +
+                                        "is running in. Dynamically adapt to what's available and what's not.",
+                            pages: [
+                                ["Test Platform Capabilities", "CapabilitiesPage", "ui-check_box"]
+                            ]
+                        },
+                        {
+                            section: "UI",
+                            description: "Create rich and responsive user interfaces with Shellfish's UI elements.",
+                            pages: [
+                                ["Pages", "PagesPage", "map-map"],
+                                ["Labels", "LabelsPage", "text-color"],
+                                ["Layout", "LayoutPage", "ui-view_grid"],
+                                ["Text Input", "TextInputPage", "input-keyboard"],
+                                ["List View and Grid View", "BreedingPage", "ui-view_list"],
+                                ["Menus and Message Dialogs", "MenusPage", "ui-menu"],
+                                ["Profiles", "ProfilesPage", "ui-toggle_on"],
+                                ["Themes", "ThemesPage", "ui-star"],
+                                ["Icon Gallery", "IconsPage", "emote-grin"],
+                                ["Calendar", "CalendarPage", "core-calendar"],
+                                ["Date and Time", "DateTimePage", "core-time"],
+                                ["Windows", "WindowsPage", "ui-window"]
+                            ]
+                        },
+                        {
+                            section: "Files",
+                            description: "Work with files.",
+                            pages: [
+                                ["File Selector", "FileSelectorPage", "fs-folder_open"],
+                                ["Drag and Drop", "DragAndDropPage", "ui-content_copy"],
+                                ["Virtual Filesystem", "FilesystemPage", "fs-drive"]
+                            ]
+                        },
+                        {
+                            section: "Communication",
+                            description: "Bi-directionally communicate with servers in a " +
+                                        "light-weight and efficient non-HTTP manner with WebSockets.",
+                            pages: [
+                                ["WebSocket", "WebSocketPage", "comm-chat"]
+                            ]
+                        },
+                        {
+                            section: "Input",
+                            description: "Read input from various devices.",
+                            pages: [
+                                ["Mouse, Touch, and Pen", "CanvasPage", "input-pen"],
+                                ["Multi Touch", "TouchPage", "input-touch"],
+                                ["Gamepad Input", "GamepadPage", "input-gamecontroller"]
+                            ]
+                        },
+                        {
+                            section: "Effects",
+                            description: "Enhance the look of your application with visual effects.",
+                            pages: [
+                                ["Color Gradients", "GradientPage", "camera-brightness-contrast"],
+                                ["Animations and Easing Curves", "BoingPage", "media-film"]
+                            ]
+                        },
+                        {
+                            section: "Media",
+                            description: "Integrate multi-media elements into your application.",
+                            pages: [
+                                ["Images", "ImagesPage", "media-image"],
+                                ["Video Player", "VideoPage", "media-movie"],
+                                ["Camera", "CameraPage", "camera-camera"]
+                            ]
+                        },
+                        {
+                            section: "Map Rendering",
+                            description: "Scroll over large or endless maps on screen. Not only useful for arcade games.",
+                            pages: [
+                                ["Tile Map", "TileMapPage", "ui-view_grid"],
+                                ["Running Dynamic Tiles", "DynamicTileSetPage", "ui-view_grid"]
+                            ]
+                        },
+                        {
+                            section: "Lock-free Concurrent Programming",
+                            description: "Take full advantage of the multiple cores the CPU has to offer.",
+                            pages: [
+                                ["Asynchronous Tasks", "ThreadPoolPage", "ui-settings"],
+                                ["Atomics", "AtomicsPage", "ui-settings"],
+                                ["Active Object Pattern", "ActiveObjectPage", "ui-settings"]
+                            ]
+                        },
+                        /*
+                        {
+                            section: "The *Shellfish 2D* Extension",
+                            description: "Display and animate 2D diagrams and scenes.",
+                            pages: [
+                                ["Simple 2D Scene", "2d/SimplePage", "ui-star"],
+                                ["Text", "2d/TextPage", "text-color"],
+                                ["Pie Chart", "2d/PieChartPage", "pie-chart"],
+                                ["Collision Detection", "2d/CollisionsPage", ""]
+                            ]
+                        },
+                        */
+                        {
+                            section: "The *Shellfish 3D* Extension",
+                            description: "Immerse your users in 3D worlds.",
+                            pages: [
+                                ["Simple 3D Scene", "3d/SimplePage", "ui-star"],
+                                ["Textured Scene", "3d/TexturePage", "ui-star"],
+                                ["Scene with Light", "3d/LightPage", "ui-star"],
+                                ["3D Model", "3d/ModelPage", "ui-star"],
+                                //["Bump Map", "3d/BumpMapPage", "ui-star"],
+                                ["Height Field", "3d/HeightFieldPage", "ui-star"],
+                                ["Clones", "3d/ClonesPage", "ui-star"],
+                                ["Collision Detection", "3d/CollisionsPage", "ui-star"]
+                            ]
+                        }
+                    ]
+                }
+
+                delegate: template Box {
+                    fillWidth: true
+                    layout: "column"
+
+                    Box {
+                        marginTop: theme.paddingLarge
+                        fillWidth: true
+                        color: theme.highlightBackgroundColor
+                        borderRadius: theme.borderRadius
+
+                        Label {
+                            marginTop: theme.paddingSmall / 2
+                            marginLeft: theme.paddingSmall / 2
+                            marginRight: theme.paddingSmall / 2
+                            marginBottom: theme.paddingSmall / 2
+                            fillWidth: true
+                            overflowBehavior: "wrap"
+                            bold: true
+                            color: theme.highlightColor
+                            text: parent.parent.modelData.value.section
+                        }
+                    }
+
+                    Label {
+                        visible: text !== ""
+                        marginTop: theme.paddingSmall
+                        marginBottom: theme.paddingLarge
+                        fillWidth: true
+                        overflowBehavior: "wrap"
+                        text: parent.modelData.value.description || ""
+                    }
+
+                    PageButtons {
+                        pageStack: page.pageStack
+                        buttonRuler: btnRuler
+                        pages: parent.modelData.value.pages
+                    }
+                }
+                
+            }//Repeater
+
+        }//Box
+
+    }//Box
+
+}

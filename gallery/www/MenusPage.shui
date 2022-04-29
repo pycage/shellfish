@@ -1,0 +1,252 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/low" as low;
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Quick-and-Dirty Text Editor"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    scrollable: false
+
+    contentTemplate: template Box {
+        id: editor
+
+        function actionNew()
+        {
+            editorArea.text = "";
+        }
+
+        function actionOpen()
+        {
+            fsel.open((files) =>
+            {
+                const reader = new FileReader();
+                reader.addEventListener("loadend", () =>
+                {
+                    editorArea.text = reader.result;
+                }, false);
+                reader.readAsText(files[0]);
+            });
+        }
+
+        function actionSave()
+        {
+            const blob = new Blob([editorArea.text], { type: "text/plain" });
+            low.saveBlob(blob, "Document.txt");
+        }
+
+        function actionQuit()
+        {
+            showQuestionDialog("Quit", "Really quit the editor?", () =>
+            {
+                page.pageStack.popPage();
+            },
+            () => { });
+        }
+
+        function actionCut()
+        {
+            const t = editorArea.text;
+            const text = t.substring(editorArea.selectionStart, editorArea.selectionEnd);
+            editorArea.text = t.substr(0, editorArea.selectionStart) +
+                              t.substr(editorArea.selectionEnd);
+            navigator.clipboard.writeText(text)
+            .then(() =>
+            {
+                console.log("OK");
+            });
+        }
+
+        function actionCopy()
+        {
+            const text = editorArea.text.substring(editorArea.selectionStart, editorArea.selectionEnd);
+            navigator.clipboard.writeText(text)
+            .then(() =>
+            {
+                console.log("OK");
+            });
+        }
+
+        function actionPaste()
+        {
+            if (navigator.clipboard.readText)
+            {
+                navigator.clipboard.readText()
+                .then((s) =>
+                {
+                    const t = editorArea.text;
+                    editorArea.text = t.substr(0, editorArea.selectionStart) +
+                                    s +
+                                    t.substr(editorArea.selectionEnd);
+                });
+            }
+            else
+            {
+                showErrorDialog("Not Available",
+                                "Reading from the clipboard is not allowed\n" +
+                                "by this browser.");
+            }
+        }
+
+        function actionAbout()
+        {
+            showMessageDialog("About",
+                              "input-pen",
+                              "A quick-and-dirty text editor.\n" +
+                              "Example of a menu-driven Shellfish application.",
+                              [{ label: "Ok" }]);
+        }
+
+        fillWidth: true
+        fillHeight: true
+
+        FileSelector { id: fsel }
+
+        Box {
+            marginTop: pageHeader.height
+            fillWidth: true
+            height: theme.itemHeightMedium
+            color: theme.secondaryBackgroundColor
+            layout: "center-row"
+
+            MenuItem {
+                text: "&File"
+
+                menu: template Menu {
+                    MenuItem { icon: "fs-file_new"; text: "New";  shortcut: "Ctrl+N"; onClick: () => { console.log("NEW"); editor.actionNew(); } }
+                    MenuItem { icon: "fs-folder_open"; text: "Open..."; shortcut: "Ctrl+O"; onClick: () => { editor.actionOpen(); } }
+                    MenuItem {
+                        icon: "fs-save"
+                        text: "Save"
+                        shortcut: "Ctrl+S"
+                        onClick: () => { editor.actionSave(); }
+                    }
+                    MenuSeparator { }
+                    MenuItem { icon: "ui-exit"; text: "Quit"; onClick: () => { editor.actionQuit(); } }
+                }
+            }
+
+            MenuItem {
+                text: "&Edit"
+
+                menu: template Menu {
+                    MenuItem { enabled: editorArea.textSelected; icon: "ui-content_cut"; text: "Cut"; shortcut: "Ctrl+X"; onClick: () => { editor.actionCut(); } }
+                    MenuItem { enabled: editorArea.textSelected; icon: "ui-content_copy"; text: "Copy"; shortcut: "Crtl+C"; onClick: () => { editor.actionCopy(); } }
+                    MenuItem { icon: "ui-content_paste"; text: "Paste"; shortcut: "Ctrl+V"; onClick: () => { editor.actionPaste(); } }
+                }
+            }
+
+            MenuItem {
+                text: "E&xtra"
+
+                menu: template Menu {
+                    MenuItem {
+                        text: "Submenu"
+
+                        menu: template Menu {
+                            MenuItem { text: "Item 1" }
+                            MenuItem { 
+                                text: "Item 2"
+
+                                menu: template Menu {
+                                    MenuItem { text: "Item 1" }
+                                    MenuItem { text: "Item 2" }
+                                    MenuItem { text: "Item 3" }
+                                }
+                            }
+                            MenuItem { text: "Item 3" }
+                        }
+                    }
+                    MenuItem { text: "Item 1" }
+                    MenuItem { text: "Item 2" }
+                }
+            }
+
+            MenuItem {
+                text: "&Help"
+
+                menu: template Menu {
+                    MenuItem { text: "About..."; onClick: () => { editor.actionAbout(); } }
+                }
+            }
+
+            Box { fillWidth: true }
+        }
+
+        TextArea {
+            id: editorArea
+
+            property textSelected: selectionStart !== selectionEnd
+
+            fillWidth: true
+            fillHeight: true
+
+            text: "Enter some text..."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightSmall
+            layout: "center-row"
+
+            Label {
+                marginLeft: theme.paddingSmall
+                bold: true
+                text: "Row:"
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: editorArea.row + 1
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                bold: true
+                text: "Column:"
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: editorArea.column + 1
+            }
+
+            Box {
+                fillWidth: true
+            }
+        }
+    }
+
+    Placeholder {
+        visible: page.loading
+        text: "[icon:ui-spinner5]"
+    }
+}

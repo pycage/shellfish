@@ -1,0 +1,400 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Layout"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui"]
+    }
+
+    property contentT: template Box {
+        fillWidth: true
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingLarge
+        marginRight: theme.paddingLarge
+        marginBottom: theme.paddingLarge
+        
+        Label {
+            overflowBehavior: "wrap"
+            text: "Shellfish keeps the complexity of CSS layouting away from " +
+                  "you. CSS was not intended for layouting user interfaces " +
+                  "initially and CSS user interface layouts are way too " +
+                  "complex to be considered maintainable." +
+                  "\n\n" +
+                  "Instead, layout is controlled by simple, yet powerful " +
+                  "layouting properties."
+        }
+
+        Ruler { id: labelsRuler }
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**position**"
+
+            SelectionBox {
+                id: positionSelector
+
+                model: ListModel { data: ["inline", "free", "global"] }
+            }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "Position controls how an element is positioned within " +
+                  "its parent container."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+            color: theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+
+            layout: "row"
+
+            Box {
+                width: theme.itemWidthLarge
+                height: parent.height
+                color: theme.secondaryColor
+                layout: "center"
+
+                Label {
+                    color: theme.secondaryBackgroundColor
+                    text: "inline"
+                }
+            }
+
+            Box {
+                position: positionSelector.text
+                x: 10
+                y: 10                
+                width: theme.itemWidthLarge
+                height: parent.height
+                color: theme.highlightBackgroundColor
+                layout: "center"
+
+                Label {
+                    color: theme.highlightColor
+                    text: positionSelector.text
+                }
+            }
+        }
+
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**layout**"
+
+            SelectionBox {
+                id: layoutSelector
+
+                model: ListModel { data: ["row", "column", "center-row", "center-column"] }
+            }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**overflowBehavior**"
+
+            SelectionBox {
+                id: overflowBehaviorSelector
+
+                model: ListModel { data: ["none", "wrap", "scroll"] }
+            }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "Layout controls how child elements with 'inline' position " +
+                  "are aligned inside a container."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge * 4
+            color: theme.highlightBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+            layout: layoutSelector.text
+            overflowBehavior: overflowBehaviorSelector.text
+            scrollbars: true
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.primaryBackgroundColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.secondaryBackgroundColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.secondaryColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.primaryBackgroundColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.secondaryBackgroundColor
+            }
+        }
+
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**origin**"
+
+            SelectionBox {
+                id: originSelector
+
+                model: ListModel { data: ["top-left", "top-right", "bottom-right", "bottom-left"] }
+            }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "In 'free' and 'global' position modes, origin controls in " +
+                  "which corner of the parent container the coordinate " +
+                  "system has its origin."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge * 2
+            color: theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+
+            Box {
+                position: "free"
+                origin: originSelector.text
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.highlightBackgroundColor
+                layout: "center"
+
+                Label {
+                    color: theme.highlightColor
+                    text: originSelector.text
+                }
+            }
+        }
+
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**fillWidth**"
+
+            Switch { id: fillWidthSwitch }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**fillHeight**"
+
+            Switch { id: fillHeightSwitch }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "Elements may fill the remaining space in their parent " +
+                  "container automatically."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge * 2
+            color: theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+            layout: "row"
+
+            Box {
+                fillWidth: fillWidthSwitch.checked
+                fillHeight: fillHeightSwitch.checked
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.highlightBackgroundColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.primaryBackgroundColor
+            }
+        }
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**x**"
+
+            Slider { id: xSlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(xSlider.value) + " px" }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**y**"
+
+            Slider { id: ySlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(ySlider.value) + " px" }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "The x and y values position an element freely in the " +
+                  "'free' and global' position modes."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge * 2
+            color: theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+
+            Box {
+                position: "free"
+                x: xSlider.value
+                y: ySlider.value
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.highlightBackgroundColor
+            }
+        }
+
+
+        Labeled {
+            marginTop: theme.paddingLarge
+            rulerObj: labelsRuler
+            text: "**marginTop**"
+
+            Slider { id: marginTopSlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginTopSlider.value) + " px" }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**marginLeft**"
+
+            Slider { id: marginLeftSlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginLeftSlider.value) + " px" }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**marginRight**"
+
+            Slider { id: marginRightSlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginRightSlider.value) + " px" }
+        }
+
+        Labeled {
+            rulerObj: labelsRuler
+            text: "**marginBottom**"
+
+            Slider { id: marginBottomSlider }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginBottomSlider.value) + " px" }
+        }
+
+        Label {
+            overflowBehavior: "wrap"
+            fontSize: theme.fontSizeSmall
+            text: "The margins control how much space there is around an element."
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge * 2
+            color: theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+
+            layout: "row"
+
+            Box {
+                marginTop: marginTopSlider.value
+                marginLeft: marginLeftSlider.value
+                marginRight: marginRightSlider.value
+                marginBottom: marginBottomSlider.value
+                fillWidth: true
+                fillHeight: true
+                color: theme.highlightBackgroundColor
+            }
+
+            Box {
+                width: theme.itemWidthLarge
+                height: theme.itemHeightLarge
+                color: theme.primaryBackgroundColor
+            }
+        }
+
+    }//Box
+
+    onFrozenChanged: {
+        if (! frozen && ! loader.item)
+        {
+            loader.sourceTemplate = contentT;
+        }
+    }
+
+    Loader {
+        id: loader
+        fillWidth: true
+        height: item ? -1 : documentRoot.windowHeight
+        
+        Placeholder {
+            visible: ! parent.item
+            text: "[icon:spinner5]"
+        }
+    }
+}

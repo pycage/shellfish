@@ -1,0 +1,124 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Images"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    Box {
+        fillWidth: true
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+
+        Label {
+            visible: image.status !== "success"
+            text: "Click the button to load an image."
+        }
+
+        Button {
+            visible: image.status !== "success"
+            marginTop: theme.paddingSmall
+            icon: "media-image"
+            text: "Load Image"
+
+            onClick: {
+                image.source = __dirname + "/sample.jpg";
+            }
+        }
+
+        Label {
+            visible: image.status === "success"
+            text: "Try out the various fit modes."
+        }
+
+        SelectionBox {
+            id: fitModeSelector
+
+            visible: image.status === "success"
+            marginTop: theme.paddingSmall
+            property current: model.data[selection] || "fill" 
+            model: ListModel { data: ["fill", "contain", "cover", "scale-down", "none"] }
+        }
+
+        Box {
+            id: imageBox
+
+            marginTop: theme.paddingMedium
+            fillWidth: true
+            height: Math.min(bbox.width, documentRoot.windowHeight - 4 * theme.itemHeightLarge)
+            color: "black"
+            layout: "center"
+
+            Box {
+                id: scrollBox
+                
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+                overflowBehavior: "scroll"
+
+                Image {
+                    id: image
+
+                    position: "free"
+                    fillWidth: fitMode !== "none"
+                    fillHeight: fitMode !== "none"
+                    fitMode: fitModeSelector.current
+
+                    onFitModeChanged: {
+                        scrollBox.contentWidthChanged();
+                        scrollBox.contentHeightChanged();
+                    }
+                }
+            }
+
+            Label {
+                visible: image.status !== "success"
+                color: "white"
+                fontSize: theme.fontSizeLarge
+                text: image.status === "empty" ? "No Image Loaded"
+                                               : image.status === "loading" ? "Loading Image..."
+                                                                            : "Error"
+            }
+
+            ScrollIndicator { id: hb; other: vb; target: scrollBox; orientation: "horizontal" }
+            ScrollIndicator { id: vb; other: hb; target: scrollBox; orientation: "vertical" }
+        }
+
+        Label {
+            visible: image.status === "success"
+            marginTop: theme.paddingSmall
+            fontSize: theme.fontSizeSmall
+            text: "Width: " + image.originalWidth + " px, Height: " + image.originalHeight + " px"
+        }
+    }
+}

@@ -1,0 +1,512 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: pageHeader
+
+        title: "Virtual Filesystem"
+        subtitle: "/"
+        codeUrls: [__filename, "Header.shui", "Labeled.shui"]
+    }
+
+    // profile objects encapsulate a set of common properties that other
+    // elements can include
+    Object {
+        id: toolButtonProfile
+
+        property flat: true
+        property fillHeight: true
+    }
+
+    property contentT: template Box {
+        id: contentBox
+
+        fillWidth: true
+        height: documentRoot.windowHeight
+
+        OfflineFS {
+            id: drive
+            volume: "Shellfish UI-Gallery"
+        }
+
+        Box {
+            marginTop: pageHeader.height
+            fillWidth: true
+            color: theme.secondaryBackgroundColor
+            height: infoLabel.bbox.height + 2 * theme.paddingSmall
+
+            Label {
+                id: infoLabel
+
+                width: parent.bbox.width - 2 * theme.paddingSmall
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall
+                overflowBehavior: "wrap"
+                color: theme.secondaryColor
+                text: "Shellfish provides a virtual filesystem, powered by HTML5 " +
+                      "Indexed DB technology, for storing local data on the " +
+                      "client side."
+            }
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightLarge
+            color: theme.secondaryBackgroundColor
+
+            layout: "row"
+
+            Button {
+                profiles: [toolButtonProfile]
+                width: bbox.height
+                icon: "ui-arrow_upward"
+
+                onClick: () =>
+                {
+                    const pos = filesView.model.path.lastIndexOf("/");
+                    let newPath = filesView.model.path.substring(0, pos);
+
+                    filesView.model.path = newPath !== "" ? newPath
+                                                          : "/";
+                }
+            }
+
+            Button {
+                profiles: [toolButtonProfile]
+                icon: "fs-folder_new"
+                //text: "New Directory"
+
+                onClick: () =>
+                {
+                    console.log("Clicked New Directory");
+                    drive.mkdir(filesView.model.path, "New Directory")
+                    .then(() => { })
+                    .catch((err) => { });
+                }
+            }
+
+            Button {
+                profiles: [toolButtonProfile]
+                icon: "fs-file_new"
+                //text: "New File"
+
+                onClick: () =>
+                {
+                    drive.write(filesView.model.path + "/New File.txt", new Blob([""]))
+                    .then(() =>
+                    {
+                        console.log("saved file");
+                    })
+                    .catch((err) =>
+                    {
+                        console.log("saving failed: " + err);
+                    });
+                }
+            }
+
+            Button {
+                profiles: [toolButtonProfile]
+                icon: "fs-upload"
+                text: "Upload"
+
+                onClick: {
+                    fsel.open((files) =>
+                    {
+                        for (let i = 0; i < files.length; ++i)
+                        {
+                            const fileItem = files[i];
+                            drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
+                            .then(() =>
+                            {
+
+                            });
+                        }
+                    });
+                }
+
+                FileSelector { id: fsel }
+            }
+
+            Box {
+                fillWidth: true
+            }
+
+            Button {
+                profiles: [toolButtonProfile]
+                width: bbox.height
+                checked: filesView.displayMode === "list"
+                icon: "ui-view_list"
+
+                onClick: () =>
+                {
+                    filesView.displayMode = "list";
+                }
+            }
+
+            Button {
+                profiles: [toolButtonProfile]
+                width: bbox.height
+                checked: filesView.displayMode === "grid"
+                icon: "ui-view_grid"
+
+                onClick: () =>
+                {
+                    filesView.displayMode = "grid";
+                }
+            }
+
+            OverflowScroller { }
+        }
+
+        SplitBox
+        {
+            id: splitter
+            fillWidth: true
+            fillHeight: true
+            height: 600
+
+            into first MouseBox {
+                fillWidth: true
+                fillHeight: true
+                color: theme.contentBackgroundColor
+                overflowBehavior: "scroll"
+                scrollbars: true
+
+                FSTreeNode {
+                    filesystem: drive
+                    path: "/"
+                    name: "[" + drive.volume + "]"
+                    target: filesView.model
+                    collapsed: false
+                }
+            }
+
+            into second DropArea {
+                fillWidth: true
+                fillHeight: true
+                color: theme.contentBackgroundColor
+
+                onDropAccept: (ev) =>
+                {
+                    if (ev.types.includes("Files"))
+                    {
+                        ev.accepted = true;
+                        ev.dropEffect = "copy";
+                    }
+                }
+
+                onDrop: (ev) =>
+                {
+                    for (let i = 0; i < ev.items.length; ++i)
+                    {
+                        const item = ev.items[i];
+                        if (item.kind !== "file")
+                        {
+                            continue;
+                        }
+                        const fileItem = item.getAsFile();
+                        drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
+                        .then(() =>
+                        {
+
+                        });
+                    }
+                }
+
+                ListView {
+                    id: filesView
+
+                    property displayMode: "list"
+                    property iconScale: scaleSelector.scale
+                    property filesystem: drive
+
+                    fillWidth: true
+                    fillHeight: true
+
+                    cellWidth: displayMode === "list" ? bbox.width - 1
+                                                      : theme.itemWidthLarge * iconScale
+
+                    cellHeight: displayMode === "list" ? theme.itemHeightMedium * iconScale
+                                                       : cellWidth
+
+                    model: FSModel {
+                        filesystem: drive
+                        path: "/"
+
+                        onPathChanged: () =>
+                        {
+                            selector.clear();
+                            pageHeader.subtitle = path;
+                        }
+                    }
+
+                    opacity: model.loading ? 0 : 1
+
+                    delegate: template FSItem {
+                        displayMode: filesView.displayMode
+                        highlighted: selector.selection.has(modelData.index)
+                        file: modelData.value
+                        filesystem: drive
+                        thumbnail: file.mimetype.startsWith("image/") ? file.path
+                                                                      : ""
+
+                        onClick: ev =>
+                        {
+                            ev.accepted = true;
+                            selector.select(modelData.index, "replace");
+                        }
+
+                        onDoubleClick: ev =>
+                        {
+                            ev.accepted = true;
+
+                            if (file.type === "d")
+                            {
+                                filesView.model.path = file.path;
+                            }
+                            else if (file.mimetype.startsWith("image/"))
+                            {
+                                const dlg = imageDialog();
+                                dlg.show();
+                                dlg.title = file.name;
+                                drive.read(file.path)
+                                .then((blob) =>
+                                {
+                                    dlg.file = blob;
+                                });
+                            }
+                        }
+                    }
+
+                    /*
+                    onFileOpen: (item) =>
+                    {
+                        if (item.type === "d")
+                        {
+                            model.path = item.path;
+                        }
+                        else if (item.mimetype.startsWith("image/"))
+                        {
+                            const dlg = imageDialog();
+                            dlg.show();
+                            dlg.title = item.name;
+                            drive.read(item.path)
+                            .then((blob) =>
+                            {
+                                dlg.file = blob;
+                            });
+                        }
+                    }
+                    */
+
+                    onKeyDown: ev =>
+                    {
+                        if (ev.key === "Delete")
+                        {
+                            const items = [...selector.selection.keys()];
+                            showQuestionDialog("Delete File",
+                                               "Do you want to delete " + items.length + " files?",
+                                               () =>
+                            {
+                                items.forEach((idx) =>
+                                {
+                                    filesystem.remove(model.at(idx).path);
+                                });
+                            });
+                            ev.accepted = true;
+                        }
+                        else if (ev.key === "Enter")
+                        {
+                            const items = [...selector.selection.keys()];
+                            if (items.length === 1)
+                            {
+                                const item = model.at(items[0]);
+                                console.log(JSON.stringify(item));
+                                const dlg = renameDialogT();
+                                dlg.name = item.name;
+                                dlg.callback = (newName) =>
+                                {
+                                    console.log("New Name: " + newName);
+                                    filesystem.move(item.path, filesystem.pathJoin(filesystem.dirname(item.path), filesystem.encodeName(newName)));
+                                };
+                                dlg.show();
+                            }
+                            ev.accepted = true;
+                        }
+                    }
+
+                    ListViewSelector {
+                        id: selector
+                    }
+
+                    ScrollIndicator { }
+                }
+
+                Box {
+                    fillWidth: true
+                    height: theme.itemHeightMedium
+                    color: theme.secondaryBackgroundColor
+                    layout: "center-row"
+
+                    Label {
+                        marginLeft: theme.paddingSmall
+                        text: filesView.count + " items"
+                    }
+
+                    Box {
+                        fillWidth: true
+                    }
+
+                    Label {
+                        text: "Scale"
+                    }
+
+                    SelectionBox {
+                        id: scaleSelector
+                        property names: ["Small", "Medium", "Large"]
+                        property scales: [0.75, 1, 2]
+                        property scale: scales[selection]
+
+                        marginLeft: theme.paddingSmall
+                        marginRight: theme.paddingSmall
+
+                        selection: 1
+
+                        model: ListModel {
+                            data: scaleSelector.names
+                        }
+                    }
+                }
+            }
+
+        }//SplitBox
+
+    }//template Box
+
+    onFrozenChanged: {
+        if (! frozen && ! loader.item)
+        {
+            loader.sourceTemplate = contentT;
+        }
+    }
+
+    Loader {
+        id: loader
+        fillWidth: true
+        height: item ? -1 : documentRoot.windowHeight
+        
+        Placeholder {
+            visible: ! parent.item
+            text: "[icon:spinner5]"
+        }
+    }
+
+    property imageDialog: template Dialog {
+        id: dialog
+
+        property file: null
+
+        into buttons Button {
+            text: "Close"
+            onClick: () => { dialog.parent = null; }
+        }
+
+        Image {
+            id: img
+
+            property maxWidth_: documentRoot.windowWidth - 4 * theme.paddingLarge
+            property maxHeight_: documentRoot.windowHeight - 16 * theme.paddingLarge
+            property ratio: originalWidth > 0 ? originalHeight / originalWidth
+                                              : 1                       
+            property goForHeight: maxWidth_ * maxWidth_ * ratio > (maxHeight_ / ratio) * maxHeight_
+
+            width: status !== "success" ? 100
+                                        : goForHeight ? maxHeight_ / ratio : maxWidth_
+            height: status !== "success" ? 100
+                                         : goForHeight ? maxHeight_ : maxWidth_ * ratio
+
+            fitMode: "contain"
+            source: !! dialog.file ? blobUrl(dialog.file) : ""
+        }
+
+    }
+
+    property renameDialogT: template Dialog {
+        id: dialog
+
+        property name: ""
+        property callback: (newName) => { }
+
+        title: "Rename"
+
+        into buttons Button {
+            text: "Rename"
+            onClick: () => { callback(textEntry.text); dialog.parent = null; }
+        }
+
+        into buttons Button {
+            marginLeft: theme.paddingSmall
+            text: "Cancel"
+            onClick: () => { dialog.parent = null; }
+        }
+
+        Box {
+            layout: "center-row"
+
+            Label { text: "Name:" }
+
+            TextEntry {
+                id: textEntry
+
+                marginLeft: theme.paddingSmall
+                width: theme.itemWidthLarge
+                text: dialog.name
+
+                onAncestorsVisibleChanged: () =>
+                {
+                    if (ancestorsVisible)
+                    {
+                        active = true;
+                        const pos = text.lastIndexOf(".");
+                        if (pos !== -1)
+                        {
+                            selectRange(0, pos);
+                        }
+                        else
+                        {
+                            selectRange(0, text.length);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

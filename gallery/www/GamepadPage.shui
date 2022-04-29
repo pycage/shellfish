@@ -1,0 +1,157 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./Labeled.shui";
+require "./GamepadGeneric.shui";
+require "./GamepadPSClassic.shui";
+require "./GamepadXBox360.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+
+        title: "Gamepad Input"
+        subtitle: gamepadModel.size + " gamepads found"
+        codeUrls: [
+            __filename, "Header.shui", "Labeled.shui", "GamepadGeneric.shui",
+            "GamepadPSClassic.shui", "GamepadXBox360.shui", "GamepadButton.shui",
+            "GamepadDPad.shui", "GamepadStick.shui", "GamepadTrigger.shui"
+        ]
+    }
+
+    GamepadModel {
+        id: gamepadModel
+    }
+
+    Box {
+        height: header.height
+    }
+
+    Box {
+        fillWidth: true
+
+        Repeater {
+            model: gamepadModel
+
+            delegate: template Box {
+                id: gamepadItem
+
+                fillWidth: true
+
+                Gamepad {
+                    id: gamepad
+                    index: parent.modelData.value.index
+                }
+
+                Box {
+                    fillWidth: true
+                    height: theme.itemHeightSmall
+                    color: theme.secondaryBackgroundColor
+                    layout: "center-row"
+
+                    Label {
+                        marginLeft: theme.paddingSmall
+                        bold: true
+                        overflowBehavior: "ellipsis"
+                        text: "[icon:sports_esports] Device " + gamepad.index + ":"
+                    }
+
+                    Label {
+                        fillWidth: true
+                        marginLeft: theme.paddingSmall
+                        marginRight: theme.paddingSmall
+                        overflowBehavior: "ellipsis"
+                        literal: true
+                        text: gamepadItem.modelData.value.name
+                    }
+                }
+
+
+                Box {
+                    marginTop: theme.paddingMedium
+                    marginLeft: theme.paddingLarge
+                    fillWidth: true
+                    layout: "center-row"
+
+                    Label {
+                        text: "Model:"
+                    }
+
+                    SelectionBox {
+                        id: modeSelector
+
+                        marginLeft: theme.paddingMedium
+                        width: theme.itemWidthLarge * 2
+                        model: ListModel {
+                            data: [
+                                "Generic Gamepad",
+                                "XBox 360 Controller",
+                                "PlayStation Classic Controller"
+                            ]
+                        }
+                    }
+
+                    Box { fillWidth: true }
+                }
+
+                Loader {
+                    property gamepad: Gamepad { index: parent.parent.modelData.index }
+
+                    marginTop: theme.paddingMedium
+                    marginLeft: theme.paddingLarge
+                    marginBottom: theme.paddingMedium
+                    fillWidth: true
+                    sourceTemplate: [page.genericT, page.xbox360T, page.psClassicT][modeSelector.selection]
+
+                    onLoadingChanged: () =>
+                    {
+                        if (item)
+                        {
+                            item.index = parent.modelData.index;
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
+
+
+    Placeholder {
+        position: "global"
+        visible: ! page.frozen && gamepadModel.size === 0
+        fillWidth: true
+        height: documentRoot.windowHeight
+        text: "No gamepads found.\n" +
+              "Connect a gamepad or press a button."
+    }
+
+    ScrollIndicator { target: documentRoot; position: "global"; marginTop: header.height }
+
+    property genericT: template GamepadGeneric { }
+    property psClassicT: template GamepadPSClassic { }
+    property xbox360T: template GamepadXBox360 { }
+}

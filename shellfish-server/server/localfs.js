@@ -101,8 +101,15 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                 const files = await fsList(sourcePath);
                 for (let i = 0; i < files.length; ++i)
                 {
-                    await fsCopy(modPath.join(sourcePath, files[i]),
-                                 modPath.join(destPath, files[i]));
+                    try
+                    {
+                        await fsCopy(modPath.join(sourcePath, files[i]),
+                                     modPath.join(destPath, files[i]));
+                    }
+                    catch (err)
+                    {
+
+                    }
                 }
 
                 resolve();
@@ -319,6 +326,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             const f = async () =>
             {
                 const result = [];
+
                 const files = await fsList(path);
                 for (let i = 0; i < files.length; ++i)
                 {
@@ -332,6 +340,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
 
                     }
                 }
+
                 return result;
             };
 

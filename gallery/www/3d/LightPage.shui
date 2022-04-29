@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -47,29 +47,39 @@ Page {
 
         scene: shf3d.Group {
 
-            shf3d.Light {
-                location: vec3(10, 5, 1)
-            }
-
             shf3d.Camera {
                 aspect: view.bbox.width / view.bbox.height
                 location: vec3(0, 0, 5)
             }
+            
+            shf3d.Light {
+                location: vec3(0, 10, 0)
+            }
 
-            shf3d.Cube {
-                rotationAxis: vec3(1, 1, 1)
+            shf3d.Group {
                 rotationAngle: 0
+                rotationAxis: vec3(0, 1, 0.5)
                 rotationAngleTransition: NumberAnimation { duration: 10000 * 100; easing: "Linear" }
-                material: shf3d.Material { source: __dirname + "/brick-wall.jpg" }
 
                 onInitialization: () => { rotationAngle = 360 * 100; }
+
+                shf3d.Cube {
+                    rotationAxis: vec3(1, 1, 1)
+                    rotationAngle: 0
+                    rotationAngleTransition: NumberAnimation { duration: 10000 * 100; easing: "Linear" }
+                    material: shf3d.Material { source: __dirname + "/brick-wall.jpg" }
+
+                    onInitialization: () => { rotationAngle = 360 * 100; }
+                }
+
+                shf3d.Cube {
+                    location: vec3(0, -1, 0)
+                    scale: vec3(10, 0.1, 10)
+                    material: shf3d.Material { source: __dirname + "/grunge-wall.jpg" }
+                }
+
             }
 
-            shf3d.Cube {
-                location: vec3(0, -1, 0)
-                scale: vec3(10, 0.1, 10)
-                material: shf3d.Material { source: __dirname + "/grunge-wall.jpg" }
-            }
         }
     }
 

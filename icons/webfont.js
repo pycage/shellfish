@@ -4,17 +4,15 @@ const fs = require("fs");
 const items = [
     { name: "core", target: "shellfish-ui/style" },
 
-    { name: "camera", target: "build/icons" },
-    { name: "comm", target: "build/icons" },
-    { name: "emote", target: "build/icons" },
-    { name: "fs", target: "build/icons" },
-    { name: "input", target: "build/icons" },
-    { name: "map", target: "build/icons" },
-    { name: "media", target: "build/icons" },
-    { name: "text", target: "build/icons" },
-    { name: "ui", target: "build/icons" },
-
-    { name: "app", target: "build/icons" }
+    { name: "camera", target: "dist/icons" },
+    { name: "comm", target: "dist/icons" },
+    { name: "emote", target: "dist/icons" },
+    { name: "fs", target: "dist/icons" },
+    { name: "input", target: "dist/icons" },
+    { name: "map", target: "dist/icons" },
+    { name: "media", target: "dist/icons" },
+    { name: "text", target: "dist/icons" },
+    { name: "ui", target: "dist/icons" }
 ];
 
 async function makeIconSet(name, target)

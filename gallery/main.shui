@@ -36,7 +36,7 @@ HTTPServer {
 
         delegate: template WebSession {
             filesystem: LocalFS { }
-            root: __dirname + "/../build/doc"
+            root: __dirname + "/../dist/doc"
 
             urlMapper: url => url.replace("/shellfish/doc", "")
         }
@@ -63,7 +63,7 @@ HTTPServer {
 
         delegate: template WebSession {
             filesystem: LocalFS { }
-            root: __dirname + "/../build"
+            root: __dirname + "/../dist"
 
             urlMapper: url => url.replace("/shellfish", "")
         }

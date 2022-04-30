@@ -4,7 +4,8 @@
 	},
 	"plugins": [
 		"plugins/markdown",
-		"doc/jsdoc-plugins/fengshui"
+		"doc/jsdoc-plugins/fengshui",
+		"doc/jsdoc-plugins/hide_inherited"
 	],
 	"opts": {
 		"template": "./node_modules/@pixi/jsdoc-template",

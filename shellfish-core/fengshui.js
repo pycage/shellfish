@@ -28,7 +28,7 @@ exports.__id = "shellfish/fengshui";
  * for any other use.
  */
 exports.tools = {
-    elementLookup: function (fqElementName, rslv, filename, modules, elementLookupCache, high)
+    elementLookup: function (fqElementName, rslv, filename, modules, elementLookupCache, declarative)
     {
         let explicitModule = "";
         let elementName = fqElementName;
@@ -48,7 +48,7 @@ exports.tools = {
             }
             else
             {
-                const el = high.element(cacheItem, null)
+                const el = declarative.element(cacheItem, null)
                             .property("defaultContainer", "", true)
                             .property("modelData", { }, true);
                 const proto = Object.getPrototypeOf(el);
@@ -77,7 +77,7 @@ exports.tools = {
                 }
                 else
                 {
-                    const el = high.element(modules[key][elementName], null)
+                    const el = declarative.element(modules[key][elementName], null)
                                .property("defaultContainer", "", true)
                                .property("modelData", { }, true);
                     const proto = Object.getPrototypeOf(el);
@@ -203,7 +203,7 @@ exports.tools = {
      * A **Template** is a Shui concept for declaring components that will be created
      * dynamically, such as items in a list view.
      * 
-     * Technically, a container is a function returning a tree of {@link high.Element elements}.
+     * Technically, a container is a function returning a tree of {@link declarative.Element elements}.
      * Use the `template` keyword to declare a template.
      * 
      * @example <caption>Declaring a template</caption>
@@ -712,7 +712,7 @@ exports.tools = {
         }
 
         requirements.push({ module: "shellfish/core", alias: "core" });
-        requirements.push({ module: "shellfish/high", alias: "high" });
+        requirements.push({ module: "shellfish/declarative", alias: "declarative" });
         // legacy hack
         if (requirements.find(r => r.module === "shellfish/ui"))
         {
@@ -740,7 +740,7 @@ exports.tools = {
                     const elementLookupCache = new Map();
                     function elementLookup(fqElementName, rslv)
                     {
-                        return fengshui_Internal.tools.elementLookup(fqElementName, rslv, __filename, modules, elementLookupCache, high);
+                        return fengshui_Internal.tools.elementLookup(fqElementName, rslv, __filename, modules, elementLookupCache, declarative);
                     }
 
                     class __FakeDV__
@@ -756,7 +756,7 @@ exports.tools = {
 
                     function __xsdv__(a, setter, functor)
                     {
-                        return high.isDynamicValue(a) ? a : typeof a === "function" && functor ? { val: functor } : new __FakeDV__(a, setter);
+                        return declarative.isDynamicValue(a) ? a : typeof a === "function" && functor ? { val: functor } : new __FakeDV__(a, setter);
                     }
 
                     exports.${name} = {
@@ -765,7 +765,7 @@ exports.tools = {
                         {
                             //console.log(__filename + " __pRslv__ " + __pRslv__);
                             ${parseElement(data, pos, true, requirements)}
-                            return high.routedElement(
+                            return declarative.routedElement(
                                 root,
                                 root.find(root.defaultContainer.val, __namespace)
                             );
@@ -1228,8 +1228,8 @@ exports.tools = {
                 depsList.push(ref);
                 argsList.push(alias);
             }
-            //console.log("Binding: high.binding([" + depsList.join(",") + "], (" + argsList.join(",") + ") => { return " + code + "; })");
-            return "high.binding([" + depsList.join(",") + "], (" + argsList.join(",") + ") => { return " + code + "; }, __filename + " + JSON.stringify(debugAnnotation) + ")";
+            //console.log("Binding: declarative.binding([" + depsList.join(",") + "], (" + argsList.join(",") + ") => { return " + code + "; })");
+            return "declarative.binding([" + depsList.join(",") + "], (" + argsList.join(",") + ") => { return " + code + "; }, __filename + " + JSON.stringify(debugAnnotation) + ")";
         }
         else
         {
@@ -2152,7 +2152,7 @@ exports.tools = {
 
     function makeChainRef(chain)
     {
-        return "high.chainRef(root, " + JSON.stringify(chain) + ", __rslv__)";
+        return "declarative.chainRef(root, " + JSON.stringify(chain) + ", __rslv__)";
     }
 
     /* Creates an IIFE for transparently accessing a (dynamic) value.
@@ -2190,7 +2190,7 @@ exports.tools = {
         if (item.endsWith(")"))
         {
             // not a valid left-hand-side; the expression may be optimized
-            //return `((a) => { return high.isDynamicValue(a) ? a : ${makeFakeDv()}; })(${item})`;
+            //return `((a) => { return declarative.isDynamicValue(a) ? a : ${makeFakeDv()}; })(${item})`;
             return `__xsdv__(${item}, () => { })`;
         }
         else
@@ -2202,7 +2202,7 @@ exports.tools = {
             //const functor = item ? `{ val: (...args) => { return /*__new__*/ (${item})(...args); } }` : "undefined";
             const functor = item ? `(...args) => { return /*__new__*/ (${item})(...args); }` : "undefined";
 
-            //return `((a) => { return high.isDynamicValue(a) ? a : typeof a === "function" ? ${makeFunctor(item)} : ${makeFakeDv(item)}; })(${item})`;
+            //return `((a) => { return declarative.isDynamicValue(a) ? a : typeof a === "function" ? ${makeFunctor(item)} : ${makeFakeDv(item)}; })(${item})`;
             return `__xsdv__(${item}, ${setter}, ${functor})`;
         }
     }

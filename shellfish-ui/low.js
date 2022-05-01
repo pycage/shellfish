@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * This module provides the low-level Shellfish API for working directly on the
  * HTML DOM and CSS.
  * 
- * When working with Shui or the high-level API, you normally do not have to
+ * When working with Shui or the declarative-level API, you normally do not have to
  * deal directly with this low-level API.
  * 
  * @example <caption>Importing in JavaScript</caption>

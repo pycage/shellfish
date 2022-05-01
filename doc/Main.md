@@ -137,9 +137,19 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### May 2022
+* **API Break:** The module `shellfish/high` is now named `shellfish/declarative`.
+  Since this module is usually not imported directly by application code,
+  applications should not be affected by this API break.
+
 ### April 2022
 * The new method {@link core.Object#log} provides a simple means for controlling
   application logging.
+* The new method {@link server.HTTPResponse#enableCrossOriginIsolation} provides
+  a comfortable way to set the HTTP headers for cross-origin-isolation on a HTTP
+  response.
+* The examples gallery is now included in the main distribution.
+* The module `shellfish/3d` is now included in the main distribution.
 
 ### February 2022
 * The `function` keyword may now be used in JavaScript sections of Shui files.

@@ -23,7 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
- * **Module ID:** `shellfish/high`
+ * **Module ID:** `shellfish/declarative`
  * 
  * This module provides a high-level API with tools for declarative programming
  * in JavaScript.
@@ -33,15 +33,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * to use this module, **you may safely ignore it.**
  * 
  * @example <caption>Import by module ID</caption>
- * shRequire("shellfish/high", high =>
+ * shRequire("shellfish/declarative", declarative =>
  * {
  *     ...
  * });
  * 
- * @namespace high
+ * @namespace declarative
  */
 
-exports.__id = "shellfish/high";
+exports.__id = "shellfish/declarative";
 
 shRequire("shellfish/core", function (core)
 {
@@ -55,7 +55,7 @@ shRequire("shellfish/core", function (core)
     /**
      * Returns if the given object is a dynamic value.
      * 
-     * @memberof high
+     * @memberof declarative
      * 
      * @param {object} v
      * @returns {bool} `true` if the object is a dynamic value.
@@ -91,14 +91,14 @@ shRequire("shellfish/core", function (core)
      * a declarative fashion.
      * 
      * The properties of the underlying mid-level element are exposed as
-     * {@link high.DynamicValue dynamic values}.
+     * {@link declarative.DynamicValue dynamic values}.
      * 
-     * @memberof high
+     * @memberof declarative
      */
     class Element
     {
         /**
-         * This constructor is not exported. Use the function {@link high.element} to
+         * This constructor is not exported. Use the function {@link declarative.element} to
          * create an element.
          * @constructor
          * @param {function} type - The constructor of the mid-level object type to wrap.
@@ -197,7 +197,7 @@ shRequire("shellfish/core", function (core)
          * @param {string} i - (optional) The element ID to set.
          * @param {string} [ns = ""] - (optional) The namespace to use.
          * 
-         * @returns {high.Element} This element for chaining.
+         * @returns {declarative.Element} This element for chaining.
          */
         id(i, ns)
         {
@@ -216,8 +216,8 @@ shRequire("shellfish/core", function (core)
         /**
          * Adds a child element to this element.
          * 
-         * @param {high.Element} child - The child high-level element.
-         * @returns {high.Element} This element for chaining.
+         * @param {declarative.Element} child - The child declarative-level element.
+         * @returns {declarative.Element} This element for chaining.
          */
         add(child)
         {
@@ -230,7 +230,7 @@ shRequire("shellfish/core", function (core)
          * The method's return value is waived.
          * 
          * @param {string} name - The name of the method to call.
-         * @returns {high.Element} This element for chaining.
+         * @returns {declarative.Element} This element for chaining.
          */
         call(name)
         {
@@ -255,7 +255,7 @@ shRequire("shellfish/core", function (core)
          * @param {string} name - The name of the new property.
          * @param {any} value - The initial value.
          * 
-         * @returns {high.Element} This element for chaining.
+         * @returns {declarative.Element} This element for chaining.
          */
         property(name, value, innate)
         {
@@ -306,7 +306,7 @@ shRequire("shellfish/core", function (core)
          * 
          * @param {string} name - The name of the new event.
          * 
-         * @returns {high.Element} This element for chaining.
+         * @returns {declarative.Element} This element for chaining.
          */
         event(name)
         {
@@ -323,8 +323,8 @@ shRequire("shellfish/core", function (core)
         /**
          * Uses the given element subsequently in a chain of commands.
          * 
-         * @param {high.Element} el - A high-level element.
-         * @returns {high.Element} The given element for chaining.
+         * @param {declarative.Element} el - A declarative-level element.
+         * @returns {declarative.Element} The given element for chaining.
          */
         use(el)
         {
@@ -336,7 +336,7 @@ shRequire("shellfish/core", function (core)
          * 
          * @param {string} prop - The property name.
          * @param {any} value - The new value.
-         * @returns {high.Element} This element for chaining.
+         * @returns {declarative.Element} This element for chaining.
          */
         set(prop, value)
         {
@@ -379,7 +379,7 @@ shRequire("shellfish/core", function (core)
         /**
          * Returns a cross connector to another element's event.
          * 
-         * @param {function} getEl - A function returning the target high-level element.
+         * @param {function} getEl - A function returning the target declarative-level element.
          * @param {string} event - The name of the event.
          * @returns {function} The connector.
          */
@@ -474,7 +474,7 @@ shRequire("shellfish/core", function (core)
          * @param {string} id - The ID of the element to look for.
          * @param {string} ns - The namespace to search.
          * 
-         * @returns {high.Element} The element, or `undefined` if not found.
+         * @returns {declarative.Element} The element, or `undefined` if not found.
          */
         find(id, ns)
         {
@@ -530,7 +530,7 @@ shRequire("shellfish/core", function (core)
                 {
                     return (...args) =>
                     {
-                        // if the function returns a high-level wrapper,
+                        // if the function returns a declarative-level wrapper,
                         // return its mid-level element instead
                         const r = v.apply(priv.element, args);
                         return r instanceof Element ? r.get() : r;
@@ -609,8 +609,8 @@ shRequire("shellfish/core", function (core)
                     const r = obj.apply(priv.element, args);
                     if (r instanceof core.Object)
                     {
-                        // if the mid-level element has a high-level wrapper,
-                        // return the high-level wrapper instead
+                        // if the mid-level element has a declarative-level wrapper,
+                        // return the declarative-level wrapper instead
                         return elementRegistry.has(r) ? elementRegistry.get(r) : r;
                     }
                     else
@@ -621,8 +621,8 @@ shRequire("shellfish/core", function (core)
             }
             else if (obj && obj instanceof core.Object)
             {
-                // if the mid-level element has a high-level wrapper, return
-                // the high-level wrapper instead
+                // if the mid-level element has a declarative-level wrapper, return
+                // the declarative-level wrapper instead
                 return elementRegistry.has(obj) ? elementRegistry.get(obj) : obj;
             }
             else
@@ -744,17 +744,17 @@ shRequire("shellfish/core", function (core)
 
     
     /** 
-     * Creates and returns a high-level {@link high.Element element} wrapping
+     * Creates and returns a declarative-level {@link declarative.Element element} wrapping
      * the given mid-level type.
      * 
      * @example
-     * const e = high.element(html.Box);
+     * const e = declarative.element(html.Box);
      * 
      * @example <caption>Trees of elements may be created and parameterized by chaining commands</caption>
-     * const tree = high.element(html.Box).id("theBox")
+     * const tree = declarative.element(html.Box).id("theBox")
      *              .color("black")
      *              .add(
-     *                  high.element(html.MouseBox)
+     *                  declarative.element(html.MouseBox)
      *                  .fillWidth(true)
      *                  .fillHeight(true)
      *                  .marginLeft(12)
@@ -765,9 +765,9 @@ shRequire("shellfish/core", function (core)
      *                  });
      *              );
      * 
-     * @memberof high
+     * @memberof declarative
      * @param {function} type - The element constructor.
-     * @returns {high.Element} The high-level element.
+     * @returns {declarative.Element} The declarative-level element.
      */
     function element(type)
     {
@@ -776,14 +776,14 @@ shRequire("shellfish/core", function (core)
     exports.element = element;
     
     /**
-     * Creates a routed element from the given {@link high.Element element}.
+     * Creates a routed element from the given {@link declarative.Element element}.
      * Children added to the routed element are added to the specified
      * element instead.
      * 
-     * @memberof high
-     * @param {high.Element} el - The element that is routed.
-     * @param {high.Element} routeTo - The element that is routed to.
-     * @returns {high.Element} The routed element.
+     * @memberof declarative
+     * @param {declarative.Element} el - The element that is routed.
+     * @param {declarative.Element} routeTo - The element that is routed to.
+     * @returns {declarative.Element} The routed element.
      */
     function routedElement(el, routeTo)
     {
@@ -830,12 +830,12 @@ shRequire("shellfish/core", function (core)
      * The stored value is accessible via the `val` property.
      * 
      * @example
-     * const dynVal = new high.DynamicValue(42);
+     * const dynVal = new declarative.DynamicValue(42);
      * console.log(dynVal.val);  // prints 42
      * dynVal.val = 25;          // changes the value to 25 and notifies all watchers.
      * console.log(dynVal.val);  // prints 25
      * 
-     * @memberof high
+     * @memberof declarative
      * 
      * @property {function} setter - The overridable setter function.
      * @property {function} getter - The overridable getter function.
@@ -911,13 +911,13 @@ shRequire("shellfish/core", function (core)
          * for changes.
          * 
          * @example <caption>Watch for changes</caption>
-         * const dynVal = new high.DynamicValue(42);
+         * const dynVal = new declarative.DynamicValue(42);
          * dynVal.watch(v => console.log("The value changed to " + v.val);
          * ++(dynval.val);
          * dynVal.update();           // prints "The value changed to 43"
          * 
          * @param {function} watchCallback - The callback to invoke on changes.
-         * @returns {high.DynamicValue.WatchHandle} The watch handle.
+         * @returns {declarative.DynamicValue.WatchHandle} The watch handle.
          */
         watch(watchCallback)
         {
@@ -937,7 +937,7 @@ shRequire("shellfish/core", function (core)
             /**
              * A dynamic value watch handle.
              * @typedef WatchHandle
-             * @memberof high.DynamicValue
+             * @memberof declarative.DynamicValue
              * @property {function} setEnabled - Enables or disables this watcher.
              * @property {function} unwatch - Stops watching the dynamic value.
              * @property {function} value - Returns the current value.
@@ -1029,7 +1029,7 @@ shRequire("shellfish/core", function (core)
          * 
          * @name watched
          * @method
-         * @memberof high.DynamicValue.prototype
+         * @memberof declarative.DynamicValue.prototype
          * @param {function} callback - The callback to invoke.
          */
         watched(callback)
@@ -1040,7 +1040,7 @@ shRequire("shellfish/core", function (core)
     exports.DynamicValue = DynamicValue;
     
     /**
-     * Creates and returns a {@link high.DynamicValue dynamic value} acting as
+     * Creates and returns a {@link declarative.DynamicValue dynamic value} acting as
      * a binding. This means that it is re-evaluated whenever one of its
      * dependency dynamic values changes.
      * 
@@ -1048,13 +1048,13 @@ shRequire("shellfish/core", function (core)
      * and acts as the value getter of the binding.
      * 
      * @example
-     * const b = high.binding([a, b], (aValue, bValue) =>
+     * const b = declarative.binding([a, b], (aValue, bValue) =>
      * {
      *     return aValue.val * bValue.val;
      * });
      * 
-     * @memberof high
-     * @param {high.DynamicValue[]} deps - The list of dependencies.
+     * @memberof declarative
+     * @param {declarative.DynamicValue[]} deps - The list of dependencies.
      * @param {function} evaluator - The evaluation function to invoke.
      * @param {string} [annotation = ""] - A user-defined annotation string that may help for debugging. 
      */
@@ -1130,8 +1130,8 @@ shRequire("shellfish/core", function (core)
     exports.binding = binding;
     
     /**
-     * Creates and returns a {@link high.DynamicValue dynamic value} that
-     * references a property of an {@link high.Element element}.
+     * Creates and returns a {@link declarative.DynamicValue dynamic value} that
+     * references a property of an {@link declarative.Element element}.
      * The element does not have to exist yet at the time of calling this function.
      * 
      * If the referenced parameter cannot be resolved immediately, resolving is
@@ -1142,7 +1142,7 @@ shRequire("shellfish/core", function (core)
      * with ID `theBox`, the chain would be `["theBox", "width"]`.
      * 
      * The `resolver` function is expected to take an element ID string as parameter and
-     * return the corresponding high-level element, or `undefined` if it could
+     * return the corresponding declarative-level element, or `undefined` if it could
      * not be resolved yet (because the element has not yet been created).
      * 
      * A simple resolver might look like
@@ -1150,16 +1150,16 @@ shRequire("shellfish/core", function (core)
      *     (id) => root.find(id);
      * 
      * @example
-     * const b = high.chainRef(root, ["theBox", "width"], (id) =>
+     * const b = declarative.chainRef(root, ["theBox", "width"], (id) =>
      * {
      *     // do something to lookup the element by ID
      *     ...
      *     return element;
      * });
      * 
-     * @memberof high
+     * @memberof declarative
      * 
-     * @param {high.Element} root - The root element.
+     * @param {declarative.Element} root - The root element.
      * @param {string[]} chain - The chain that makes up the reference.
      * @param {function} resolver - A resolver function.
      */

@@ -103,15 +103,17 @@ shRequire(["shellfish/core"], core =>
      * The setter methods of this class return the class instance itself, so
      * method calls may be chained.
      * 
+     * @memberof server
+     * 
      * @example
      * response(200, "OK")
      * .cookie("MyCookie", "42")
-     * .body("<html><body><h1>Hello World</h1></body></html", "text/html")
+     * .body("Hello World", "text/html")
      * .send();
      */
     class HTTPResponse
     {
-        constructor(response, code, status)
+        constructor(response, code, status, callback)
         {
             this.code = code;
             this.status = status;
@@ -121,10 +123,16 @@ shRequire(["shellfish/core"], core =>
             this.data = "";
             this.dataStream = null;
             this.dataSize = -1;
+            this.callback = callback;
         }
         
+        /**
+         * Sends the response.
+         */
         send()
         {
+            this.callback(this);
+
             const cookies = [...this.cookies].map(item =>
             {
                 return item[0] + "=" + encodeURIComponent(item[1]);
@@ -151,6 +159,13 @@ shRequire(["shellfish/core"], core =>
             }
         }
 
+        /**
+         * Sets the response body.
+         * 
+         * @param {string} s - The response body.
+         * @param {string} mimetype - The MIME type of the response body.
+         * @returns {server.HTTPResponse} The response object for chaining multiple methods.
+         */
         body(s, mimetype)
         {
             this.header("Content-Length", "" + Buffer.from(s).length);
@@ -165,6 +180,7 @@ shRequire(["shellfish/core"], core =>
          * @param {ReadableStream} s - The stream.
          * @param {string} mimetype - The MIME type of the data.
          * @param {number} dataSize - The expected size of data in bytes, or -1 for unknown size.
+         * @returns {server.HTTPResponse} The response object for chaining multiple methods.
          */
         stream(s, mimetype, dataSize)
         {
@@ -182,6 +198,13 @@ shRequire(["shellfish/core"], core =>
             return this;
         }
 
+        /**
+         * Sets a HTTP header.
+         * 
+         * @param {string} name - The header name.
+         * @param {string} value - The header value.
+         * @returns {server.HTTPResponse} The response object for chaining multiple methods.
+         */
         header(name, value)
         {
             if (! this.headers.get(name))
@@ -192,6 +215,25 @@ shRequire(["shellfish/core"], core =>
             return this;
         }
 
+        /**
+         * Enables Cross-Origin-Isolation by setting the appropriate HTTP headers.
+         * 
+         * @returns {server.HTTPResponse} The response object for chaining multiple methods.
+         */
+        enableCrossOriginIsolation()
+        {
+            this.header("Access-Control-Allow-Origin", "*");
+            this.header("Cross-Origin-Opener-Policy", "same-origin");
+            this.header("Cross-Origin-Embedder-Policy", "require-corp");
+            return this;
+        }
+
+        /**
+         * Sets a HTTP cookie.
+         * @param {string} name - The cookie name.
+         * @param {string} value - The cookie value.
+         * @returns {server.HTTPResponse} The response object for chaining multiple methods.
+         */
         cookie(name, value)
         {
             this.cookies.set(name, value);
@@ -238,6 +280,13 @@ shRequire(["shellfish/core"], core =>
              * @memberof server.HTTPSession
              */
             this.registerEvent("request");
+
+            /**
+             * Is triggered when a response is ready to be sent.
+             * @event responseReady
+             * @memberof server.HTTPSession
+             */
+            this.registerEvent("responseReady");
         }
 
         get sessionId() { return d.get(this).sessionId; }
@@ -295,7 +344,11 @@ shRequire(["shellfish/core"], core =>
                      code + " " + status);
             const r = new HTTPResponse(d.get(this).response,
                                        code,
-                                       status);
+                                       status,
+                                       (res) =>
+            {
+                this.responseReady(res);
+            });
             return r;
         }
 

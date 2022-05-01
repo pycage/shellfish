@@ -39,6 +39,8 @@ HTTPServer {
             root: __dirname + "/../dist/doc"
 
             urlMapper: url => url.replace("/shellfish/doc", "")
+
+            onResponseReady: r => { r.enableCrossOriginIsolation(); }
         }
     }
 
@@ -73,6 +75,8 @@ HTTPServer {
         delegate: template WebSession {
             filesystem: LocalFS { }
             root: __dirname + "/www"
+
+            onResponseReady: r => { r.enableCrossOriginIsolation(); }
         }
     }
 }

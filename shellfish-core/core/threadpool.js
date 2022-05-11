@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire([__dirname + "/object.js"], (obj) =>
+shRequire([__dirname + "/object.js", __dirname + "/util/compat.js"], (obj, compat) =>
 {
     /**
      * The worker environment in the thread pool.
@@ -119,8 +119,9 @@ shRequire([__dirname + "/object.js"], (obj) =>
 
         let idCounter = 0;
         
-        // map of code -> URL
-        const urlCache = new Map();
+        // map of code -> task ID
+        const taskCache = new Map();
+        let taskIdCounter = 0;
 
         // map of URL -> Module
         const moduleCache = new Map();
@@ -130,7 +131,75 @@ shRequire([__dirname + "/object.js"], (obj) =>
         const methods = new Map();
         let transferList = [];
 
-        self.AtomicInt32 = class AtomicInt32
+
+        //
+
+        const isWeb = (typeof self !== "undefined");
+        const isNode = (typeof process !== "undefined" && typeof process.versions.node !== "undefined");
+
+        const modWorkerThreads = isNode ? require("worker_threads") : null;
+        const modVm = isNode ? require("vm") : null;
+        const worker = isWeb ? self : this;
+
+        console.log("isWeb: " + isWeb + ", isNode: " + isNode);
+
+        function importCodeCompat(code)
+        {
+            console.log("import code " + code.length);
+            if (isWeb)
+            {
+                const codeBlob = new Blob([code], { type: "application/type" });
+                const url = URL.createObjectURL(codeBlob);
+                importScripts(url);
+                URL.revokeObjectURL(url);
+            }
+            else if (isNode)
+            {
+                modVm.runInThisContext(code, { filename: "<task>" });
+            }
+        }
+
+        function addEventListenerCompat(event, callback)
+        {
+            if (isWeb)
+            {
+                worker.addEventListener(event, callback);
+            }
+            else if (isNode)
+            {
+                modWorkerThreads.parentPort.on(event, callback);
+            }
+        }
+
+        function postMessageCompat(...args)
+        {
+            if (isWeb)
+            {
+                worker.postMessage(...args);
+            }
+            else if (isNode)
+            {
+                modWorkerThreads.parentPort.postMessage(...args);
+            }
+        }
+
+        function extractMessageDataCompat(obj)
+        {
+            if (isWeb)
+            {
+                return obj.data;
+            }
+            else
+            {
+                return obj;
+            }
+        }
+
+        //
+
+
+
+        worker.AtomicInt32 = class AtomicInt32
         {
             constructor(buffer)
             {
@@ -164,7 +233,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Imports (Emscripten) WASM code from the given URL.
          */
-        self.importWasm = (wasmUrl) =>
+        worker.importWasm = (wasmUrl) =>
         {
             return new Promise(async (resolve, reject) =>
             {
@@ -200,7 +269,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Puts the thread to sleep for the given amount of milliseconds.
          */
-        self.sleep = (ms) =>
+        worker.sleep = (ms) =>
         {
             if (typeof SharedArrayBuffer !== "undefined")
             {
@@ -220,7 +289,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Marks the given object for transfer.
          */
-        self.transfer = (v) =>
+        worker.transfer = (v) =>
         {
             transferList.push(v);
             return v;
@@ -230,7 +299,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
          * Creates a proxy for calling methods of the given object by
          * another thread.
          */
-        self.proxyObject = (obj) =>
+        worker.proxyObject = (obj) =>
         {
             const proxyId = idCounter;
             ++idCounter;
@@ -263,9 +332,9 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Registers the given module (used internally).
          */
-        self.registerModule = (mod) =>
+        worker.registerModule = (mod) =>
         {
-            moduleCache.set(currentUrl, mod);
+            moduleCache.set(taskIdCounter, mod);
             for (let key in mod)
             {
                 if (key === "__run__")
@@ -282,7 +351,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Registers the given worker method (used internally).
          */
-        self.registerWorkerMethod = (name, f) =>
+        worker.registerWorkerMethod = (name, f) =>
         {
             console.log("Registering worker method: " + name);
             methods.set(name, f);
@@ -291,17 +360,19 @@ shRequire([__dirname + "/object.js"], (obj) =>
         /**
          * Exits the task manually.
          */
-        self.exit = () =>
+        worker.exit = () =>
         {
-            self.postMessage({ type: "exit" });
+            postMessageCompat({ type: "exit" });
         };
 
         function loadTask(code)
         {
-            let url = "";
-            if (urlCache.has(code))
+            let taskId = "";
+            if (taskCache.has(code))
             {
-                url = urlCache.get(code);
+                taskId = taskCache.get(code);
+                console.log("from cache " + taskId);
+                console.log(moduleCache);
             }
             else
             {
@@ -309,19 +380,15 @@ shRequire([__dirname + "/object.js"], (obj) =>
                            "const exports = { }; " +
                            code + "\\n" +
                            "if (typeof run !== 'undefined') { exports.__run__ = run; }\\n\\n" +
-                           "self.registerModule(exports); " +
+                           "worker.registerModule(exports); " +
                            "})();"
-
-                const blob = new Blob([js], { type: "application/javascript" });
-                url = URL.createObjectURL(blob);
-                urlCache.set(code, url);
-
-                currentUrl = url;
-                importScripts(url);
-
-                URL.revokeObjectURL(url);
+               
+                importCodeCompat(js);
+                taskId = taskIdCounter;
+                taskCache.set(code, taskId);
+                ++taskIdCounter;
             }
-            return moduleCache.get(url);
+            return moduleCache.get(taskId);
         }
 
         function processInParameters(parameters)
@@ -336,7 +403,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
                         const callbackId = p.safeCallback;
                         return (...parameters) =>
                         {
-                            self.postMessage({ type: "callback", callback: callbackId, parameters }, transferList);
+                            postMessageCompat({ type: "callback", callback: callbackId, parameters }, transferList);
                             transferList = [];
                         };
                     }
@@ -370,18 +437,15 @@ shRequire([__dirname + "/object.js"], (obj) =>
             }
         }
 
-        self.addEventListener("message", (ev) =>
+        addEventListenerCompat("message", ev =>
         {
-            const msg = ev.data;
+            const msg = extractMessageDataCompat(ev);
             if (msg.type === "import")
             {
                 // import worker-global code (e.g. require.js)
 
-                const blob = new Blob([msg.code], { type: "application/javascript" });
-                const blobUrl = URL.createObjectURL(blob);
-                importScripts(blobUrl);
-                URL.revokeObjectURL(blobUrl);
-                self.postMessage({ type: "ready" });
+                importCodeCompat(msg.code);
+                postMessageCompat({ type: "ready" });
             }
             else if (msg.type === "task")
             {
@@ -397,20 +461,20 @@ shRequire([__dirname + "/object.js"], (obj) =>
                     const taskResult = task.__run__(...parameters);
                     handleResult(taskResult, r =>
                     {
-                        self.postMessage({ type: "result", value: r }, transferList);
+                        postMessageCompat({ type: "result", value: r }, transferList);
                         transferList = [];
                     },
                     err =>
                     {
-                        self.postMessage({ type: "error", value: "" + err });
+                        postMessageCompat({ type: "error", value: "" + err });
                         transferList = [];
-                        self.postMessage({ type: "exit" });
+                        postMessageCompat({ type: "exit" });
                     });
                 }
 
                 if (methods.size === 0)
                 {
-                    self.postMessage({ type: "exit" });
+                    postMessageCompat({ type: "exit" });
                 }
             }
             else if (msg.type === "call")
@@ -425,25 +489,25 @@ shRequire([__dirname + "/object.js"], (obj) =>
                         const result = methods.get(msg.name)(...parameters);
                         handleResult(result, r =>
                         {
-                            self.postMessage({ type: "methodResult", callId: msg.callId, value: r }, transferList);
+                            postMessageCompat({ type: "methodResult", callId: msg.callId, value: r }, transferList);
                             transferList = [];        
                         },
                         err =>
                         {
-                            self.postMessage({ type: "methodError", callId: msg.callId, value: "" + err });
+                            postMessageCompat({ type: "methodError", callId: msg.callId, value: "" + err });
                             transferList = [];        
                         });
                     }
                     catch (err)
                     {
-                        self.postMessage({ type: "methodError", callId: msg.callId, value: "" + err });
+                        postMessageCompat({ type: "methodError", callId: msg.callId, value: "" + err });
                         transferList = [];
                     }
                 }
                 else
                 {
                     const err = "No such method to call: " + msg.name;
-                    self.postMessage({ type: "methodError", callId: msg.callId, value: err });
+                    postMessageCompat({ type: "methodError", callId: msg.callId, value: err });
                     transferList = [];
                 }
             }
@@ -689,11 +753,8 @@ shRequire([__dirname + "/object.js"], (obj) =>
         {
             super();
 
-            const runtimeBlob = new Blob([WORKER_CODE], { type: "text/javascript" });
-
             d.set(this, {
                 size: 1,
-                runtimeUrl: URL.createObjectURL(runtimeBlob),
                 workers: [],
                 queue: [],
                 transferList: [],
@@ -725,7 +786,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
             };
         }
 
-        get hardwareConcurrency() { return navigator.hardwareConcurrency || 1; }
+        get hardwareConcurrency() { return compat.hardwareConcurrency(); }
 
         get free() { return d.get(this).workers.filter(item => item.free).length; }
         get waiting() { return d.get(this).queue.length; }
@@ -785,12 +846,12 @@ shRequire([__dirname + "/object.js"], (obj) =>
 
             while (n > priv.workers.length)
             {
-                const w = new Worker(priv.runtimeUrl);
+                const w = compat.createWorkerThread(WORKER_CODE);
                 const workerItem = { worker: w, free: true, ready: false, taskId: -1 };
 
-                w.onmessage = this.safeCallback((ev) =>
+                compat.addEventListener(w, "message", this.safeCallback((ev) =>
                 {
-                    const msg = ev.data;
+                    const msg = compat.extractMessageData(ev);
                     if (msg.type === "ready")
                     {
                         workerItem.ready = true;
@@ -811,7 +872,6 @@ shRequire([__dirname + "/object.js"], (obj) =>
                     }
                     else if (msg.type === "methodResult")
                     {
-                        console.log("Worker method result: " + JSON.stringify(msg.value));
                         priv.callMap.get(msg.callId).resolve(this.processOutParameters(workerItem.taskId, [msg.value])[0]);
                         priv.callMap.delete(msg.callId);
                     }
@@ -822,7 +882,6 @@ shRequire([__dirname + "/object.js"], (obj) =>
                     }
                     else if (msg.type === "result")
                     {
-                        console.log("Task result: " + JSON.stringify(msg.value));
                         priv.taskMap.get(workerItem.taskId).resolve(this.processOutParameters(workerItem.taskId, [msg.value])[0]);
                     }
                     else if (msg.type === "error")
@@ -840,24 +899,13 @@ shRequire([__dirname + "/object.js"], (obj) =>
                             priv.callbackMap.delete(msg.callback);
                         }
                     }
-                });
+                }));
                 priv.workers.push(workerItem);
 
                 shRequire.selfUrl()
                 .then(url =>
                 {
-                    return fetch(url);
-                })
-                .then(response =>
-                {
-                    if (response.ok)
-                    {
-                        return response.text();
-                    }
-                    else
-                    {
-                        throw "Failed to load resource: " + url;
-                    }
+                    return compat.fetch(url);
                 })
                 .then(code =>
                 {
@@ -1110,18 +1158,7 @@ shRequire([__dirname + "/object.js"], (obj) =>
 
             const promise = new Promise((resolve, reject) =>
             {
-                fetch(url, { cache: "no-cache" })
-                .then(response =>
-                {
-                    if (response.ok)
-                    {
-                        return response.text();
-                    }
-                    else
-                    {
-                        throw "Failed to load task from " + url + " (" + response.status + " " + response.statusText + ")";
-                    }
-                })
+                compat.fetch(url)
                 .then(code =>
                 {
                     priv.taskMap.set(taskId, {

@@ -36,6 +36,7 @@ exports.SHELLFISH_BUILD = "%PKG_GIT_SHORTHASH%-%PKG_DATE%";
 const mods = [
     "fengshui",
     "declarative",
+    "core/util/compat",
     "core/util/matrix",
     "core/util/mime",
     "core/util/vec",

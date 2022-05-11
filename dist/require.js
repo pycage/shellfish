@@ -192,6 +192,11 @@ const shRequire = (function ()
             }
         });
 
+        if (url.startsWith("/") && ! url.startsWith("//"))
+        {
+            outParts.unshift("");
+        }
+
         //console.log("normalized URL " + url + " -> " + outParts.join("/"));
         return outParts.join("/");
     }
@@ -951,7 +956,7 @@ const shRequire = (function ()
     {
         if (! hasDom)
         {
-            return "";
+            return __filename;
         }
 
         const tags = document.scripts;

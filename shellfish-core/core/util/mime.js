@@ -66,6 +66,7 @@ const EXTENSIONS = {
     ".svg":   "image/svg+xml",
     ".txt":   "text/plain",
     ".vcf":   "text/vcard",
+    ".wasm":  "application/wasm",
     ".webm":  "video/webm",
     ".xml":   "text/xml",
     ".zip":   "application/zip"

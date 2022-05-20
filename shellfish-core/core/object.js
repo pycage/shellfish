@@ -1198,6 +1198,33 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             });
         }
 
+        /** 
+         * Imports a JavaScript or WASM module and returns a Promise that
+         * resolves to the module.
+         * 
+         * @param {string} url - The address of the module.
+         * @returns {Promise} The Promise object.
+         */
+        import(url, callback)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                shRequire([url], mod =>
+                {
+                    if (mod)
+                    {
+                        resolve(mod);
+                        if (callback) callback(mod);
+                    }
+                    else
+                    {
+                        reject("Failed to load module: " + url);
+                        if (callback) callback(null);
+                    }
+                });
+            });
+        }
+
         /**
          * Sends a log message to the parent element if there is one.
          * Override this method to handle logging. By default, logging is not

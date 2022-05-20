@@ -141,6 +141,12 @@ Layouting elements on screen is intuitive, yet powerful.
 * **API Break:** The module `shellfish/high` is now named `shellfish/declarative`.
   Since this module is usually not imported directly by application code,
   applications should not be affected by this API break.
+* WebAssembly is now directly supported by the module loader, so WASM modules
+  may be loaded like any other Shellfish module or JavaScript file.
+  The element {@link core.Wasm} is thus deprecated and should not be used in new
+  code. It will be removed eventually.
+* The new method {@link core.Object#import} imports JavaScript, CSS, or WASM
+  modules dynamically.
 
 ### April 2022
 * The new method {@link core.Object#log} provides a simple means for controlling

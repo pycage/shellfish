@@ -426,8 +426,11 @@ const shRequire = (function ()
                         js += `
                             shRequire.registerLoader("${resUrl}", (exports, __dirname, __filename) =>
                             {
+                                const currentDependencyCounter = shRequire.dependencyCounter;
                                 ${bundle.resources[resUrl]}
-                                shRequire.registerModule("${resUrl}", typeof Module !== "undefined" ? Module : exports);
+                                const mod = typeof Module !== "undefined" ? Module : exports;
+                                mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
+                                shRequire.registerModule("${resUrl}", mod);
                             });
                         `;
                     }
@@ -673,6 +676,8 @@ const shRequire = (function ()
                         const __dirname = "${dirname}";
                         const __filename = "${url}";
     
+                        const currentDependencyCounter = shRequire.dependencyCounter;
+
                         const exports = {
                             include: (mod) => {
                                 for (let key in mod)
@@ -685,7 +690,9 @@ const shRequire = (function ()
                             }
                         };
                         ${code}
-                        shRequire.registerModule("${url}", typeof Module !== "undefined" ? Module : exports);
+                        const mod = typeof Module !== "undefined" ? Module : exports;
+                        mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
+                        shRequire.registerModule("${url}", mod);
                     })();
                 `;
     
@@ -729,6 +736,105 @@ const shRequire = (function ()
         }
     }
 
+    /**
+     * Loads a WASM module.
+     * @private
+     * 
+     * @param {string} url - The URL where to load from.
+     * @param {function} callback - The callback to be invoked with the WASM instance object.
+     */
+    function loadWasm(url, callback)
+    {
+        function fail(err)
+        {
+            logError(`Failed to load WASM module '${url}': ${err}`);
+            callback("");
+        }
+
+        if (cache[url])
+        {
+            // if the module was already loaded, look up in cache
+            callback(cache[url]);
+            return;
+        }
+
+        const progressNode = hasDom ? document.getElementById("sh-require-progress") : null;
+        const statusNode = hasDom ? document.getElementById("sh-require-status") : null;
+        if (progressNode)
+        {
+            const pos = url.lastIndexOf("/");
+            progressNode.innerHTML = pos !== -1 ? url.substring(pos + 1) : url;
+        }
+        if (statusNode)
+        {
+            statusNode.innerHTML = "Loading";
+        }
+        stackOfQueues.push([]);
+
+        const pos = url.lastIndexOf("/");
+        let dirname = url.substring(0, pos);
+        if (dirname === "")
+        {
+            dirname = ".";
+        }
+
+        const importObj = {
+            imports: { }
+        };
+
+        if (bundleCache[url])
+        {
+            WebAssembly.instantiate(bundleCache[url], importObj)
+            .then(module =>
+            {
+                callback(module.instance.exports);
+            })
+            .catch(err =>
+            {
+                fail(err);
+            });
+        }
+        else if (typeof fetch !== "undefined")
+        {
+            fetch(url, { cache: "no-cache" })
+            .then(response =>
+            {
+                return WebAssembly.instantiateStreaming(response, importObj)
+            })
+            .then(module =>
+            {
+                callback(module.instance.exports);
+            })
+            .catch (err)
+            {
+                fail(err);
+            }
+        }
+        else
+        {
+            const modFs = require("fs");
+            modFs.readFile(url, (err, data) =>
+            {
+                if (err)
+                {
+                    fail(err);
+                }
+                else
+                {
+                    WebAssembly.instantiate(data, importObj)
+                    .then(module =>
+                    {
+                        callback(module.instance.exports);
+                    })
+                    .catch(err =>
+                    {
+                        fail(err);
+                    });
+                }
+            });
+        }
+    }
+
     function next()
     {
         if (nextScheduled)
@@ -753,13 +859,28 @@ const shRequire = (function ()
         if (ctx.urls.length === 0)
         {
             queue.shift();
-            ctx.callback.apply(null, ctx.modules);
+            if (ctx.callback)
+            {
+                ctx.callback.apply(null, ctx.modules);
+            }
             next();
             return;
         }
 
         let url = normalizeUrl(ctx.urls[0]);
         ctx.urls.shift();
+
+        function tryImmediateCallback()
+        {
+            // if the loaded modules have no further dependencies, we may
+            // invoke the callback immediately
+            if (! ctx.dependencies && ctx.urls.length === 0)
+            {
+                //console.log("Invoking immediate callback on " + JSON.stringify(ctx.allUrls));
+                ctx.callback.apply(null, ctx.modules);
+                ctx.callback = null;
+            }
+        }
 
         if (idsMap[url])
         {
@@ -776,24 +897,39 @@ const shRequire = (function ()
             {
                 nextScheduled = false;
                 ctx.modules.push(null);
+                tryImmediateCallback();
                 next();
             });
         }
         else if (ext === "js" || ext === "shui")
         {
-            loadModule(url, ctx.processor, function (module)
+            loadModule(url, ctx.processor, module =>
             {
                 nextScheduled = false;
                 ctx.modules.push(module);
+                ctx.dependencies |= module.hasDependencies;
+                tryImmediateCallback();
+                next();
+            });
+        }
+        else if (ext === "wasm")
+        {
+            loadWasm(url, module =>
+            {
+                nextScheduled = false;
+                ctx.modules.push(module);
+                tryImmediateCallback();
                 next();
             });
         }
         else if (url.startsWith("blob:"))
         {
-            loadModule(url, ctx.processor, function (module)
+            loadModule(url, ctx.processor, module =>
             {
                 nextScheduled = false;
                 ctx.modules.push(module);
+                ctx.dependencies |= module.hasDependencies;
+                tryImmediateCallback();
                 next();
             });
         }
@@ -802,6 +938,7 @@ const shRequire = (function ()
             logError(`Cannot load invalid module '${url}'.`);
             nextScheduled = false;
             ctx.modules.push(null);
+            tryImmediateCallback();
             next();
         }
     }
@@ -815,7 +952,9 @@ const shRequire = (function ()
         let queue = stackOfQueues[stackOfQueues.length - 1];
         let ctx = {
             urls: urls,
+            allUrls: urls.slice(),
             modules: [],
+            dependencies: false,
             callback: callback,
             processor: processor
         };
@@ -838,6 +977,7 @@ const shRequire = (function ()
             {
                 const blob = new Blob([urls], { type: "application/javascript" });
                 const objUrl = URL.createObjectURL(blob);
+                ++__require.dependencyCounter;
                 addTask([objUrl], (...args) =>
                 {
                     URL.revokeObjectURL(objUrl);
@@ -846,10 +986,12 @@ const shRequire = (function ()
             }
             else if (typeof urls === "string")
             {
+                ++__require.dependencyCounter;
                 addTask([urls], callback, processor);
             }
             else
             {
+                __require.dependencyCounter += urls.length;
                 addTask(urls, callback, processor);
             }
             next();
@@ -857,6 +999,8 @@ const shRequire = (function ()
 
         f(urls, callback, processor);
     }
+
+    __require.dependencyCounter = 0;
 
     /**
      * Registers data for the given URL.
@@ -880,7 +1024,7 @@ const shRequire = (function ()
      */
     __require.registerModule = function (url, module)
     {
-       cache[url] = module;
+        cache[url] = module;
     };
 
     /**

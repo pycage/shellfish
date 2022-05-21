@@ -93,6 +93,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 literal: false,
                 filter: null,
                 selectable: false,
+                textInvalidated: true,
                 item: HTML.cloneNode()
             });
 
@@ -140,6 +141,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             if (value !== d.get(this).literal)
             {
                 d.get(this).literal = value;
+                d.get(this).textInvalidated = true;
                 this.text = this.text;
                 this.literalChanged();
                 this.updateSizeFrom(null, false);
@@ -152,6 +154,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             if (f !== d.get(this).filter)
             {
                 d.get(this).filter = f;
+                d.get(this).textInvalidated = true;
                 this.text = this.text;
                 this.filterChanged();
                 this.updateSizeFrom(null, false);
@@ -174,10 +177,11 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
         set text(text)
         {
             const priv = d.get(this);
-            if (! priv.filter && text.length === priv.text.length && text === priv.text)
+            if (! priv.textInvalidated && text.length === priv.text.length && text === priv.text)
             {
                 return;
             }
+            priv.textInvalidated = false;
 
             const isLiteral = priv.literal;
 

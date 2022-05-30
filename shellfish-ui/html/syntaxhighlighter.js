@@ -111,8 +111,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             {
                 const matches = priv.tokens
                 .map(t => [s.substr(pos).match(t.regexp), t])
-                .filter(m => m[0] !== null);
-                //.sort((a, b) => a[0][0].length > b[0][0].length ? -1 : 1);
+                .filter(m => m[0] !== null)
+                .sort((a, b) => a[0].index < b[0].index ? -1 : 1);
                 
                 if (matches.length === 0)
                 {
@@ -123,7 +123,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 {
                     //console.log(matches);
                     const match = matches[0];
-                    pos += match[0][0].length;
+                    out += escape(s.substr(pos, match[0].index));
+                    pos += match[0].index + match[0][0].length;
                     out += "<span style=\"color: " + match[1].token.color.toCss() + "\">" + escape(match[0][0]) + "</span>";
                     //console.log("<span style=\"color: " + match[1].token.color.toCss() + "\">" + escape(match[0][0]) + "</span>");
                 }

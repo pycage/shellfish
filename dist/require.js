@@ -222,7 +222,7 @@ const shRequire = (function ()
     
             scriptNode.addEventListener("load", function ()
             {
-                URL.revokeObjectURL(codeUrl);
+                //URL.revokeObjectURL(codeUrl);
                 callback(true);
             }, false);
     
@@ -259,7 +259,7 @@ const shRequire = (function ()
             try
             {
                 importScripts(codeUrl);
-                URL.revokeObjectURL(codeUrl);
+                //URL.revokeObjectURL(codeUrl);
                 callback(true);
             }
             catch (err)
@@ -671,12 +671,13 @@ const shRequire = (function ()
                 }
     
                 const js = `/* Module ${url} */
-                    (function ()
+                    (function (Module)
                     {
                         const __dirname = "${dirname}";
                         const __filename = "${url}";
     
-                        const currentDependencyCounter = shRequire.dependencyCounter;
+                        const haveShellfish = typeof shRequire !== "undefined";
+                        const currentDependencyCounter = haveShellfish ? shRequire.dependencyCounter : 0;
 
                         const exports = {
                             include: (mod) => {
@@ -690,10 +691,13 @@ const shRequire = (function ()
                             }
                         };
                         ${code}
-                        const mod = typeof Module !== "undefined" ? Module : exports;
-                        mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
-                        shRequire.registerModule("${url}", mod);
-                    })();
+                        if (haveShellfish)
+                        {
+                            const mod = typeof Module !== "undefined" ? Module : exports;
+                            mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
+                            shRequire.registerModule("${url}", mod);
+                        }
+                    })(typeof Module !== "undefined" ? Module : undefined);
                 `;
     
                 if (statusNode)
@@ -805,10 +809,10 @@ const shRequire = (function ()
             {
                 callback(module.instance.exports);
             })
-            .catch (err)
+            .catch (err =>
             {
                 fail(err);
-            }
+            });
         }
         else
         {

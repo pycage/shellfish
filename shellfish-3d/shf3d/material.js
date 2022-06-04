@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of Shellfish-3D.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -120,7 +120,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                 vec4 texColor = texture2D(texture, vec2(fTexCoord.s * textureRepeatS, fTexCoord.t * textureRepeatT));
                 if (texColor.a < 0.01)
                 {
-                    //discard();
+                    discard;
                 }
                 diffuseReflection *= vec4(texColor.rgb, 1.0);
             }
@@ -321,15 +321,14 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
                     gl.bindTexture(gl.TEXTURE_2D, null);
-
-                    this.invalidate();
                 });
+                this.invalidate();
             };
             img.onerror = (err) =>
             {
                 console.error("Failed to load texture: " + s);
             }
-            console.log("Loading texture: " + s);
+            //console.log("Loading texture: " + s);
             img.src = shRequire.resource(s);
         }
 

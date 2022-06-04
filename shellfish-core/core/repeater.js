@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -127,6 +127,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                 priv.model.disconnect("modelReset", this);
                 priv.model.disconnect("modelInsert", this);
                 priv.model.disconnect("modelRemove", this);
+                priv.model.disconnect("modelReplace", this);
                 priv.model.referenceRemove(this);
             }
 

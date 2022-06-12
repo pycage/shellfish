@@ -387,27 +387,42 @@ exports.tools = {
                     return;
                 }
 
-                for (let key in shui)
+                function waitForShuiReady()
                 {
-                    if (shui[key].create)
+                    if (shui.shuiReady === true)
                     {
-                        const now = Date.now();
-                        try
+                        for (let key in shui)
                         {
-                            let root = shui[key].create(rslv);
-                            root.set("objectType", url);
-                            console.log("Created Shui Document '" + url + "' in " + (Date.now() - now) + " ms.");
-                            resolve(root);
+                            if (shui[key].create)
+                            {
+                                const now = Date.now();
+                                try
+                                {
+                                    let root = shui[key].create(rslv);
+                                    root.set("objectType", url);
+                                    console.log("Created Shui Document '" + url + "' in " + (Date.now() - now) + " ms.");
+                                    resolve(root);
+                                }
+                                catch (err)
+                                {
+                                    reject(err);
+                                }
+                                return;
+                            }
                         }
-                        catch (err)
-                        {
-                            reject(err);
-                        }
-                        return;
+                    }
+                    else if (shui.shuiReady === false)
+                    {
+                        setTimeout(waitForShuiReady, 100);
+                    }
+                    else
+                    {
+                        reject("'" + url + "' is not a Shui module.");
                     }
                 }
-                reject("'" + url + "' is not a Shui module.");
-    
+
+                waitForShuiReady();
+
             }, compile);
 
         });
@@ -727,6 +742,7 @@ exports.tools = {
 
         const code = `/* Compiled from Shui by Feng Shui Code Processor */
             "use strict";
+            exports.shuiReady = false;
             shRequire(["shellfish/fengshui"], (fengshui_Internal) =>
             {
                 shRequire([${requirements.map(req => "\"" + req.module.replace(/^\.\//, moduleDir + "/") + "\"").join(", ")}],
@@ -771,6 +787,8 @@ exports.tools = {
                             );
                         }
                     };
+
+                    exports.shuiReady = true;
                 }, fengshui_Internal.compile);
             });
         `;

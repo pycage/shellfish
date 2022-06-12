@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of Shellfish-3D.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -41,6 +41,11 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
             d.set(this, {
                 
             });
+
+            this.onChildrenChanged = () =>
+            {
+                this.invalidate();
+            };
         }
 
         prepareScene(om, sceneInfo)

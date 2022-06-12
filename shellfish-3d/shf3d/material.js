@@ -273,7 +273,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             this.bumpSourceChanged();
 
             const img = new Image();
-            img.onload = () =>
+            img.onload = this.safeCallback(() =>
             {
                 //console.log("bump map loaded: " + b);
                 this.schedule((gl) =>
@@ -287,9 +287,9 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                     gl.bindTexture(gl.TEXTURE_2D, null);
 
-                    this.invalidate();
                 });
-            };
+                this.invalidate();
+            });
             img.onerror = (err) =>
             {
                 console.error("Failed to load bump map: " + b);
@@ -306,7 +306,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             this.sourceChanged();
 
             const img = new Image();
-            img.onload = () =>
+            img.onload = this.safeCallback(() =>
             {
                 //console.log("texture loaded: " + s);
                 this.schedule((gl) =>
@@ -323,7 +323,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                     gl.bindTexture(gl.TEXTURE_2D, null);
                 });
                 this.invalidate();
-            };
+            });
             img.onerror = (err) =>
             {
                 console.error("Failed to load texture: " + s);

@@ -59,12 +59,16 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
      * Represents a camera in the scene.
      * 
      * There may be multiple cameras in a scene and the active camera may be
-     * switched in the View element.
+     * switched in the View element by assigning the `camera` property.
      * 
      * @memberof shf3d
      * @extends shf3d.Entity
+     * 
+     * @property {number} aspect - (default: `1`) The aspect ratio of the camera view.
+     * @property {number} fieldOfView - (default: `45`) The field of view in degrees.
+     * @property {string} projection - (default: `"perspective"`) The projection mode. One of `perspective|orthographic`
      */
-    exports.Camera = class Camera extends entity.Entity
+    class Camera extends entity.Entity
     {
         constructor()
         {
@@ -121,5 +125,6 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
                 sceneInfo.cameraLocation = mat.mul(mat.mul(om, this.matrix), mat.vec(0, 0, 0, 1));
             }
         }
-    };
+    }
+    exports.Camera = Camera;
 });

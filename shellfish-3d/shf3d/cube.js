@@ -71,7 +71,7 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js", "shellfish/core/
      * @extends shf3d.Mesh
      * @property {shf3d.Material} material - (default: `null`) The surface material.
      */
-    exports.Cube = class Cube extends mesh.Mesh
+    class Cube extends mesh.Mesh
     {
         constructor()
         {
@@ -121,5 +121,6 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js", "shellfish/core/
                 return [];
             }
         }
-    };
+    }
+    exports.Cube = Cube;
 });

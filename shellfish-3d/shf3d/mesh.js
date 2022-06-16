@@ -38,7 +38,7 @@ shRequire([__dirname + "/entity.js",
      *                              clockwise order instead of being in
      *                              counter-clockwise order.
      */
-    exports.Mesh = class Mesh extends entity.Entity
+    class Mesh extends entity.Entity
     {
         constructor()
         {
@@ -170,6 +170,13 @@ shRequire([__dirname + "/entity.js",
             });
         }
 
+        /**
+         * Assigns a material to a range of surfaces of the mesh.
+         * 
+         * @param {shf3d.Material} material - The material.
+         * @param {number} from - The first surface of the range.
+         * @param {number} to - The last surface of the range.
+         */
         assignMaterial(material, from, to)
         {
             d.get(this).materials.push({ material, from, to });
@@ -200,5 +207,6 @@ shRequire([__dirname + "/entity.js",
                 }
             });
         }
-    };
+    }
+    exports.Mesh = Mesh;
 });

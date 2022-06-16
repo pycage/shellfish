@@ -17,7 +17,7 @@ makes declarative programming an ideal choice for building UIs.
 
 For instance, buttons may only be clickable under certain circumstances, while
 the visibility or size of other elements may depend on a lot of other factors.
-The modeling all of these dependencies with procedural or object oriented programming
+Modeling all of these dependencies with procedural or object oriented programming
 can result in pieces of code that are hard to extend or maintain.
 
 # Dynamic Values

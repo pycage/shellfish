@@ -36,7 +36,7 @@ shRequire([__dirname + "/mesh.js",
      *    (note that textures in the MTL must be supplied in JPEG or PNG format).
      * 
      * @memberof shf3d
-     * @property {bool} autoNormals - (default: `false`) If ´true`, the model's
+     * @property {bool} autoNormals - (default: `false`) If `true`, the model's
      *                                normal vectors are replaced by auto-generated
      *                                normal vectors. Use this if the shading of
      *                                the model seems wrong. If the model supplies
@@ -45,7 +45,7 @@ shRequire([__dirname + "/mesh.js",
      * @property {string} source - The URL of the source file to load. Referenced MTL files and textures are fetched automatically.
      * @property {string} status - [readonly] The current status. One of: `empty|loading|error|success`
      */
-    exports.Model3D = class Model3D extends mesh.Mesh
+    class Model3D extends mesh.Mesh
     {
         constructor()
         {
@@ -196,5 +196,6 @@ shRequire([__dirname + "/mesh.js",
                 this.invalidate();
             }
         }
-    };
+    }
+    exports.Model3D = Model3D;
 });

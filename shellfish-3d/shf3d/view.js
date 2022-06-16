@@ -30,12 +30,14 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
      * Class representing a view displaying a 3D scene.
      * 
      * @memberof shf3d
+     * @extends html.Canvas
+     * 
      * @property {color} ambience - (default: `rgb(0, 0, 0)`) The ambient light color.
      * @property {color} color - (default: `rgb(0, 0, 0)`) The background color.
      * @property {shf3d.Camera} camera - (default: `null`) The active camera.
      * @property {shf3d.Entity} scene - (default: `null`) The scene to show.
      */
-    exports.View = class View extends html.Canvas
+    class View extends html.Canvas
     {
         constructor()
         {
@@ -137,6 +139,9 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
             s.connect("invalidate", this, () => { this.invalidateScene(); });
         }
 
+        /**
+         * Invalidates the scene and causes it to render again.
+         */
         invalidateScene()
         {
             const priv = d.get(this);
@@ -152,6 +157,9 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
             }
         }
 
+        /**
+         * Renders the scene.
+         */
         renderScene()
         {
             //console.log("render scene into " + this.objectLocation);
@@ -190,6 +198,7 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
                 priv.scene.renderScene(gl, mat.scalingM(mat.vec(1, 1, 1, 1)), sceneInfo);
             }
 
+            // render subviews
             this.children.filter(c => c !== priv.scene && c.renderScene).forEach((obj) =>
             {
                 //console.log("child: " + obj.constructor.name);
@@ -208,5 +217,6 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
             }
             child.parent = this;
         }
-    };
+    }
+    exports.View = View;
 });

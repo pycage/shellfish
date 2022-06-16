@@ -7,15 +7,15 @@ each level.
 
 ### low
 
-The low level (see {@link low}) provides a procedural API for dealing with the HTML
+The low level provides a procedural API for dealing with the HTML
 DOM and CSS inside the browser or a similar runtime environment.
 
 This is the foundation the higher levels build upon. As a programmer, you
 rarely have to use the low level API directly.
 
-### mid
+### mid - The Object-Oriented Layer
 
-The mid level (see {@link mid}) provides an object-oriented toolkit of UI elements.
+The mid level provides an object-oriented toolkit of UI elements.
 
 This is an example of code using the mid level:
 
@@ -37,7 +37,7 @@ The mid level builds the foundation for Shellfish's high level. Only when you in
 to implement new custom mid level elements derived from other elements, the mid level may
 concern you.
 
-### high
+### high - The Declarative Layer
 
 The high level (see {@link high}) is a declarative wrapper for the mid level. This is
 the level where concepts such as dynamic values or bindings are introduced.

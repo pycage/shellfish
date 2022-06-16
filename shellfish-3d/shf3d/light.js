@@ -29,8 +29,8 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
     /**
      * Class representing a light source in a 3D scene.
      * 
-     * Scenes without light sources display objects in the ambient only, without
-     * highlights or shades.
+     * Scenes without light sources display objects in the ambient light only,
+     * without highlights or shades.
      * 
      * A scene may use up to 16 light sources.
      * 
@@ -39,7 +39,7 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
      * @property {color} color - The light color.
      * @property {number} range - The range of the light until 100% fall-off.
      */
-    exports.Light = class Light extends entity.Entity
+    class Light extends entity.Entity
     {
         constructor()
         {
@@ -85,5 +85,6 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
                 range: this.range
             });
         }
-    };
+    }
+    exports.Light = Light;
 });

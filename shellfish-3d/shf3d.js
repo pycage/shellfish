@@ -56,7 +56,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * The `View` can switch between multiple cameras in a scene.
  * 
- * @module shf3d
+ * @namespace shf3d
  */
 
 exports.__id = "shellfish/3d";

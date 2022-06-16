@@ -32,13 +32,16 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
      * @memberof shf3d
      * @extends core.Object
      * 
+     * @property {matrix.Matrix} inverseMatrix - [readonly] The inverse of `matrix`.
      * @property {vec3} location - (default: `vec3(0, 0, 0)`) The current location.
+     * @property {matrix.Matrix} matrix - [readonly] The current transformation matrix.
      * @property {number} rotationAngle - (default: `0`) The rotation angle in degrees.
      * @property {vec3} rotationAxis - (default: `vec3(0, 1, 0)`) The rotation axis. 
+     * @property {number[]} rotationQuaternion - [readonly] The quaternion describing the current rotation.
      * @property {vec3} scale - (default: `vec3(1, 1, 1)`) The current scale.
      * @property {bool} visible - (default: `true`) Whether the entity is visible.
      */
-    exports.Entity = class Entity extends core.Object
+    class Entity extends core.Object
     {
         constructor()
         {
@@ -176,7 +179,6 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
         /**
          * Schedules a function to be executed with a GL context.
          * 
-         * @memberof shf3d.Entity
          * @param {function} f - The function.
          */
         schedule(f)
@@ -184,6 +186,12 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
             d.get(this).scheduledFunctions.push(f);
         }
 
+        /**
+         * Runs the scheduled functions with a GL context.
+         * 
+         * @private
+         * @param {GLContext} gl 
+         */
         prepare(gl)
         {
             d.get(this).scheduledFunctions.forEach((f) =>
@@ -197,7 +205,6 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
          * Moves the entity by the given directional vector.
          * The vector is expected to be in the entity-local coordinate-system.
          * 
-         * @memberof shf3d.Entity
          * @param {vec3} dv - The directional vector.
          */
         move(dv)
@@ -218,6 +225,13 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
             ));
         }
 
+        /**
+         * Performs collision detection with a vertex. Subclasses may override
+         * this method in order to implement collision detection.
+         * 
+         * @property {vec3} v - The vertex to check for.
+         * @returns {shf3d.Entity[]} - The entities colliding with the vertex.
+         */
         collisionsWith(v)
         {
             return [];
@@ -232,5 +246,6 @@ shRequire(["shellfish/core", "shellfish/core/matrix", "shellfish/core/vector"], 
         {
             // no action by default
         }
-    };
+    }
+    exports.Entity = Entity;
 });

@@ -37,7 +37,7 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js"], (mesh, util) =>
      * @property {string} source - (default: `""`) The URL of the height-field image.
      * @property {string} status - [readonly] The current status. One of: `empty|loading|error|success`
      */
-    exports.HeightMesh = class HeightMesh extends mesh.Mesh
+    class HeightMesh extends mesh.Mesh
     {
         constructor()
         {
@@ -241,5 +241,6 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js"], (mesh, util) =>
 
             return (hx + hy) / 2;
         }
-    };
+    }
+    exports.HeightMesh = HeightMesh;
 });

@@ -96,7 +96,7 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js"], (mesh, util) =>
      * @extends shf3d.Mesh
      * @property {shf3d.Material} material - (default: `null`) The surface material.
      */
-    exports.Sphere = class Sphere extends mesh.Mesh
+    class Sphere extends mesh.Mesh
     {
         constructor()
         {
@@ -132,5 +132,6 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js"], (mesh, util) =>
             
             this.materialChanged();
         }
-    };
+    }
+    exports.Sphere = Sphere;
 });

@@ -179,7 +179,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
      * @property {number} shininess - (default: `1`) The surface's shininess. The lower the shininess value, the matter the surface appears.
      * @property {string} source - (default: `""`) The URL of a texture.
      */
-    exports.Material = class Material extends core.Object
+    class Material extends core.Object
     {
         constructor()
         {
@@ -497,5 +497,6 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                 gl.uniform1fv(programInfo.uniforms.lightRange, new Float32Array(lightRanges));
             }
         }
-    };
+    }
+    exports.Material = Material;
 });

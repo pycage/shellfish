@@ -1,7 +1,7 @@
 The Shellfish SDK assists you with tools to
 
  * build the API documentation locally
- * build the Shellfish runtime bundle file `shellfish.pkg`
+ * build the Shellfish runtime bundle files, such as `shellfish.pkg`
 
 # Setup
 
@@ -21,9 +21,9 @@ for the SDK; Shellfish itself has no external dependencies.
 
 Next, run
 
-    npm run build-package
+    npm run build-all
 
-to create the Shellfish bundle file `build/shellfish.pkg`.
+to create the Shellfish bundle files with ending `.pkg` in the `dist` subdirectory.
 
 ## Building the API Documentation
 
@@ -31,21 +31,33 @@ Run
 
     npm run generate-docs
 
-to build the API documentation in HTML format in the directory `build/doc/`.
+to build the API documentation in HTML format in the directory `dist/doc/`.
 
+## Exploring the Gallery
+
+Shellfish comes with a gallery of examples along with their source code in
+the `gallery` subdirectory. Run
+
+    npm run run-gallery
+
+to start a web server. Then point your browser to
+
+    http://localhoat:8000
 
 # Distributing the Shellfish Runtime
 
-When distributing a Shellfish UI, all you need are the files
+When distributing a Shellfish application, all you need are the files
 
  * `require.js` (found in the `lib` subdirectory)
  * `shellfish.pkg` (the file you have built in the previous step)
+ * some of the other `.pkg` files if needed
  * and of course an `index.html` as the application's entry point
 
 along with your code.
 
 These are all static files, so put them on your webserver of choice. For the
-`index.html` file, just use the one you can find in the `lib` subdirectory.
+`index.html` file, just use the one you can find in the `gallery/www` subdirectory
+as a base.
 
 Add another file `main.shui` with this code:
 

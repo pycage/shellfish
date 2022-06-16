@@ -27,9 +27,17 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
     const d = new WeakMap();
 
     /**
-     * Class representing a sub-view displaying a 3D scene.
+     * Class representing a sub-view displaying a 3D scene within a view.
+     * 
+     * @memberof shf3d
+     * @extends core.Object
+     * 
+     * @property {color} ambience - (default: `rgb(0, 0, 0)`) The ambient light color.
+     * @property {color} color - (default: `rgb(0, 0, 0)`) The background color.
+     * @property {shf3d.Camera} camera - (default: `null`) The active camera.
+     * @property {shf3d.Entity} scene - (default: `null`) The scene to show.
      */
-    exports.SubView = class SubView extends core.Object
+    class SubView extends core.Object
     {
         constructor()
         {
@@ -152,6 +160,9 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             this.invalidateScene();
         }
 
+        /**
+         * Renders the scene.
+         */
         renderScene(gl)
         {
             //console.log("render scene into " + this.objectLocation);
@@ -190,5 +201,6 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                 priv.scene.renderScene(gl, mat.scalingM(mat.vec(1, 1, 1, 1)), sceneInfo);
             }
         }
-    };
+    }
+    exports.SubView = SubView;
 });

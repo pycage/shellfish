@@ -33,7 +33,7 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
      * @memberof shf3d
      * @extends shf3d.Entity
      */
-    exports.Group = class Group extends entity.Entity
+    class Group extends entity.Entity
     {
         constructor()
         {
@@ -87,5 +87,6 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
             child.parent = this;
             child.connect("invalidate", this, () => { this.invalidate(); });
         }
-    };
+    }
+    exports.Group = Group;
 });

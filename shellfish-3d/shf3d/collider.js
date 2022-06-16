@@ -28,15 +28,15 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
 
     /**
      * Class representing a collider vertex that detects collisions with other
-     * entities.
+     * entities, provided they implement collision detection.
      * 
      * @memberof shf3d
      * @extends shf3d.Entity
      * 
-     * @property {shf3d.Entity[]} collisions - [readonly] The entities that the collider currently collides with.
+     * @property {shf3d.Entity[]} collisions - [readonly] The entities that the collider is currently colliding with.
      * @property {bool} enabled - (default: `true`) Whether the collider is enabled.
      */
-    exports.Collider = class Collider extends entity.Entity
+    class Collider extends entity.Entity
     {
         constructor()
         {
@@ -64,6 +64,12 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
             this.invalidate();
         }
 
+        /**
+         * Registers collision with the given objects.
+         * 
+         * @private
+         * @param {shf3d.Entity[]} objs 
+         */
         collide(objs)
         {
             d.get(this).collisions = objs;
@@ -82,5 +88,6 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
                 });
             }
         }
-    };
+    }
+    exports.Collider = Collider;
 });

@@ -33,11 +33,27 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
      * transformations to each clone. This way expensive entities need to be
      * created or held in memory only once.
      * 
+     * @example
+     * Clone {
+     *      id: a
+     *      entity: Cube { }
+     * }
+     * 
+     * Clone {
+     *      location: vec3(5, 0, 0)
+     *      entity: a.entity
+     * }
+     * 
+     * Clone {
+     *      location: vec3(10, 0, 0)
+     *      entity: a.entity
+     * }
+     * 
      * @memberof shf3d
      * @extends shf3d.Entity
      * @property {shf3d.Entity} entity - (default: `null`) The shared entity.
      */
-    exports.Clone = class Clone extends entity.Entity
+    class Clone extends entity.Entity
     {
         constructor()
         {
@@ -88,5 +104,6 @@ shRequire([__dirname + "/entity.js", "shellfish/core/matrix"], (entity, mat) =>
             const transformed = mat.mul(this.inverseMatrix, v);
             return priv.entity ? priv.entity.collisionsWith(transformed) : [];
         }
-    };
+    }
+    exports.Clone = Clone;
 });

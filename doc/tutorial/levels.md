@@ -15,7 +15,8 @@ rarely have to use the low level API directly.
 
 ### mid - The Object-Oriented Layer
 
-The mid level provides an object-oriented toolkit of UI elements.
+The mid level provides an object-oriented toolkit of elements for UI and other
+purposes.
 
 This is an example of code using the mid level:
 
@@ -39,25 +40,26 @@ concern you.
 
 ### high - The Declarative Layer
 
-The high level (see {@link high}) is a declarative wrapper for the mid level. This is
+The high level (see {@link declarative}) is a declarative wrapper for the 
+object-oriented mid level. This is
 the level where concepts such as dynamic values or bindings are introduced.
 
 However, writing declarative code in plain JavaScript can be quite ugly, especially
 when dealing with bindings:
 
 ```
-const myDocument = high.element(html.Document);
+const myDocument = declarative.element(html.Document);
 myDocument
 .add(
-    high.element(html.Box)
+    declarative.element(html.Box)
     .add(
-        high.element(html.Label)
+        declarative.element(html.Label)
         .id("label1")
         .set("text", "I am Label 1")
     )
     .add(
-        high.element(html.Label)
-        .set("text", high.binding([high.chainRef(myDocument, ["label1", "text"], __rslv__)],
+        declarative.element(html.Label)
+        .set("text", declarative.binding([declarative.chainRef(myDocument, ["label1", "text"], __rslv__)],
                 t =>
         {
             return "I am Label 2. By the way, Label 1 shows " +

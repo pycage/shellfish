@@ -19,7 +19,7 @@ The size of the viewport is described by the read-only `bbox` property.
 
 ### Scrollbars
 
-The boolean `scrollbars` property of {@link html.Box} controls if the HTML runtime
+The boolean `scrollbars` property of {@link html.Box Box} controls if the HTML runtime
 environment shall provide native scrollbars automatically. The default value is `false`,
 which means that no native scrollbars are shown. The element {@link ui.ScrollIndicator}
 provides an alternative to native scrollbars for a uniform look and feel across all

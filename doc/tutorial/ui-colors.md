@@ -1,9 +1,9 @@
-The base class {@link html.Object} provides several functions to create colors
-for assigning them to elements.
+The base class {@link core.Object Object} provides several functions to create
+colors for assigning them to elements.
 
 ### Color by Name
 
-The function {@link html.Object#colorName colorName} creates a {@link html.Color color}
+The function {@link core.Object#colorName colorName} creates a {@link core.Color color}
 object from a name string. Shellfish supports the standard set of
 {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value CSS color names.},
 including `transparent`, which is invisible with the background shining through.

@@ -120,6 +120,34 @@ Document {
 **Attention:** Parameters passed to the multiple handlers are the same objects for each handler function.
 Keep this in mind when modifying a parameter object.
 
+### Initialization and Destruction
+
+All elements provide events for notifying about changes in their life cycle.
+
+The `initialization` event is fired after the element has been initialized.
+An element is considered initialized after it has been created, the properties
+have been set to their configured values, and all of it's child elements have
+been initialized.
+
+The `destruction` event is fired when the element is about to be destroyed. At
+this moment, the element is still functional.
+
+```
+Box {
+
+    onInitialization: () =>
+    {
+        console.log("The box has been created.");
+    }
+
+    onDestruction: () =>
+    {
+        console.log("The box will be destroyed.");
+    }
+    
+}
+```
+
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-elements}
 </span><span class="go-next">

@@ -27,7 +27,7 @@ MouseBox {
 }
 ```
 
-Methods may also be called in binding expressions.
+Methods may also be called by binding expressions.
 
 ```
 Box {

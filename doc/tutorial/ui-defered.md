@@ -7,10 +7,10 @@ Here are some ways of how to defer element creation.
 
 ### Repeating Elements
 
-The {@link html.Repeater Repeater} element spawns new elements from a
+The {@link core.Repeater Repeater} element spawns new elements from a
 template dynamically and places them in its parent container.
 
-The property `model` accepts a {@link html.ListModel ListModel} element,
+The property `model` accepts a {@link core.ListModel ListModel} element,
 which is described in detail in {@tutorial ui-listmodel},
 but for simplicity, the model may also be a plain number.
 
@@ -324,5 +324,5 @@ the root element of the loaded content.
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
 <span class="go-previous">{@tutorial ui-timer}</span>
-<!--<span class="go-next">{@tutorial ui-listmodel}</span>-->
+<span class="go-next">{@tutorial ui-listmodel}</span>
 </div>

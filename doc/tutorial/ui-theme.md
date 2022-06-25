@@ -1,5 +1,5 @@
-The module {@link ui shellfish/ui} is thoroughly using a {@link ui.Theme} element for
-maintaining a uniform look, and so should you.
+The module {@link ui shellfish/ui} is thoroughly using a {@link ui.Theme Theme}
+element for maintaining a uniform look, and so should you.
 
 ### Theme in the Document
 
@@ -22,8 +22,8 @@ Document {
 }
 ```
 
-Shellfish provides the themes {@link ui.Theme} and {@link ui.DarkTheme} in
-{@link ui shellfish/ui}.
+Shellfish provides the themes {@link ui.Theme Theme} and
+{@link ui.DarkTheme DarkTheme} in {@link ui shellfish/ui}.
 
 Since `Document` is the root element of the whole application, the `theme` property
 will be visible everywhere. It provides you with a number of predefined measurements
@@ -58,12 +58,12 @@ Document {
 
 ![](images/ui-theme-01.png)
 
-See {@link ui.Theme} for a description of the properties provided by themes.
+See {@link ui.Theme Theme} for a description of the properties provided by themes.
 
 
 ### Custom Themes
 
-You may define custom themes by overriding the properties of {@link ui.Theme}
+You may define custom themes by overriding the properties of {@link ui.Theme Theme}
 that you want to change.
 
 ```
@@ -141,7 +141,7 @@ Document {
 
 ![](images/ui-theme-02.png)
 
-Note that because {@link html.Box} has no own property `theme`, you have to declare it with
+Note that because {@link html.Box Box} has no own property `theme`, you have to declare it with
 the `property` keyword.
 
 ### Automatic Bright Mode / Dark Mode Switch
@@ -149,7 +149,7 @@ the `property` keyword.
 Some OS such as Windows, MacOS, or Android allow the user to switch between
 a bright mode and a dark mode in recent versions.
 The current preference is represented by the boolean property `systemDarkMode`
-of {@link html.Document}.
+of {@link html.Document Document}.
 
 If you make the application's theme depend on this property, the application will switch
 along with the OS automatically.

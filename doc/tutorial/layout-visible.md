@@ -1,4 +1,4 @@
-The boolean property `visible` controls the visibility of elements. Setting
+The boolean property `visible` controls the visibility of visual elements. Setting
 this value to `false` makes elements disappear from the screen.
 
 ```
@@ -25,7 +25,7 @@ Document {
 The default value for `visible` is `true`.
 
 If an element containing child elements becomes invisible, the child elements
-become invisible as well, even though their `visible` property is `true`.
+become invisible as well, even though their `visible` property was `true`.
 
 ```
 Document {

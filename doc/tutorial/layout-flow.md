@@ -113,7 +113,7 @@ layout flow and do not occupy space.
 ### Overflow Behavior
 
 If the child elements exceed the space inside their parent box, an overflow
-occurs. The property `overflowBehavior` of {@link html.Box} controls how
+occurs. The property `overflowBehavior` of {@link html.Box Box} controls how
 overflows are handled.
 
 `overflowBehavior` may have one of these values:

@@ -1,5 +1,5 @@
-All visual element derive from {@link html.Item} and have properties for controlling
-their size.
+All visual elements derive from {@link html.Item Item} and have properties for
+controlling their size.
 
 ### Width and Height
 
@@ -70,7 +70,8 @@ Box {
 }
 ```
 
-The properties `maxWidth` and `maxHeight` dictate the maximum size of an element.
+The properties `maxWidth` and `maxHeight`, on the other hand, dictate the
+maximum size of an element.
 It is under no circumstances allowed to grow larger.
 
 ```

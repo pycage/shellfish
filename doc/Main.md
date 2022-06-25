@@ -42,7 +42,7 @@ or even by shipping only pre-translated code. It's your choice.
 
 ### Introduction to Shui
 
-Shui is the declarative UI description language used by Shellfish.
+Shui is the declarative description language used by Shellfish.
 
 * {@tutorial shui-elements}
 * {@tutorial shui-events}
@@ -74,8 +74,9 @@ Layouting elements on screen is intuitive, yet powerful.
 * {@tutorial ui-animations}
 * {@tutorial ui-timer}
 * {@tutorial ui-defered}
-<!--
 * {@tutorial ui-listmodel}
+<!--
+* {@tutorial ui-dragndrop}
 -->
 
 <!--

@@ -4,7 +4,7 @@ repeatedly.
 
 ### The `Timer` Element
 
-The `Timer` element has a property `running` that controls if the timer is
+The {@link core.Timer Timer} element has a property `running` that controls if the timer is
 active. As long as `running` is `false`, which is the default value, the
 timer does nothing. 
 
@@ -36,7 +36,7 @@ Document {
 
 ### The `FrameTimer` Element
 
-The `FrameTimer` element is a special timer that is bound to the screen
+The {@link html.FrameTimer FrameTimer} element is a special timer that is bound to the screen
 refresh rate. Instead of a repetition interval, you may specify a frame
 rate of how often the event is emitted within a second with the property
 `fps`. The default value is 60 frames per second.

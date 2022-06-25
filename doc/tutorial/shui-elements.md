@@ -154,7 +154,7 @@ at runtime and breaks the infinite update loop, they print an error message to t
 and serve no purpose.
 
 References consisting of only the property name without an element identifier access the element they are
-used within, or one of its ancestors if the property is not found.
+used within, or one of its ancestors if the property was not found.
 
 ```
 Box {

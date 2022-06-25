@@ -74,7 +74,7 @@ of `main.shui`, even though it is a descendent element.
 Namespaces are assigned automatically by the Shui compiler (see {@link fengshui fengshui})
 at compile time and may be accessed by the `__namespace` constant as a string value.
 
-Every Shui file and template gets its own namespace this way.
+All Shui files and also templates get their own namespace this way.
 
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-templates}

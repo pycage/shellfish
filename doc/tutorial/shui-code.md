@@ -33,10 +33,14 @@ width = 100;
 ```
 
 The special identifier `self` may be used to reference the element that contains the
-code block. `self` may be omitted in this case, though.
+code block. `self` may be omitted when accessing properties or methods, though.
 
 ```
 self.width = 100;
+```
+is the same as
+```
+width = 100;
 ```
 
 ### Local Variables
@@ -51,7 +55,7 @@ Local variables may be declared with the JavaScript keywords `var`, `let`, and `
 
  * `const` declares a constant with block scope. It is not allowed to assign a new value
    to a `const` after its declaration, but it is allowed to modify the value itself
-   (for example, you may append elements to a `const` list).
+   (for example, you may append items to a `const` list).
 
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-methods}

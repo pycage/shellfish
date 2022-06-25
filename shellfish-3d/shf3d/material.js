@@ -272,6 +272,12 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             priv.bumpSource = b;
             this.bumpSourceChanged();
 
+            if (b === "")
+            {
+                this.invalidate();
+                return;
+            }
+
             const img = new Image();
             img.onload = this.safeCallback(() =>
             {
@@ -304,6 +310,12 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             const priv = d.get(this);
             priv.source = s;
             this.sourceChanged();
+
+            if (s === "")
+            {
+                this.invalidate();
+                return;
+            }
 
             const img = new Image();
             img.onload = this.safeCallback(() =>

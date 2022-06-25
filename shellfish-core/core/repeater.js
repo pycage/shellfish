@@ -340,7 +340,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                 }
             };
 
-            const now = Date.now();
+            //const now = Date.now();
             if (this.parent.withoutSizing)
             {
                 this.parent.withoutSizing(f);

@@ -75,20 +75,11 @@ Layouting elements on screen is intuitive, yet powerful.
 * {@tutorial ui-timer}
 * {@tutorial ui-defered}
 * {@tutorial ui-listmodel}
-<!--
 * {@tutorial ui-dragndrop}
+<!--
 -->
 
 <!--
-### UI
-
-* Assigning Colors
-* Using Themes
-* Representing Lists of Data
-* Defering Loading of Elements
-* Animations and Easing Curves
-* Using Timers
-* Drag & Drop
 
 ### Filesystem
 

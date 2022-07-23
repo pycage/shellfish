@@ -75,6 +75,7 @@ const mods = [
     "model3d",
     "sphere",
     "subview",
+    "surface",
     "view"
 ];
 

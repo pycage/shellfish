@@ -164,6 +164,22 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
 
     const programInfos = new WeakMap();
 
+    function createTexture(gl, image)
+    {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.generateMipmap(gl.TEXTURE_2D)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        return texture;
+    }
+
     const d = new WeakMap();
 
     /**
@@ -195,13 +211,17 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                 bumpSource: "",
                 texture: null,
                 bumpTexture: null,
-                scheduledFunctions: []
+                scheduledFunctions: [],
+                loading: false,
+                clearImage: new ImageData(1, 1),
+                gl: null
             });
 
             this.notifyable("bumpSource");
             this.notifyable("color");
             this.notifyable("columns");
             this.notifyable("emissiveColor");
+            this.notifyable("loading");
             this.notifyable("opacity");
             this.notifyable("rows");
             this.notifyable("shininess");
@@ -213,7 +233,29 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             this.registerEvent("invalidate");
 
             this.schedule((gl) => { this.initGl(gl); });
+
+            this.onDestruction = () =>
+            {
+                const priv = d.get(this);
+                if (priv.texture)
+                {
+                    priv.gl.deleteTexture(priv.texture);
+                }
+                if (priv.bumpTexture)
+                {
+                    priv.gl.deleteTexture(priv.bumpTexture);
+                }
+
+                const programInfo = programInfos.get(priv.gl);
+                programInfo.usageCount -= 1;
+                if (programInfo.usageCount === 0)
+                {
+                    priv.gl.deleteProgram(programInfo.id);
+                }
+            };
         }
+
+        get loading() { return d.get(this).loading; }
 
         get emissiveColor() { return d.get(this).emissiveColor; }
         set emissiveColor(c)
@@ -284,15 +326,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                 //console.log("bump map loaded: " + b);
                 this.schedule((gl) =>
                 {
-                    priv.bumpTexture = gl.createTexture();
-                    gl.bindTexture(gl.TEXTURE_2D, priv.bumpTexture);
-                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-                    gl.generateMipmap(gl.TEXTURE_2D)
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
-
+                    priv.bumpTexture = createTexture(gl, img);
                 });
                 this.invalidate();
             });
@@ -313,31 +347,39 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
 
             if (s === "")
             {
+                priv.texture = null;
                 this.invalidate();
                 return;
             }
 
+            if (! priv.texture)
+            {
+                this.schedule(gl =>
+                {
+                    priv.texture = createTexture(gl, priv.clearImage);
+                });
+            }
+            
             const img = new Image();
+            priv.loading = true;
+            this.loadingChanged();
             img.onload = this.safeCallback(() =>
             {
+                priv.loading = false;
+                this.loadingChanged();
+
                 //console.log("texture loaded: " + s);
                 this.schedule((gl) =>
                 {
-                    priv.texture = gl.createTexture();
-                    gl.bindTexture(gl.TEXTURE_2D, priv.texture);
-                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-                    gl.generateMipmap(gl.TEXTURE_2D)
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    gl.deleteTexture(priv.texture);
+                    priv.texture = createTexture(gl, img);
                 });
                 this.invalidate();
             });
             img.onerror = (err) =>
             {
+                priv.loading = false;
+                this.loadingChanged();
                 console.error("Failed to load texture: " + s);
             }
             //console.log("Loading texture: " + s);
@@ -360,6 +402,8 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
 
         initGl(gl)
         {
+            d.get(this).gl = gl;
+
             if (! programInfos.get(gl))
             {
                 const programId = gl.createProgram();
@@ -395,6 +439,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
         
                 programInfos.set(gl, {
                     id: programId,
+                    usageCount: 1,
                     uniforms: {
                         viewMatrix: gl.getUniformLocation(programId, "vm"),
                         objectMatrix: gl.getUniformLocation(programId, "om"),
@@ -424,6 +469,10 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
                         texture: gl.getAttribLocation(programId, "vTexCoord")
                     }
                 });
+            }
+            else
+            {
+                programInfos.get(gl).usageCount += 1;
             }
         }
 

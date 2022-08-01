@@ -326,6 +326,11 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         this.response(200, "OK")
                         .body(makeIndexDocument(priv.root, path, files), "text/html")
                         .send();
+                    })
+                    .catch(err =>
+                    {
+                        this.response(500, "Internal Error")
+                        .send();
                     });
                     return;
                 }
@@ -540,6 +545,11 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                     this.response(404, "Resource Not Available")
                     .send();
                 });
+            })
+            .catch(err =>
+            {
+                this.response(500, "Internal Error")
+                .send();
             });
         }
 
@@ -609,6 +619,10 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
 
                 this.response(207, "Multi-Status")
                 .body(out, "application/xml")
+                .send();
+            })
+            .catch(err => {
+                this.response(500, "Internal Error")
                 .send();
             });
 

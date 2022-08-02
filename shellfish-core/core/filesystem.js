@@ -166,11 +166,20 @@ shRequire([__dirname + "/object.js"], obj =>
                     {
                         const files = await this.list(this.dirname(path));
                         const info = files.find(f => f.path === path);
-                        resolve(info || null);
+                        if (info)
+                        {
+                            resolve(info);
+                        }
+                        else
+                        {
+                            reject("'" + path + "' not found");
+                        }
+                        //resolve(info || null);
                     }
                     catch (err)
                     {
-                        resolve(null);
+                        //resolve(null);
+                        reject(err);
                     }
                 }
             });

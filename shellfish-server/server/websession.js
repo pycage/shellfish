@@ -211,8 +211,8 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                     })
                     .catch(err =>
                     {
+                        this.log("WWW", "error", err);
                         this.response(500, "Internal Server Error")
-                        .body("" + err)
                         .send();
                     });
                     return;
@@ -245,15 +245,15 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                 })
                 .catch(err =>
                 {
+                    this.log("WWW", "error", err);
                     this.response(500, "Internal Server Error")
-                    .body("" + err)
                     .send();
                 });
             })
             .catch(err =>
             {
+                this.log("WWW", "error", err);
                 this.response(403, "Forbidden")
-                .body("" + err)
                 .send();
             });
         }
@@ -275,8 +275,8 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             })
             .catch(err =>
             {
+                this.log("WWW", "error", err);
                 this.response(403, "Forbidden")
-                .body("" + err)
                 .send();
             });
         }

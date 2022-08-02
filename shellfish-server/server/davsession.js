@@ -280,8 +280,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
+                this.log("DAV", "error", err);
                 this.response(401, "Forbidden")
-                .body("" + err)
                 .send();
             });
         }
@@ -301,8 +301,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
+                this.log("DAV", "error", err);
                 this.response(403, "Forbidden")
-                .body("" + err)
                 .send();
             });
         }
@@ -329,7 +329,9 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                     })
                     .catch(err =>
                     {
-                        this.response(500, "Internal Error")
+                        // apparently no read permission
+                        this.log("DAV", "error", err);
+                        this.response(403, "Forbidden")
                         .send();
                     });
                     return;
@@ -362,15 +364,15 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 })
                 .catch(err =>
                 {
+                    this.log("DAV", "error", err);
                     this.response(500, "Internal Server Error")
-                    .body("" + err)
                     .send();
                 });
             })
             .catch(err =>
             {
-                this.response(403, "Forbidden")
-                .body("" + err)
+                this.log("DAV", "error", err);
+                this.response(404, "Resource Not Available")
                 .send();
             });
         }
@@ -392,8 +394,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
-                this.response(403, "Forbidden")
-                .body("" + err)
+                this.log("DAV", "error", err);
+                this.response(404, "Resource Not Available")
                 .send();
             });
         }
@@ -412,7 +414,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
-                console.error(err);
+                this.log("DAV", "error", err);
                 this.response(403, "Forbidden")
                 .send();
             });
@@ -434,8 +436,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
+                this.log("DAV", "error", err);
                 this.response(409, "Conflict")
-                .body("" + err)
                 .send();
             });
         }
@@ -522,8 +524,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         })
                         .catch(err =>
                         {
+                            this.log("DAV", "error", err);
                             this.response(500, "Internal Error")
-                            .body("" + err, "text/plain")
                             .send();
                         });
                     }
@@ -542,12 +544,14 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 })
                 .catch(err =>
                 {
+                    this.log("DAV", "error", err);
                     this.response(404, "Resource Not Available")
                     .send();
                 });
             })
             .catch(err =>
             {
+                this.log("DAV", "error", err);
                 this.response(500, "Internal Error")
                 .send();
             });
@@ -622,6 +626,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 .send();
             })
             .catch(err => {
+                this.log("DAV", "error", err);
                 this.response(500, "Internal Error")
                 .send();
             });
@@ -643,8 +648,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             })
             .catch(err =>
             {
+                this.log("DAV", "error", err);
                 this.response(409, "Conflict")
-                .body("" + err)
                 .send();
             });
         }

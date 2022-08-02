@@ -151,6 +151,11 @@ shRequire(["shellfish/core"], core =>
             }
             if (this.dataStream)
             {
+                this.dataStream.on("error", () =>
+                {
+                    console.error("broken pipe");
+                    this.response.end();
+                });
                 this.dataStream.pipe(this.response);
             }
             else

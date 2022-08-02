@@ -176,13 +176,13 @@ const shRequire = (function ()
         const parts = url.split("/");
         let outParts = [];
         
-        parts.forEach(function (p)
+        parts.forEach((p, idx) =>
         {
             if (p === ".." && outParts.length > 0 && outParts[outParts.length - 1] !== "..")
             {
                 outParts.pop();
             }
-            else if (p === "." || p === "")
+            else if (p === "." || (p === "" && idx > 0) /* don't drop leading / */)
             {
                 // ignore "." and ""
             }
@@ -191,11 +191,6 @@ const shRequire = (function ()
                 outParts.push(p);
             }
         });
-
-        if (url.startsWith("/") && ! url.startsWith("//"))
-        {
-            outParts.unshift("");
-        }
 
         //console.log("normalized URL " + url + " -> " + outParts.join("/"));
         return outParts.join("/");

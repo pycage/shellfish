@@ -734,7 +734,7 @@ exports.tools = {
             requirements.push({ module: "shellfish/html", alias: "html" });
         }
 
-        let moduleDir = "/";
+        let moduleDir = ".";
         if (moduleLocation.indexOf("/") !== -1)
         {
             moduleDir = moduleLocation.substr(0, moduleLocation.lastIndexOf("/"));

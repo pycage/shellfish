@@ -39,15 +39,15 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
         {
             return new Promise((resolve, reject) =>
             {
-                let data = "";
-                const stream = modFs.createReadStream(this.path);
+                const chunks = [];
+                const stream = modFs.createReadStream(this.path, { encoding: "binary" });
                 stream.on("data", chunk =>
                 {
-                    data += chunk;
+                    chunks.push(Buffer.from(chunk, "binary"));
                 });
                 stream.on("end", () =>
                 {
-                    resolve(data);
+                    resolve(Buffer.concat(chunks));
                 });
                 stream.on("error", err =>
                 {
@@ -281,7 +281,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
     const d = new WeakMap();
 
     /**
-     * Class for accessing the local filesystem.
+     * Class for accessing the local filesystem on the server side.
      * 
      * @extends core.Filesystem
      * @memberof server

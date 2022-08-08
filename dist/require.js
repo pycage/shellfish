@@ -685,10 +685,11 @@ const shRequire = (function ()
                                 }
                             }
                         };
+                        const module = { };
                         ${code}
                         if (haveShellfish)
                         {
-                            const mod = typeof Module !== "undefined" ? Module : exports;
+                            const mod = typeof Module !== "undefined" ? Module : module.exports ? module.exports : exports;
                             mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
                             shRequire.registerModule("${url}", mod);
                         }
@@ -892,7 +893,7 @@ const shRequire = (function ()
 
         if (ext === "css")
         {
-            loadStyle(url, function ()
+            loadStyle(url, () =>
             {
                 nextScheduled = false;
                 ctx.modules.push(null);

@@ -186,7 +186,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
      * @extends server.HTTPSession
      * @memberof server
      * 
-     * @property {core.Filesystem} - (default: `null`) The filesystem to serve.
+     * @property {core.Filesystem} filesystem - (default: `null`) The filesystem to serve.
      * @property {string} root - (default: `"/"`) The path in the filesystem to use as the root folder.
      */
     class DAVSession extends httpSession.HTTPSession

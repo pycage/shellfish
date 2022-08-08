@@ -130,7 +130,15 @@ shRequire([__dirname + "/object.js"], obj =>
          */
         exists(path)
         {
-            throw "Not implemented";
+            const f = async () =>
+            {
+                const dir = this.dirname(path);
+                const filename = this.filename(path);
+
+                const files = await this.list(dir);
+                return files.indexof(filename) !== -1;
+            };
+            return f();
         }
 
         /**

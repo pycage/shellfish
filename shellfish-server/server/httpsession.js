@@ -250,9 +250,28 @@ shRequire(["shellfish/core"], core =>
     const d = new WeakMap();
 
     /**
-     * Class representing a HTTP session.
+     * Base class representing a HTTP session. Connect to the `request` event
+     * in order to handle HTTP requests.
      * 
      * A session is identified by a session ID.
+     * 
+     * @example
+     * HttpSession {
+     *     onRequest: req =>
+     *     {
+     *         if (req.method === "FOO")
+     *         {
+     *             response(200, "OK")
+     *             .body("You requested " + req.url)
+     *             .send();
+     *         }
+     *         else
+     *         {
+     *             response(404, "Not Found")
+     *             .send();
+     *         }
+     *     }
+     * }
      * 
      * @extends core.Object
      * @memberof server

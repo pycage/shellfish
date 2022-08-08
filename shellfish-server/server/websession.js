@@ -137,10 +137,13 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
      * Class representing a plain web session serving a filesystem for
      * GET and HEAD methods.
      * 
+     * When requesting a folder, a simple HTML page with the folder's contents
+     * is generated.
+     * 
      * @extends server.WebSession
      * @memberof server
      * 
-     * @property {core.Filesystem} - (default: `null`) The filesystem to serve.
+     * @property {core.Filesystem} filesystem - (default: `null`) The filesystem to serve.
      * @property {string} root - (default: `"/"`) The local path to use as the root folder.
      */
     class WebSession extends httpSession.HTTPSession

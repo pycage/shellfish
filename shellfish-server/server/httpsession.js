@@ -277,6 +277,7 @@ shRequire(["shellfish/core"], core =>
      * @memberof server
      * 
      * @property {string} sessionId - [readonly] The ID that identifies this session. The ID is assigned by the {@link server.HTTPServer HTTP server}.
+     * @property {string} user - [readonly] The user ID associated with this session.
      * @property {number} timeout - (default: `60000`) The session inactivity timeout in ms. The session closes automatically after this time of inactivity.
      * @property {function} urlMapper - (default: `url => url`) A function for mapping the request URL.
      */
@@ -297,6 +298,7 @@ shRequire(["shellfish/core"], core =>
 
             this.notifyable("timeout");
             this.notifyable("urlMapper");
+            this.notifyable("user");
 
             /**
              * Is triggered when a request comes in.
@@ -315,6 +317,9 @@ shRequire(["shellfish/core"], core =>
 
         get sessionId() { return d.get(this).sessionId; }
         set sessionId(id) { d.get(this).sessionId = id; }
+
+        get user() { return d.get(this).user; }
+        set user(u) { d.get(this).user = u; this.userChanged(); }
 
         get timeout() { return d.get(this).timeout; }
         set timeout(t)
@@ -336,7 +341,7 @@ shRequire(["shellfish/core"], core =>
 
             priv.request = request;
             priv.response = response;
-            priv.user = user;
+            //priv.user = user;
 
             this.request(makeRequestEvent(priv.urlMapper, request, user));
 

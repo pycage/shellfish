@@ -133,7 +133,7 @@ shRequire(["shellfish/core"], core =>
                 user = priv.authentication.authorize(request);
                 if (user === null)
                 {
-                    this.log("HTTP", "info", "Requesting Authorization for " +
+                    this.log("HTTP/Auth", "info", "Requesting Authorization for " +
                              request.connection.remoteAddress + ":" + request.connection.remotePort +
                              " - " + request.method + " " + request.url);
 
@@ -147,6 +147,7 @@ shRequire(["shellfish/core"], core =>
 
             const sessionId = priv.generateSessionId(request);
             const session = this.getSession(sessionId);
+            session.user = user;
             session.handleRequest(request, response, user);
         }
 

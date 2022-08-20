@@ -129,6 +129,16 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### August 2022
+* The element {@link server.HTTPServer} has the new property `enabled` for turning
+  the server on or off.
+* The element {@link core.FileStorage} has the new read-only property `ready` to
+  get notified when the file storage is loaded and ready.
+
+### July 2022
+* The new element {@link shf3d.Surface} provides a flat rectangular 2D surface
+  for use in 3D scenes.
+
 ### May 2022
 * **API Break:** The module `shellfish/high` is now named `shellfish/declarative`.
   Since this module is usually not imported directly by application code,

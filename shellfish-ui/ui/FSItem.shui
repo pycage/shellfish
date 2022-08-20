@@ -65,10 +65,11 @@ MouseBox {
                        file.path === forPath;
             };
 
-            wait(300)
-            .then(safeCallback(() =>
+            if (file.type === "d")
             {
-                if (file.type === "d")
+                /*
+                wait(300)
+                .then(safeCallback(() =>
                 {
                     filesystem.list(file.path)
                     .then(safeCallback(items =>
@@ -76,25 +77,25 @@ MouseBox {
                         sizeLabel.text = items.length + " items";
                     }, condition))
                     .catch(() => { });
-                }
-                else
-                {
-                    let size = Math.ceil(item.file.size / 1024);
-                    const units = ["KB", "MB", "GB", "TB"];
+                }, condition));
+                */
+            }
+            else
+            {
+                let size = Math.ceil(item.file.size / 1024);
+                const units = ["KB", "MB", "GB", "TB"];
 
-                    for (let i = 0; i < units.length; ++i)
+                for (let i = 0; i < units.length; ++i)
+                {
+                    const unit = units[i];
+                    if (size < 1024)
                     {
-                        const unit = units[i];
-                        if (size < 1024)
-                        {
-                            sizeLabel.text = (i === 0 ? size : size.toFixed(1)) + " " + unit;
-                            break;
-                        }
-                        size /= 1024;
+                        sizeLabel.text = (i === 0 ? size : size.toFixed(1)) + " " + unit;
+                        break;
                     }
-                    //sizeLabel.text = Math.ceil(item.file.size / 1024) + " KB";
+                    size /= 1024;
                 }
-            }, condition));
+            }
         }
     }
 

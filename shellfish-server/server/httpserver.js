@@ -40,6 +40,7 @@ shRequire(["shellfish/core"], core =>
      * @memberof server
      * 
      * @property {string} certificate - (default: `""`) The path to the server certificate in PEM format, if `secure` is set.
+     * @property {bool} enabled - (default: `true`) Whether the HTTP server is enabled or disabled.
      * @property {string} host - (default: `"0.0.0.0"`) The host address to listen at.
      * @property {number} keepAlive - (default: `5000`) The time in ms to keep a client connection alive, if the client requested so.
      * @property {string} key - (default: `""`) The path to the server private key in PEM format, if `secure` is set.
@@ -52,6 +53,7 @@ shRequire(["shellfish/core"], core =>
         {
             super();
             d.set(this, {
+                enabled: true,
                 host: "0.0.0.0",
                 port: 8000,
                 secure: false,
@@ -63,6 +65,7 @@ shRequire(["shellfish/core"], core =>
             });
 
             this.notifyable("certificate");
+            this.notifyable("enabled");
             this.notifyable("host");
             this.notifyable("keepAlive");
             this.notifyable("key");
@@ -75,11 +78,20 @@ shRequire(["shellfish/core"], core =>
             };
         }
 
+        get enabled() { return d.get(this).enabled; }
+        set enabled(e)
+        {
+            d.get(this).enabled = e;
+            this.enabledChanged();
+            this.listen();
+        }
+
         get certificate() { return d.get(this).certificate; }
         set certificate(c)
         {
             d.get(this).certificate = c;
             this.certificateChanged();
+            this.listen();
         }
 
         get host() { return d.get(this).host; }
@@ -87,6 +99,7 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).host = h;
             this.hostChanged();
+            this.listen();
         }
 
         get keepAlive() { return d.get(this).keepAlive; }
@@ -107,6 +120,7 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).key = k;
             this.keyChanged();
+            this.listen();
         }
 
         get port() { return d.get(this).port; }
@@ -114,6 +128,7 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).port = p;
             this.portChanged();
+            this.listen();
         }
 
         get secure() { return d.get(this).secure; }
@@ -121,6 +136,7 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).secure = s;
             this.secureChanged();
+            this.listen();
         }
 
         listen()
@@ -145,6 +161,12 @@ shRequire(["shellfish/core"], core =>
             if (priv.server)
             {
                 priv.server.close();
+                this.log("HTTPServer", "info", "Closed Server");
+            }
+
+            if (! priv.enabled)
+            {
+                return;
             }
 
             if (priv.secure)

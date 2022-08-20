@@ -62,22 +62,22 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.notifyable("originalWidth");
             this.notifyable("originalHeight");
 
-            d.get(this).item.onload = (ev) =>
+            d.get(this).item.onload = this.safeCallback(ev =>
             {
                 d.get(this).status = "success";
                 this.statusChanged();
                 this.originalWidthChanged();
                 this.originalHeightChanged();
-            };
+            });
 
-            d.get(this).item.onerror = () =>
+            d.get(this).item.onerror = this.safeCallback(() =>
             {
                 if (d.get(this).source !== "")
                 {
                     d.get(this).status = "error";
                     this.statusChanged();
                 }
-            };
+            });
         }
 
         get status() { return d.get(this).status; }

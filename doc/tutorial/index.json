@@ -31,7 +31,8 @@
             "ui-animations": { "title": "Complex Animations" },
             "ui-timer": { "title": "Timers" },
             "ui-defered": { "title": "Defered Creation of UI Elements" },
-            "ui-listmodel": { "title": "List Models" }
+            "ui-listmodel": { "title": "List Models" },
+            "ui-dragndrop": { "title": "Drag and Drop" }
         }
     }
 }

@@ -134,6 +134,7 @@ MouseBox {
         //overflowBehavior: "ellipsis"
         horizontalAlignment: "center"
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
+        literal: true
         text: button.format(button.text)
 
         profiles: button.labelProfile ? [button.labelProfile] : []

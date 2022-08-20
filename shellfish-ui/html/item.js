@@ -356,7 +356,8 @@ shRequire(["shellfish/low",
 
                 if (! this.ancestorsVisible)
                 {
-                    priv.mayUpdateSize = false;
+                    // FIXME: causes problems (e.g. when changing themes)
+                    //priv.mayUpdateSize = false;
                     if (priv.hasFocus)
                     {
                         priv.hasFocus = false;

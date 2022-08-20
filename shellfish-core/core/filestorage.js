@@ -24,16 +24,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire([__dirname + "/object.js"], obj =>
 {
-    class StringStream
-    {
-        constructor(s)
-        {
-            this.data = s;
-        }
-
-
-    }
-
     const d = new WeakMap();
 
     /**
@@ -47,6 +37,7 @@ shRequire([__dirname + "/object.js"], obj =>
      * 
      * @property {core.Filesystem} filesystem - (default: `null`) The filesystem to use.
      * @property {string} path - (default: `""`) The path of the storage file.
+     * @property {bool} ready - [read-only] `true` when the storage is loaded and ready.
      */
     class FileStorage extends obj.Object
     {
@@ -54,6 +45,7 @@ shRequire([__dirname + "/object.js"], obj =>
         {
             super();
             d.set(this, {
+                ready: false,
                 filesystem: null,
                 path: "",
                 doc: { },
@@ -62,7 +54,10 @@ shRequire([__dirname + "/object.js"], obj =>
 
             this.notifyable("filesystem");
             this.notifyable("path");
+            this.notifyable("ready");
         }
+
+        get ready() { return d.get(this).ready; }
 
         get filesystem() { return d.get(this).filesystem; }
         set filesystem(fs)
@@ -98,10 +93,16 @@ shRequire([__dirname + "/object.js"], obj =>
                             this[key] = priv.doc[key];
                         }
                     }
+
+                    this.saveDocument();
+                    priv.ready = true;
+                    this.readyChanged();
                 })
                 .catch(err =>
                 {
-
+                    this.saveDocument();
+                    priv.ready = true;
+                    this.readyChanged();
                 });
             }
         }
@@ -109,16 +110,17 @@ shRequire([__dirname + "/object.js"], obj =>
         saveDocument()
         {
             const priv = d.get(this);
+
             if (priv.filesystem !== null && priv.path !== "")
             {
                 let blob = null;
                 if (typeof Blob !== "undefined")
                 {
-                    blob = new Blob([JSON.stringify(priv.doc)], { type: "application/json" });
+                    blob = new Blob([JSON.stringify(priv.doc, null, 2)], { type: "application/json" });
                 }
                 else
                 {
-                    blob = JSON.stringify(priv.doc);
+                    blob = JSON.stringify(priv.doc, null, 2);
                 }
 
                 priv.filesystem.write(priv.path, blob)
@@ -158,7 +160,10 @@ shRequire([__dirname + "/object.js"], obj =>
                 else
                 {
                     priv.doc[key] = v;
-                    this.saveDocument();
+                    if (priv.ready)
+                    {
+                        this.saveDocument();
+                    }
                     isSet = true;
                     return setter(v);
                 }

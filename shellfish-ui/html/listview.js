@@ -761,7 +761,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
             {
                 priv.itemMeta.removeAt(idx);
                 priv.recycleBin.push(item);
-                item.x = -priv.cellWidth;
+                item.x = -window.outerWidth;
                 item.y = 0;
             }
         }
@@ -953,8 +953,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
                     }
 
                     item.position = "free";
-                    item.width = priv.cellWidth;
-                    item.height = priv.cellHeight;
                     priv.itemMeta.set(lastIndex, item);
 
                     isNew = true;

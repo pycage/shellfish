@@ -241,9 +241,9 @@ shRequire(["shellfish/core"], function (core)
 
             return new Promise(async (resolve, reject) =>
             {
-                path = this.normalizePath(this.pathJoin(path, name));
-                const url = priv.root + path;
-                console.log("mkdir: " + path);
+                const dirPath = this.normalizePath(this.pathJoin(path, name));
+                const url = priv.root + dirPath;
+                console.log("mkdir: " + dirPath);
 
                 const response = await doFetch(url, { method: "MKCOL" });
                 if (response.status === 201 /* Created */)

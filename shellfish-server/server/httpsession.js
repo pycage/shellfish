@@ -92,6 +92,7 @@ shRequire(["shellfish/core"], core =>
             range: headers.has("range") ? parseRange(headers.get("range")) : [],
             body: () => { return readRequest(request); },
             stream: request,
+            unmappedUrl: request.url,
             url: urlMapper(request.url),
             user: user
         };

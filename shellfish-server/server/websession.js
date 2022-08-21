@@ -103,23 +103,23 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
         }
     }
 
-    function makeIndexDocument(root, path, files)
+    function makeIndexDocument(unmappedUrl, root, path, files)
     {
         let out = "<!DOCTYPE html>";
         out += "<html>";
         out += "<head>";
         out += "<meta charset=\"utf-8\">";
-        out += "<title>Contents of " + escapeXml(path) + "</title>";
+        out += "<title>Contents of " + escapeXml(unmappedUrl) + "</title>";
         out += "</head>";
         out += "<body>";
-        out += "<h1>" + escapeXml(unrootPath(root, path)) + "</h1>";
+        out += "<h1>" + escapeXml(unmappedUrl) + "</h1>";
         out += "<ul>";
 
         files.forEach(f =>
         {
-            const unrootedPath = unrootPath(root, f.path);
+            const fileUrl = (unmappedUrl + "/" + f.name).replace(/\/\//g, "/");
             out += "<li>";
-            out += "<a href='" + escapeXml(pathToHref(unrootedPath)) + "'>" + escapeXml(f.name) + "</a>";
+            out += "<a href='" + escapeXml(fileUrl) + "'>" + escapeXml(f.name) + "</a>";
             out += "<br>" + f.mimetype + ", " + f.size + " bytes";
             out += "</li>";
         });
@@ -209,7 +209,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                     .then(files =>
                     {
                         this.response(200, "OK")
-                        .body(makeIndexDocument(priv.root, path, files), "text/html")
+                        .body(makeIndexDocument(ev.unmappedUrl, priv.root, path, files), "text/html")
                         .send();
                     })
                     .catch(err =>

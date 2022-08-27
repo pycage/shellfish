@@ -1,0 +1,118 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./ShuiSyntaxHighlighter.shui";
+
+// loading stand-alone WASM modules is really easy
+require "./wasm/maths.wasm" as maths;
+
+Page {
+    id: page
+
+    scrollable: false
+
+    onInitialization: () =>
+    {
+
+    }
+
+    into header Header {
+        id: pageHeader
+
+        title: "WebAssembly"
+        codeUrls: [__filename, "Header.shui", "ShuiSyntaxHighlighter.shui",
+                   "wasm/maths.ts"]
+    }
+
+    Label {
+        marginTop: pageHeader.height + theme.paddingSmall
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        fillWidth: true
+        overflowBehavior: "wrap"
+        text: "If you only need the exports, compiled WebAssembly (WASM) " +
+              "modules can be imported and used as if they were JavaScript modules."
+    }
+
+    Label {
+        property highlighter: ShuiSyntaxHighlighter { }
+
+        marginTop: theme.paddingMedium
+        marginLeft: theme.paddingMedium + theme.paddingLarge
+        color: theme.secondaryColor
+        fontFamily: "monospace"
+        filter: highlighter.filter
+        text: "require \"shellfish/ui\";\n" +
+              "require \"./wasm/maths.wasm\" as maths;\n" +
+              "\n" +
+              "Document {\n" +
+              "    ...\n" +
+              "    resultLabel.text = maths.add(Number.parseInt(numberEntry.text), 42);\n" +
+              "    ...\n" +
+              "}"
+    }
+
+    Box {
+        marginTop: theme.paddingLarge
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        layout: "center-row"
+
+        Label {
+            bold: true
+            text: "Enter number:"
+        }
+
+        TextEntry {
+            id: numberEntry
+            marginLeft: theme.paddingSmall
+        }
+
+        Button {
+            marginLeft: theme.paddingSmall
+            text: "Calculate"
+            onClick: () =>
+            {
+                resultLabel.text = maths.add(Number.parseInt(numberEntry.text), 42);
+            }
+        }
+    }
+
+    Box {
+        marginTop: theme.paddingMedium
+        marginLeft: theme.paddingMedium
+        marginRight: theme.paddingMedium
+        layout: "center-row"
+
+        Label {
+            bold: true
+            text: "Result:"
+        }
+
+        Label {
+            marginLeft: theme.paddingSmall
+            id: resultLabel
+        }
+    }
+}

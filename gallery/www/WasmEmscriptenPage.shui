@@ -1,0 +1,300 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "./Header.shui";
+require "./wasm/mandelbrot.js" as mb;
+
+Page {
+    id: page
+
+    scrollable: false
+
+    into header Header {
+        id: pageHeader
+
+        title: "Mandelbrot Set"
+        subtitle: "A Parallelized Asynchronous Emscripten C++ Example"
+        codeUrls: [__filename, "Header.shui",
+                   "wasm/main.cc", "wasm/mandelbrot.h", "wasm/mandelbrot.cc",
+                   "wasm/threadpool.h", "wasm/binding.h"]
+    }
+
+    // our instance of the C++ Mandelbrot class
+    property mandelbrot: null
+
+    property ready: false
+
+    // keep track of the pending render tasks
+    property pending: 0
+
+    property offsetX: 0.0
+    property offsetY: 0.0
+    property scale: 1.0
+    property lowRes: false
+
+    property zoom: (factor, cx, cy, lowRes) =>
+    {
+        // zoom while keeping the view centered
+        const cx1 = cx * 2.0 / scale;
+        const cy1 = cy * 2.0 / scale;
+        scale *= factor;
+        const cx2 = cx * 2.0 / scale;
+        const cy2 = cy * 2.0 / scale;
+        const dx = cx2 - cx1;
+        const dy = cy2 - cy1;
+        offsetX -= dx;
+        offsetY -= dy;
+
+        if (lowRes)
+        {
+            page.lowRes = true;
+            wait(500).then(() =>
+            {
+                page.lowRes = false;
+                page.render()
+            });
+        }
+        render();
+    }
+
+    property render: () =>
+    {
+        if (! mandelbrot)
+        {
+            return;
+        }
+
+        const targetCnv = page.lowRes ? lowResCnv : cnv;
+
+        const totalWidth = targetCnv.originalWidth;
+        const totalHeight = targetCnv.originalHeight;
+
+        const blockSize = Math.floor(targetCnv.originalWidth / (page.lowRes ? 1 : 3));
+
+        // clear pending tasks
+        mandelbrot.reset();
+        pending = 0;
+
+        // divide the screen into regions to be computed in parallel
+        for (let x = 0; x < totalWidth; x += blockSize)
+        {
+            for (let y = 0; y < totalHeight; y += blockSize)
+            {
+                renderRegion(totalWidth, totalHeight, {
+                    x: x,
+                    y: y,
+                    width: blockSize,
+                    height: blockSize,
+                    offsetX: page.offsetX,
+                    offsetY: page.offsetY
+                });
+            }
+        }
+    }
+
+    property renderRegion: (totalWidth, totalHeight, region) =>
+    {
+        ++page.pending;
+
+        const ctx = page.lowRes ? lowResCnv.context2d : cnv.context2d;
+        const imageData = ctx.createImageData(region.width, region.height);
+        const buffer = imageData.data;
+
+        mandelbrot.computeRegionAsync(totalWidth, totalHeight, region, page.scale, (data) =>
+        {
+            --page.pending;
+
+            const imgData = new ImageData(new Uint8ClampedArray(data), region.width);
+            ctx.putImageData(imgData, region.x, region.y);
+        });
+    }
+
+    onInitialization: () =>
+    {
+        function init()
+        {
+            // create an instance of the C++ Mandelbrot class and use it in
+            // JavaScript just like any other object
+            page.mandelbrot = new mb.Mandelbrot();
+            page.ready = true;
+            page.render();
+        }
+
+        if (mb.calledRun)
+        {
+            init();
+        }
+        else
+        {
+            // The Emscripten runtime provides the "onRuntimeInitialized" callback
+            // for reacting when the runtime becomes ready for use.
+            mb.onRuntimeInitialized = init;
+        }
+
+        wait(0).then(() =>
+        {           
+            showInfoDialog("Usage",
+                        "Use the left mouse key to drag, and the mouse wheel " +
+                        "or the buttons at the bottom to zoom in/out.");
+
+        });
+    }
+
+    onDestruction: () =>
+    {
+        page.mandelbrot.delete();        
+        mb.PThread.terminateAllThreads();
+    }
+
+    onBboxChanged: () => { render(); }
+   
+    MouseBox {
+        fillWidth: true
+        height: documentRoot.windowHeight
+
+        color: "black"
+
+
+        onDrag: (ev) =>
+        {
+            ev.accepted = true;
+            if (Math.abs(ev.deltaX) > 4 || Math.abs(ev.deltaY) > 4)
+            {
+                const w = bbox.width;
+                const h = bbox.height;
+                const dx = ev.deltaX / w;
+                const dy = ev.deltaY / h;
+
+                page.lowRes = true;
+
+                // multiply by 2.0 because the range in view is of size 2+2i
+                page.offsetX -= 2.0 * dx / page.scale;
+                page.offsetY -= 2.0 * dy / page.scale;
+                page.render();
+            }
+        }
+
+        onDragEnd: () => { page.lowRes = false; page.render(); }
+
+        onWheel: (ev) =>
+        {
+            ev.accepted = true;
+            const px = ev.x / bbox.width;
+            const py = ev.y / bbox.height;
+            page.zoom(ev.deltaY < 0 ? 0.9 : 1.1, px, py, true);
+        }
+
+        Box {
+            fillWidth: true
+            fillHeight: true
+            cursor: "move"
+
+            Canvas {
+                id: lowResCnv
+
+                position: "free"
+                fillWidth: true
+                fillHeight: true
+
+                originalWidth: 100
+                originalHeight: 100
+            }
+
+            Canvas {
+                id: cnv
+
+                visible: ! page.lowRes
+                position: "free"
+
+                fillWidth: true
+                fillHeight: true
+
+                originalWidth: bbox.width
+                originalHeight: bbox.height
+            }
+        }
+
+        MouseBox {
+            fillWidth: true
+            height: theme.itemHeightMedium
+            layout: "center-row"
+            color: theme.primaryBackgroundColor
+
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                fillWidth: true
+                text: "Zoom: " + Math.floor(page.scale * 100) + " %, Pending tasks: " + page.pending
+            }
+
+            Button {
+                icon: "ui-zoom_in"
+                onClick: () =>
+                {
+                    page.zoom(1.1, 0.5, 0.5, false);
+                }
+            }
+
+            Button {
+                marginLeft: theme.paddingSmall
+                icon: "ui-zoom_out"
+                onClick: () =>
+                {
+                    page.zoom(0.9, 0.5, 0.5, false);
+                }
+            }
+
+            Button {
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                text: "Reset View"
+                onClick: () =>
+                {
+                    page.offsetX = 0.0;
+                    page.offsetY = 0.0;
+                    page.scale = 1.0;
+                    page.render();
+                }
+            }
+        }
+
+        Placeholder {
+            visible: ! page.ready
+            text: "Loading WebAssembly..."
+        }
+    }
+
+    // This timer provides some kind of mainloop for monitoring the thread pool.
+    // It only runs while there are tasks scheduled.
+    Timer {
+        interval: 0
+        running: page.pending > 0
+        repeat: true
+        
+        onTimeout: () =>
+        {
+            mandelbrot.checkResults();
+        }
+    }
+}

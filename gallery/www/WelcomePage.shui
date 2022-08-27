@@ -201,6 +201,15 @@ Page {
                                 ["Active Object Pattern", "ActiveObjectPage", "ui-settings"]
                             ]
                         },
+                        {
+                            section: "WebAssembly",
+                            description: "Load modules written in a compiled language, such as C++ or AssemblyScript. " +
+                                         "WebAssembly is supported by all major browsers, as well as Node.js.",
+                            pages: [
+                                ["Stand-Alone WASM", "WasmImportPage", "fs-file-empty"],
+                                ["Emscripten (C++)", "WasmEmscriptenPage", "camera-flash_on"]
+                            ]
+                        },
                         /*
                         {
                             section: "The *Shellfish 2D* Extension",

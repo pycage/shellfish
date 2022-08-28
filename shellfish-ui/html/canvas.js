@@ -47,6 +47,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                     .attr("width", "100")
                     .attr("height", "100")
                     .style("touch-action", "none")
+                    .style("pointer-events", "none")
                     .html()
                 )
             });

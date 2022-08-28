@@ -87,16 +87,25 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * @typedef WheelEvent
      * @memberof html.MouseBox
      */
-    function makeWheelEvent(ev)
+    function makeWheelEvent(ev, item)
     {
+        let itemX = 0;
+        let itemY = 0;
+        if (item)
+        {
+            const bbox = item.getBoundingClientRect();
+            itemX = bbox.left;
+            itemY = bbox.top;
+        }
+
         return {
             original: ev,
             accepted: false,
             deltaX: ev.deltaX,
             deltaY: ev.deltaY,
             deltaZ: ev.deltaZ,
-            x: ev.offsetX,
-            y: ev.offsetY
+            x: ev.clientX - itemX,
+            y: ev.clientY - itemY
         };
     }
 

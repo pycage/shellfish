@@ -275,7 +275,7 @@ html.Document {
             
             Box {
                 marginTop: theme.paddingMedium
-                marginRight: parent.bbox.width * (1.0 - dialog.progress)
+                marginRight: parent.bboxWidth * (1.0 - dialog.progress)
                 marginBottom: theme.paddingMedium
                 fillWidth: true
                 height: theme.paddingSmall

@@ -42,10 +42,10 @@ Box {
     id: indicator
 
     position: "global"
-    x: parent.bbox.x
-    y: parent.bbox.y
-    width: parent.bbox.width
-    height: parent.bbox.height
+    x: parent.bboxX
+    y: parent.bboxY
+    width: parent.bboxWidth
+    height: parent.bboxHeight
     //fillWidth: true
     //fillHeight: true
     enabled: false

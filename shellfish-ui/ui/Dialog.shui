@@ -53,8 +53,8 @@ Overlay {
         property offset: 1.0
 
         position: "free"
-        x: (parent.bbox.width - bbox.width) / 2
-        y: (parent.bbox.height - bbox.height) / 2 - (offset * theme.itemHeightLarge)
+        x: (parent.bboxWidth - bboxWidth) / 2
+        y: (parent.bboxHeight - bboxHeight) / 2 - (offset * theme.itemHeightLarge)
         width: -1
         height: -1
         maxWidth: documentRoot.windowWidth - 2 * theme.paddingLarge
@@ -99,7 +99,7 @@ Overlay {
         }
 
         ScrollIndicator {
-            height: contentArea.bbox.height + 2 * theme.paddingLarge
+            height: contentArea.bboxHeight + 2 * theme.paddingLarge
             target: contentArea
         }
 

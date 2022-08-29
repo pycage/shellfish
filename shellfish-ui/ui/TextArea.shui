@@ -100,7 +100,7 @@ MouseBox {
         }
         else if (ev.deltaX > 0)
         {
-            input.contentX = Math.min(input.contentWidth - input.bbox.width, input.contentX + theme.itemHeightMedium);
+            input.contentX = Math.min(input.contentWidth - input.bboxWidth, input.contentX + theme.itemHeightMedium);
         }
 
         if (ev.deltaY < 0)
@@ -109,7 +109,7 @@ MouseBox {
         }
         else if (ev.deltaY > 0)
         {
-            input.contentY = Math.min(input.contentHeight - input.bbox.height, input.contentY + theme.itemHeightMedium);
+            input.contentY = Math.min(input.contentHeight - input.bboxHeight, input.contentY + theme.itemHeightMedium);
         }
     }
 

@@ -41,7 +41,7 @@ require "shellfish/ui";
  * @example
  * ListView {
  *     canFocus: true
- *     cellWidth: bbox.width
+ *     cellWidth: bboxWidth
  *     cellHeight: theme.itemHeightSmall
  *     model: myModel
  *     delegate: template MouseBox {
@@ -72,7 +72,7 @@ Object {
         id: priv
         property selectionAnchor: -1
         property lastSelected: -1
-        property itemsPerRow: Math.max(1, Math.floor(target.bbox.width / target.cellWidth))
+        property itemsPerRow: Math.max(1, Math.floor(target.bboxWidth / target.cellWidth))
     }
 
     /**

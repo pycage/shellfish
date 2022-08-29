@@ -72,7 +72,7 @@ Box {
             }
             else
             {
-                const maxX = target.contentWidth - target.bbox.width;
+                const maxX = target.contentWidth - target.bboxWidth;
                 target.contentX = Math.min(maxX, target.contentX + amount);
             }
         }
@@ -84,20 +84,20 @@ Box {
             }
             else
             {
-                const maxY = target.contentHeight - target.bbox.height;
+                const maxY = target.contentHeight - target.bboxHeight;
                 target.contentY = Math.min(maxY, target.contentY + amount);
             }
         }
     }
 
-    visible: target.contentWidth > target.bbox.width ||
-             target.contentHeight > target.bbox.height
+    visible: target.contentWidth > target.bboxWidth ||
+             target.contentHeight > target.bboxHeight
 
     position: "global"
-    x: parent.bbox.x
-    y: parent.bbox.y
-    width: parent.bbox.width
-    height: parent.bbox.height
+    x: parent.bboxX
+    y: parent.bboxY
+    width: parent.bboxWidth
+    height: parent.bboxHeight
 
     onInitialization: () =>
     {
@@ -152,8 +152,8 @@ Box {
     }
 
     MouseBox {
-        visible: target.bbox.width < target.contentWidth &&
-                 target.contentX + 0.5 < target.contentWidth - target.bbox.width
+        visible: target.bboxWidth < target.contentWidth &&
+                 target.contentX + 0.5 < target.contentWidth - target.bboxWidth
         position: "free"
         origin: "top-right"
         width: theme.paddingLarge
@@ -248,8 +248,8 @@ Box {
     }
 
     MouseBox {
-        visible: target.bbox.height < target.contentHeight &&
-                 target.contentY + 0.5 < target.contentHeight - target.bbox.height
+        visible: target.bboxHeight < target.contentHeight &&
+                 target.contentY + 0.5 < target.contentHeight - target.bboxHeight
         position: "free"
         origin: "bottom-left"
         fillWidth: true

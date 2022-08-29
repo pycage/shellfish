@@ -51,7 +51,7 @@ ListView {
 
     event fileOpen
 
-    cellWidth: fsview.displayMode === "list" ? fsview.bbox.width - 1
+    cellWidth: fsview.displayMode === "list" ? fsview.bboxWidth - 1
                                              : theme.itemWidthLarge * iconScale
 
     cellHeight: fsview.displayMode === "list" ? theme.itemHeightMedium * iconScale

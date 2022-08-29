@@ -130,6 +130,9 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### August 2022
+* Elements derived from {@link html.Item} have the new bounding box properties
+  `bboxX`, `bboxY`, `bboxWidth`, and `bboxHeight`. Using these usually gives a
+  better performance than referencing particular members of the `bbox` property.
 * The element {@link server.HTTPServer} has the new property `enabled` for turning
   the server on or off.
 * The element {@link core.FileStorage} has the new read-only property `ready` to

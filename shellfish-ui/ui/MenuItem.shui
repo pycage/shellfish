@@ -109,7 +109,7 @@ MenuItemBase {
 
             visible: item.icon !== ""
             marginLeft: theme.paddingSmall
-            width: label.bbox.height
+            width: label.bboxHeight
             height: width
             color: label.color
             text: visible ? "[icon:" + item.icon + "]" : ""
@@ -167,9 +167,9 @@ MenuItemBase {
 
     Box {
         ruler: !! thisMenu ? thisMenu.menuRuler : null
-        width: (iconLabel.visible ? iconLabel.bbox.width + theme.paddingSmall : 0) +
-               (label.visible ? label.bbox.width + theme.paddingSmall : 0) +
-               (shortcutLabel.visible ? shortcutLabel.bbox.width + theme.paddingLarge : 0) +
+        width: (iconLabel.visible ? iconLabel.bboxWidth + theme.paddingSmall : 0) +
+               (label.visible ? label.bboxWidth + theme.paddingSmall : 0) +
+               (shortcutLabel.visible ? shortcutLabel.bboxWidth + theme.paddingLarge : 0) +
                (!! thisMenu ? theme.paddingMedium + 4 : theme.paddingSmall)
         //height: 1
         //color: "red"

@@ -96,7 +96,7 @@ Box {
     Button {
         visible: titlebar.showMinimize
         labelProfile: buttonProfile
-        width: bbox.height
+        width: bboxHeight
         fillHeight: true
         flat: true
         icon: "core-window-minimize"
@@ -113,7 +113,7 @@ Box {
     Button {
         visible: titlebar.showMaximize && target.resizable
         labelProfile: buttonProfile
-        width: bbox.height
+        width: bboxHeight
         fillHeight: true
         flat: true
         icon: "core-window-maximize"
@@ -130,7 +130,7 @@ Box {
     Button {
         visible: titlebar.showClose
         labelProfile: buttonProfile
-        width: bbox.height
+        width: bboxHeight
         fillHeight: true
         flat: true
         icon: "core-window-close"

@@ -248,7 +248,7 @@ MouseBox {
     MouseBox {
         visible: ! win.selected || win.pressed || win.resizing
         position: "free"
-        marginTop: titleArea.bbox.height
+        marginTop: titleArea.bboxHeight
         fillWidth: true
         fillHeight: true
         //color: colorName(win.resizing ? "yellow" : "red").alpha(0.3)

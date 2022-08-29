@@ -55,7 +55,7 @@ Box {
     }
 
     Box {
-        property margin: Math.max(firstBox.bbox.width, secondBox.bbox.width)
+        property margin: Math.max(firstBox.bboxWidth, secondBox.bboxWidth)
 
         fillWidth: true
         height: header.height

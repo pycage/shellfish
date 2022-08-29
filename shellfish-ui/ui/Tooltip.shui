@@ -75,23 +75,23 @@ Object {
         position: "global"
         x: 0
         y: documentRoot.windowHeight
-        width: innerBox.bbox.width
-        height: innerBox.bbox.height
+        width: innerBox.bboxWidth
+        height: innerBox.bboxHeight
 
         onHeightChanged: () =>
         {
             if (height > 0 && ! initialized)
             {
                 const tbbox = tooltip.target.bbox;
-                if (tbbox.x + bbox.width < documentRoot.windowWidth)
+                if (tbbox.x + bboxWidth < documentRoot.windowWidth)
                 {
                     x = tbbox.x;
                 }
                 else
                 {
-                    x = tbbox.x + tbbox.width - bbox.width;
+                    x = tbbox.x + tbbox.width - bboxWidth;
                 }
-                if (tbbox.y + tbbox.height + bbox.height + 2 < documentRoot.windowHeight)
+                if (tbbox.y + tbbox.height + bboxHeight + 2 < documentRoot.windowHeight)
                 {
                     
                     y = tbbox.y + tbbox.height + 2;
@@ -99,7 +99,7 @@ Object {
                 }
                 else
                 {
-                    y = tbbox.y - bbox.height - 2;
+                    y = tbbox.y - bboxHeight - 2;
                     riseAnim.from = height;
                 }
                 riseAnim.start();

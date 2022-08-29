@@ -127,10 +127,10 @@ Overlay {
     // cheap shadow box
     Box {
         position: "global"
-        x: menuBox.bbox.x + 2
-        y: menuBox.bbox.y + 2
-        width: menuBox.bbox.width
-        height: menuBox.bbox.height
+        x: menuBox.bboxX + 2
+        y: menuBox.bboxY + 2
+        width: menuBox.bboxWidth
+        height: menuBox.bboxHeight
         color: "black"
         opacity: 0.2
     }
@@ -143,18 +143,18 @@ Overlay {
         property anchorHeight: 0
 
         property spaceAbove: anchorY - anchorHeight
-        property spaceBelow: menu.bbox.height - anchorY
+        property spaceBelow: menu.bboxHeight - anchorY
         property showBelow: spaceBelow > 5 * theme.itemHeightMedium ? true
                                                                     : spaceBelow > spaceAbove
 
         position: "global"
         overflowBehavior: "scroll"
 
-        x: anchorX + bbox.width < menu.bbox.width ? anchorX
-                                                  : menu.bbox.width - bbox.width
+        x: anchorX + bboxWidth < menu.bboxWidth ? anchorX
+                                                : menu.bboxWidth - bboxWidth
         y: showBelow ? anchorY : anchorY - anchorHeight - height
 
-        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bbox.height + 2 /* borders */)
+        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bboxHeight + 2 /* borders */)
         color: theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor
@@ -235,7 +235,7 @@ Overlay {
 
     Box {
         position: "free"
-        x: menuBox.x + menuBox.bbox.width - width
+        x: menuBox.x + menuBox.bboxWidth - width
         y: menuBox.y
         width: theme.paddingSmall
         height: menuBox.height

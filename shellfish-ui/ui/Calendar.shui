@@ -283,8 +283,8 @@ MouseBox {
 
             model: daysModel
 
-            cellWidth: box.bbox.width / 7
-            cellHeight: box.bbox.height / 6
+            cellWidth: box.bboxWidth / 7
+            cellHeight: box.bboxHeight / 6
 
             delegate: cal.dayDelegate
         }
@@ -306,8 +306,8 @@ MouseBox {
                      "Jul", "Aug", "Sep",
                      "Oct", "Nov", "Dec"] : []
             }
-            cellWidth: box.bbox.width / 3
-            cellHeight: box.bbox.height / 4
+            cellWidth: box.bboxWidth / 3
+            cellHeight: box.bboxHeight / 4
 
             delegate: template Button {
                 flat: true
@@ -337,8 +337,8 @@ MouseBox {
                 data: sequence(1900, 200)
             }
 
-            cellWidth: box.bbox.width / 4
-            cellHeight: box.bbox.height / 6
+            cellWidth: box.bboxWidth / 4
+            cellHeight: box.bboxHeight / 6
 
             delegate: template Button {
                 flat: true

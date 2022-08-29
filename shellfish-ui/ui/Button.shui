@@ -119,7 +119,7 @@ MouseBox {
         visible: button.icon !== ""
         marginLeft: 4
         marginRight: 4
-        fontSize: parent.bbox.height * 0.6
+        fontSize: parent.bboxHeight * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
 
@@ -144,7 +144,7 @@ MouseBox {
         visible: button.secondaryIcon !== ""
         marginLeft: 4
         marginRight: 4
-        fontSize: parent.bbox.height * 0.6
+        fontSize: parent.bboxHeight * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 

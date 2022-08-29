@@ -44,7 +44,7 @@ Box {
     layout: "center"
 
     Label {
-        width: parent.bbox.width - 2 * theme.paddingLarge
+        width: parent.bboxWidth - 2 * theme.paddingLarge
         overflowBehavior: "wrap"
         horizontalAlignment: "center"
         color: theme.primaryColor

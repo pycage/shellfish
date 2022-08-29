@@ -115,9 +115,9 @@ Box {
         layout: priv.isHorizontal ? "center-column"
                                   : "center-row"
 
-        x: priv.isHorizontal ? splitBox.bbox.width * splitBox.splitRatio
+        x: priv.isHorizontal ? splitBox.bboxWidth * splitBox.splitRatio
                              : 0
-        y: priv.isVertical ? splitBox.bbox.height * splitBox.splitRatio
+        y: priv.isVertical ? splitBox.bboxHeight * splitBox.splitRatio
                            : 0
 
         width: priv.isHorizontal ? theme.paddingLarge
@@ -133,8 +133,8 @@ Box {
         
         onDrag: (ev) =>
         {
-            const w = splitBox.bbox.width;
-            const h = splitBox.bbox.height;
+            const w = splitBox.bboxWidth;
+            const h = splitBox.bboxHeight;
 
             if (priv.isHorizontal && w > 0)
             {
@@ -162,8 +162,8 @@ Box {
 
         onKeyDown: (ev) =>
         {
-            const w = splitBox.bbox.width;
-            const h = splitBox.bbox.height;
+            const w = splitBox.bboxWidth;
+            const h = splitBox.bboxHeight;
             
             if (priv.isHorizontal && w > 0)
             {
@@ -224,7 +224,7 @@ Box {
 
             Label {
                 rotationAngle: priv.isVertical ? 90 : 0
-                fontSize: Math.min(parent.bbox.width, parent.bbox.height)
+                fontSize: Math.min(parent.bboxWidth, parent.bboxHeight)
                 text: "[icon:ui-drag_indicator]"
             }
         }

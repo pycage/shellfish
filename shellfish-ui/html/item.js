@@ -85,6 +85,10 @@ shRequire(["shellfish/low",
      * @property {bool} ancestorsVisible - [readonly] Whether all ancestors are visible.
      * @property {number} aspectRatio - (default: `0`) The aspect ratio of the side lengths. If this value is greater than `0`, the element is sized within the constraints of `width` and `height`.
      * @property {html.Item.BoundingBox} bbox - [readonly] The item's bounding box in window coordinates.
+     * @property {number} bboxX - [readonly] The item's bounding box X position in window coordinates.
+     * @property {number} bboxY - [readonly] The item's bounding box Y position in window coordinates.
+     * @property {number} bboxWidth - [readonly] The item's bounding box width in window coordinates.
+     * @property {number} bboxHeight - [readonly] The item's bounding box height in window coordinates.
      * @property {bool} canFocus - (default: `false`) Whether the item may accept keyboard focus.
      * @property {number} contentHeight - [readonly] The current scrolling viewport height.
      * @property {number} contentWidth - [readonly] The current scrolling viewport width.
@@ -169,6 +173,10 @@ shRequire(["shellfish/low",
             this.notifyable("ancestorsVisible");
             this.notifyable("aspectRatio");
             this.notifyable("bbox");
+            this.notifyable("bboxX");
+            this.notifyable("bboxY");
+            this.notifyable("bboxWidth");
+            this.notifyable("bboxHeight");
             this.notifyable("canFocus");
             this.notifyable("contentHeight");
             this.notifyable("contentWidth");
@@ -682,6 +690,11 @@ shRequire(["shellfish/low",
             return priv.cachedBbox;
         }
 
+        get bboxX() { return this.bbox.x; }
+        get bboxY() { return this.bbox.y; }
+        get bboxWidth() { return this.bbox.width; }
+        get bboxHeight() { return this.bbox.height; }
+
         get fillWidth() { return d.get(this).fillWidth; }
         set fillWidth(value)
         {
@@ -1115,10 +1128,15 @@ shRequire(["shellfish/low",
 
             const prevBbox = priv.prevBbox;
             const bbox = this.bbox;
-            const bboxHasChanged = bbox.x !== prevBbox.x ||
-                                   bbox.y !== prevBbox.y ||
-                                   bbox.width !== prevBbox.width ||
-                                   bbox.height !== prevBbox.height;
+            const bboxHasChangedX = bbox.x !== prevBbox.x;
+            const bboxHasChangedY = bbox.y !== prevBbox.y;
+            const bboxHasChangedWidth = bbox.width !== prevBbox.width;
+            const bboxHasChangedHeight = bbox.height !== prevBbox.height;
+
+            const bboxHasChanged = bboxHasChangedX ||
+                                   bboxHasChangedY ||
+                                   bboxHasChangedWidth ||
+                                   bboxHasChangedHeight;
 
             if (bboxHasChanged)
             {
@@ -1135,6 +1153,10 @@ shRequire(["shellfish/low",
                     if (bboxHasChanged)
                     {
                         this.bboxChanged();
+                        if (bboxHasChangedX) this.bboxXChanged();
+                        if (bboxHasChangedY) this.bboxYChanged();
+                        if (bboxHasChangedWidth) this.bboxWidthChanged();
+                        if (bboxHasChangedHeight) this.bboxHeightChanged();
                     }
 
                     // may affect content size, if child is positioned "inline" or
@@ -1150,6 +1172,10 @@ shRequire(["shellfish/low",
                     if (bboxHasChanged)
                     {
                         this.bboxChanged();
+                        if (bboxHasChangedX) this.bboxXChanged();
+                        if (bboxHasChangedY) this.bboxYChanged();
+                        if (bboxHasChangedWidth) this.bboxWidthChanged();
+                        if (bboxHasChangedHeight) this.bboxHeightChanged();
                     }
                 }
             }
@@ -1158,11 +1184,15 @@ shRequire(["shellfish/low",
                 if (bboxHasChanged)
                 {
                     this.bboxChanged();
+                    if (bboxHasChangedX) this.bboxXChanged();
+                    if (bboxHasChangedY) this.bboxYChanged();
+                    if (bboxHasChangedWidth) this.bboxWidthChanged();
+                    if (bboxHasChangedHeight) this.bboxHeightChanged();
                 }
             }
 
             // notify parent and children, excluding from where the update came
-            if (bboxHasChanged)
+            if (bboxHasChangedWidth || bboxHasChangedHeight)
             {
                 if (this.parent && this.parent !== item && this.parent.updateSizeFrom)
                 {
@@ -1170,7 +1200,7 @@ shRequire(["shellfish/low",
                 }
             }
 
-            if (bboxHasChanged || fromChild)
+            if (bboxHasChangedWidth || bboxHasChangedHeight || fromChild)
             {
                 if (bbox.width * bbox.height > 0)
                 {

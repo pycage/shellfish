@@ -55,11 +55,11 @@ class Warehouse
         if (stock.length === 0)
         {
             this.produce(type);
-            if (! this.inProduction.get(type))
-            {
-                this.inProduction.set(type, true);
-                setTimeout(() => { this.fillStock(type); }, 30);
-            }
+        }
+        if (stock.length < this.capacity && ! this.inProduction.get(type))
+        {
+            this.inProduction.set(type, true);
+            setTimeout(() => { this.fillStock(type); }, 30);
         }
         return stock.pop();
     }

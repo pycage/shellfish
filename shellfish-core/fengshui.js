@@ -54,7 +54,7 @@ exports.tools = {
                 const proto = Object.getPrototypeOf(el);
 
                 ["add", "property", "get", "find", "children", "call", "crossConnect", "flushPending", "addPendingCallback"]
-                .forEach(f => { el[f] = (...args) => proto[f].apply(el, args); });
+                .forEach(f => { el[f] = (...args) => { return proto[f].apply(el, args); }; });
 
                 return el;
             }
@@ -83,7 +83,7 @@ exports.tools = {
                     const proto = Object.getPrototypeOf(el);
 
                     ["add", "property", "get", "find", "children", "call", "crossConnect", "flushPending", "addPendingCallback"]
-                    .forEach(f => { el[f] = (...args) => proto[f].apply(el, args); });
+                    .forEach(f => { el[f] = (...args) => { return proto[f].apply(el, args); }; });
 
                     return el;
                 }
@@ -2235,17 +2235,12 @@ exports.tools = {
     {
         const modFs = require("fs");
 
-        function help()
+        if (process.argv.length !== 3 || process.argv[2] === "-h")
         {
             console.log("Compiles a Shui document and produces JavaScript code.");
             console.log("");
             console.log("Usage: node fengshui.js <shui-file>");
             console.log("");
-        }
-
-        if (process.argv.length !== 3 || process.argv[2] === "-h")
-        {
-            help();
             process.exit(1);
         }
 

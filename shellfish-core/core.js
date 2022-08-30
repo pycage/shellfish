@@ -40,6 +40,7 @@ const mods = [
     "core/util/matrix",
     "core/util/mime",
     "core/util/vec",
+    "core/util/warehouse",
     "core/util/xmlsax"
 ];
 

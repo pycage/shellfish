@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 exports.__id = "shellfish/declarative";
 
-shRequire("shellfish/core", function (core)
+shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, warehouse)
 {
     let dvCounter = 0;
     let totalWatchCount = 0;
@@ -51,6 +51,8 @@ shRequire("shellfish/core", function (core)
     // maps an element to its high-level counterpart
     const elementRegistry = new Map();
 
+    // a warehouse for storing pre-created elements for quick delivery
+    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); }, 500);
 
     /**
      * Returns if the given object is a dynamic value.
@@ -771,7 +773,18 @@ shRequire("shellfish/core", function (core)
      */
     function element(type)
     {
-        return new Element(type);
+        if (type.name === "Box" ||
+            type.name === "MouseBox" ||
+            type.name === "Label" ||
+            type.name === "Ruler" ||
+            type.name === "Timer")
+        {
+            return elementWarehouse.retrieve(type);
+        }
+        else
+        {
+            return new Element(type);
+        }
     }
     exports.element = element;
     

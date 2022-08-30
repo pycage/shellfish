@@ -130,6 +130,8 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### August 2022
+* Some of the most common basic element types are preproduced and held in stock
+  by `shellfish/declarative` for better element creation performance with Shui.
 * Elements derived from {@link html.Item} have the new bounding box properties
   `bboxX`, `bboxY`, `bboxWidth`, and `bboxHeight`. Using these usually gives a
   better performance than referencing particular members of the `bbox` property.

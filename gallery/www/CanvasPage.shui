@@ -102,6 +102,8 @@ Page {
 
                 property type: ["", "mouse", "pen", "touch"][selection]
 
+                labelProfile: Object { property literal: false }
+
                 marginLeft: theme.paddingSmall
                 marginRight: theme.paddingSmall
                 model: ListModel {

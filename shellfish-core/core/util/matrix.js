@@ -422,7 +422,7 @@ function det(m)
     let result = 0;
     for (let i = 0; i < s.rows; ++i)
     {
-        result += ((-1) ** i) * m[0][i] * exports.det(exports.minor(m, 0, i));
+        result += Math.pow(-1, i) * m[0][i] * exports.det(exports.minor(m, 0, i));
     }
     return result;
 }
@@ -467,7 +467,7 @@ function inv(m)
         for (let c = 0; c < s.cols; ++c)
         {
             const minor = exports.minor(m, r, c);
-            result[r][c] = ((-1) ** (r + c)) * exports.det(minor);
+            result[r][c] = Math.pow(-1, r + c) * exports.det(minor);
         }
     }
     result = exports.t(result);

@@ -234,7 +234,7 @@ exports.rgba = function (r, g, b, a)
         b: Math.max(0, Math.min(1, b)),
         a: Math.max(0, Math.min(1, a)),
         toArray: () => [r, g, b, a],
-        toCss: () => `rgba(${(r * 255)}, ${(g * 255)}, ${(b * 255)}, ${a})`,
+        toCss: () => `rgba(${(r * 255) | 0}, ${(g * 255) | 0}, ${(b * 255) | 0}, ${a})`,
         alpha: value => exports.rgba(r, g, b, value),
         brightness: factor => exports.rgba(r * factor, g * factor, b * factor, a),
         saturation: factor => saturate(r, g, b, a, factor)

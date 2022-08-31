@@ -102,7 +102,7 @@ Document {
         if (ev.key === "d" && ev.ctrlKey)
         {
             console.log("Objects Dump:");
-            console.log(mid.dumpStatus());
+            console.log(core.dumpStatus());
             ev.accepted = true;
         }
     }

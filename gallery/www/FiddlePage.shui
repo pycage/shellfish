@@ -143,7 +143,7 @@ Box {
                         bold: codeBox.bold
                         color: codeBox.textColor
                         literal: false
-                        text: codeBox.row && codeBox.bbox && codeBox.selectionStart === codeBox.selectionEnd ? codeBox.text : ""
+                        text: codeBox.text + codeBox.row // invisible anyway
 
                         filter: (s) =>
                         {

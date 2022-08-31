@@ -1200,7 +1200,7 @@ shRequire(["shellfish/low",
                 }
             }
 
-            if (bboxHasChangedWidth || bboxHasChangedHeight || fromChild)
+            if (bboxHasChanged || fromChild)
             {
                 if (bbox.width * bbox.height > 0)
                 {

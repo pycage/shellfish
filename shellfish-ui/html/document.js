@@ -24,6 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire(["shellfish/low", "shellfish/core"], function (low, core)
 {
+    const POINTER_EVENT = !! window.PointerEvent;
+
     /**
      * A generic event.
      * @typedef Event
@@ -143,6 +145,10 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             this.notifyable("contentWidth");
             this.notifyable("contentHeight");
             this.notifyable("bbox");
+            this.notifyable("bboxX");
+            this.notifyable("bboxY");
+            this.notifyable("bboxWidth");
+            this.notifyable("bboxHeight");
             this.notifyable("fullscreenItem");
 
             /**
@@ -184,17 +190,34 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             }, { passive: true });
 
             // detect the operation mode (mouse vs touch)
-            this.addHtmlEventListener(document, "pointermove", ev =>
+            if (POINTER_EVENT)
             {
-                const priv = d.get(this);
-                priv.pointerX = ev.clientX;
-                priv.pointerY = ev.clientY;
-                if (priv.inputDevice !== ev.pointerType)
+                this.addHtmlEventListener(document, "pointermove", ev =>
                 {
-                    priv.inputDevice = ev.pointerType;
-                    this.inputDeviceChanged();
-                }
-            }, { passive: true, capture: true });
+                    const priv = d.get(this);
+                    priv.pointerX = ev.clientX;
+                    priv.pointerY = ev.clientY;
+                    if (priv.inputDevice !== ev.pointerType)
+                    {
+                        priv.inputDevice = ev.pointerType;
+                        this.inputDeviceChanged();
+                    }
+                }, { passive: true, capture: true });
+            }
+            else
+            {
+                this.addHtmlEventListener(document, "mousemove", ev =>
+                {
+                    const priv = d.get(this);
+                    priv.pointerX = ev.clientX;
+                    priv.pointerY = ev.clientY;
+                    if (priv.inputDevice !== "mouse")
+                    {
+                        priv.inputDevice = "mouse";
+                        this.inputDeviceChanged();
+                    }
+                }, { passive: true, capture: true });
+            }
 
             // and a workaround for Firefox which may have pointer events
             // disabled by default
@@ -370,6 +393,11 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             };
         }
 
+        get bboxX() { return this.bbox.x; }
+        get bboxY() { return this.bbox.y; }
+        get bboxWidth() { return this.bbox.width; }
+        get bboxHeight() { return this.bbox.height; }
+
         get color() { return d.get(this).color; }
         set color(c)
         {
@@ -454,6 +482,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             else
             {
                 this.bboxChanged();
+                this.bboxWidthChanged();
+                this.bboxHeightChanged();
             }
 
             // notify children, excluding from where the update came

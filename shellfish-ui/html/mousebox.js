@@ -734,6 +734,15 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     }
                 }, { passive: true });
             }
+
+            this.addTracedHtmlEventListener(item, "blur", ev =>
+            {
+                if (priv.pressed)
+                {
+                    priv.pressed = false;
+                    this.pressedChanged();
+                }
+            });
         }
 
         get containsMouse() { return d.get(this).containsMouse; }

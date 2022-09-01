@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -26,7 +26,7 @@ const modChildProcess = require("child_process"),
       modFs = require("fs"),
       modPath = require("path"),
       modProcess = require("process"),
-      modBabel = require("@babel/core"),
+      modBabel = require("./babel.min.js"),
       modFengshui = require("../shellfish-core/fengshui.js");
 
 const BABEL_CONFIG = {
@@ -34,6 +34,7 @@ const BABEL_CONFIG = {
     code: true,
     comments: false,
     minified: true
+    //presets: ["env"]
 };
 
 const MODULE_ID_REGEXP = new RegExp("\n *exports.__id *= *\"([^\"]+)\";");

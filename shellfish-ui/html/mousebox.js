@@ -65,6 +65,9 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             itemY = bbox.top;
         }
 
+        const buttons = typeof ev.buttons !== undefined ? ev.buttons
+                                                        : ev.which /* old WebKit */;
+
         return {
             original: ev,
             accepted: false,
@@ -74,7 +77,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                           : ev.clientX - itemX, // ev.offsetX,
             y: touchPoint ? touchPoint.clientY - itemY //ev.target.getBoundingClientRect().top
                           : ev.clientY - itemY, // ev.offsetY,
-            buttons: touchPoint ? 1 : ev.buttons,
+            buttons: touchPoint ? 1 : buttons,
             pressure: POINTER_EVENT ? ev.pressure : 0.5,
             tiltX: POINTER_EVENT ? ev.tiltX : 0,
             tiltY: POINTER_EVENT ? ev.tiltY : 0,
@@ -739,6 +742,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             {
                 if (priv.pressed)
                 {
+                    priv.clickAccepted = false;
                     priv.pressed = false;
                     this.pressedChanged();
                 }

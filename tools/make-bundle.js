@@ -25,17 +25,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 const modChildProcess = require("child_process"),
       modFs = require("fs"),
       modPath = require("path"),
-      modProcess = require("process"),
       modBabel = require("./babel.min.js"),
       modFengshui = require("../shellfish-core/fengshui.js");
 
-const BABEL_CONFIG = {
-    ast: false,
-    code: true,
-    comments: false,
-    minified: true
-    //presets: ["env"]
-};
 
 const MODULE_ID_REGEXP = new RegExp("\n *exports.__id *= *\"([^\"]+)\";");
 
@@ -48,12 +40,15 @@ const GIT_SHORTHASH = modChildProcess.execSync("git log -n 1 --format=%h HEAD").
 
 function help()
 {
-    console.log("Create a Shellfish bundle.");
+    console.log("Usage: node make-bundle.js [OPTION]... <bundle-file> <path>");
+    console.log("Create a Shellfish bundle file for easy distribution.");
     console.log("");
-    console.log("Usage: node make-bundle.js <bundle-file> <path>");
+    console.log("  -h, --help           Show this help.");
+    console.log("  -l, --legacy         Translate modern ECMAScript to ES2015 standard to run in");
+    console.log("                       legacy environments.");
     console.log("");
-    console.log("with <bundle-file>   The name of the bundle file to create.");
-    console.log("     <path>          The path to pack into the bundle.");
+    console.log("  <bundle-file>        The name of the bundle file to create.");
+    console.log("  <path>               The path to pack into the bundle.");
     console.log("");
 }
 
@@ -66,8 +61,19 @@ function fillPlaceholders(s)
     ;
 }
 
-function updateBundle(path)
+function updateBundle(path, config)
 {
+    const babelConfig = {
+        ast: false,
+        code: true,
+        comments: false,
+        minified: true
+    };
+    if (config.legacy)
+    {
+        babelConfig.presets = ["env"];
+    }
+
     function findFiles(prefix, location, path)
     {
         modFs.readdirSync(modPath.join(location, path)).forEach((name) =>
@@ -103,7 +109,7 @@ function updateBundle(path)
                         {
                             bundle.aliases[match[1]] = resourcePath;
                         }
-                        const result = modBabel.transform(code, BABEL_CONFIG);
+                        const result = modBabel.transform(code, babelConfig);
                         data = result.code;
                         bundle.formats[resourcePath] = "utf-8";
                     }
@@ -114,7 +120,7 @@ function updateBundle(path)
                         resourcePath = resourcePath + ".js";
                         const code = modFengshui.compile(shuiPath, fillPlaceholders(binary.toString("utf8")));
                         sizeBefore = Math.ceil(code.length / 1024);
-                        const result = modBabel.transform(code, BABEL_CONFIG);
+                        const result = modBabel.transform(code, babelConfig);
                         bundle.aliases[shuiPath] = resourcePath;
                         data = result.code;
                         bundle.formats[resourcePath] = "utf-8";
@@ -141,7 +147,7 @@ function updateBundle(path)
                 {
                     console.error(`Failed to read file: ${fullPath}`);
                     console.error(err);
-                    modProcess.exit(1);
+                    process.exit(1);
                 }
             }
         });
@@ -158,23 +164,52 @@ function updateBundle(path)
     return JSON.stringify(bundle);
 }
 
-if (modProcess.argv.length !== 4 || modProcess.argv[2] === "-h")
+const config = {
+    legacy: false
+};
+
+const args = process.argv.slice(2);
+const paths = [];
+while (args.length > 0)
 {
-    help();
-    modProcess.exit(1);
+    const arg = args.shift();
+    if (arg === "-h" || arg === "--help")
+    {
+        help();
+        process.exit(0);
+    }
+    else if (arg === "-l" || arg === "--legacy")
+    {
+        config.legacy = true;
+    }
+    else if (! arg.startsWith("-"))
+    {
+        paths.push(arg);
+    }
+    else
+    {
+        help();
+        process.exit(1);
+    }
 }
 
-const bundleFile = modProcess.argv[2];
-const path = modProcess.argv[3];
+if (paths.length !== 2)
+{
+    help();
+    process.exit(1);
+}
+
+const bundleFile = paths[0];
+const path = paths[1];
 
 if (! modFs.existsSync(path))
 {
     console.error(`Path "${path}" does not exist. Aborting.`);
-    modProcess.exit(1);
+    process.exit(1);
 }
 
 console.log(`Bundling path: ${path}`);
-const bundle = updateBundle(path);
+const bundle = updateBundle(path, config);
 modFs.writeFileSync(bundleFile, bundle);
 const stats = modFs.statSync(bundleFile);
 console.log(`Bundle written successfully: ${bundleFile} (${Math.ceil(stats.size / 1024)} K)`);

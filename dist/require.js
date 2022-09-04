@@ -1096,30 +1096,66 @@ const shRequire = (function ()
      * @private
      * @returns {Promise} - The Promise object.
      */
-    __require.selfUrl = async function ()
+    __require.selfUrl = function ()
     {
-        if (! hasDom)
+        const checkScript = function (url)
         {
-            return __filename;
+            return new Promise((resolve, reject) =>
+            {
+                fetch(url)
+                .then(response =>
+                {
+                    if (response.ok)
+                    {
+                        response.text()
+                        .then(code =>
+                        {
+                            resolve(code.indexOf(UUID) !== -1 ? url : "");
+                        })
+                        .catch(err =>
+                        {
+                            resolve("");
+                        });
+                    }
+                    else
+                    {
+                        resolve("");
+                    }
+                })
+                .catch(err =>
+                {
+                    resolve("");
+                });
+            });
         }
 
-        const tags = document.scripts;
-        for (let i = 0; i < tags.length; ++i)
+        return new Promise((resolve, reject) =>
         {
-            const tag = tags[i];
-            const response = await fetch(tag.src);
-            if (! response.ok)
+            if (typeof __filename !== "undefined")
             {
-                continue;
+                resolve(__filename);
+                return;
             }
-            const code = await response.text();
-            if (code.indexOf(UUID) !== -1)
+
+            const tags = document.scripts;
+            const promises = [];
+            for (let i = 0; i < tags.length; ++i)
             {
-                return tag.src;
+                promises.push(checkScript(tags[i].src));
             }
-        }
-        return "";
-    };
+            Promise.all(promises)
+            .then(urls =>
+            {
+                const self = urls.find(url => url !== "");
+                resolve(self ? self : "");
+            })
+            .catch(err =>
+            {
+                resolve("");
+            });
+        });
+    }
+
 
     if (hasDom)
     {

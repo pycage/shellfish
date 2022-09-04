@@ -240,6 +240,63 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
     const connHub = new ConnectionsHub();
 
     /**
+     * Class representing named task queues.
+     */
+    class TaskQueues
+    {
+        constructor()
+        {
+            this.queues = new Map();
+            this.queuesBusy = new Map();
+        }
+
+        clear(qName)
+        {
+            if (this.queues.has(qName))
+            {
+                this.queues.set(qName, []);
+            }
+        }
+
+        enqueue(qName)
+        {
+            if (! this.queues.has(qName))
+            {
+                this.queues.set(qName, []);
+                this.queuesBusy.set(qName, false);
+            }
+
+            const next = () =>
+            {
+                this.queuesBusy.set(qName, false);
+
+                const queue = this.queues.get(qName);
+                if (queue.length > 0)
+                {
+                    const cb = queue.shift();
+                    this.queuesBusy.set(qName, true);
+                    cb();
+                }
+            };
+
+            return new Promise((resolve, reject) =>
+            {
+                const queue = this.queues.get(qName);
+                queue.push(() =>
+                {
+                    resolve(next);
+                });
+
+                if (! this.queuesBusy.get(qName))
+                {
+                    next();
+                }
+            });
+        }
+    }
+    const taskQueues = new TaskQueues();
+
+    /**
      * Class managing the custom object properties.
      * @private
      */
@@ -397,6 +454,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             return propsManager.properties(this);
         }
     }
+
+    const sharedResources = new Map();
 
     /**
      * Base class representing a mid-level object with support for
@@ -981,6 +1040,12 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          */
         change(name, newValue)
         {
+            const type = typeof newValue;
+            if ((type === "string" || type === "number") && newValue === this[name])
+            {
+                return;
+            }
+
             const transitionProp = name + "Transition";
             if (this[transitionProp] &&
                 this[transitionProp].enabled &&
@@ -1182,6 +1247,135 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         }
 
         /**
+         * Retrieves a shared resource identified by a key. If the resource did
+         * not yet exist, it will be created using the supplied factory function.
+         * 
+         * The factory function may be omitted if you don't want to create the
+         * resource at this place. In this case, this method will return `null`
+         * if the resource did not exist.
+         * 
+         * @see {@link core.Object#freeSharedResource freeSharedResource}
+         * @see {@link core.Object#awaitSharedResource awaitSharedResource}
+         * 
+         * @example
+         * const res = this.sharedResource("mySharedResource", () =>
+         * {
+         *     return new BigResource();
+         * });
+         * 
+         * @param {string} key - The resource key.
+         * @param {function} [factory] - The factory function.
+         * @return {any} The shared resource.
+         */
+        sharedResource(key, factory)
+        {
+            if (sharedResources.has(key))
+            {
+                const share = sharedResources.get(key);
+                share.users.add(this);
+                return share.res;
+            }
+            if (factory)
+            {
+                const res = factory();
+                const share = {
+                    users: new Set(),
+                    res
+                };
+                share.users.add(this);
+                sharedResources.set(key, share);
+
+                const monitors = this.sharedResource(key + "-pending") || [];
+                monitors.forEach(mon => mon());
+
+                return res;
+            }
+            return null;
+        }
+
+        /**
+         * Frees a shared resource identified by a key. If this was the last
+         * user of the resource, it will be deleted using the supplied deleter
+         * function.
+         * 
+         * The deleter function may be omitted if there is no special action
+         * to be taken for deletion.
+         * 
+         * @see {@link core.Object#sharedResource sharedResource}
+         * @see {@link core.Object#awaitSharedResource awaitSharedResource}
+         * 
+         * @example
+         * this.freeSharedResource("mySharedResource", res =>
+         * {
+         *     res.cleanUp();
+         * });
+         * 
+         * @param {string} key - The resource key.
+         * @param {function} [deleter] - The deleter function.
+         */
+        freeSharedResource(key, deleter)
+        {
+            if (sharedResources.has(key))
+            {
+                const share = sharedResources.get(key);
+                share.users.delete(this);
+                if (share.users.size === 0)
+                {
+                    sharedResources.delete(key);
+                    if (deleter)
+                    {
+                        deleter(share.res);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Waits for a shared resource identified by a key to become available.
+         * Once the resource is available, the given callback will be invoked.
+         * If this method returns `true`, the shared resource must be created
+         * first (it does not exist and this object is the first one waiting).
+         * 
+         * This method is useful for dealing with resources that are created
+         * asynchronously.
+         * 
+         * @see {@link core.Object#sharedResource sharedResource}
+         * @see {@link core.Object#freeSharedResource freeSharedResource}
+         * 
+         * @param {string} key - The resource key.
+         * @param {function} callback - The callback function.
+         * @returns {bool} - Whether the resource needs to be created or not.
+         */
+        awaitSharedResource(key, callback)
+        {
+            if (this.sharedResource(key))
+            {
+                callback();
+                return false;
+            }
+
+            const pendingKey = key + "-pending";
+            const monitors = this.sharedResource(pendingKey, () => []);
+
+            if (monitors.length > 0)
+            {
+                monitors.push(() =>
+                {
+                    this.freeSharedResource(pendingKey);
+                    callback();
+                });
+                return false;
+            }
+            monitors.push(() =>
+            {
+                this.freeSharedResource(pendingKey);
+                callback();
+            });
+
+            return true;
+        }
+
+        /**
          * Returns a Promise that resolves after a given amount of milliseconds.
          * 
          * @param {number} ms - The amount of milliseconds to wait.
@@ -1196,6 +1390,29 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                     resolve();
                 }), ms);
             });
+        }
+
+        /**
+         * Waits in a named queue and returns a Promise that resolves to a
+         * `next` function when it's the caller's turn. After the caller has
+         * finished its turn, that `next` function must be invoked.
+         * 
+         * @param {string} qName - The name of the queue.
+         * @return {Promise<function>} The Promise object.
+         */
+        waitQueued(qName)
+        {
+            return taskQueues.enqueue(this.objectId + qName);
+        }
+
+        /**
+         * Clears the given waiting queue.
+         * 
+         * @param {string} qName - The name of the queue.
+         */
+        clearQueue(qName)
+        {
+            taskQueues.clear(this.objectId + qName);
         }
 
         /** 

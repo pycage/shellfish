@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,7 @@ require "shellfish/ui";
  * @property {number} value - (default: `0`) The current value.
  * @property {number} stepSize - (default: `5`) The step size between value changes when pressing one of the step buttons.
  */
-MouseBox {
+Box {
     id: spinBox
 
     property minValue: 0
@@ -70,24 +70,11 @@ MouseBox {
 
     layout: "center-row"
 
-    onWheel: ev =>
-    {
-        if (ev.deltaY < 0)
-        {
-            spinBox.setValue(spinBox.value - spinBox.stepSize);
-        }
-        else if (ev.deltaY > 0)
-        {
-            spinBox.setValue(spinBox.value + spinBox.stepSize);
-        }
-        ev.accepted = true;
-    }
-
     Button {
         enabled: spinBox.value > spinBox.minValue
         flat: true
         checked: pressed
-        icon: "core-minus"
+        icon: "core-arrow_down"
 
         onClick: () =>
         {
@@ -116,44 +103,63 @@ MouseBox {
         }
     }
 
-    TextEntry {
-        property value: spinBox.value
-
+    MouseBox {
         fillWidth: true
-        pattern: "-?[0-9]*"
-        text: "" + spinBox.value
 
-        onValueChanged: () =>
+        onWheel: ev =>
         {
-            const t = "" + value;
-            if (t !== text)
+            if (ev.deltaY < 0)
             {
-                text = t;
+                spinBox.setValue(spinBox.value - spinBox.stepSize);
             }
+            else if (ev.deltaY > 0)
+            {
+                spinBox.setValue(spinBox.value + spinBox.stepSize);
+            }
+            ev.accepted = true;
         }
 
-        onTextChanged: () =>
-        {
-            if (text !== "" && text !== "-")
+        TextEntry {
+            property value: spinBox.value
+
+            fillWidth: true
+            pattern: "-?[0-9]*"
+            text: "" + spinBox.value
+            horizontalAlignment: "center"
+
+            onValueChanged: () =>
             {
-                spinBox.setValue(Number.parseInt(text));
-                if (text !== "" + spinBox.value)
+                const t = "" + value;
+                if (t !== text)
                 {
-                    text = "" + spinBox.value;
+                    text = t;
                 }
             }
-            else
+
+            onTextChanged: () =>
             {
-                text = "" + spinBox.minValue;
+                if (text !== "" && text !== "-")
+                {
+                    spinBox.setValue(Number.parseInt(text));
+                    if (text !== "" + spinBox.value)
+                    {
+                        text = "" + spinBox.value;
+                    }
+                }
+                else
+                {
+                    text = "" + spinBox.minValue;
+                }
             }
         }
     }
+
 
     Button {
         enabled: spinBox.value < spinBox.maxValue
         flat: true
         checked: pressed
-        icon: "core-plus"
+        icon: "core-arrow_up"
 
         onClick: () =>
         {

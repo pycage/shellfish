@@ -35,7 +35,7 @@ require "shellfish/ui";
  * @property {number} value - (default: `0`) The current value.
  * @property {number} stepSize - (default: `5`) The step size between value changes when pressing one of the step buttons.
  */
-Box {
+MouseBox {
     id: spinBox
 
     property minValue: 0
@@ -69,6 +69,19 @@ Box {
     height: theme.itemHeightSmall
 
     layout: "center-row"
+
+    onWheel: ev =>
+    {
+        if (ev.deltaY < 0)
+        {
+            spinBox.setValue(spinBox.value - spinBox.stepSize);
+        }
+        else if (ev.deltaY > 0)
+        {
+            spinBox.setValue(spinBox.value + spinBox.stepSize);
+        }
+        ev.accepted = true;
+    }
 
     Button {
         enabled: spinBox.value > spinBox.minValue

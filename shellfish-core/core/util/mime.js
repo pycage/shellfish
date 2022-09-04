@@ -25,10 +25,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 exports.__id = "shellfish/core/mime";
 
 const EXTENSIONS = {
+    ".7z":    "application/x-7z-compressed",
     ".apk":   "application/java-archive",
     ".avi":   "video/x-msvideo",
     ".bat":   "application/x-batch",
     ".c":     "text/plain",
+    ".cbz":   "application/zip",
     ".cc":    "text/plain",
     ".cpp":   "text/plain",
     ".css":   "text/css",
@@ -36,7 +38,7 @@ const EXTENSIONS = {
     ".flac":  "audio/flac",
     ".flv":   "video/x-flv",
     ".gif":   "image/gif",
-    ".gz":    "application/x-gzip",
+    ".gz":    "application/gzip",
     ".h":     "text/plain",
     ".hpp":   "text/plain",
     ".htm":   "text/html",
@@ -63,11 +65,14 @@ const EXTENSIONS = {
     ".qml":   "application/x-qml",
     ".rtf":   "text/rtf",
     ".sh":    "application/x-shellscript",
+    ".shui":  "text/plain",
     ".svg":   "image/svg+xml",
     ".txt":   "text/plain",
+    ".tgz":   "application/gzip",
     ".vcf":   "text/vcard",
     ".wasm":  "application/wasm",
     ".webm":  "video/webm",
+    ".webp":  "image/webp",
     ".xml":   "text/xml",
     ".zip":   "application/zip"
 };

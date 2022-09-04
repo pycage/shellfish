@@ -185,6 +185,15 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             this.notifyable("pressed");
             this.notifyable("touchPoints");
 
+            this.onBboxChanged = () =>
+            {
+                if (priv.containsMouse)
+                {
+                    priv.containsMouse = false;
+                    this.containsMouseChanged();
+                }
+            };
+
             this.onDestruction = () =>
             {
                 priv.listeners = { };

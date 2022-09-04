@@ -33,8 +33,9 @@ Label {
         case "application/x-folder":
             icon = "core-folder";
             break;
+        case "application/x-7z-compressed":
         case "application/java-archive":
-        case "application/x-gzip":
+        case "application/gzip":
         case "application/zip":
             icon = "core-file-zip";
             break;
@@ -53,6 +54,7 @@ Label {
         case "image/jpeg":
         case "image/png":
         case "image/svg+xml":
+        case "image/webp":
             icon = "core-file-image";
             break;
         case "text/plain":

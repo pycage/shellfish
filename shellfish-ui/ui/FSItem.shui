@@ -32,9 +32,8 @@ require "shellfish/ui";
  *
  * @property {string} displayMode - (default: `"list"`) The display mode. One of `list|grid`
  * @property {object} file - (default: `null`) The file object to represent.
- * @property {html.Filesystem} filesystem - (default: null) If the filesystem is set, it is used for icon thumbnails.
  * @property {bool} highlighted - (default: `false`) If `true`, the item is highlighted.
- * @property {string} thumbnail - (default: `""`) The path of the thumbnail on the filesystem.
+ * @property {string} thumbnail - (default: `""`) The URL of the thumbnail. This is usually a local blob URL.
  */
 MouseBox {
     id: item
@@ -42,7 +41,6 @@ MouseBox {
     property displayMode: "list"
     property highlighted: false
     property file: null
-    property filesystem: null
     property thumbnail: ""
 
     color: containsMouse && ! highlighted ? theme.hoverBackgroundColor
@@ -55,30 +53,11 @@ MouseBox {
     {
         sizeLabel.text = "...";
 
-        if (filesystem && file)
+        if (file)
         {
-            const forPath = file.path;
-
-            const condition = () =>
-            {
-                return lifeCycleStatus !== "destroyed" &&
-                       file.path === forPath;
-            };
-
             if (file.type === "d")
             {
-                /*
-                wait(300)
-                .then(safeCallback(() =>
-                {
-                    filesystem.list(file.path)
-                    .then(safeCallback(items =>
-                    {
-                        sizeLabel.text = items.length + " items";
-                    }, condition))
-                    .catch(() => { });
-                }, condition));
-                */
+
             }
             else
             {
@@ -96,41 +75,6 @@ MouseBox {
                     size /= 1024;
                 }
             }
-        }
-    }
-
-    onThumbnailChanged: () =>
-    {
-        thumbnailIcon.source = "";
-
-        if (filesystem && thumbnail !== "")
-        {
-            const forThumbnail = thumbnail;
-
-            const condition = () =>
-            {
-                return lifeCycleStatus !== "destroyed" &&
-                       thumbnail === forThumbnail;
-            };
-
-            wait(300)
-            .then(safeCallback(() =>
-            {
-                filesystem.exists(thumbnail)
-                .then(safeCallback(ok =>
-                {
-                    if (ok)
-                    {
-                        filesystem.read(thumbnail)
-                        .then(safeCallback(blob =>
-                        {
-                            thumbnailIcon.source = blobUrl(blob);
-                        }, condition))
-                        .catch(() => { });
-                    }
-                }, condition))
-                .catch(() => { });
-            }, condition));
         }
     }
 
@@ -161,10 +105,12 @@ MouseBox {
             fillWidth: true
             fillHeight: true
             fitMode: "cover"
+
+            source: item.thumbnail
         }
 
         Box {
-            visible: item.file.type === "d" || ! thumbnailIcon.visible
+            //visible: item.file.type === "d" || ! thumbnailIcon.visible
 
             position: "free"
             origin: "bottom-right"

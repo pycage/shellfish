@@ -30,6 +30,7 @@ require "shellfish/ui";
  * @class
  * @extends html.Box
  *
+ * @property {string} horizontalAlignment - (default: `"left"`) Horizontal text alignment: `left|center|right`
  * @property {string} text - (default: `""`) The current text.
  * @property {bool} password - (default: `false`) Whether this is a password entry, i.e. the actual text is not displayed.
  * @property {string} pattern - (default: `".*"`) A regular expression for limiting the allowed text input, e.g. `"[0-9]*"` would allow entering numbers only.
@@ -40,6 +41,7 @@ MouseBox {
     property text: ""
     property password: false
     property pattern: ".*"
+    property horizontalAlignment: "left"
 
     property active: false
 
@@ -87,6 +89,7 @@ MouseBox {
         fillWidth: true
         marginLeft: theme.paddingSmall
         marginRight: theme.paddingSmall
+        horizontalAlignment: box.horizontalAlignment
         fontSize: theme.fontSizeMedium
         color: theme.primaryColor
         selectionBackgroundColor: theme.highlightBackgroundColor

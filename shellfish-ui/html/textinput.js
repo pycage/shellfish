@@ -36,6 +36,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * @property {html.Color} color - The text color.
      * @property {string} fontFamily - The font family.
      * @property {number} fontSize - The font size in CSS pixels.
+     * @property {string} horizontalAlignment - (default: `"left"`) Horizontal text alignment: `left|center|right`
      * @property {bool} password - (default: `false`) Whether this is a password entry field.
      * @property {string} pattern - (default: `".*"`) A regular expression pattern for restricting allowed input.
      * @property {html.Color} selectionBackgroundColor - The background color of selected text.
@@ -51,6 +52,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 pattern: /.*/,
                 selectionColor: this.colorName("white"),
                 selectionBackgroundColor: this.colorName("navy"),
+                horizontalAlignment: "left",
                 item: low.createElementTree(
                     low.tag("input")
                     .class("sh-text-selectable")
@@ -61,6 +63,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                     .style("width", "auto")
                     .style("height", "auto")
                     .style("color", "black")
+                    .style("text-align", "left")
                     .style("--sh-selection-color", "white")
                     .style("--sh-selection-background-color", "navy")
                     .html()
@@ -72,6 +75,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.notifyable("color");
             this.notifyable("fontFamily", true);
             this.notifyable("fontSize", true);
+            this.notifyable("horizontalAlignment");
             this.notifyable("password", true);
             this.notifyable("pattern");
             this.notifyable("selectionBackgroundColor");
@@ -123,6 +127,23 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.css("color", col.toCss());
             d.get(this).color = col;
             this.colorChanged();
+        }
+
+        get horizontalAlignment() { d.get(this).horizontalAlignment; }
+        set horizontalAlignment(a)
+        {
+            if (a !== d.get(this).horizontalAlignment)
+            {
+                const map = {
+                    "left": "flex-start",
+                    "right": "flex-end",
+                    "center": "center"
+                };
+                d.get(this).horizontalAlignment = a;
+                this.css("justify-content", map[a]);
+                this.css("text-align", a);
+                this.horizontalAlignmentChanged();
+            }
         }
 
         get selectionColor() { return d.get(this).selectionColor; }

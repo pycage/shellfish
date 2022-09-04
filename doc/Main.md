@@ -129,6 +129,16 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### September 2022
+* The new method {@link core.Object#waitQueued} allows for asynchronous actions
+  to wait in a named queue. The method {@link core.Object#clearQueue} clears a
+  named queue, cancelling all waiting actions.
+* It is now possible to build Shellfish packages with ES2015 syntax for running
+  in legacy environments by using the Babel compiler while bundling.
+  Pass the `--legacy` option to `make-bundle.js` to enable.
+* **API Break:** The element {@link ui.FSItem} has no property `filesystem`
+  anymore. The path given to `thumbnail` is an URL now, e.g. a Blob URL.
+
 ### August 2022
 * Some of the most common basic element types are preproduced and held in stock
   by `shellfish/declarative` for better element creation performance with Shui.

@@ -130,6 +130,8 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### September 2022
+* The new element {@link ui.MultiSelectionBox} provides a selection box for
+  multi-selections.
 * The new method {@link core.Object#waitQueued} allows for asynchronous actions
   to wait in a named queue. The method {@link core.Object#clearQueue} clears a
   named queue, cancelling all waiting actions.

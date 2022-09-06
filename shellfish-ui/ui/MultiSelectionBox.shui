@@ -1,0 +1,186 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a drop-down selection box for multi-selections.
+ *
+ * @example
+ * MultiSelectionBox {
+ *     model: ListModel { data: ["One", "Two", "Three"] }
+ * }
+ *
+ * @memberof ui
+ * @name MultiSelectionBox
+ * @class
+ * @extends ui.Button
+ *
+ * @property {string} emptyText - (default: `"---"`) The text shown when no items are selected.
+ * @property {html.ListModel} model - (default: `ListModel { }`) The list model of strings holding the selection items.
+ * @property {number[]} selections - (default: `[]`) The indexes of the currently selected items.
+ */
+Button {
+    id: box
+
+    property model: ListModel { }
+    property selections: []
+    property emptyText: "---"
+
+
+    minWidth: theme.itemWidthLarge
+
+    secondaryIcon: "core-menu"
+    text: selections.length > 0 ? selections.map(idx => model.at(idx)).join(", ")
+                                : emptyText
+
+    labelProfile: Object {
+        property overflowBehavior: "ellipsis"
+    }
+
+    onPointerDown: (ev) =>
+    {
+        const menu = _menuT();
+        menu.popup(self);
+        ev.accepted = true;
+    }
+
+    property _menuT: template Menu {
+
+        onVisibleChanged: () =>
+        {
+            if (! visible)
+            {
+                box.focus = true;
+            }
+        }
+
+        MenuItemBase {
+            minWidth: box.bboxWidth - 2 /* menu borders */
+            highlighted: false
+
+            MouseBox {
+                fillWidth: true
+                fillHeight: true
+                layout: "center-row"
+
+                onClick: ev => ev.accepted = true;
+
+                Box { fillWidth: true }
+
+                Button {
+                    fillHeight: true
+                    flat: true
+                    icon: "core-check_box_blank"
+
+                    onClick: () =>
+                    {
+                        itemRepeater.items.forEach(item => item.setChecked(false));
+                    }
+                }
+
+                Button {
+                    fillHeight: true
+                    flat: true
+                    icon: "core-check_box"
+
+                    onClick: () =>
+                    {
+                        itemRepeater.items.forEach(item => item.setChecked(true));
+                    }
+                }
+            }
+        }
+
+        Repeater {
+            id: itemRepeater
+            
+            model: box.model
+
+            delegate: template MenuItemBase {
+                id: item
+
+                function setChecked(value)
+                {
+                    checkBox.checked = value;
+                }
+
+                minWidth: box.bboxWidth - 2 /* menu borders */
+                
+                MouseBox {
+                    fillWidth: true
+                    fillHeight: true
+                    layout: "center-row"
+
+                    onClick: ev =>
+                    {
+                        checkBox.checked = ! checkBox.checked;
+                        ev.accepted = true;
+                    }
+
+                    CheckBox {
+                        id: checkBox
+
+                        marginLeft: theme.paddingSmall
+                        checked: box.selections.includes(item.modelData.index)
+
+                        onCheckedChanged: () =>
+                        {
+                            let sel = box.selections.slice();
+                            if (checked)
+                            {
+                                if (! sel.includes(item.modelData.index))
+                                {
+                                    sel.push(item.modelData.index);
+                                }
+                            }
+                            else
+                            {
+                                sel = sel.filter(n => n !== item.modelData.index);
+                            }
+                            sel.sort((a, b) => a - b);
+                            box.selections = sel;
+                        }
+                    }
+
+                    Label {
+                        id: label
+
+                        marginLeft: theme.paddingSmall
+                        marginRight: theme.paddingSmall
+                        color: item.highlighted ? theme.highlightColor : theme.primaryColor
+                        text: item.modelData.value
+                    }
+
+                    Box { fillWidth: true }
+                }
+
+                Box {
+                    ruler: thisMenu.menuRuler
+                    width: theme.itemWidthSmall + label.bboxWidth +
+                           theme.itemWidthSmall + checkBox.bboxWidth +
+                           theme.itemWidthSmall
+                }
+            }//delegate
+        }//Repeater
+    }//Menu
+}

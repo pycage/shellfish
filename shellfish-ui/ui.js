@@ -53,6 +53,7 @@ const mods = [
     "MenuItem",
     "MenuItemBase",
     "MenuSeparator",
+    "MultiSelectionBox",
     "OverflowScroller",
     "Overlay",
     "Page",

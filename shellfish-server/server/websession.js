@@ -99,7 +99,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
         }
         else
         {
-            return decodeURIComponent(href);
+            return decodeURIComponent(href.replace(/\?.*$/, ""));
         }
     }
 

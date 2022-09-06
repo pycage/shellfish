@@ -107,6 +107,7 @@ MouseBox {
             if (focus)
             {
                 box.active = true;
+                selectRange(0, text.length);
             }
             else
             {

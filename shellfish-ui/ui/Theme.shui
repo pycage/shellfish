@@ -74,18 +74,18 @@ Object {
     property borderRadius: 3
     
     property itemWidthSmall: 32
-    property itemWidthMedium: 64
-    property itemWidthLarge: 128
+    property itemWidthMedium: itemWidthSmall * 2
+    property itemWidthLarge: itemWidthSmall * 4
 
     property itemHeightSmall: 24
-    property itemHeightMedium: 32
-    property itemHeightLarge: 42
+    property itemHeightMedium: (itemHeightSmall * 1.5) | 0
+    property itemHeightLarge: itemHeightSmall * 2
 
     property paddingSmall: 8
-    property paddingMedium: 12
-    property paddingLarge: 16
+    property paddingMedium: paddingSmall * 1.5
+    property paddingLarge: paddingSmall * 2
 
-    property fontSizeSmall: 12
+    property fontSizeSmall: (fontSizeMedium * 0.7) | 0
     property fontSizeMedium: 16
-    property fontSizeLarge: 32
+    property fontSizeLarge: fontSizeMedium * 2
 }

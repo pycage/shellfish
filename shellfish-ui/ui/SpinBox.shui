@@ -68,13 +68,18 @@ Box {
     width: theme.itemWidthLarge
     height: theme.itemHeightSmall
 
+    color: theme.contentBackgroundColor
+    borderColor: theme.borderColor
+    borderWidth: 1
+    borderRadius: theme.borderRadius
+
     layout: "center-row"
 
     Button {
         enabled: spinBox.value > spinBox.minValue
         flat: true
         checked: pressed
-        icon: "core-arrow_down"
+        icon: "core-minus"
 
         onClick: () =>
         {
@@ -126,6 +131,7 @@ Box {
             pattern: "-?[0-9]*"
             text: "" + spinBox.value
             horizontalAlignment: "center"
+            borderWidth: 0
 
             onValueChanged: () =>
             {
@@ -159,7 +165,7 @@ Box {
         enabled: spinBox.value < spinBox.maxValue
         flat: true
         checked: pressed
-        icon: "core-arrow_up"
+        icon: "core-plus"
 
         onClick: () =>
         {

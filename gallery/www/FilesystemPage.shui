@@ -274,9 +274,19 @@ Page {
                         displayMode: filesView.displayMode
                         highlighted: selector.selection.has(modelData.index)
                         file: modelData.value
-                        filesystem: drive
-                        thumbnail: file.mimetype.startsWith("image/") ? file.path
-                                                                      : ""
+
+                        onFileChanged: () =>
+                        {
+                            if (file && file.mimetype.startsWith("image/"))
+                            {
+                                drive.read(file.path)
+                                .then(blob =>
+                                {
+                                    thumbnail = blobUrl(blob);
+                                })
+                                .catch(() => { });
+                            }
+                        }
 
                         onClick: ev =>
                         {

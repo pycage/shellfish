@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -112,7 +112,11 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 const matches = priv.tokens
                 .map(t => [s.substr(pos).match(t.regexp), t])
                 .filter(m => m[0] !== null)
-                .sort((a, b) => a[0].index < b[0].index ? -1 : 1);
+                .sort((a, b) =>
+                {
+                    return a[0].index === b[0].index ? b[0][0].length - a[0][0].length
+                                                     : a[0].index - b[0].index;
+                });
                 
                 if (matches.length === 0)
                 {

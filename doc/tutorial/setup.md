@@ -48,7 +48,7 @@ to start a web server. Then point your browser to
 
 When distributing a Shellfish application, all you need are the files
 
- * `require.js` (found in the `lib` subdirectory)
+ * `require.js` (found in the `dist` subdirectory)
  * `shellfish.pkg` (the file you have built in the previous step)
  * some of the other `.pkg` files if needed
  * and of course an `index.html` as the application's entry point

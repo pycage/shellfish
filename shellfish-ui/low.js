@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -150,6 +150,20 @@ function resolveIcons(text)
     return out;
 }
 exports.resolveIcons = resolveIcons;
+
+/**
+ * Escapes a text string for literal output.
+ * 
+ * @memberof low
+ * 
+ * @param {string} text - The text to escape.
+ * @returns {string} The escaped text.
+ */
+function escapeMarkup(text)
+{
+    return text.replace(/\*/g, "\\*").replace(/_/g, "\\_");
+}
+exports.escapeMarkup = escapeMarkup;
 
 /**
  * Resolves inline markup in a text string. Use the character `\` to escape

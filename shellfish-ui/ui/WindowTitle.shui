@@ -89,7 +89,6 @@ Box {
         overflowBehavior: "ellipsis"
         color: target.selected ? theme.highlightColor
                                : theme.primaryColor
-        literal: true
         text: titlebar.text
     }
 

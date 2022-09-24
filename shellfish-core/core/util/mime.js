@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2018 - 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2018 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -30,6 +30,7 @@ const EXTENSIONS = {
     ".avi":   "video/x-msvideo",
     ".bat":   "application/x-batch",
     ".c":     "text/plain",
+    ".cbr":   "application/x-rar-compressed",
     ".cbz":   "application/zip",
     ".cc":    "text/plain",
     ".cpp":   "text/plain",
@@ -63,6 +64,7 @@ const EXTENSIONS = {
     ".pro":   "text/plain",
     ".py":    "application/x-python",
     ".qml":   "application/x-qml",
+    ".rar":   "application/x-rar-compressed",
     ".rtf":   "text/rtf",
     ".sh":    "application/x-shellscript",
     ".shui":  "text/plain",

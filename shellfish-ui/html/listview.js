@@ -917,6 +917,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
 
         renderItems(items)
         {
+            if (this.lifeCycleStatus === "destroyed")
+            {
+                return;
+            }
+
             const now = Date.now();
             const bbox = this.bbox;
             const priv = d.get(this);

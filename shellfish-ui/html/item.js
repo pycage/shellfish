@@ -232,6 +232,15 @@ shRequire(["shellfish/low",
              */
             this.registerEvent("keyDown");
 
+            /**
+             * Is triggered when a key is released while the item has keyboard
+             * focus.
+             * @event keyUp
+             * @param {html.Item.KeyboardEvent} event - The event object.
+             * @memberof html.Item
+             */
+            this.registerEvent("keyUp");
+
             const priv = d.get(this);
 
             this.onInitialization = () =>
@@ -245,6 +254,17 @@ shRequire(["shellfish/low",
                 {
                     const e = makeKeyEvent(ev);
                     this.keyDown(e);
+                    if (e.accepted)
+                    {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                    }
+                });
+
+                this.addHtmlEventListener(item, "keyup", (ev) =>
+                {
+                    const e = makeKeyEvent(ev);
+                    this.keyUp(e);
                     if (e.accepted)
                     {
                         ev.stopPropagation();

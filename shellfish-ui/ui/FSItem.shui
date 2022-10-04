@@ -93,10 +93,6 @@ MouseBox {
                                                     nameLabel.bboxHeight +
                                                     sizeLabel.bboxHeight
 
-        //borderRadius: 3
-        //borderColor: theme.borderColor
-        //borderWidth: thumbnailIcon.visible ? 1 : 0
-
         layout: "center"
 
         Image {
@@ -111,16 +107,12 @@ MouseBox {
         }
 
         Box {
-            //visible: item.file.type === "d" || ! thumbnailIcon.visible
-
             position: "free"
             origin: "bottom-right"
             fillWidth: ! thumbnailIcon.visible
             fillHeight: ! thumbnailIcon.visible
             width: thumbnailIcon.visible ? parent.bboxWidth * 0.3 : -1
             height: thumbnailIcon.visible ? width : -1
-
-            color: item.containsMouse || item.highlighted ? item.color : theme.contentBackgroundColor
 
             layout: "center"
 

@@ -78,6 +78,7 @@ MouseBox {
     borderColor: theme.borderColor
     layout: "center-row"
 
+    minWidth: theme.itemWidthSmall
     height: theme.itemHeightSmall
 
     opacity: ancestorsEnabled && enabled ? 1 : 0.6
@@ -119,7 +120,7 @@ MouseBox {
         visible: button.icon !== ""
         marginLeft: 4
         marginRight: 4
-        fontSize: Math.min(parent.bboxWidth, parent.bboxHeight) * 0.7
+        fontSize: Math.min(parent.bboxWidth, parent.bboxHeight) * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.icon !== "" ? "[icon:" + button.icon + "]" : ""
 
@@ -143,7 +144,7 @@ MouseBox {
         visible: button.secondaryIcon !== ""
         marginLeft: 4
         marginRight: 4
-        fontSize: Math.min(parent.bboxWidth, parent.bboxHeight) * 0.7
+        fontSize: Math.min(parent.bboxWidth, parent.bboxHeight) * 0.6
         color: priv.highlighted ? theme.highlightColor : theme.primaryColor
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 

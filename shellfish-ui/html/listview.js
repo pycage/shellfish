@@ -613,6 +613,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
             {
                 totalSize = modelSize > 0 ? this.positionOf(modelSize - 1)[1] + cellHeight
                                           : 0;
+                totalSize = Math.max(bbox.height, totalSize);
 
                 const y1 = this.contentY - priv.cacheMargin;
                 const y2 = y1 + bbox.height + 2 * priv.cacheMargin;
@@ -624,6 +625,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
             {
                 totalSize = modelSize > 0 ? this.positionOf(modelSize - 1)[0] + cellWidth
                                           : 0;
+                totalSize = Math.max(bbox.width, totalSize);
 
                 const x1 = this.contentX - priv.cacheMargin;
                 const x2 = x1 + bbox.width + 2 * priv.cacheMargin;

@@ -21,7 +21,7 @@ async function makeIconSet(name, target)
         files: "icons/" + name + "/*.svg",
         fontName: name,
         template: "icons/fontmap.template",
-        formats: "woff2"
+        formats: ["woff2"]
     });
     const fontData = Buffer.from(result.woff2, "binary").toString("base64");
     fs.writeFileSync(target + "/" + name + "-icons.css", result.template.replace("FONT_DATA_GOES_HERE", fontData));

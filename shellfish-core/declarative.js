@@ -52,7 +52,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
     const elementRegistry = new Map();
 
     // a warehouse for storing pre-created elements for quick delivery
-    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); }, 500);
+    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); }, 100);
 
     /**
      * Returns if the given object is a dynamic value.

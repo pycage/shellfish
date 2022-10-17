@@ -129,6 +129,14 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### October 2022
+* The element {@link html.ListView} has a new property `overflowBehavior` for
+  disabling or enabling scrolling.
+* The element {@link html.ListView} has a new property `snapMode` for snapping
+  to items after scrolling.
+* The new property `scrolling` of {@link html.Item} tells if an item is currently
+  scrolling its content.
+
 ### September 2022
 * The new element {@link ui.MultiSelectionBox} provides a selection box for
   multi-selections.

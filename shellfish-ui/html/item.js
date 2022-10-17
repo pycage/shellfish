@@ -115,6 +115,7 @@ shRequire(["shellfish/low",
      * @property {number} rotationAngle - (default: `0`) The rotation angle in degrees.
      * @property {vec3} rotationAxis - (default: `vec3(0, 1, 0)`) The rotation axis. Rotations are counter-clockwise.
      * @property {html.Ruler} ruler - (default: `null`) The ruler object to use.
+     * @property {bool} scrolling - [readonly] Whether the item is currently scrolling.
      * @property {string[]} style - (default: `[]`) A list of custom CSS class names.
      * @property {bool} trapFocus - (default: `false`) Whether to trap keyboard focus to this element, including its descendants.
      * @property {bool} visible - (default: `true`) Whether the item is visible. To check if the item is really
@@ -166,7 +167,8 @@ shRequire(["shellfish/low",
                 rotationAxis: this.vec3(0, 0, 1),
                 rotationAngle: 0,
                 rotationQuaternion: [0, 0, 0, 0],
-                style: []
+                style: [],
+                scrolling: false
             });
             
             this.notifyable("ancestorsEnabled");
@@ -202,6 +204,7 @@ shRequire(["shellfish/low",
             this.notifyable("position");
             this.notifyable("rotationAxis");
             this.notifyable("rotationAngle");
+            this.notifyable("scrolling");
             this.notifyable("style");
             this.notifyable("trapFocus");
             this.notifyable("visible");
@@ -338,8 +341,29 @@ shRequire(["shellfish/low",
                     }
                 });
 
+                let scrollingStatusHandle = null;
+                const updateScrollingStatus = () =>
+                {
+                    if (scrollingStatusHandle)
+                    {
+                        clearTimeout(scrollingStatusHandle);
+                    }
+                    else
+                    {
+                        priv.scrolling = true;
+                        this.scrollingChanged();
+                    }
+                    scrollingStatusHandle = setTimeout(this.safeCallback(() =>
+                    {
+                        scrollingStatusHandle = null;
+                        priv.scrolling = false;
+                        this.scrollingChanged();
+                    }), 250);
+                };
+
                 this.addHtmlEventListener(item, "scroll", () =>
                 {
+                    updateScrollingStatus();
                     this.contentXChanged();
                     this.contentYChanged();
 
@@ -508,6 +532,8 @@ shRequire(["shellfish/low",
                 }
             });
         }
+
+        get scrolling() { return d.get(this).scrolling; }
 
         updatePosition()
         {

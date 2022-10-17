@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function (low, item, core)
+shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimation.js", "shellfish/core"], function (low, item, numberanimation, core)
 {
 
     class SparseList
@@ -236,7 +236,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
      * @property {fengshui.Template} delegate - The delegate template for creating items dynamically.
      * @property {core.ListModel} model - The model to display. You may pass a number value to implicitly create a simple model.
      * @property {string} orientation - (default: `vertical`) The orientation of the view. One of `horizontal|vertical`
+     * @property {string} overflowBehavior - (default: `"scroll"`) The overflow behavior: `none|scroll`
      * @property {bool} scrollbars - (default: `false`) Whether to display native scrollbars.
+     * @property {bool} snapMode - (default: `"none"`) The mode for snapping to items. One of `none|begin|end`.
      */
     class ListView extends item.Item
     {
@@ -258,7 +260,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
                 cellHeight: 32,
                 cacheMargin: 0,
                 itemsPerRow: 0,
+                overflowBehavior: "scroll",
                 scrollbars: false,
+                snapMode: "none",
                 windowRange: [-1, -1],
                 recycleBin: [],
                 item: low.createElementTree(
@@ -268,6 +272,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
                     .style("width", "auto")
                     .style("height", "auto")
                     .style("overflow", "auto")
+                    .style("overscroll-behavior", "none")
                     .content(
                         // content box
                         low.tag("div")
@@ -290,7 +295,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
             this.notifyable("cellWidth");
             this.notifyable("model");
             this.notifyable("orientation");
+            this.notifyable("overflowBehavior");
             this.notifyable("scrollbars");
+            this.notifyable("snapMode");
 
             let willUpdateLayout = false;
             let willForceUpdateLayout = false;
@@ -345,6 +352,74 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
                 }
             };
 
+            // CSS snapping doesn't work with custom scroll bars,
+            // so we implement our own snapping
+            const na = new numberanimation.NumberAnimation();
+            na.duration = 300;
+            na.easing = "InOutQuad";
+
+            this.onScrollingChanged = () =>
+            {
+                const priv = d.get(this);
+
+                if (! this.scrolling && priv.snapMode !== "none")
+                {
+                    let contentPos = 0;
+                    let cellSize = 0;
+                    let viewSize = 0;
+
+                    if (priv.orientation === "horizontal")
+                    {
+                        contentPos = this.contentX;
+                        viewSize = this.bboxWidth;
+                        cellSize = priv.cellWidth;
+                    }
+                    else
+                    {
+                        contentPos = this.contentY;
+                        viewSize = this.bboxHeight;
+                        cellSize = priv.cellHeight;
+                    }
+
+                    if (priv.snapMode === "end")
+                    {
+                        contentPos += viewSize;
+                    }
+
+                    const moduloPos = contentPos % cellSize;
+                    if (moduloPos !== 0)
+                    {
+                        const targetPos = (moduloPos < cellSize / 2) ? contentPos - moduloPos
+                                                                     : contentPos - moduloPos + cellSize;
+                                                                                
+                        if (na.running)
+                        {
+                            return;
+                        }
+                        na.from = contentPos;
+                        na.to = targetPos;
+
+                        na.start(this.safeCallback(pos =>
+                        {
+                            if (priv.snapMode === "end")
+                            {
+                                pos -= viewSize;
+                            }
+
+                            if (priv.orientation === "horizontal")
+                            {
+                                
+                                this.contentX = pos;
+                            }
+                            else
+                            {
+                                this.contentY = pos;
+                            }
+                        }));
+                    }
+                }
+            };
+
             this.canFocus = true;
         }
 
@@ -364,6 +439,15 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
             this.updateLayout(false);
         }
 
+        get overflowBehavior() { return d.get(this).overflowBehavior; }
+        set overflowBehavior(b)
+        {
+            d.get(this).overflowBehavior = b;
+            this.css("overflow", b === "scroll" ? "auto" : "hidden");
+            this.css("touch-action", b === "scroll" ? "auto" : "none");
+            this.overflowBehaviorChanged();
+        }
+
         get scrollbars() { return d.get(this).scrollbars; }
         set scrollbars(value)
         {
@@ -377,6 +461,13 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core"], function 
                 d.get(this).item.classList.add("sh-no-scrollbars");
             }
             this.scrollbarsChanged();
+        }
+
+        get snapMode() { return d.get(this).snapMode; }
+        set snapMode(s)
+        {
+            d.get(this).snapMode = s;
+            this.snapModeChanged();
         }
 
         get count() { return !! d.get(this).model ? d.get(this).model.size : 0; }

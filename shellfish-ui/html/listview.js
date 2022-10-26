@@ -357,12 +357,14 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             const na = new numberanimation.NumberAnimation();
             na.duration = 300;
             na.easing = "InOutQuad";
+            na.onBegin = () => { this.css("touch-action", "none"); }
+            na.onFinish = () => { this.css("touch-action", "auto"); }
 
             this.onScrollingChanged = () =>
             {
                 const priv = d.get(this);
 
-                if (! this.scrolling && priv.snapMode !== "none")
+                if (! this.scrolling && priv.snapMode !== "none" && ! na.running)
                 {
                     let contentPos = 0;
                     let cellSize = 0;
@@ -392,12 +394,13 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         const targetPos = (moduloPos < cellSize / 2) ? contentPos - moduloPos
                                                                      : contentPos - moduloPos + cellSize;
                                                                                 
-                        if (na.running)
+                        if (Math.abs(contentPos - targetPos) < 1)
                         {
                             return;
                         }
                         na.from = contentPos;
                         na.to = targetPos;
+
 
                         na.start(this.safeCallback(pos =>
                         {
@@ -589,6 +592,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         {
                             this.updateItem(i);
                         }
+                        this.render();
                     }
                     this.updateLayout(false);
                     this.countChanged();

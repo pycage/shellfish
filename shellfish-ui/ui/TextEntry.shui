@@ -30,6 +30,7 @@ require "shellfish/ui";
  * @class
  * @extends html.Box
  *
+ * @property {bool} clearButton - (default: `false`) If `true`, shows a button to clear the text.
  * @property {string} horizontalAlignment - (default: `"left"`) Horizontal text alignment: `left|center|right`
  * @property {string} text - (default: `""`) The current text.
  * @property {bool} password - (default: `false`) Whether this is a password entry, i.e. the actual text is not displayed.
@@ -42,6 +43,7 @@ MouseBox {
     property password: false
     property pattern: ".*"
     property horizontalAlignment: "left"
+    property clearButton: false
 
     property active: false
 
@@ -113,6 +115,24 @@ MouseBox {
             {
                 box.active = false;
             }
+        }
+    }
+
+    MouseBox {
+        visible: box.clearButton
+        width: theme.itemWidthSmall
+        fillHeight: true
+        layout: "center"
+        
+        Label {
+            color: theme.secondaryColor
+            text: "[icon:core-keyboard_backspace]"
+        }
+
+        onClick: ev =>
+        {
+            ev.accepted = true;
+            input.text = "";
         }
     }
 

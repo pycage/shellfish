@@ -143,6 +143,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
      * @extends server.WebSession
      * @memberof server
      * 
+     * @property {string} indexFile - (default: `""`) If set, a redirect is made to this file (e.g. `"index.html"`) when attempting to open a directory.
      * @property {core.Filesystem} filesystem - (default: `null`) The filesystem to serve.
      * @property {string} root - (default: `"/"`) The local path to use as the root folder.
      */
@@ -153,10 +154,12 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             super();
             d.set(this, {
                 filesystem: null,
+                indexFile: "",
                 root: "/"
             });
 
             this.notifyable("filesystem");
+            this.notifyable("indexFile");
             this.notifyable("root");
 
             this.onRequest = ev => { this.webRequest(ev); }
@@ -167,6 +170,13 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
         {
             d.get(this).filesystem = fs;
             this.filesystemChanged();
+        }
+
+        get indexFile() { return d.get(this).indexFile; }
+        set indexFile(f)
+        {
+            d.get(this).indexFile = f;
+            this.indexFileChanged();
         }
 
         get root() { return d.get(this).root; }
@@ -205,19 +215,33 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             {
                 if (finfo.type === "d")
                 {
-                    priv.filesystem.list(path)
-                    .then(files =>
+                    if (priv.indexFile !== "")
                     {
-                        this.response(200, "OK")
-                        .body(makeIndexDocument(ev.unmappedUrl, priv.root, path, files), "text/html")
+                        // redirect to index file
+                        this.response(302, "Relocate")
+                        .header("Location",
+                                ev.unmappedUrl +
+                                (ev.unmappedUrl.endsWith("/") ? "" : "/") +
+                                priv.indexFile)
                         .send();
-                    })
-                    .catch(err =>
+                    }
+                    else
                     {
-                        this.log("WWW", "error", err);
-                        this.response(500, "Internal Server Error")
-                        .send();
-                    });
+                        // list directory
+                        priv.filesystem.list(path)
+                        .then(files =>
+                        {
+                            this.response(200, "OK")
+                            .body(makeIndexDocument(ev.unmappedUrl, priv.root, path, files), "text/html")
+                            .send();
+                        })
+                        .catch(err =>
+                        {
+                            this.log("WWW", "error", err);
+                            this.response(500, "Internal Server Error")
+                            .send();
+                        });
+                    }
                     return;
                 }
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -33,10 +33,14 @@ require "shellfish/ui";
  * @class
  * @extends html.MouseBox
  *
- * @property {number} minValue - (default: `0`) The minimum allowed value.
  * @property {number} maxValue - (default: `100`) The maximum allowed value.
- * @property {number} value - (default: `0`) The current value.
+ * @property {number} minValue - (default: `0`) The minimum allowed value.
+ * @property {bool} seeking - [readonly] `true` while the user is seeking.
+ * @property {number} seekValue - [readonly] The actual value while `seeking` is `true`. Otherwise the same as `value`.
  * @property {number} stepSize - (default: `5`) The step size between value changes. The step size only applies to value changes with the PgUp/PgDown keyboard keys.
+ * @property {template} styleOfBackground - The background style template.
+ * @property {template} styleOfHandle - The handle style template.
+ * @property {number} value - (default: `0`) The current value. This value is not updated while `seeking` is `true`.
  */
 MouseBox {
     id: slider
@@ -44,7 +48,48 @@ MouseBox {
     property minValue: 0
     property maxValue: 100
     property value: 0
+    property seekValue: 0
     property stepSize: 5
+    property seeking: false
+
+    property styleOfBackground: template Box {
+        fillWidth: true
+        fillHeight: true
+
+        layout: "center"
+
+        Box {
+            fillWidth: true
+            height: theme.paddingSmall / 2
+
+            borderWidth: 1
+            borderColor: theme.borderColor
+            borderRadius: 3
+
+            color: theme.secondaryColor
+        }
+    }
+
+    property styleOfHandle: template Box {
+        width: bboxHeight * 1.5
+        fillHeight: true
+
+        borderWidth: 1
+        borderColor: theme.borderColor
+        borderRadius: theme.borderRadius
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : theme.contentBackgroundColor
+
+        layout: "center"
+
+        Label {
+            color: parent.containsMouse || parent.pressed ? theme.highlightColor
+                                                          : theme.secondaryColor;
+            text: "[icon:core-drag_indicator]"
+        }
+    }
 
     /**
      * Sets the current value.
@@ -62,78 +107,74 @@ MouseBox {
         {
             value = nv;
         }
+        seekValue = value;
     }
 
     onMinValueChanged: () => { setValue(value); }
     onMaxValueChanged: () => { setValue(value); }
     onValueChanged: () => { setValue(value); }
+    onSeekingChanged: () =>
+    {
+        if (! seeking)
+        {
+            value = seekValue;
+        }
+    }
 
     canFocus: true
-
-    layout: "center"
 
     width: theme.itemWidthLarge
     height: theme.itemHeightSmall
     opacity: enabled && ancestorsEnabled ? 1 : 0.6
 
-    Box {
+    Loader {
         fillWidth: true
-        height: theme.paddingSmall / 2
+        fillHeight: true
 
-        borderWidth: 1
-        borderColor: theme.borderColor
-        borderRadius: 3
-
-        color: theme.secondaryColor
+        sourceTemplate: styleOfBackground
     }
 
     MouseBox {
         id: handle
 
-        property percents: slider.maxValue > slider.minValue ? Math.max(0, Math.min(1, (slider.value - slider.minValue) / (slider.maxValue - slider.minValue)))
+        property percents: slider.maxValue > slider.minValue ? Math.max(0, Math.min(1, (slider.seekValue - slider.minValue) / (slider.maxValue - slider.minValue)))
                                                              : 0
 
         property animated: false
 
         position: "free"
-        layout: "center"
+        fillHeight: true
 
-        width: height * 1.5
-        height: theme.itemHeightSmall
-
-        borderWidth: 1
-        borderColor: theme.borderColor
-        borderRadius: theme.borderRadius
-
-        color: pressed ? theme.highlightBackgroundColor
-                       : containsMouse ? theme.hoverBackgroundColor
-                                       : theme.contentBackgroundColor
-
-        x: (slider.bboxWidth - width) * percents
+        x: (slider.bboxWidth - bboxWidth) * percents
         xTransition: NumberAnimation { enabled: handle.animated; duration: 300; easing: "InOutQuad" }
 
         onPointerDown: (ev) =>
         {
             slider.focus = true;
+            slider.seeking = true;
             ev.accepted = true;
         }
 
         onDrag: (ev) =>
         {
-            const sx = Math.max(0, Math.min(slider.bboxWidth - width, x + ev.deltaX));
-            const p = sx / (slider.bboxWidth - width);
+            const sx = Math.max(0, Math.min(slider.bboxWidth - bboxWidth, x + ev.deltaX));
+            const p = sx / (slider.bboxWidth - bboxWidth);
             const newValue = slider.minValue + (slider.maxValue - slider.minValue) * p;
 
-            slider.value = newValue;
+            slider.seekValue = newValue;
             slider.focus = true;
 
             ev.accepted = true;
         }
 
-        Label {
-            color: parent.containsMouse || parent.pressed ? theme.highlightColor
-                                                          : theme.secondaryColor;
-            text: "[icon:core-drag_indicator]"
+        onDragEnd: () =>
+        {
+            slider.seeking = false;
+        }
+
+        Loader {
+            fillHeight: true
+            sourceTemplate: slider.styleOfHandle
         }
     }
 
@@ -151,38 +192,52 @@ MouseBox {
 
     onKeyDown: (ev) =>
     {
-        handle.animated = true;
         if (ev.key === "ArrowLeft")
         {
-            value = Math.max(minValue, value - 1);
+            seeking = true;
+            seekValue = Math.max(minValue, seekValue - 1);
             ev.accepted = true;
         }
         else if (ev.key === "ArrowRight")
         {
-            value = Math.min(maxValue, value + 1);
+            seeking = true;
+            seekValue = Math.min(maxValue, seekValue + 1);
             ev.accepted = true;
         }
         else if (ev.key === "PageUp")
         {
-            value = Math.max(minValue, value - stepSize);
+            seeking = true;
+            seekValue = Math.max(minValue, seekValue - stepSize);
             ev.accepted = true;
         }
         else if (ev.key === "PageDown")
         {
-            value = Math.min(maxValue, value + stepSize);
+            seeking = true;
+            value = Math.min(maxValue, seekValue + stepSize);
             ev.accepted = true;
         }
         else if (ev.key === "Home")
         {
+            handle.animated = true;
             value = minValue;
+            handle.animated = false;
             ev.accepted = true;
         }
         else if (ev.key === "End")
         {
+            handle.animated = true;
             value = maxValue;
+            handle.animated = false;
             ev.accepted = true;
         }
-        handle.animated = false;
+    }
+
+    onKeyUp: (ev) =>
+    {
+        if (seeking)
+        {
+            seeking = false;
+        }
     }
 
     FocusIndicator { visible: slider.focus }

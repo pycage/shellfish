@@ -205,6 +205,21 @@ shRequire([__dirname + "/object.js"], obj =>
         }
 
         /**
+         * Searches for files matching a query and returns a Promise object with the file items.
+         * 
+         * @param {string} path - The path to search.
+         * @param {string} query - The search query.
+         * @returns {Promise} The Promise object.
+         */
+        search(path, query)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                resolve([]);
+            });
+        }
+
+        /**
          * Creates a new directory at the given path.
          * 
          * @param {string} path - The path where to create a new directory.

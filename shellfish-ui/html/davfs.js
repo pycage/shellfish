@@ -233,6 +233,42 @@ shRequire(["shellfish/core"], function (core)
             });
         }
 
+        search(path, query)
+        {
+            const f = async (path, depth) =>
+            {
+                let result = [];
+                let files = [];
+
+                try
+                {
+                    files = await this.list(path);
+                }
+                catch (err)
+                {
+
+                }
+                for (let i = 0; i < files.length; ++i)
+                {
+                    const file = files[i];
+                    if (file.type === "d")
+                    {
+                        if (depth < 0)
+                        {
+                            result = result.concat(await f(file.path, depth + 1));
+                        }
+                    }
+                    else if (file.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+                    {
+                        result.push(file);
+                    }
+                }
+                return result;
+            };
+
+            return f(path, 0);
+        }
+
         mkdir(path, name)
         {
             const priv = d.get(this);

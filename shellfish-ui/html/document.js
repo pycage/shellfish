@@ -193,8 +193,6 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
 
                 this.contentXChanged();
                 this.contentYChanged();
-                this.contentWidthChanged();
-                this.contentHeightChanged();
                 this.trigger("scroll");
             }, { passive: true });
 

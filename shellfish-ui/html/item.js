@@ -134,6 +134,7 @@ shRequire(["shellfish/low",
                 mayUpdateSize: false,
                 prevBbox: { x: 0, y: 0, width: 0, height: 0 },
                 cachedBbox: null,
+                prevContentSize: { width: 0, height: 0 },
                 // cache for accumulating CSS operations while the item is not shown;
                 // will be null while the item is shown and the cache not in use
                 cssCache: { },
@@ -348,7 +349,7 @@ shRequire(["shellfish/low",
                     {
                         clearTimeout(scrollingStatusHandle);
                     }
-                    else
+                    else if (! priv.scrolling)
                     {
                         priv.scrolling = true;
                         this.scrollingChanged();
@@ -358,7 +359,7 @@ shRequire(["shellfish/low",
                         scrollingStatusHandle = null;
                         priv.scrolling = false;
                         this.scrollingChanged();
-                    }), 250);
+                    }), 300);
                 };
 
                 this.addHtmlEventListener(item, "scroll", () =>
@@ -367,6 +368,7 @@ shRequire(["shellfish/low",
                     this.contentXChanged();
                     this.contentYChanged();
 
+                    // child bbox positions changed
                     this.children.forEach((c) =>
                     {
                         if (c !== item && c.updateSizeFrom)
@@ -438,6 +440,16 @@ shRequire(["shellfish/low",
                 }
 
                 this.updateFocusTrap();
+            };
+
+            this.onContentWidthChanged = () =>
+            {
+                priv.prevContentSize.width = this.contentWidth;
+            };
+
+            this.onContentHeightChanged = () =>
+            {
+                priv.prevContentSize.height = this.contentHeight;
             };
 
             this.onEnabledChanged = () =>
@@ -1209,8 +1221,8 @@ shRequire(["shellfish/low",
                     // "free"
                     if (item.position === "inline" || item.position === "free")
                     {
-                        this.contentWidthChanged();
-                        this.contentHeightChanged();
+                        if (priv.prevContentSize.width !== this.contentWidth) this.contentWidthChanged();
+                        if (priv.prevContentSize.height !== this.contentHeight) this.contentHeightChanged();
                     }
                 }
                 else
@@ -1235,6 +1247,9 @@ shRequire(["shellfish/low",
                     if (bboxHasChangedWidth) this.bboxWidthChanged();
                     if (bboxHasChangedHeight) this.bboxHeightChanged();
                 }
+
+                if (priv.prevContentSize.width !== this.contentWidth) this.contentWidthChanged();
+                if (priv.prevContentSize.height !== this.contentHeight) this.contentHeightChanged();
             }
 
             // notify parent and children, excluding from where the update came

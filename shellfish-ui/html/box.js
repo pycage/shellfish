@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -91,12 +91,6 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.onInitialization = () =>
             {
                 this.updateLayout();
-            };
-
-            this.onBboxChanged = () =>
-            {
-                this.contentWidthChanged();
-                this.contentHeightChanged();
             };
 
             this.onVisibleChanged = () =>

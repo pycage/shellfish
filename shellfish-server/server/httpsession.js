@@ -375,10 +375,10 @@ shRequire(["shellfish/core"], core =>
             const r = new HTTPResponse(d.get(this).response,
                                        code,
                                        status,
-                                       (res) =>
+                                       this.safeCallback(res =>
             {
                 this.responseReady(res);
-            });
+            }));
             return r;
         }
 

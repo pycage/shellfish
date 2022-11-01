@@ -36,6 +36,7 @@ require "shellfish/ui";
  * @property {bool} flat - (default: `false`) Whether the button flat, i.e. borderless.
  * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
  * @property {html.Object} labelProfile - (default: `null`) The profile that is applied to the labels.
+ * @property {number} repeatAcceleration - (default: `0`) The acceleration factor of auto-repeated triggering rate. A value greater than `1.0` accelerates the triggering, while a value less than `1.0` decelerates it. A value of `0` disables auto-repeat.
  */
 MouseBox {
     id: button
@@ -45,6 +46,7 @@ MouseBox {
     property text: ""
     property flat: false
     property checked: false
+    property repeatAcceleration: 0
     property labelProfile: null
 
     Object {
@@ -149,6 +151,23 @@ MouseBox {
         text: button.secondaryIcon !== "" ? "[icon:" + button.secondaryIcon + "]" : ""
 
         profiles: button.labelProfile ? [button.labelProfile] : []
+    }
+
+    Timer {
+        running: button.repeatAcceleration > 0 && button.pressed
+        repeat: true
+
+        onRunningChanged: () =>
+        {
+            interval = 300;
+        }
+
+        onTimeout: () =>
+        {
+            button.click({ });
+
+            interval = interval / button.repeatAcceleration;
+        }
     }
 
     FocusIndicator { visible: button.focus }

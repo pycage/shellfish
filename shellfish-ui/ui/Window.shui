@@ -398,7 +398,7 @@ MouseBox {
         onDragEnd: () => { win.resizing = false; }
     }
 
-    // sout-west
+    // south-west
     MouseBox {
         visible: win.resizable && ! win.maximized
         position: "free"

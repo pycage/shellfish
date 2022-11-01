@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -31,24 +31,61 @@ require "shellfish/ui";
  * @extends html.MouseBox
  *
  * @property {bool} checked - (default: `false`) Whether the switch is currently in checked state (on).
+ * @property {template} styleOfBackground - The background style template.
+ * @property {template} styleOfHandle - The handle style template.
  */
 MouseBox {
     id: switch
 
     property checked: false
 
+    property styleOfBackground: template Box {
+        fillWidth: true
+        fillHeight: true
+
+        opacity: enabled && ancestorsEnabled ? 1 : 0.6
+
+        borderColor: theme.borderColor
+        borderWidth: 1
+        borderRadius: theme.borderRadius
+
+        color: theme.secondaryBackgroundColor
+
+        Box {
+            position: "free"
+            width: parent.bboxWidth / 2
+            fillHeight: true
+
+            color: theme.highlightBackgroundColor
+        }
+    }
+
+    property styleOfHandle: template Box {
+        width: switch.bboxWidth / 2
+        fillHeight: true
+        enabled: false
+
+        marginTop: 1
+        marginRight: 1
+        marginBottom: 1
+        marginLeft: switch.checked ? parent.bboxWidth - bboxWidth : 1
+
+        color: theme.primaryBackgroundColor
+
+        borderColor: theme.borderColor
+        borderWidth: 1
+        borderRadius: theme.borderRadius
+
+        marginLeftTransition: NumberAnimation {
+            duration: 200
+            easing: "InExpo"
+        }
+    }
+
     canFocus: true
 
     width: theme.itemWidthMedium
     height: theme.itemHeightSmall
-    opacity: enabled && ancestorsEnabled ? 1 : 0.6
-
-    borderColor: theme.borderColor
-    borderWidth: 1
-    borderRadius: theme.borderRadius
-
-    color: checked ? theme.highlightBackgroundColor
-                   : theme.secondaryBackgroundColor
 
     onClick: (ev) =>
     {
@@ -65,26 +102,25 @@ MouseBox {
         }
     }
 
-    Box {
-        position: "free"
-        marginLeft: switch.checked ? width - 2 : 1
-        width: switch.width / 2
+    Loader {
+        fillWidth: true
         fillHeight: true
-        enabled: false
+        sourceTemplate: styleOfBackground
 
-        marginTop: 1
-        marginRight: 1
-        marginBottom: 1
+        onItemChanged: () =>
+        {
+            if (item)
+            {
+                item.add(contentT());
+            }
+        }
 
-        color: theme.primaryBackgroundColor
+        property contentT: template Loader {
+            position: "free"
+            fillWidth: true
+            fillHeight: true
 
-        borderColor: theme.borderColor
-        borderWidth: 1
-        borderRadius: theme.borderRadius
-
-        marginLeftTransition: NumberAnimation {
-            duration: 200
-            easing: "InExpo"
+            sourceTemplate: styleOfHandle
         }
     }
 

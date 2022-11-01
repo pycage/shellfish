@@ -101,7 +101,7 @@ MouseBox {
             visible: status === "success"
             fillWidth: true
             fillHeight: true
-            fitMode: "cover"
+            fitMode: "contain"
 
             source: item.thumbnail
         }

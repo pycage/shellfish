@@ -47,6 +47,18 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * A pointer event.
      * @typedef PointerEvent
      * @memberof html.MouseBox
+     * 
+     * @property {bool} accepted - (default: `false`) Set to `true` to accept the event and prevent it from bubbling up.
+     * @property {number} buttons - [readonly] The buttons pressed.
+     * @property {bool} directTarget - [readonly] `true` if this event was emitted by the direct target instead of having bubbled up.
+     * @property {Event} original - [readonly] The original HTML pointer event.
+     * @property {number} pointerId - [readonly] The ID of the pointer.
+     * @property {string} pointerType - [readonly] The type of pointer. One of `mouse|pen|touch`
+     * @property {number} pressure - [readonly] The pressure (typically of a pen) applied as number in the range of `0` and `1`.
+     * @property {number} tiltX - [readonly] The tilt of the pen in X direction.
+     * @property {number} tiltY - [readonly] The tilt of the pen in Y direction.
+     * @property {number} x - [readonly] The X position of the pointer within the MouseBox.
+     * @property {number} y - [readonly] The Y position of the pointer within the MouseBox.
      */
     function makePointerEvent(ev, item)
     {
@@ -89,6 +101,14 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * A wheel event.
      * @typedef WheelEvent
      * @memberof html.MouseBox
+     * 
+     * @property {bool} accepted - (default: `false`) Set to `true` to accept the event and prevent it from bubbling up.
+     * @property {number} deltaX - [readonly] The scroll amount in X direction.
+     * @property {number} deltaY - [readonly] The scroll amount in Y direction.
+     * @property {number} deltaZ - [readonly] The scroll amount in Z direction.
+     * @property {Event} original - [readonly] The original HTML wheel event.
+     * @property {number} x - [readonly] The X position of the pointer within the MouseBox.
+     * @property {number} y - [readonly] The Y position of the pointer within the MouseBox.
      */
     function makeWheelEvent(ev, item)
     {
@@ -114,8 +134,17 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
 
     /**
      * A drag event. This is not related to drag-and-drop functionality.
+     * 
+     * The drag only starts if the `accepted` property is set to `true`.
+     * 
      * @typedef DragEvent
      * @memberof html.MouseBox
+     * 
+     * @property {bool} accepted - (default: `false`) Set to `true` to accept the event and initiate the drag.
+     * @property {number} buttons - [readonly] The buttons pressed.
+     * @property {number} deltaX - [readonly] The drag amount in X direction.
+     * @property {number} deltaY - [readonly] The drag amount in Y direction.
+     * @property {Event} original - [readonly] The original HTML pointer event.
      */
     function makeDragEvent(ev, dx, dy)
     {

@@ -311,7 +311,7 @@ exports.tools = {
     const TOKEN_IDENTIFIER = /^[a-z_][a-z_0-9]*(\.[a-z_0-9]+)*/i;
     const TOKEN_NUMBER = /^[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/;
     const TOKEN_HEXNUMBER = /^0x[0-9a-fA-F]+/;
-    const TOKEN_OPERATOR = /^[+\-*/%&|~!=<>]+/;
+    const TOKEN_OPERATOR = /^([+\-*/%&|~!=<>]+|\?\?)/;
     const TOKEN_ARROW_FUNCTION = /^\([a-z_0-9]* *(, *[a-z_0-9]*)* *\) *=>/i;
     const TOKEN_ARROW_FUNCTION_COMPACT = /^[a-z_0-9]+ *=>/i;
     const TOKEN_REGEXP = /^\/(\\\/|[^\/\n])+?\/[dgimsuy]*/;
@@ -606,14 +606,6 @@ exports.tools = {
                 result += "\"";
                 ++pos.value;
             }
-            /*
-            else if (data[pos.value] === "\\")
-            {
-                result += "\\";
-                ++pos.value;
-                result += data[pos.value];
-            }
-            */
             else
             {
                 result += data[pos.value];
@@ -1191,14 +1183,14 @@ exports.tools = {
         let aliasCounter = 0;
         const aliasCache = new Map();
         
-        function bindingResolver(parts, scopes, line)
+        function bindingResolver(parts, protectedOnes, scopes, line)
         {
             //console.log("Resolving chain in binding expression: " + JSON.stringify(parts));
             let firstInChain = parts[0];
             if (JS_GLOBALS.indexOf(firstInChain) !== -1 ||
                 inScope(scopes, firstInChain))
             {
-                return chainResolver(parts, scopes, line);
+                return chainResolver(parts, protectedOnes, scopes, line);
             }
             else
             {
@@ -1218,7 +1210,12 @@ exports.tools = {
                 }
                 scopes[scopes.length - 1].push(alias);
                 
-                return chainResolver([alias].concat(splitResult[1]), scopes, line);
+                const newParts = [alias].concat(splitResult[1]);
+                while (protectedOnes.length > newParts.length)
+                {
+                    protectedOnes.shift();
+                }
+                return chainResolver(newParts, protectedOnes, scopes, line);
             }   
         }
 
@@ -1581,6 +1578,13 @@ exports.tools = {
                     mayTerminate = true;
                 }
             }
+            else if (nextIsToken(data, pos, TOKEN_OPERATOR))
+            {
+                // operator
+                const s = readToken(data, pos, TOKEN_OPERATOR);
+                code += s;
+                mayTerminate = (s === "++" || s === "--");
+            }
             else if (next(data, pos, "?"))
             {
                 // ternary operator
@@ -1618,13 +1622,6 @@ exports.tools = {
                 // number
                 code += readToken(data, pos, TOKEN_NUMBER);
                 mayTerminate = true;
-            }
-            else if (nextIsToken(data, pos, TOKEN_OPERATOR))
-            {
-                // operator
-                const s = readToken(data, pos, TOKEN_OPERATOR);
-                code += s;
-                mayTerminate = (s === "++" || s === "--");
             }
             else if (nextIsToken(data, pos, TOKEN_NAME))
             {
@@ -1688,14 +1685,15 @@ exports.tools = {
                     // FIXME: is still required for Emscripten embind enums...
                     //console.warn(`The "direct" keyword is not required anymore and is deprecated. Used in line ${lineOfPos(data, pos)}.`);
                     skipWhitespace(data, pos, true, true);
-                    code += parseJsChain(data, pos, modules, scopes, (parts, scopes) =>
+                    code += parseJsChain(data, pos, modules, scopes, (parts, protectedOnes, scopes) =>
                     {
                         // do not attempt to resolve anything
                         let code = parts[0];
                         parts.shift();
-                        parts.forEach((p) =>
+                        protectedOnes.shift();
+                        parts.forEach((p, idx) =>
                         {               
-                            code += (p[0] !== "(" && p[0] !== "[") ? "." + p
+                            code += (p[0] !== "(" && p[0] !== "[") ? (protectedOnes[idx + 1] ? "?." : ".") + p
                                                                    : p; 
                         });
                         return code;
@@ -1867,7 +1865,9 @@ exports.tools = {
         //console.log("parseJsChain at " + pos.value + " with scope " + JSON.stringify(scopes) + " " + data.substr(pos.value, 80));
 
         let parts = [];
+        let protectedOnes = [];
         let isFirst = true;
+        let nextIsProtected = false;
 
         while (pos.value < data.length)
         {
@@ -1892,12 +1892,21 @@ exports.tools = {
             }
             isFirst = false;
             parts.push(part);
+            protectedOnes.push(nextIsProtected);
             
             const prevPos = pos.value;
             skipWhitespace(data, pos, true, true);
             if (next(data, pos, "."))
             {
                 expect(data, pos, ".");
+                nextIsProtected = false;
+                continue;
+            }
+            else if (next(data, pos, "?."))
+            {
+                // optional chaining
+                expect(data, pos, "?.");
+                nextIsProtected = true;
                 continue;
             }
             else if (next(data, pos, "(") || next(data, pos, "["))
@@ -1912,7 +1921,7 @@ exports.tools = {
             }
         }
 
-        return resolver(parts, scopes, lineOfPos(data, pos));
+        return resolver(parts, protectedOnes, scopes, lineOfPos(data, pos));
     }
 
     function parseJsForLoop(data, pos, modules, scopes, resolver)
@@ -2068,7 +2077,7 @@ exports.tools = {
         return code;
     }
 
-    function chainResolver(parts, scopes, line)
+    function chainResolver(parts, protectedOnes, scopes, line)
     {
         const names = parts
         .map((p, i) => p.startsWith("(") ? "CALL_" + i
@@ -2094,9 +2103,10 @@ exports.tools = {
             // do not attempt to resolve anything
             let code = firstInChain;
             parts.shift();
-            parts.forEach((p) =>
+            protectedOnes.shift();
+            parts.forEach((p, idx) =>
             {               
-                code += (p[0] !== "(" && p[0] !== "[") ? "." + p
+                code += (p[0] !== "(" && p[0] !== "[") ? (protectedOnes[idx + 1] ? "?." : ".") + p
                                                        : p; 
             });
             //console.log("Resolving to: " + code + " (global)");
@@ -2113,7 +2123,11 @@ exports.tools = {
             // resolve first in chain
             accessed = accessDv("__rslv__(\"" + firstInChain + "\")");
             code += `const ${names[counter]} = ${accessed};`;
-            
+        }
+
+        if (protectedOnes[counter + 1])
+        {
+            code += `if (${names[counter]}.val === null || ${names[counter]}.val === undefined) return { val: undefined };`;
         }
 
         parts.shift();
@@ -2131,6 +2145,11 @@ exports.tools = {
                 accessed = accessDv(`${names[counter - 1]}.val${p}`);
             }
             code += `const ${names[counter]} = ${accessed};`;
+
+            if (protectedOnes[counter + 1])
+            {
+                code += `if (${names[counter]}.val === null || ${names[counter]}.val === undefined) return { val: undefined };`;
+            }
         });
         
         code += `return ${names[counter]};`;

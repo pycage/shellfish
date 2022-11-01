@@ -129,6 +129,15 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### November 2022
+* The nullish-coalescing operator (??) can now be used in Shui code.
+* The optional-chaining operator (?.) can now be used in Shui code.
+* The {@link ui.Button} element has the new property `repeatAcceleration`
+  for repeated triggering while holding down.
+* The element {@link ui.Slider} is now stylable with templates.
+* The element {@link ui.SpinBox} is now stylable with templates.
+* The element {@link ui.Switch} is now stylable with templates.
+
 ### October 2022
 * The element {@link html.ListView} has a new property `overflowBehavior` for
   disabling or enabling scrolling.

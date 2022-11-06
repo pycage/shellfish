@@ -110,6 +110,12 @@ MouseBox {
         seekValue = value;
     }
 
+    canFocus: true
+
+    width: theme.itemWidthLarge
+    height: theme.itemHeightSmall
+    opacity: enabled && ancestorsEnabled ? 1 : 0.6
+
     onMinValueChanged: () => { setValue(value); }
     onMaxValueChanged: () => { setValue(value); }
     onValueChanged: () => { setValue(value); }
@@ -121,11 +127,18 @@ MouseBox {
         }
     }
 
-    canFocus: true
-
-    width: theme.itemWidthLarge
-    height: theme.itemHeightSmall
-    opacity: enabled && ancestorsEnabled ? 1 : 0.6
+    onWheel: ev =>
+    {
+        ev.accepted = true;
+        if (ev.deltaY < 0)
+        {
+            seekValue = Math.max(minValue, seekValue - 1);
+        }
+        else if (ev.deltaY > 0)
+        {
+            value = Math.min(maxValue, seekValue + 1);
+        }
+    }
 
     Loader {
         fillWidth: true

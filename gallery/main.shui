@@ -75,6 +75,7 @@ HTTPServer {
         delegate: template WebSession {
             filesystem: LocalFS { }
             root: __dirname + "/www"
+            indexFile: "index.html"
 
             onResponseReady: r => { r.enableCrossOriginIsolation(); }
         }

@@ -109,6 +109,7 @@ shRequire(["shellfish/low",
      * @property {number} minHeight - (default: `0`) The item's minimum height. It will not shrink further.
      * @property {number} minWidth - (default: `0`) The item's minimum width. It will not shrink further.
      * @property {number} opacity - (default: `1`) The item's opacity between 0 (invisible) and 1 (fully opaque).
+     * @property {number} order - (default: `0`) The item's layout order. Items are displayed by their `order` value first, and then by their source code order. The order number may be negative.
      * @property {string} origin - (default: `"top-left"`) The corner of the coordinates origin in "free" and "global" position mode: `top-left|top-right|bottom-right|bottom-left`
      * @property {number} perspective - (default: `1000`) The distance of the viewer to the `z = 0` plane for rotations in 3-dimensional space. Use `0` to disable perspective projection.
      * @property {string} position - (default: `"inline"`) The positioning mode: `inline|free|global`
@@ -159,6 +160,7 @@ shRequire(["shellfish/low",
                 perspective: 1000,
                 position: "inline",
                 origin: "top-left",
+                order: 0,
                 canFocus: false,
                 hasFocus: false,
                 trapFocus: false,
@@ -200,6 +202,7 @@ shRequire(["shellfish/low",
             this.notifyable("minHeight");
             this.notifyable("minWidth");
             this.notifyable("opacity");
+            this.notifyable("order");
             this.notifyable("origin");
             this.notifyable("perspective");
             this.notifyable("position");
@@ -882,6 +885,14 @@ shRequire(["shellfish/low",
             d.get(this).position = pos;
             this.updatePosition();
             this.positionChanged();
+        }
+
+        get order() { return d.get(this).order; }
+        set order(o)
+        {
+            d.get(this).order = o;
+            this.css("order", o);
+            this.orderChanged();
         }
 
         get origin() { return d.get(this).origin; }

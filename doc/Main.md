@@ -137,6 +137,8 @@ Layouting elements on screen is intuitive, yet powerful.
 * The element {@link ui.Slider} is now stylable with templates.
 * The element {@link ui.SpinBox} is now stylable with templates.
 * The element {@link ui.Switch} is now stylable with templates.
+* The new property `order` of {@link ui.Item} allows you to change the layout
+  order of elements dynamically.
 
 ### October 2022
 * The element {@link html.ListView} has a new property `overflowBehavior` for

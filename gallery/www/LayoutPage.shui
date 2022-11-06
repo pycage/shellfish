@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -277,7 +277,7 @@ Page {
             text: "**x**"
 
             Slider { id: xSlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(xSlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(xSlider.seekValue) + " px" }
         }
 
         Labeled {
@@ -285,7 +285,7 @@ Page {
             text: "**y**"
 
             Slider { id: ySlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(ySlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(ySlider.seekValue) + " px" }
         }
 
         Label {
@@ -304,8 +304,8 @@ Page {
 
             Box {
                 position: "free"
-                x: xSlider.value
-                y: ySlider.value
+                x: xSlider.seekValue
+                y: ySlider.seekValue
                 width: theme.itemWidthLarge
                 height: theme.itemHeightLarge
                 color: theme.highlightBackgroundColor
@@ -319,7 +319,7 @@ Page {
             text: "**marginTop**"
 
             Slider { id: marginTopSlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginTopSlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginTopSlider.seekValue) + " px" }
         }
 
         Labeled {
@@ -327,7 +327,7 @@ Page {
             text: "**marginLeft**"
 
             Slider { id: marginLeftSlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginLeftSlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginLeftSlider.seekValue) + " px" }
         }
 
         Labeled {
@@ -335,7 +335,7 @@ Page {
             text: "**marginRight**"
 
             Slider { id: marginRightSlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginRightSlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginRightSlider.seekValue) + " px" }
         }
 
         Labeled {
@@ -343,7 +343,7 @@ Page {
             text: "**marginBottom**"
 
             Slider { id: marginBottomSlider }
-            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginBottomSlider.value) + " px" }
+            Label { marginLeft: theme.paddingSmall; text: Math.floor(marginBottomSlider.seekValue) + " px" }
         }
 
         Label {
@@ -362,10 +362,10 @@ Page {
             layout: "row"
 
             Box {
-                marginTop: marginTopSlider.value
-                marginLeft: marginLeftSlider.value
-                marginRight: marginRightSlider.value
-                marginBottom: marginBottomSlider.value
+                marginTop: marginTopSlider.seekValue
+                marginLeft: marginLeftSlider.seekValue
+                marginRight: marginRightSlider.seekValue
+                marginBottom: marginBottomSlider.seekValue
                 fillWidth: true
                 fillHeight: true
                 color: theme.highlightBackgroundColor

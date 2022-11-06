@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -69,7 +69,7 @@ Page {
             property marginLeft: theme.paddingSmall
             property marginRight: theme.paddingSmall
             property marginBottom: theme.paddingSmall
-            property rotationAngle: rotationSlider.value
+            property rotationAngle: rotationSlider.seekValue
             property opacity: 1
         }
 
@@ -80,7 +80,7 @@ Page {
             property marginRight: theme.paddingSmall
             property marginBottom: theme.paddingSmall
             property rotationAngle: 0
-            property opacity: opacitySlider.value
+            property opacity: opacitySlider.seekValue
         }
 
         // to use a profile, just reference it in the element's "profiles"

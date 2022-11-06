@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -40,7 +40,7 @@ Page {
 
         LinearGradient {
             id: grd
-            angle: angleSlider.value
+            angle: angleSlider.seekValue
 
             GradientStop { position: 0; color: "green" }
             GradientStop { position: 0.4; color: "yellow" }
@@ -73,7 +73,7 @@ Page {
                 }
                 Label {
                     marginLeft: theme.paddingSmall
-                    text: Math.floor(angleSlider.value) + " deg"
+                    text: Math.floor(angleSlider.seekValue) + " deg"
                 }
             }
 

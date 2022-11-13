@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -47,6 +47,7 @@ require "shellfish/ui";
  * @property {bool} flip - (default: `false`) If `true`, the first and second containers are swapped.
  * @property {string} orientation - (default: `horizontal`) The orientation of the splitter. Either `horizontal` or `vertical`.
  * @property {number} splitRatio - (default: `0.5`) The split ratio as a value between `0.0` and `1.0`.
+ * @property {template} styleOfGutter - The gutter style template.
  */
 Box {
     id: splitBox
@@ -57,6 +58,58 @@ Box {
     property orientation: "horizontal"
     property flip: false
     property splitRatio: 0.5
+
+    property styleOfGutter: template Box {
+        fillWidth: true
+        fillHeight: true
+
+        layout: priv.isHorizontal ? "center-column"
+                                  : "center-row"
+
+        Box {
+            width: priv.isHorizontal ? 1 : -1
+            height: priv.isVertical ? 1 : -1
+            fillWidth: priv.isVertical
+            fillHeight: priv.isHorizontal
+            color: theme.borderColor
+        }
+
+        Box {
+            fillWidth: priv.isHorizontal
+            fillHeight: priv.isVertical
+            
+            width: priv.isVertical ? theme.itemHeightLarge : -1
+            height: priv.isHorizontal ? theme.itemHeightLarge : -1
+
+            marginTop: priv.isVertical ? 2 : 0
+            marginLeft: priv.isHorizontal ? 2 : 0
+            marginRight: priv.isHorizontal ? 2 : 0
+            marginBottom: priv.isVertical ? 2 : 0
+
+            color: parent.pressed ? theme.highlightBackgroundColor
+                                  : parent.containsMouse ? theme.hoverBackgroundColor
+                                                         : theme.secondaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+            borderRadius: theme.borderRadius
+
+            layout: "center"
+
+            Label {
+                rotationAngle: priv.isVertical ? 90 : 0
+                fontSize: Math.min(parent.bboxWidth, parent.bboxHeight)
+                text: "[icon:core-drag_indicator]"
+            }
+        }
+
+        Box {
+            width: priv.isHorizontal ? 1 : -1
+            height: priv.isVertical ? 1 : -1
+            fillWidth: priv.isVertical
+            fillHeight: priv.isHorizontal
+            color: theme.borderColor
+        }
+    }
 
     event click
     event doubleClick
@@ -106,14 +159,19 @@ Box {
         profiles: [splitBox.flip ? positionProfile2 : positionProfile1]
     }
 
+    Box {
+        id: box2
+
+        position: "free"
+        profiles: [splitBox.flip ? positionProfile1 : positionProfile2]
+    }
+
     MouseBox {
         id: gutter
 
         canFocus: true
 
         position: "free"
-        layout: priv.isHorizontal ? "center-column"
-                                  : "center-row"
 
         x: priv.isHorizontal ? splitBox.bboxWidth * splitBox.splitRatio
                              : 0
@@ -193,57 +251,14 @@ Box {
             }
         }
 
-        Box {
-            width: priv.isHorizontal ? 1 : -1
-            height: priv.isVertical ? 1 : -1
-            fillWidth: priv.isVertical
-            fillHeight: priv.isHorizontal
-            color: theme.borderColor
-        }
+        Loader {
+            fillWidth: true
+            fillHeight: true
 
-        Box {
-            fillWidth: priv.isHorizontal
-            fillHeight: priv.isVertical
-            
-            width: priv.isVertical ? theme.itemHeightLarge : -1
-            height: priv.isHorizontal ? theme.itemHeightLarge : -1
-
-            marginTop: priv.isVertical ? 2 : 0
-            marginLeft: priv.isHorizontal ? 2 : 0
-            marginRight: priv.isHorizontal ? 2 : 0
-            marginBottom: priv.isVertical ? 2 : 0
-
-            color: parent.pressed ? theme.highlightBackgroundColor
-                                  : parent.containsMouse ? theme.hoverBackgroundColor
-                                                         : theme.secondaryBackgroundColor
-            borderColor: theme.borderColor
-            borderWidth: 1
-            borderRadius: theme.borderRadius
-
-            layout: "center"
-
-            Label {
-                rotationAngle: priv.isVertical ? 90 : 0
-                fontSize: Math.min(parent.bboxWidth, parent.bboxHeight)
-                text: "[icon:ui-drag_indicator]"
-            }
-        }
-
-        Box {
-            width: priv.isHorizontal ? 1 : -1
-            height: priv.isVertical ? 1 : -1
-            fillWidth: priv.isVertical
-            fillHeight: priv.isHorizontal
-            color: theme.borderColor
+            sourceTemplate: styleOfGutter
         }
 
         FocusIndicator { visible: gutter.focus }
     }
 
-    Box {
-        id: box2
-
-        position: "free"
-        profiles: [splitBox.flip ? positionProfile1 : positionProfile2]
-    }
 }

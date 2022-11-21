@@ -39,6 +39,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
         .style("overflow", "hidden")
         .style("font-famiy", "sans-serif")
         .style("font-size", "12")
+        .style("line-height", "1.2")
         .style("user-select", "none")
         .style("-webkit-user-select", "none")
         .content("")
@@ -70,7 +71,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
      * @property {string} horizontalAlignment - (default: `"left"`) Horizontal text alignment: `left|center|right`
      * @property {bool} italic - (default: `false`) Show text in italics.
      * @property {bool} literal - (default: `false`) If true, markup code is not interpreted and line breaks and spaces are preserved.
-     * @property {string} overflowBehavior - (default: `"clip"`) Overflow behavior: `clip|ellipsis|wrap`
+     * @property {string} overflowBehavior - (default: `"clip"`) Overflow behavior: `clip|ellipsis|wrap|break`
      * @property {bool} selectable - (default: `false`) If `true`, text may be selected by the mouse.
      * @property {string} text - (default: `""`) The text to show.
      * @property {string} verticalAlignment - (default: `"center"`) Vertical text alignment: `top|center|bottom`
@@ -293,11 +294,13 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 {
                     this.css("text-overflow", m);
                     this.css("white-space", "nowrap");
+                    this.css("word-break", "normal");
                 }
-                else if (m === "wrap")
+                else if (m === "wrap" || m === "break")
                 {
                     this.css("text-overflow", "clip");
                     this.css("white-space", "normal");
+                    this.css("word-break", m === "wrap" ? "normal" : "break-all");
                 }
                 this.overflowBehaviorChanged();
                 this.updateSizeFrom(null, false);

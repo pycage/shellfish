@@ -48,11 +48,11 @@ MouseBox {
                                           : highlighted ? theme.highlightBackgroundColor
                                                         : "transparent"
 
-    layout: item.displayMode === "list" ? "center-row" : "center-column"
+    layout: item.displayMode === "list" ? "center-row" : "column"
 
     onFileChanged: () =>
     {
-        sizeLabel.text = "...";
+        sizeLabel.text = "";
 
         if (file)
         {
@@ -83,17 +83,19 @@ MouseBox {
     Box {
         id: iconBox
 
-        width: bboxHeight
         fillWidth: displayMode === "list" ? false : true
-        fillHeight: true
+        fillHeight: displayMode === "list" ? true : false
+        width: displayMode === "list" ? bboxHeight : -1
+        height: displayMode === "list" ? -1 : bboxWidth
+
         marginTop: displayMode === "list" ? 0 : theme.paddingSmall
         marginLeft: displayMode === "list" ? 0 : theme.paddingSmall
         marginRight: displayMode === "list" ? 0 : theme.paddingSmall
-        marginBottom: displayMode === "list" ? 0 : theme.paddingSmall +
+        marginBottom: displayMode === "list" ? 0 : 0 /*theme.paddingSmall +
                                                     nameLabel.bboxHeight +
-                                                    sizeLabel.bboxHeight
+                                                    sizeLabel.bboxHeight*/
 
-        layout: "center"
+        layout: "column"
 
         Image {
             id: thumbnailIcon
@@ -113,6 +115,7 @@ MouseBox {
             fillHeight: ! thumbnailIcon.visible
             width: thumbnailIcon.visible ? parent.bboxWidth * 0.3 : -1
             height: thumbnailIcon.visible ? width : -1
+            color: thumbnailIcon.visible ? theme.secondaryBackgroundColor : "transparent"
 
             layout: "center"
 
@@ -131,33 +134,46 @@ MouseBox {
     Label {
         id: nameLabel
 
-        position: item.displayMode === "list" ? "inline" : "free"
-        origin: item.displayMode === "list" ? "top-left" : "bottom-left"
+        property lines: Math.round(contentHeight / (fontSize * 1.2))
+        property lineHeight: contentHeight / lines
+
+        fillWidth: true
+        marginTop: item.displayMode === "list" ? 0 : theme.paddingSmall
+        marginLeft: theme.paddingSmall
+        marginRight: theme.paddingSmall
+        horizontalAlignment: item.displayMode === "list" ? "left" : "center"
+        overflowBehavior: "break" //"ellipsis"
+        maxHeight: lineHeight * 3
+        color: parent.highlighted || parent.containsMouse ? theme.highlightColor : theme.primaryColor
+        text: low.escapeMarkup(item.file.name)
+    }
+
+    Box {
+        visible: nameLabel.lines > 3 && item.displayMode !== "list"
         fillWidth: true
         marginLeft: theme.paddingSmall
         marginRight: theme.paddingSmall
-        marginBottom: item.displayMode === "list" ? 0 : sizeLabel.bboxHeight
-        horizontalAlignment: item.displayMode === "list" ? "left" : "center"
-        overflowBehavior: "ellipsis"
-        color: parent.highlighted || parent.containsMouse ? theme.highlightColor : theme.primaryColor
-        text: low.escapeMarkup(item.file.name)
+        height: 1
+        color: sizeLabel.color
     }
 
     Label {
         id: sizeLabel
 
-        position: item.displayMode === "list" ? "inline" : "free"
-        origin: item.displayMode === "list" ? "top-left" : "bottom-left"
         fillWidth: item.displayMode === "grid"
+        marginTop: 2
         marginLeft: theme.paddingSmall
         marginRight: theme.paddingSmall
         horizontalAlignment: item.displayMode === "list" ? "left" : "center"
         fontSize: item.displayMode === "list" ? theme.fontSizeMedium : theme.fontSizeSmall
         color: parent.highlighted || parent.containsMouse ? theme.highlightColor : theme.secondaryColor
+        //text: nameLabel.lines + ", " + nameLabel.lineHeight.toFixed(2)
     }
 
     Tooltip {
-        visible: parent.hovered && nameLabel.contentWidth > Math.round(nameLabel.bboxWidth)
+        visible: parent.hovered &&
+                 (nameLabel.contentWidth > Math.round(nameLabel.bboxWidth) ||
+                  nameLabel.contentHeight > Math.round(nameLabel.bboxHeight))
         text: nameLabel.text
     }
 }

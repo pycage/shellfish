@@ -90,9 +90,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.addHtmlEventListener(d.get(this).item, "keydown", (ev) =>
             {
-                const handle = low.addFrameHandler(() =>
+                this.nextFrame(() =>
                 {
-                    handle.cancel();
                     if (this.lifeCycleStatus === "initialized")
                     {
                         this.selectionStartChanged();
@@ -119,9 +118,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.addHtmlEventListener(d.get(this).item, "click", () =>
             {
-                const handle = low.addFrameHandler(() =>
+                this.nextFrame(() =>
                 {
-                    handle.cancel();
                     if (this.lifeCycleStatus === "initialized")
                     {
                         this.selectionStartChanged();
@@ -136,9 +134,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             {
                 if (ev.buttons !== 0)
                 {
-                    const handle = low.addFrameHandler(() =>
+                    this.nextFrame(() =>
                     {
-                        handle.cancel();
                         if (this.lifeCycleStatus === "initialized")
                         {
                             this.columnChanged();

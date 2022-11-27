@@ -248,8 +248,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             d.set(this, {
                 bboxWidth: 0,
                 bboxHeight: 0,
-                renderHandle: null,
-                shallRenderAgain: false,
                 indexOffset: 0,
                 totalSize: 0,
                 model: null,
@@ -299,7 +297,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.notifyable("scrollbars");
             this.notifyable("snapMode");
 
-            let willUpdateLayout = false;
             let willForceUpdateLayout = false;
             const updateLayoutLater = (force) =>
             {
@@ -307,18 +304,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 {
                     willForceUpdateLayout = true;
                 }
-
-                if (! willUpdateLayout)
+                this.wait(0)
+                .then(this.namedCallback(this.safeCallback(() =>
                 {
-                    willUpdateLayout = true;
-                    low.later()
-                    .then(this.safeCallback(() =>
-                    {
-                        this.updateLayout(willForceUpdateLayout);
-                        willUpdateLayout = false;
-                        willForceUpdateLayout = false;
-                    }));
-                }
+                    this.updateLayout(willForceUpdateLayout);
+                }), "updateLayoutLater"));
             };
 
             this.onContentXChanged = () => this.updateLayout(false);
@@ -524,7 +514,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             {
                 this.destroyItem(idx);
             });
-            this.dumpRecycleBin();
             priv.windowRange = [-1, -1];
 
             if (priv.model)
@@ -552,13 +541,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     }
                     prevSize = mObj.size;
 
-                    if (priv.renderHandle)
-                    {
-                        priv.renderHandle.cancel();
-                        priv.renderHandle = null;
-                    }
-
-                    const isEmpty = priv.itemMeta.length === 0;
+                    // cancel pending renderings
+                    this.cancelNamedCallback("render");
 
                     const toDestroy = [];
                     priv.itemMeta.forEach((item, idx) =>
@@ -572,7 +556,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.destroyItem(idx);
                     });
                     priv.windowRange = [-1, -1];
-                    this.dumpRecycleBin();
                     this.updateLayout(false)
                     this.countChanged();
                 });
@@ -600,11 +583,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 mObj.connect("modelRemove", this, (at) =>
                 {
                     console.log("model remove at " + at);
-                    if (priv.renderHandle)
-                    {
-                        priv.renderHandle.cancel();
-                        priv.renderHandle = null;
-                    }
+                    
+                    // cancel pending renderings
+                    this.cancelNamedCallback("render");
                     
                     let windowRange = priv.windowRange.slice();
                     this.destroyItem(at);
@@ -640,6 +621,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         set delegate(del)
         {
             d.get(this).delegate = del;
+            this.dumpRecycleBin();
             this.render();
         }
 
@@ -747,17 +729,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     low.css(priv.item.children[1], "left", (totalSize - 1) + "px");
                 }
 
-                const handle = low.addFrameHandler(() =>
-                {
-                    handle.cancel();
-                    if (this.lifeCycleStatus !== "destroyed")
-                    {
-                        //this.contentXChanged();
-                        //this.contentYChanged();
-                        this.contentWidthChanged();
-                        this.contentHeightChanged();
-                    }
-                }, this.objectType + "@" + this.objectLocation);
                 willRender = true;
             }
 
@@ -916,10 +887,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
         render()
         {
-            //this.withoutSizing(() =>
-            //{
+            this.nextFrame(this.namedCallback(() =>
+            {
                 this.doRender();
-            //});
+            }, "doRender"));
         }
 
         doRender()
@@ -933,11 +904,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             const cellWidth = priv.cellWidth;
             const cellHeight = priv.cellHeight;
 
-            if (priv.renderHandle)
-            {
-                priv.shallRenderAgain = true;
-                return;
-            }
+            // cancel pending renderings
+            this.cancelNamedCallback("render");
 
             if (! model || ! delegate || this.lifeCycleStatus !== "initialized" || (bbox.width === 0 && bbox.height === 0))
             {
@@ -1029,10 +997,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             //console.log("itemsPerRow: " + priv.itemsPerRow);
             for (let n = 0; n < items.length; ++n)
             {
-                if (priv.shallRenderAgain)
-                {
-                    break;
-                }
 
                 let item = null;
                 const lastIndex = items[n][0];
@@ -1097,37 +1061,23 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     distExceeded = dist > bbox.width / 2;
                 }
 
-                if (distExceeded && Date.now() - now > 1000 / 30)
+                if (/*distExceeded &&*/ Date.now() - now > 60)
                 {
                     const remainingItems = items.slice(n + 1);
-                    //console.log("later, remaining: " + remainingItems.length);
-                    const handle = window.setTimeout(() =>
+                    //console.log("render later, remaining: " + remainingItems.length);
+
+                    this.wait(1000 / 30)
+                    .then(this.namedCallback(() =>
                     {
-                        priv.renderHandle = null;
-                        //this.withoutSizing(() =>
-                        //{
-                            this.renderItems(remainingItems);
-                        //});
-                    }, 20);
-                    priv.renderHandle = {
-                        cancel: () => { window.clearTimeout(handle); priv.renderHandle = null; }
-                    };
+                        this.renderItems(remainingItems);
+                    }, "render"));
+
                     break;
                 }
             }
 
-            if (priv.shallRenderAgain)
-            {
-                priv.shallRenderAgain = false;
-                const handle = low.addFrameHandler(() =>
-                {
-                    handle.cancel();
-                    if (this.lifeCycleStatus !== "destroyed")
-                    {
-                        this.render();
-                    }
-                }, this.objectType + "@" + this.objectLocation);
-            }
+            // update content size
+            this.updateSizeFrom(null, false, false);
         }
 
         /**

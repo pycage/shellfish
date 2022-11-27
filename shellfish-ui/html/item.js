@@ -376,16 +376,16 @@ shRequire(["shellfish/low",
                     {
                         if (c !== item && c.updateSizeFrom)
                         {
-                            c.updateSizeFrom(null, false);
+                            c.updateSizeFrom(null, false, false);
                         }
                     });
                 }, { passive: true });
 
-                const handle = low.addFrameHandler(this.safeCallback(() =>
+                // setup initial size
+                this.nextFrame(() =>
                 {
-                    handle.cancel();
                     this.updateSizeFrom(null, false);
-                }), this.objectType + "@" + this.objectLocation);
+                });
             };
 
             this.onAncestorsEnabledChanged = () =>
@@ -1179,7 +1179,7 @@ shRequire(["shellfish/low",
             }
         }
 
-        updateSizeFrom(item, fromChild)
+        updateSizeFrom(item, fromChild, propagate)
         {
             const priv = d.get(this);
 
@@ -1192,6 +1192,13 @@ shRequire(["shellfish/low",
             {
                 return;
             }
+
+            if (propagate === undefined)
+            {
+                propagate = true;
+            }
+
+            priv.inSizeUpdate = true;
 
             priv.cachedBbox = null
 
@@ -1210,23 +1217,19 @@ shRequire(["shellfish/low",
             if (bboxHasChanged)
             {
                 priv.prevBbox = bbox;
+                this.bboxChanged();
+                if (bboxHasChangedX) this.bboxXChanged();
+                if (bboxHasChangedY) this.bboxYChanged();
+                if (bboxHasChangedWidth) this.bboxWidthChanged();
+                if (bboxHasChangedHeight) this.bboxHeightChanged();
             }
 
-            //console.log("update size from " + JSON.stringify(bbox) + ", " + this.objectLocation);
+            //console.log("update size from " + JSON.stringify(bbox) + ", " + this.objectId + "@" + this.objectLocation);
             //console.log("updateSizeFrom " + fromChild + ": " + this.constructor.name);
-            priv.inSizeUpdate = true;
             if (item)
             {
                 if (fromChild)
                 {   
-                    if (bboxHasChanged)
-                    {
-                        this.bboxChanged();
-                        if (bboxHasChangedX) this.bboxXChanged();
-                        if (bboxHasChangedY) this.bboxYChanged();
-                        if (bboxHasChangedWidth) this.bboxWidthChanged();
-                        if (bboxHasChangedHeight) this.bboxHeightChanged();
-                    }
 
                     // may affect content size, if child is positioned "inline" or
                     // "free"
@@ -1236,51 +1239,34 @@ shRequire(["shellfish/low",
                         if (priv.prevContentSize.height !== this.contentHeight) this.contentHeightChanged();
                     }
                 }
-                else
-                {
-                    if (bboxHasChanged)
-                    {
-                        this.bboxChanged();
-                        if (bboxHasChangedX) this.bboxXChanged();
-                        if (bboxHasChangedY) this.bboxYChanged();
-                        if (bboxHasChangedWidth) this.bboxWidthChanged();
-                        if (bboxHasChangedHeight) this.bboxHeightChanged();
-                    }
-                }
+
             }
             else
             {
-                if (bboxHasChanged)
-                {
-                    this.bboxChanged();
-                    if (bboxHasChangedX) this.bboxXChanged();
-                    if (bboxHasChangedY) this.bboxYChanged();
-                    if (bboxHasChangedWidth) this.bboxWidthChanged();
-                    if (bboxHasChangedHeight) this.bboxHeightChanged();
-                }
-
                 if (priv.prevContentSize.width !== this.contentWidth) this.contentWidthChanged();
                 if (priv.prevContentSize.height !== this.contentHeight) this.contentHeightChanged();
             }
 
             // notify parent and children, excluding from where the update came
-            if (bboxHasChangedWidth || bboxHasChangedHeight)
+            if ((! item || item.position === "inline") && bboxHasChangedWidth || bboxHasChangedHeight)
             {
-                if (this.parent && this.parent !== item && this.parent.updateSizeFrom)
+                if (propagate && this.parent && this.parent !== item && this.parent.updateSizeFrom)
                 {
-                    this.parent.updateSizeFrom(this, true);
+                    //console.log("propagate to parent " + this.parent.objectType);
+                    this.parent.updateSizeFrom(this, true, true);
                 }
             }
 
             if (bboxHasChanged || fromChild)
             {
-                if (bbox.width * bbox.height > 0)
+                if (propagate && bbox.width * bbox.height > 0)
                 {
                     this.children.forEach((c) =>
                     {
-                        if (c !== item && c.updateSizeFrom)
+                        if (c !== item && c.updateSizeFrom && (c.position === "inline" || c.fillWidth || c.fillHeight))
                         {
-                            c.updateSizeFrom(this, false);
+                            //console.log("propagate to child " + c.objectType + "@" + c.objectLocation);
+                            c.updateSizeFrom(this, false, true);
                         }
                     });
                 }
@@ -1330,6 +1316,20 @@ shRequire(["shellfish/low",
         }
 
         /**
+         * Invokes the given callback on the next render frame.
+         * 
+         * @param {function} callback - The callback to invoke.
+         */
+        nextFrame(callback)
+        {
+            const handle = low.addFrameHandler(() =>
+            {
+                handle.cancel();
+                this.safeCallback(callback)();
+            }, this.objectType + "@" + this.objectLocation);
+        }
+
+        /**
          * Returns the item's DOM element.
          * Subclasses must override this abstract method.
          * 
@@ -1351,8 +1351,6 @@ shRequire(["shellfish/low",
          */
         withoutSizing(f)
         {
-            const priv = d.get(this);
-
             if (sizingCalculationsFrozen)
             {
                 f();

@@ -936,19 +936,18 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 if (! pending)
                 {
                     pending = true;
-                    const handle = low.addFrameHandler(() =>
+                    this.nextFrame(() =>
                     {
-                        handle.cancel();
                         pending = false;
                         
-                        if (this.lifeCycleStatus !== "destroyed" && priv.dragging)
+                        if (priv.dragging)
                         {
                             const e = makeDragEvent(event, pendingDx, pendingDy);
                             this.drag(e);
                             pendingDx = 0;
                             pendingDy = 0;
                         }
-                    }, this.objectType + "@" + this.objectLocation);
+                    });
                 }
 
                 originX = event.clientX;
@@ -968,19 +967,18 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 if (! pending)
                 {
                     pending = true;
-                    const handle = low.addFrameHandler(() =>
+                    this.nextFrame(() =>
                     {
-                        handle.cancel();
                         pending = false;
                         
-                        if (this.lifeCycleStatus !== "destroyed" && priv.dragging)
+                        if (priv.dragging)
                         {
                             const e = makeDragEvent(event, pendingDx, pendingDy);
                             this.drag(e);
                             pendingDx = 0;
                             pendingDy = 0;
                         }
-                    }, this.objectType + "@" + this.objectLocation);
+                    });
                 }
 
                 originX = event.touches[0].clientX;

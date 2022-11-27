@@ -98,15 +98,15 @@ Overlay {
 
         if (menuBox.children().length > 0)
         {
-            const handle = low.addFrameHandler(safeCallback(() =>
+            wait(0)
+            .then(() =>
             {
-                handle.cancel();
                 const cs = menuBox.children().filter((c) => { return c.canFocus && c.enabled && c.visible; });
                 if (cs.length > 0)
                 {
                     cs[0].focus = true;
                 }
-            }), objectType + "@" + objectLocation);
+            });
         }
     }
 

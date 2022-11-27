@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -464,15 +464,11 @@ shRequire(["shellfish/low", __dirname + "/canvas.js"], function (low, cnv)
                 }
                 else
                 {
-                    const handle = low.addFrameHandler(() =>
+                    this.nextFrame(() =>
                     {
-                        handle.cancel();
-                        if (this.lifeCycleStatus === "initialized")
-                        {
-                            priv.renderPending = false;
-                            this.render();
-                        }
-                    }, this.objectType + "@" + this.objectLocation);
+                        priv.renderPending = false;
+                        this.render();
+                    });
                 }
             }
         }

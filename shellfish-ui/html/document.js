@@ -300,13 +300,14 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
 
             this.addHtmlEventListener(window, "focusout", (ev) =>
             {
-                setTimeout(() =>
+                this.wait(100)
+                .then(() =>
                 {
                     if (document.activeElement === document.body)
                     {
                         restoreFocusWithin(this);
                     }
-                }, 100);
+                });
             });
 
             // monitor focus changes

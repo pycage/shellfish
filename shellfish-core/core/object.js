@@ -296,6 +296,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
     }
     const taskQueues = new TaskQueues();
 
+    const namedCallbacks = new Map();
+
     /**
      * Class managing the custom object properties.
      * @private
@@ -731,6 +733,59 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                     return callback(...args);
                 }
             };
+        }
+
+        /**
+         * Wraps a callback function to give it a name handle by which it may be
+         * canceled before execution.
+         * 
+         * When setting multiple callbacks with the same name, only the last
+         * one will be executed.
+         * 
+         * @param {function} callback - The callback function.
+         * @param {string} name - The name.
+         * @returns {function} - The wrapped callback function.
+         */
+        namedCallback(callback, name)
+        {
+            const cbName = this.objectId + "#" + name;
+            namedCallbacks.set(cbName, callback);
+
+            return (...args) =>
+            {
+                if (namedCallbacks.has(cbName))
+                {
+                    const cb = namedCallbacks.get(cbName);
+                    namedCallbacks.delete(cbName);
+                    return cb(...args);
+                }
+            }
+        }
+
+        /**
+         * Returns if the given named callback is currently pending.
+         * 
+         * @param {string} name - The name.
+         * @returns {bool} `true` if the callback is currently pending.
+         */
+        namedCallbackPending(name)
+        {
+            const cbName = this.objectId + "#" + name;
+            return namedCallbacks.has(cbName);
+        }
+
+        /**
+         * Cancels the given pending named callback before it gets executed.
+         * 
+         * @param {string} name - The name.
+         */
+        cancelNamedCallback(name)
+        {
+            const cbName = this.objectId + "#" + name;
+            if (namedCallbacks.has(cbName))
+            {
+                namedCallbacks.delete(cbName);
+            }
         }
 
         /**

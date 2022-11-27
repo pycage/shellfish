@@ -148,12 +148,11 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
             if (! priv.renderPending)
             {
                 priv.renderPending = true;
-                const handle = low.addFrameHandler(() =>
+                this.nextFrame(() =>
                 {
-                    handle.cancel();
                     this.renderScene();
                     priv.renderPending = false;
-                }, this.objectType + "@" + this.objectLocation);
+                });
             }
         }
 

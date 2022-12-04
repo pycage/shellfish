@@ -50,6 +50,14 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             // map { handlerKey -> handler }
             this.handlers = new Map();
+
+            this.afterTriggerHandlers = [];
+            this.depth = 0;
+        }
+
+        runAfterTrigger(f)
+        {
+            this.afterTriggerHandlers.push(f);
         }
 
         connect(emitter, event, receiver, handler)
@@ -172,6 +180,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 return;
             }
 
+            ++this.depth;
             for (let handlerKey of this.handlersOfEmitter.get(emitter))
             {
                 if (this.eventOfHandler.get(handlerKey) === event)
@@ -185,7 +194,19 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                         console.error(`[${exports.dbgctx}] Error triggering event '${emitter.constructor.name}.${event} (${emitter.objectLocation}): ${err}\n${err.stack || "<stacktrace not available>"}`);
                     }
                 }
-            }    
+            }
+            --this.depth;
+
+            if (this.depth === 0)
+            {
+                ++this.depth;
+                while (this.afterTriggerHandlers.length > 0)
+                {
+                    const f = this.afterTriggerHandlers.shift();
+                    f();
+                }
+                --this.depth;
+            }
         }
 
         has(emitter, event)
@@ -1430,8 +1451,17 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             return true;
         }
 
+        accumulate(f, name)
+        {
+            this.wait(0).then(this.namedCallback(this.safeCallback(f), name));
+        }
+
         /**
          * Returns a Promise that resolves after a given amount of milliseconds.
+         * 
+         * If the milliseconds are set to `0`, the promise resolves immediately
+         * after the JavaScript engine finished executing its current code,
+         * without using a timer.
          * 
          * @param {number} ms - The amount of milliseconds to wait.
          * @returns {Promise} The Promise object.
@@ -1440,10 +1470,20 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         {
             return new Promise((resolve, reject) =>
             {
-                setTimeout(this.safeCallback(() =>
+                if (ms === 0)
                 {
-                    resolve();
-                }), ms);
+                    connHub.runAfterTrigger(this.safeCallback(() =>
+                    {
+                        resolve();
+                    }));
+                }
+                else
+                {
+                    setTimeout(this.safeCallback(() =>
+                    {
+                        resolve();
+                    }), ms);
+                }
             });
         }
 

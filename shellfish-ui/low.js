@@ -747,6 +747,7 @@ exports.fullscreenExit = fullscreenExit;
 
 const animationFrameHandlers = new Map();
 let duringFrameUpdate = false;
+let frameHandlerId = 0;
 
 /**
  * A handle for controlling a frame handler.
@@ -793,37 +794,18 @@ let duringFrameUpdate = false;
  */
 function addFrameHandler(handler, annotation)
 {
-    let handle = Date.now() + "" + animationFrameHandlers.size;
+    let handle = "" + frameHandlerId;
+    ++frameHandlerId;
+    if (frameHandlerId > 0xffffff)
+    {
+        frameHandlerId = 0;
+    }
     animationFrameHandlers.set(handle, { callback: handler, annotation: annotation || "<no annotation>" });
 
     if (animationFrameHandlers.size === 1)
     {
-        /*
-        let runCount = 0;
-        let runHandle = handle;
-        */
         window.requestAnimationFrame(function callback(timestamp)
         {
-            /*
-            const firstHandle = animationFrameHandlers.keys().next().value;
-            if (firstHandle === runHandle)
-            {
-                ++runCount;
-                if (runCount > 3000)
-                {
-                    const h = animationFrameHandlers.get(firstHandle);
-                    const a = h.annotation;
-                    console.warn(`The frame handler is continuously busy with the same callback (${firstHandle}, ${a}).`);
-                    runCount = 0;
-                }
-            }
-            else
-            {
-                runHandle = firstHandle;
-                runCount = 0;
-            }
-            */
-
             //console.log(animationFrameHandlers.size + " handlers");
             duringFrameUpdate = true;
             for (let key of animationFrameHandlers.keys())

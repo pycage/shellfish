@@ -192,6 +192,9 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.scrollbarsChanged();
         }
 
+        /**
+         * Sets the CSS properties for layouting children.
+         */
         updateLayout()
         {
             const priv = d.get(this);
@@ -281,9 +284,9 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.children.forEach(c =>
             {
-                if (c.updatePosition)
+                if (c.updateSizeFrom)
                 {
-                    c.updatePosition();
+                    c.updateSizeFrom(this, false, true);
                 }
             });
         }

@@ -298,35 +298,34 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.notifyable("snapMode");
 
             let willForceUpdateLayout = false;
-            const updateLayoutLater = (force) =>
+            const updateLayoutAccumulated = (force) =>
             {
                 if (force)
                 {
                     willForceUpdateLayout = true;
                 }
-                this.wait(0)
-                .then(this.namedCallback(this.safeCallback(() =>
+                this.accumulate(() =>
                 {
                     this.updateLayout(willForceUpdateLayout);
-                }), "updateLayoutLater"));
+                }, "updateLayout");
             };
 
-            this.onContentXChanged = () => this.updateLayout(false);
-            this.onContentYChanged = () => this.updateLayout(false);
-            this.onCellWidthChanged = () => this.updateLayout(true);
-            this.onCellHeightChanged = () => this.updateLayout(true);
+            this.onContentXChanged = () => updateLayoutAccumulated(false);
+            this.onContentYChanged = () => updateLayoutAccumulated(false);
+            this.onCellWidthChanged = () => updateLayoutAccumulated(true);
+            this.onCellHeightChanged = () => updateLayoutAccumulated(true);
             this.onVisibleChanged = () =>
             {
                 if (this.visible)
                 {
-                    this.updateLayout(true);
+                    updateLayoutAccumulated(true);
                 }
             };
             this.onAncestorsVisibleChanged = () =>
             {
                 if (this.ancestorsVisible)
                 {
-                    this.updateLayout(true);
+                    updateLayoutAccumulated(true);
                 }
             };
             this.onBboxChanged = () =>
@@ -338,7 +337,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     d.get(this).bboxWidth = b.width;
                     d.get(this).bboxHeight = b.height;
 
-                    updateLayoutLater(true);
+                    updateLayoutAccumulated(true);
                 }
             };
 
@@ -887,10 +886,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
         render()
         {
-            this.nextFrame(this.namedCallback(() =>
+            this.accumulate(() =>
             {
                 this.doRender();
-            }, "doRender"));
+            }, "doRender");
         }
 
         doRender()
@@ -1051,6 +1050,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     item.parent = this;
                 }
 
+                /*
                 let distExceeded = false;
                 if (priv.orientation === "vertical")
                 {
@@ -1061,23 +1061,24 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     distExceeded = dist > bbox.width / 2;
                 }
 
-                if (/*distExceeded &&*/ Date.now() - now > 60)
+                if (distExceeded && Date.now() - now > 1000 / 10)
                 {
                     const remainingItems = items.slice(n + 1);
                     //console.log("render later, remaining: " + remainingItems.length);
 
-                    this.wait(1000 / 30)
+                    this.wait(1000 / 60)
                     .then(this.namedCallback(() =>
                     {
                         this.renderItems(remainingItems);
-                    }, "render"));
+                    }, "renderMore"));
 
                     break;
                 }
+                */
             }
 
-            // update content size
-            this.updateSizeFrom(null, false, false);
+            // update content size after placing items
+            this.updateContentSize();
         }
 
         /**

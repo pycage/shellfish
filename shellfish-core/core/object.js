@@ -1451,6 +1451,16 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             return true;
         }
 
+        /**
+         * Accumulates the given function associated with a name.
+         * 
+         * Only the most recent one of the accumulated functions under a name
+         * will be executed before the JavaScript engine finished executing its
+         * current code.
+         * 
+         * @param {function} f - The function to invoke.
+         * @param {string} name - The accumulation name.
+         */
         accumulate(f, name)
         {
             this.wait(0).then(this.namedCallback(this.safeCallback(f), name));

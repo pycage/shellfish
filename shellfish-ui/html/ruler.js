@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -62,7 +62,6 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
         {
             super();
             d.set(this, {
-                frameHandle: null,
                 min: {
                     x: 0,
                     y: 0,
@@ -142,16 +141,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 maxChanged = true;
             }
 
-            if ((minChanged || maxChanged) && ! d.get(this).frameHandle)
-            {
-                d.get(this).frameHandle = low.addFrameHandler(this.safeCallback(() =>
-                {
-                    d.get(this).frameHandle.cancel();
-                    d.get(this).frameHandle = null;
-                    this.minChanged();
-                    this.maxChanged();
-                }), this.objectType + "@" + this.objectLocation);
-            }
+            if (minChanged) this.accumulate(() => { this.minChanged(); }, "minChanged");
+            if (maxChanged) this.accumulate(() => { this.maxChanged(); }, "maxChanged");
         }
     }
     exports.Ruler = Ruler;

@@ -132,7 +132,7 @@ MouseBox {
         ev.accepted = true;
         if (ev.deltaY < 0)
         {
-            seekValue = Math.max(minValue, seekValue - 1);
+            value = Math.max(minValue, seekValue - 1);
         }
         else if (ev.deltaY > 0)
         {
@@ -226,7 +226,7 @@ MouseBox {
         else if (ev.key === "PageDown")
         {
             seeking = true;
-            value = Math.min(maxValue, seekValue + stepSize);
+            seekValue = Math.min(maxValue, seekValue + stepSize);
             ev.accepted = true;
         }
         else if (ev.key === "Home")

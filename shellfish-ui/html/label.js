@@ -95,6 +95,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 filter: null,
                 selectable: false,
                 textInvalidated: true,
+                contentSizeInvalidated: false,
                 item: HTML.cloneNode()
             });
 
@@ -120,6 +121,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 d.get(this).bold = value;
                 this.css("font-weight", value ? "bold" : "normal");
                 this.boldChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -132,6 +134,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 d.get(this).italic = value;
                 this.css("font-style", value ? "italic" : "normal");
                 this.italicChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -145,6 +148,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 d.get(this).textInvalidated = true;
                 this.text = this.text;
                 this.literalChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -158,6 +162,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 d.get(this).textInvalidated = true;
                 this.text = this.text;
                 this.filterChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -212,6 +217,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 priv.item.innerHTML = out;
             }
             this.textChanged();
+            d.get(this).contentSizeInvalidated = true;
             this.updateSizeFrom(null, false);
         }
 
@@ -235,6 +241,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 this.css("font-family", f);
                 d.get(this).fontFamily = f;
                 this.fontFamilyChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -247,6 +254,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 this.css("font-size", s + "px");
                 d.get(this).fontSize = s;
                 this.fontSizeChanged();
+                d.get(this).contentSizeInvalidated = true;
                 this.updateSizeFrom(null, false);
             }
         }
@@ -304,6 +312,15 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 }
                 this.overflowBehaviorChanged();
                 this.updateSizeFrom(null, false);
+            }
+        }
+
+        updateContentSize()
+        {
+            if (d.get(this).contentSizeInvalidated)
+            {
+                d.get(this).contentSizeInvalidated = false;
+                super.updateContentSize();
             }
         }
 

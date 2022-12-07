@@ -135,7 +135,7 @@ MouseBox {
         id: nameLabel
 
         property lines: Math.round(contentHeight / (fontSize * 1.2))
-        property lineHeight: contentHeight / lines
+        property lineHeight: lines > 0 ? contentHeight / lines : 0;
 
         fillWidth: true
         marginTop: item.displayMode === "list" ? 0 : theme.paddingSmall

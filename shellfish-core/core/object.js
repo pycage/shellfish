@@ -197,9 +197,10 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             }
             --this.depth;
 
-            if (this.depth === 0)
+            if (this.depth === 0 && this.afterTriggerHandlers.length > 0)
             {
                 ++this.depth;
+                //console.log("processing " + this.afterTriggerHandlers.length + " after-trigger handlers after " + emitter.objectLocation + "." + event);
                 while (this.afterTriggerHandlers.length > 0)
                 {
                     const f = this.afterTriggerHandlers.shift();
@@ -1452,7 +1453,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         }
 
         /**
-         * Accumulates the given function associated with a name.
+         * Accumulates the given callback function associated with a name.
          * 
          * Only the most recent one of the accumulated functions under a name
          * will be executed before the JavaScript engine finished executing its
@@ -1461,7 +1462,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          * @param {function} f - The function to invoke.
          * @param {string} name - The accumulation name.
          */
-        accumulate(f, name)
+        accumulateCallback(f, name)
         {
             this.wait(0).then(this.namedCallback(this.safeCallback(f), name));
         }

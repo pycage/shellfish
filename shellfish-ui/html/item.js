@@ -132,6 +132,7 @@ shRequire(["shellfish/low",
             super();
             d.set(this, {
                 inSizeUpdate: false,
+                inContentSizeUpdate: false,
                 mayUpdateSize: false,
                 prevBbox: { x: 0, y: 0, width: 0, height: 0 },
                 cachedBbox: null,
@@ -367,17 +368,25 @@ shRequire(["shellfish/low",
 
                 this.addHtmlEventListener(item, "scroll", () =>
                 {
-                    updateScrollingStatus();
-                    this.contentXChanged();
-                    this.contentYChanged();
-
-                    // child bbox positions changed
-                    this.children.forEach((c) =>
+                    
+                    this.nextFrame(() =>
                     {
-                        if (c !== item && c.updateSizeFrom)
+                        this.contentXChanged();
+                        this.contentYChanged();
+
+                        this.accumulateCallback(() =>
                         {
-                            c.updateSizeFrom(null, false, false);
-                        }
+                            updateScrollingStatus();
+                            
+                            // child bbox positions changed
+                            this.children.forEach((c) =>
+                            {
+                                if (c !== item && c.updateSizeFrom)
+                                {
+                                    c.updateSizeFrom(null, false, false);
+                                }
+                            });
+                        }, "onScroll");
                     });
                 }, { passive: true });
 
@@ -1176,7 +1185,7 @@ shRequire(["shellfish/low",
 
         updateSizeAccumulated()
         {
-            this.accumulate(() =>
+            this.accumulateCallback(() =>
             {
                 this.updateSizeFrom(null, false, true);
             }, "updateSizeFrom");
@@ -1186,12 +1195,10 @@ shRequire(["shellfish/low",
         {
             const priv = d.get(this);
 
-            if (sizingCalculationsFrozen || ! priv.mayUpdateSize)
-            {
-                return;
-            }
-
-            if (priv.inSizeUpdate)
+            if (this.lifeCycleStatus !== "initialized" ||
+                sizingCalculationsFrozen ||
+                ! priv.mayUpdateSize ||
+                priv.inSizeUpdate)
             {
                 return;
             }
@@ -1206,10 +1213,10 @@ shRequire(["shellfish/low",
             priv.cachedBbox = null
 
             const bbox = this.bbox;
-            const bboxHasChangedX = bbox.x !== priv.prevBbox.x;
-            const bboxHasChangedY = bbox.y !== priv.prevBbox.y;
-            const bboxHasChangedWidth = bbox.width !== priv.prevBbox.width;
-            const bboxHasChangedHeight = bbox.height !== priv.prevBbox.height;
+            const bboxHasChangedX = Math.abs(bbox.x - priv.prevBbox.x) > 0.1;
+            const bboxHasChangedY = Math.abs(bbox.y - priv.prevBbox.y) > 0.1;
+            const bboxHasChangedWidth = Math.abs(bbox.width - priv.prevBbox.width) > 0.1;
+            const bboxHasChangedHeight = Math.abs(bbox.height - priv.prevBbox.height) > 0.1;
 
             const bboxHasChanged = bboxHasChangedX ||
                                    bboxHasChangedY ||
@@ -1267,10 +1274,13 @@ shRequire(["shellfish/low",
             }
 
             // wait until the browser has the content size updated before checking
-            this.nextFrame(() =>
+            if (! priv.inContentSizeUpdate)
             {
-                this.updateContentSize();
-            });
+                this.nextFrame(() =>
+                {                
+                    this.updateContentSize();
+                });
+            }
 
             priv.cachedBbox = null;
             priv.inSizeUpdate = false;
@@ -1282,14 +1292,16 @@ shRequire(["shellfish/low",
 
             const cWidth = this.contentWidth;
             const cHeight = this.contentHeight;
-            const hasChangedContentWidth = cWidth !== priv.prevContentSize.width;
-            const hasChangedContentHeight = cHeight !== priv.prevContentSize.height;
+            const hasChangedContentWidth = Math.abs(cWidth - priv.prevContentSize.width) > 0.1;
+            const hasChangedContentHeight = Math.abs(cHeight - priv.prevContentSize.height) > 0.1;
 
             priv.prevContentSize.width = cWidth;
             priv.prevContentSize.height = cHeight;
 
+            priv.inContentSizeUpdate = true;
             if (hasChangedContentWidth) this.contentWidthChanged();
             if (hasChangedContentHeight) this.contentHeightChanged();
+            priv.inContentSizeUpdate = false;
         }
 
         updateTransformation()
@@ -1316,7 +1328,7 @@ shRequire(["shellfish/low",
             );
             this.css("transform", "matrix3d(" + mat.flat(m).join(",") + ")");
             // transformations may change the size
-            this.updateSize();
+            this.updateSizeAccumulated();
         }
 
         detachChild(child)

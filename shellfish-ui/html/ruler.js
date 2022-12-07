@@ -141,8 +141,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 maxChanged = true;
             }
 
-            if (minChanged) this.accumulate(() => { this.minChanged(); }, "minChanged");
-            if (maxChanged) this.accumulate(() => { this.maxChanged(); }, "maxChanged");
+            if (minChanged) this.accumulateCallback(() => { this.minChanged(); }, "minChanged");
+            if (maxChanged) this.accumulateCallback(() => { this.maxChanged(); }, "maxChanged");
         }
     }
     exports.Ruler = Ruler;

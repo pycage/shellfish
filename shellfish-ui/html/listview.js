@@ -304,7 +304,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 {
                     willForceUpdateLayout = true;
                 }
-                this.accumulate(() =>
+                this.accumulateCallback(() =>
                 {
                     this.updateLayout(willForceUpdateLayout);
                 }, "updateLayout");
@@ -542,6 +542,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
                     // cancel pending renderings
                     this.cancelNamedCallback("render");
+                    this.cancelNamedCallback("renderMore");
 
                     const toDestroy = [];
                     priv.itemMeta.forEach((item, idx) =>
@@ -585,6 +586,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     
                     // cancel pending renderings
                     this.cancelNamedCallback("render");
+                    this.cancelNamedCallback("renderMore");
                     
                     let windowRange = priv.windowRange.slice();
                     this.destroyItem(at);
@@ -886,10 +888,14 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
         render()
         {
-            this.accumulate(() =>
+            // cancel pending renderings
+            this.cancelNamedCallback("render");
+            this.cancelNamedCallback("renderMore");
+
+            this.accumulateCallback(() =>
             {
                 this.doRender();
-            }, "doRender");
+            }, "render");
         }
 
         doRender()
@@ -902,9 +908,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             const delegate = priv.delegate;
             const cellWidth = priv.cellWidth;
             const cellHeight = priv.cellHeight;
-
-            // cancel pending renderings
-            this.cancelNamedCallback("render");
 
             if (! model || ! delegate || this.lifeCycleStatus !== "initialized" || (bbox.width === 0 && bbox.height === 0))
             {
@@ -1050,7 +1053,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     item.parent = this;
                 }
 
-                /*
                 let distExceeded = false;
                 if (priv.orientation === "vertical")
                 {
@@ -1061,7 +1063,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     distExceeded = dist > bbox.width / 2;
                 }
 
-                if (distExceeded && Date.now() - now > 1000 / 10)
+                if (/*distExceeded &&*/ Date.now() - now > 1000 / 30 && n < items.length - 1)
                 {
                     const remainingItems = items.slice(n + 1);
                     //console.log("render later, remaining: " + remainingItems.length);
@@ -1071,10 +1073,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     {
                         this.renderItems(remainingItems);
                     }, "renderMore"));
-
+                    
                     break;
                 }
-                */
             }
 
             // update content size after placing items

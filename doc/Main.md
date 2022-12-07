@@ -129,6 +129,10 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### December 2022
+* Reworked the inner HTML and CSS update mechanisms for better performance when
+  rendering content in a browser.
+
 ### November 2022
 * The nullish-coalescing operator (??) can now be used in Shui code.
 * The optional-chaining operator (?.) can now be used in Shui code.

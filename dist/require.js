@@ -113,6 +113,20 @@ const shRequire = (function ()
     };
 
     const hasDom = (typeof document !== "undefined");
+    const isWeb = hasDom &&
+                  typeof navigator !== "undefined" &&
+                  typeof window !== "undefined";
+    const isNode = typeof process !== "undefined" &&
+                   typeof process.versions === "object" &&
+                   typeof process.versions.node !== "undefined";
+    const isDeno = typeof window !== "undefined" && window.Deno;
+    const isElectronRenderer = hasDom &&
+                               typeof window !== "undefined" &&
+                               typeof window.process === "object" &&
+                               window.process.type === "renderer";
+    const isElectronMain = typeof process !== "undefined" &&
+                           typeof process.versions === "object" &&
+                           typeof process.versions.electron !== "undefined";
 
     // stack of task queues
     const stackOfQueues = [];
@@ -231,7 +245,7 @@ const shRequire = (function ()
             scriptNode.src = codeUrl;
             document.head.appendChild(scriptNode);
         }
-        else if (typeof window !== "undefined" && window.Deno)
+        else if (isDeno)
         {
             try
             {
@@ -247,6 +261,14 @@ const shRequire = (function ()
                 callback(false);
             }
             
+        }
+        else if (isNode)
+        {
+            const inlineModule = new module.constructor();
+            inlineModule.paths = module.paths;
+            inlineModule.shRequire = __require;
+            inlineModule._compile("const shRequire = module.shRequire; " + code, url);
+            callback(true);
         }
         else if (typeof Blob !== "undefined")
         {
@@ -264,14 +286,7 @@ const shRequire = (function ()
                 callback(false);
             }
         }
-        else
-        {
-            const inlineModule = new module.constructor();
-            inlineModule.paths = module.paths;
-            inlineModule.shRequire = __require;
-            inlineModule._compile("const shRequire = module.shRequire; " + code, url);
-            callback(true);
-        }
+
     }
 
     /**
@@ -285,7 +300,7 @@ const shRequire = (function ()
     {
         const now = Date.now();
 
-        if (typeof window !== "undefined" && window.Deno)
+        if (isDeno)
         {
             Deno.readTextFile(url)
             .then(data =>
@@ -309,7 +324,36 @@ const shRequire = (function ()
                 logError(`Failed to load bundle from '${url}': ${err}`);
             });
         }
-        else if (typeof fetch !== "undefined")
+        else if (isNode)
+        {
+            const modFs = require("fs");
+            modFs.readFile(url, (err, buf) =>
+            {
+                if (err)
+                {
+                    logError(`Failed to load bundle from '${url}': ${err}`);
+                    return;
+                }
+
+                const data = buf.toString();
+
+                try
+                {
+                    console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
+                    const bundleName = url;
+                    processBundle(bundleName, JSON.parse(data), () =>
+                    {
+                        callback();
+                    });
+                }
+                catch (err)
+                {
+                    logError(`Failed to process JS bundle '${url}': ${err}`);
+                }                
+
+            });
+        }
+        else
         {
             fetch(url, { cache: "no-cache" })
             .then(response =>
@@ -341,36 +385,6 @@ const shRequire = (function ()
                 logError(`Failed to load bundle from '${url}': ${err}`);
             });
         }
-        else
-        {
-            const modFs = require("fs");
-            modFs.readFile(url, (err, buf) =>
-            {
-                if (err)
-                {
-                    logError(`Failed to load bundle from '${url}': ${err}`);
-                    return;
-                }
-
-                const data = buf.toString();
-
-                try
-                {
-                    console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
-                    const bundleName = url;
-                    processBundle(bundleName, JSON.parse(data), () =>
-                    {
-                        callback();
-                    });
-                }
-                catch (err)
-                {
-                    logError(`Failed to process JS bundle '${url}': ${err}`);
-                }                
-
-            });
-        }
-
     }
 
     /**
@@ -481,7 +495,7 @@ const shRequire = (function ()
             return;
         }
 
-        if (typeof window !== "undefined" && window.Deno)
+        if (isDeno)
         {
             Deno.readTextFile(url)
             .then(data =>
@@ -494,7 +508,23 @@ const shRequire = (function ()
                 callback("");
             });
         }
-        else if (typeof fetch !== "undefined")
+        else if (isNode)
+        {
+            const modFs = require("fs");
+            modFs.readFile(url, (err, data) =>
+            {
+                if (err)
+                {
+                    logError(`Failed to load module: '${url}': ${err}`);
+                    callback("");
+                }
+                else
+                {
+                    callback(data.toString());
+                }
+            });
+        }
+        else
         {
             fetch(url, { cache: "no-cache" })
             .then(response =>
@@ -513,22 +543,6 @@ const shRequire = (function ()
             {
                 logError(`Failed to load module '${url}': ${err}`);
                 callback("");
-            });
-        }
-        else
-        {
-            const modFs = require("fs");
-            modFs.readFile(url, (err, data) =>
-            {
-                if (err)
-                {
-                    logError(`Failed to load module: '${url}': ${err}`);
-                    callback("");
-                }
-                else
-                {
-                    callback(data.toString());
-                }
             });
         }
     }
@@ -794,23 +808,7 @@ const shRequire = (function ()
                 fail(err);
             });
         }
-        else if (typeof fetch !== "undefined")
-        {
-            fetch(url, { cache: "no-cache" })
-            .then(response =>
-            {
-                return WebAssembly.instantiateStreaming(response, importObj)
-            })
-            .then(module =>
-            {
-                callback(module.instance.exports);
-            })
-            .catch (err =>
-            {
-                fail(err);
-            });
-        }
-        else
+        else if (isNode)
         {
             const modFs = require("fs");
             modFs.readFile(url, (err, data) =>
@@ -831,6 +829,22 @@ const shRequire = (function ()
                         fail(err);
                     });
                 }
+            });
+        }
+        else
+        {
+            fetch(url, { cache: "no-cache" })
+            .then(response =>
+            {
+                return WebAssembly.instantiateStreaming(response, importObj)
+            })
+            .then(module =>
+            {
+                callback(module.instance.exports);
+            })
+            .catch (err =>
+            {
+                fail(err);
             });
         }
     }
@@ -1001,6 +1015,41 @@ const shRequire = (function ()
     }
 
     __require.dependencyCounter = 0;
+
+    /**
+     * Holds the name of the detected environment this code is running in.
+     * 
+     * Supported types are:
+     *
+     * - deno
+     * - node
+     * - electron-renderer
+     * - electron
+     * - web
+     */
+    __require.environment = (() =>
+    {
+        if (isDeno)
+        {
+            return "deno";
+        }
+        else if (isNode)
+        {
+            return "node";
+        }
+        else if (isElectronRenderer)
+        {
+            return "electron-renderer";
+        }
+        else if (isElectronMain)
+        {
+            return "electron";
+        }
+        else
+        {
+            return "web";
+        }
+    })();
 
     /**
      * Registers data for the given URL.
@@ -1194,7 +1243,7 @@ const shRequire = (function ()
         }
     }// if (hasDom)
 
-    console.log("Initialized Shellfish module manager.");
+    console.log("Initialized Shellfish module manager. Detected environment: " + __require.environment);
 
     // In order to support both module systems, ESM and CJS, exports are not used.
     // Instead, we assign the Shellfish environment to a certain variable in scope,

@@ -1063,7 +1063,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     distExceeded = dist > bbox.width / 2;
                 }
 
-                if (/*distExceeded &&*/ Date.now() - now > 1000 / 30 && n < items.length - 1)
+                if (distExceeded && Date.now() - now > 1000 / 30 && n < items.length - 1)
                 {
                     const remainingItems = items.slice(n + 1);
                     //console.log("render later, remaining: " + remainingItems.length);

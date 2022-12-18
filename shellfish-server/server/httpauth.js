@@ -187,26 +187,29 @@ shRequire(["shellfish/core"], core =>
         authorize(request)
         {
             const priv = d.get(this);
-   
             const authHeader = request.headers["authorization"];
-            if (authHeader === undefined)
+   
+            return new Promise((resolve, reject) =>
             {
-                return null;
-            }
-            else if (priv.mode === "basic")
-            {
-                const user = basicAuth(authHeader, priv.realm, priv.users);
-                return user;
-            }
-            else if (priv.mode === "digest")
-            {
-                const user = digestAuth(authHeader, request.method, priv.users);
-                return user;
-            }
-            else
-            {
-                throw(`Invalid authentication mode: '${priv.mode}'`);
-            }
+                if (authHeader === undefined)
+                {
+                    resolve(null);
+                }
+                else if (priv.mode === "basic")
+                {
+                    const user = basicAuth(authHeader, priv.realm, priv.users);
+                    resolve(user);
+                }
+                else if (priv.mode === "digest")
+                {
+                    const user = digestAuth(authHeader, request.method, priv.users);
+                    resolve(user);
+                }
+                else
+                {
+                    reject(`Invalid authentication mode: '${priv.mode}'`);
+                }
+            });
         }
     
         /**
@@ -237,6 +240,7 @@ shRequire(["shellfish/core"], core =>
                                                            "opaque=\"" + opaque + "\""
                                    });
             }
+            response.write("Not Authorized");
         }
     }
     exports.HTTPAuth = HTTPAuth;

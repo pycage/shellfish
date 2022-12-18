@@ -24,6 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire(["shellfish/core"], core =>
 {
+    const modUrl = require("url");
+
     /* Reads the HTTP request body.
     */
     function readRequest(request)
@@ -67,7 +69,7 @@ shRequire(["shellfish/core"], core =>
         if (request.headers.cookie)
         {
             const cookieString = request.headers.cookie;
-            cookieString.split(":").forEach(part =>
+            cookieString.split(";").forEach(part =>
             {
                 const cookie = part.split("=");
                 cookies.set(
@@ -83,9 +85,19 @@ shRequire(["shellfish/core"], core =>
             headers.set(key.toLowerCase(), request.headers[key]);
         }
 
+        const urlObj = new modUrl.URL(urlMapper("" + request.url), "http://localhost");
+
+        const params = { };
+        for (const entry of urlObj.searchParams.entries())
+        {
+            params[entry[0]] = entry[1];
+        }
+
         return {
             original: request,
             accepted: false,
+            sourceAddress: request.connection.remoteAddress,
+            sourcePort: request.connection.remotePort,
             cookies: cookies,
             headers: headers,
             method: request.method,
@@ -93,7 +105,20 @@ shRequire(["shellfish/core"], core =>
             body: () => { return readRequest(request); },
             stream: request,
             unmappedUrl: request.url,
-            url: urlMapper(request.url),
+            url: {
+                hash: urlObj.hash,
+                host: urlObj.host,
+                hostname: urlObj.hostname,
+                href: urlObj.href,
+                origin: urlObj.origin,
+                parameters: params,
+                password: urlObj.password,
+                path: urlObj.pathname,
+                port: urlObj.port,
+                protocol: urlObj.protocol,
+                search: urlObj.search,
+                username: urlObj.username
+            },
             user: user
         };
     }
@@ -138,7 +163,10 @@ shRequire(["shellfish/core"], core =>
             {
                 return item[0] + "=" + encodeURIComponent(item[1]);
             });
-            this.response.setHeader("Set-Cookie", cookies);
+            cookies.forEach(cookie =>
+            {
+                this.response.setHeader("Set-Cookie", cookie);
+            });
             
             [...this.headers].forEach(item =>
             {
@@ -152,9 +180,9 @@ shRequire(["shellfish/core"], core =>
             }
             if (this.dataStream)
             {
-                this.dataStream.on("error", () =>
+                this.dataStream.on("error", err =>
                 {
-                    console.error("broken pipe");
+                    console.error("broken pipe: " + err);
                     this.response.end();
                 });
                 this.dataStream.pipe(this.response);

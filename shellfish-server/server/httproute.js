@@ -130,25 +130,37 @@ shRequire(["shellfish/core"], core =>
             let user = "";
             if (priv.authentication)
             {
-                user = priv.authentication.authorize(request);
-                if (user === null)
+                priv.authentication.authorize(request)
+                .then(user =>
                 {
-                    this.log("HTTP/Auth", "info", "Requesting Authorization for " +
-                             request.connection.remoteAddress + ":" + request.connection.remotePort +
-                             " - " + request.method + " " + request.url);
-
-                    priv.authentication.requestAuthorization(response);
-                    
-                    // delay the response to discourage brute force attempts
-                    setTimeout(() => { response.end(); }, 3000);
-                    return;
-                }
+                    if (user === null)
+                    {
+                        this.log("HTTP", "info", "Requesting Authorization for " +
+                                 request.connection.remoteAddress + ":" + request.connection.remotePort +
+                                 " - " + request.method + " " + request.url);
+    
+                        priv.authentication.requestAuthorization(response);
+                        
+                        // delay the response to discourage brute force attempts
+                        setTimeout(() => { response.end(); }, 3000);
+                    }
+                    else
+                    {
+                        const sessionId = priv.generateSessionId(request);
+                        const session = this.getSession(sessionId);
+                        session.user = user;
+                        session.handleRequest(request, response, user);
+                    }
+                });
+            }
+            else
+            {
+                const sessionId = priv.generateSessionId(request);
+                const session = this.getSession(sessionId);
+                session.user = user;
+                session.handleRequest(request, response, user);
             }
 
-            const sessionId = priv.generateSessionId(request);
-            const session = this.getSession(sessionId);
-            session.user = user;
-            session.handleRequest(request, response, user);
         }
 
     }

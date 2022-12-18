@@ -27,18 +27,46 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
     const modFs = require("fs");
     const modOs = require("os");
     const modPath = require("path");
+    const modStream = require("stream");
 
     class File
     {
-        constructor(path)
+        constructor(finfo, buffer)
         {
-            this.path = path;
+            this.path = finfo.path;
+            this.buffer = buffer;
+            this.from = 0;
+            this.to = -1;
+            this.finfo = finfo;
+        }
+
+        get size() { return this.finfo.size; }
+        get mimetype() { return this.finfo.mimetype; }
+
+        slice(from, to)
+        {
+            const f = new File(this.finfo, this.buffer);
+            f.from = from;
+            f.to = to;
+            return f;
         }
 
         arrayBuffer()
         {
             return new Promise((resolve, reject) =>
             {
+                if (this.buffer)
+                {
+                    if (this.to > this.from)
+                    {
+                        return this.buffer.slice(this.from, this.to);
+                    }
+                    else
+                    {
+                        return this.buffer;
+                    }
+                }
+
                 const chunks = [];
                 const stream = modFs.createReadStream(this.path, { encoding: "binary" });
                 stream.on("data", chunk =>
@@ -47,7 +75,14 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                 });
                 stream.on("end", () =>
                 {
-                    resolve(Buffer.concat(chunks));
+                    if (this.to > this.from)
+                    {
+                        resolve(Buffer.concat(chunks).slice(this.from, this.to));
+                    }
+                    else
+                    {
+                        resolve(Buffer.concat(chunks));
+                    }
                 });
                 stream.on("error", err =>
                 {
@@ -56,16 +91,35 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             });
         }
 
-        stream(from, to)
+        stream()
         {
-            if (to !== undefined)
+            if (this.buffer)
             {
-                return modFs.createReadStream(this.path, { start: from, end: to });
+                if (this.to > this.from)
+                {
+                    async function * generate(buffer) { yield buffer; }
+                    const s = modStream.Readable.from(generate(this.buffer.slice(this.from, this.to)));
+                    return s;
+                }
+                else
+                {
+                    async function * generate(buffer) { yield buffer; }
+                    const s = modStream.Readable.from(generate(this.buffer));
+                    return s;
+                }
             }
             else
             {
-                return modFs.createReadStream(this.path);
+                if (this.to > this.from)
+                {
+                    return modFs.createReadStream(this.path, { start: this.from, end: this.to });
+                }
+                else
+                {
+                    return modFs.createReadStream(this.path);
+                }
             }
+
         }
 
         text()
@@ -73,6 +127,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             return this.arrayBuffer();
         }
     }
+    exports.File = File;
 
     function makeFileItem(path, filePath, name, stats)
     {
@@ -373,7 +428,8 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
         {
             const f = async () =>
             {
-                return new File(path);
+                const finfo = await this.fileInfo(path);
+                return new File(finfo);
             };
 
             return f();

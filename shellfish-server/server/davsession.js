@@ -268,7 +268,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             const destination = rootPath(priv.root, hrefToPath(ev.headers.get("destination") || ""));
             this.log("DAV", "info", "COPY " + path + " -> " + destination);
 
@@ -290,7 +290,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "DELETE " + path);
 
             this.filesystem.remove(path)
@@ -311,7 +311,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "GET " + path);
             const range = ev.range;
 
@@ -338,6 +338,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 }
 
                 this.filesystem.read(path)
+                this.readFile(path, finfo, ev)
                 .then(file =>
                 {
                     if (range.length === 0)
@@ -345,20 +346,20 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         // no range
                         this.response(200, "OK")
                         .header("Accept-Ranges", "bytes")
-                        .stream(file.stream(), finfo.mimetype, finfo.size)
+                        .stream(file.stream(), file.mimetype, file.size)
                         .send();
                     }
                     else
                     {
-                        const from = Math.min(range[0], finfo.size - 1);
+                        const from = Math.min(range[0], file.size - 1);
                         const to = Math.min(range[1] !== -1 ? range[1]
-                                                            : finfo.size - 1,
-                                            finfo.size - 1);
-                        this.log("DAV", "info", "Bytes Range: " + from + "-" + to + "/" + finfo.size);
+                                                            : file.size - 1,
+                                            file.size - 1);
+                        this.log("DAV", "info", "Bytes Range: " + from + "-" + to + "/" + file.size);
                         this.response(206, "Partital Content")
                         .header("Accept-Ranges", "bytes")
-                        .header("Content-Range", "bytes " + from + "-" + to + "/" + finfo.size)
-                        .stream(file.stream(from, to), finfo.mimetype, to - from + 1)
+                        .header("Content-Range", "bytes " + from + "-" + to + "/" + file.size)
+                        .stream(file.slice(from, to).stream(), file.mimetype, to - from + 1)
                         .send();
                     }
                 })
@@ -381,7 +382,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "HEAD " + path);
 
             this.filesystem.fileInfo(path)
@@ -404,7 +405,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "MKCOL " + path);
             priv.filesystem.mkdir(path)
             .then(() =>
@@ -424,7 +425,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             const destination = rootPath(priv.root, hrefToPath(ev.headers.get("destination") || ""));
             this.log("DAV", "info", "MOVE " + path + " -> " + destination);
 
@@ -458,7 +459,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             .then(xml =>
             {
                 const depth = ev.headers.get("depth") || "infinity";
-                const path = rootPath(priv.root, hrefToPath(ev.url));
+                const path = rootPath(priv.root, hrefToPath(ev.url.path));
                 this.log("DAV", "info", "PROPFIND " + path);
 
                 if (xml === "")
@@ -637,7 +638,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "PUT " + path);
 
             priv.filesystem.write(path, ev.stream)
@@ -652,6 +653,11 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 this.response(409, "Conflict")
                 .send();
             });
+        }
+
+        readFile(path, finfo, ev)
+        {
+            return this.filesystem.read(path);
         }
     }
     exports.DAVSession = DAVSession;

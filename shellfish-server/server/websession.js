@@ -206,7 +206,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("WWW", "info", "GET " + path);
             const range = ev.range;
 
@@ -266,7 +266,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                         this.response(206, "Partital Content")
                         .header("Accept-Ranges", "bytes")
                         .header("Content-Range", "bytes " + from + "-" + to + "/" + finfo.size)
-                        .stream(file.stream(from, to), finfo.mimetype, to - from + 1)
+                        .stream(file.slice(from, to).stream(), finfo.mimetype, to - from + 1)
                         .send();
                     }
                 })
@@ -289,7 +289,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
         {
             const priv = d.get(this);
 
-            const path = rootPath(priv.root, hrefToPath(ev.url));
+            const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("WWW", "info", "HEAD " + path);
 
             priv.filesystem.fileInfo(path)

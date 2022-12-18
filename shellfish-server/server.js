@@ -23,7 +23,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 "use strict";
 
 /**
- * **Module ID:** `shellfish/3d`
+ * **Module ID:** `shellfish/server`
  * 
  * This module provides elements for constructing server applications.
  * The supported environment is currently Node.js.
@@ -40,6 +40,7 @@ const includes = [
     "httpserver",
     "httpsession",
     "localfs",
+    "tokenauth",
     "websession"
 ];
 

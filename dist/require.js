@@ -211,6 +211,123 @@ const shRequire = (function ()
     }
 
     /**
+     * Retrieves a resource object from the local storage, if available.
+     * 
+     * @param {string} url - The URL for addressing the resource object.
+     * 
+     * @returns {object} - The resource object, or `null` if it was not found, or if there is no local storage available.
+     */
+    function storeGet(url)
+    {
+        if (typeof localStorage === "undefined")
+        {
+            return null;
+        }
+        else
+        {
+            const json = localStorage.getItem("shellfish-require:" + url);
+            if (json)
+            {
+                return JSON.parse(json);
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Puts an object of resource data into the local storage, if available.
+     * 
+     * @param {string} url - The URL for addressing the resource object.
+     * @param {object} data - The resource object. It must be JSON-serializable.
+     * 
+     * @returns {bool} Whether the data was put in the local storage successfully.
+     */
+    function storePut(url, data)
+    {
+        if (typeof localStorage === "undefined")
+        {
+            return false;
+        }
+        else
+        {
+            try
+            {
+                localStorage.setItem("shellfish-require:" + url, JSON.stringify(data));
+                return true;
+            }
+            catch (err)
+            {
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Fetches a resource from the given URL, or from the local storage, if
+     * cached there.
+     * 
+     * @param {string} url - The URL to fetch from.
+     * @param {function} callback - The callback function to invoke with the resource data.
+     */
+    function storeFetch(url, callback)
+    {
+        let lastModified = Date.now();
+        fetch(url, { cache: "no-cache", method: "HEAD" })
+        .then(response =>
+        {
+            if (response.headers.has("Last-Modified"))
+            {
+                lastModified = Date.parse(response.headers.get("Last-Modified"));
+            }
+
+            const obj = storeGet(url);
+            //console.log("shellfish-require " + url + " " + obj?.lastModified + " vs " + lastModified);
+            if (! obj || obj.lastModified < lastModified)
+            {
+                fetch(url, { cache: "no-cache" })
+                .then(response =>
+                {
+                    if (! response.ok)
+                    {
+                        throw `${response.status} ${response.statusText}`;
+                    }
+
+                    if (response.headers.has("Last-Modified"))
+                    {
+                        lastModified = Date.parse(response.headers.get("Last-Modified"));
+                    }
+                    return response.text()
+                })
+                .then(data =>
+                {
+                    storePut(url, {
+                        lastModified: lastModified,
+                        data: data
+                    });
+                    console.log("Fetched from remote: " + url);
+                    callback(data);
+                })
+                .catch(err =>
+                {
+                    callback(null);
+                });
+            }
+            else
+            {
+                console.log("Fetched from cache: " + url);
+                callback(obj.data);
+            }
+        })
+        .catch(err =>
+        {
+            callback(null);
+        });
+    }
+
+    /**
      * Imports the given code into a script tag.
      * @private
      * 
@@ -355,17 +472,13 @@ const shRequire = (function ()
         }
         else
         {
-            fetch(url, { cache: "no-cache" })
-            .then(response =>
+            storeFetch(url, data =>
             {
-                if (! response.ok)
+                if (! data)
                 {
-                    throw `${response.status} ${response.statusText}`;
+                    logError(`Failed to load bundle from '${url}'`);
                 }
-                return response.text();
-            })
-            .then(data =>
-            {
+
                 try
                 {
                     console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
@@ -379,11 +492,8 @@ const shRequire = (function ()
                 {
                     logError(`Failed to process JS bundle '${url}': ${err}`);
                 }
-            })
-            .catch(err =>
-            {
-                logError(`Failed to load bundle from '${url}': ${err}`);
             });
+
         }
     }
 
@@ -526,24 +636,15 @@ const shRequire = (function ()
         }
         else
         {
-            fetch(url, { cache: "no-cache" })
-            .then(response =>
+            storeFetch(url, data =>
             {
-                if (! response.ok)
+                if (! data)
                 {
-                    throw `${response.status} ${response.statusText}`;
+                    logError(`Failed to load module '${url}'`);
                 }
-                return response.text();
-            })
-            .then(data =>
-            {
                 callback(data);
-            })
-            .catch(err =>
-            {
-                logError(`Failed to load module '${url}': ${err}`);
-                callback("");
             });
+
         }
     }
 

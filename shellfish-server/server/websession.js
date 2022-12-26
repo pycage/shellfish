@@ -266,6 +266,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                         this.response(206, "Partital Content")
                         .header("Accept-Ranges", "bytes")
                         .header("Content-Range", "bytes " + from + "-" + to + "/" + finfo.size)
+                        .header("Last-Modified", new Date(finfo.mtime).toUTCString())
                         .stream(file.slice(from, to).stream(), finfo.mimetype, to - from + 1)
                         .send();
                     }
@@ -298,6 +299,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                 this.response(200, "OK")
                 .header("Content-Size", "" + finfo.size)
                 .header("Content-Type", finfo.mimetype)
+                .header("Last-Modified", new Date(finfo.mtime).toUTCString())
                 .send();
             })
             .catch(err =>

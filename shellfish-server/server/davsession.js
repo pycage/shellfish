@@ -346,6 +346,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         // no range
                         this.response(200, "OK")
                         .header("Accept-Ranges", "bytes")
+                        .header("Last-Modified", new Date(finfo.mtime).toUTCString())
                         .stream(file.stream(), file.mimetype, file.size)
                         .send();
                     }
@@ -359,6 +360,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         this.response(206, "Partital Content")
                         .header("Accept-Ranges", "bytes")
                         .header("Content-Range", "bytes " + from + "-" + to + "/" + file.size)
+                        .header("Last-Modified", new Date(finfo.mtime).toUTCString())
                         .stream(file.slice(from, to).stream(), file.mimetype, to - from + 1)
                         .send();
                     }
@@ -391,6 +393,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                 this.response(200, "OK")
                 .header("Content-Size", "" + finfo.size)
                 .header("Content-Type", finfo.mimetype)
+                .header("Last-Modified", new Date(finfo.mtime).toUTCString())
                 .send();
             })
             .catch(err =>

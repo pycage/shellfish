@@ -46,6 +46,7 @@ const mods = [
     "FSItem",
     "FSTreeNode",
     "FSView",
+    "IndexScroller",
     "Label",
     "ListViewSelector",
     "Loader",

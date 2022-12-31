@@ -1,0 +1,200 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a (non-proportional) scrollbar with an index.
+ *
+ * @memberof ui
+ * @name IndexScroller
+ * @class
+ * @extends html.MouseBox
+ *
+ * @property {function} getLabel - A function for returning the index label for the nth item.
+ * @property {number} labelSize - (default: `theme.itemHeightMedium`) The minimum size of an index label.
+ * @property {string} orientation - The scrolling orientation. One of: `horizontal|vertical`
+ * @property {html.ListView} target - (default: `parent`) The scrolling target.
+ *
+ */
+MouseBox {
+    id: indexScroller
+
+    property target: parent
+    property getLabel: (idx) => { return ""; }
+    property orientation: "vertical"
+    property labelSize: theme.itemHeightMedium
+
+    visible: target.contentHeight > target.bboxHeight
+
+    color: theme.secondaryBackgroundColor
+
+    layout: orientation === "vertical" ? "center-column"
+                                       : "center-row"
+
+    function update()
+    {
+        accumulateCallback(() =>
+        {
+            doUpdate();
+        }, "update");
+    }
+
+    function doUpdate()
+    {
+        if (! target)
+        {
+            return;
+        }
+
+        //console.log("Update Index Scroller");
+
+        let itemsPerRow = 1;
+        let cellSize = 0;
+        if (target.orientation === "vertical")
+        {
+            itemsPerRow = Math.floor(target.bboxWidth / target.cellWidth);
+            cellSize = target.cellHeight;
+        }
+        else
+        {
+            itemsPerRow = Math.floor(target.bboxHeight / target.cellHeight);
+            cellSize = target.cellWidth;
+        }
+
+        if (itemsPerRow === 0)
+        {
+            return;
+        }
+
+        let maxItems = 0;
+        if (orientation === "vertical")
+        {
+            maxItems = Math.floor(bboxHeight / labelSize);
+        }
+        else
+        {
+            maxItems = Math.floor(bboxWidth / labelSize);
+        }
+
+        //console.log("per row: " + itemsPerRow);
+
+        let m = [];
+        let pos = 0;
+        let prevLabel = "";
+
+        for (let i = 0; i < target.count; i += itemsPerRow)
+        {
+            const label = indexScroller.getLabel(
+                i < target.count - itemsPerRow ? (i === 0 ? 0 : i + itemsPerRow - 1)
+                                               : target.count - 1
+            );
+
+            if (m.length > 0)
+            {
+                m[m.length - 1].until = pos - 1;
+            }
+            if (label !== prevLabel)
+            {
+                m.push({ position: pos, until: pos + cellSize - 1, label: label });
+                prevLabel = label;
+            }
+            pos += cellSize;
+        }
+        
+        // remove exceeding items, but not the first or the last
+        while (m.length > 0 && maxItems > 1 && m.length > maxItems)
+        {
+            const tooMany = m.length - maxItems;
+
+            const sizes = m
+            .map((item, idx) => { return { size: item.until - item.position, index: idx }; })
+            .slice(1, -1)
+            .sort((itemA, itemB) => itemA.size - itemB.size);
+
+            const toRemove = sizes
+            .slice(0, tooMany)
+            .map(item => item.index);
+
+            if (toRemove.length === 0)
+            {
+                break;
+            }
+
+            m = m.filter((nil, idx) => toRemove.indexOf(idx) === -1);
+        }
+
+        labelRepeater.model.reset(m);
+    }
+
+    onBboxChanged: () => { update(); }
+    onLabelSizeChanged: () => { update(); }
+    onGetLabelChanged: () => { update(); }
+    target.onLayoutChange: () => { update(); }
+
+    onWheel: ev =>
+    {
+        ev.accepted = true;
+        if (labelRepeater.count === 0)
+        {
+            return;
+        }
+
+        const stepSize = bboxHeight / labelRepeater.count;
+        if (ev.deltaY < 0)
+        {
+            target.contentY = target.contentY - stepSize;
+        }
+        else if (ev.deltaY > 0)
+        {
+            target.contentY = target.contentY + stepSize;
+        }
+    }
+
+    Repeater {
+        id: labelRepeater
+
+        model: ListModel { }
+
+        delegate: template Button {
+            fillWidth: true
+            fillHeight: true
+            flat: true
+
+            checked: target.contentY < modelData.value.until &&
+                     target.contentY + target.bboxHeight > modelData.value.position
+            text: modelData.value.label
+
+            labelProfile: Object {
+                property fontSize: theme.fontSizeSmall
+                property color: theme.primaryColor
+                property bold: true
+            }
+
+            onClick: () =>
+            {
+                target.contentY = modelData.value.position;
+            }
+        }
+    }
+
+}

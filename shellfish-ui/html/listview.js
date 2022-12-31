@@ -237,6 +237,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
      * @property {core.ListModel} model - The model to display. You may pass a number value to implicitly create a simple model.
      * @property {string} orientation - (default: `vertical`) The orientation of the view. One of `horizontal|vertical`
      * @property {string} overflowBehavior - (default: `"scroll"`) The overflow behavior: `none|scroll`
+     * @property {bool} rendering - [readonly] `true` while the list view is rendering.
      * @property {bool} scrollbars - (default: `false`) Whether to display native scrollbars.
      * @property {bool} snapMode - (default: `"none"`) The mode for snapping to items. One of `none|begin|end`.
      */
@@ -261,6 +262,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 overflowBehavior: "scroll",
                 scrollbars: false,
                 snapMode: "none",
+                isRendering: false,
                 windowRange: [-1, -1],
                 recycleBin: [],
                 item: low.createElementTree(
@@ -294,8 +296,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.notifyable("model");
             this.notifyable("orientation");
             this.notifyable("overflowBehavior");
+            this.notifyable("rendering");
             this.notifyable("scrollbars");
             this.notifyable("snapMode");
+
+            this.registerEvent("layoutChange");
 
             let willForceUpdateLayout = false;
             const updateLayoutAccumulated = (force) =>
@@ -464,6 +469,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
         get count() { return !! d.get(this).model ? d.get(this).model.size : 0; }
 
+        get rendering() { return d.get(this).isRendering; }
+
         get model() { return d.get(this).model; }
         set model(m)
         {
@@ -556,7 +563,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.destroyItem(idx);
                     });
                     priv.windowRange = [-1, -1];
-                    this.updateLayout(false)
+                    this.updateLayout(false);
+                    this.layoutChange();
                     this.countChanged();
                 });
                 mObj.connect("modelInsert", this, (at, size) =>
@@ -578,6 +586,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.render();
                     }
                     this.updateLayout(false);
+                    this.layoutChange();
                     this.countChanged();
                 });
                 mObj.connect("modelRemove", this, (at) =>
@@ -603,6 +612,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.render();
                     }
                     this.updateLayout(false);
+                    this.layoutChange();
                     this.countChanged();
                 });
                 mObj.connect("modelReplace", this, (at) =>
@@ -662,6 +672,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             const modelSize = priv.model.size;
 
             let willRender = force;
+            let changedLayout = false;
 
             let itemsPerRow = 0;
             let totalSize = 0;
@@ -685,6 +696,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 priv.itemsPerRow = itemsPerRow;
 
                 willRender = true;
+                changedLayout = true;
             }
 
             if (priv.orientation === "vertical")
@@ -731,6 +743,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 }
 
                 willRender = true;
+                changedLayout = true;
             }
 
             if (begin !== priv.windowRange[0])
@@ -748,6 +761,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             {
                 //console.log("window content range: " + priv.windowRange[0] + ", " + priv.windowRange[1] + ", forced: " + force);
                 this.render();
+            }
+
+            if (changedLayout)
+            {
+                //console.log("layout change");
+                this.accumulateCallback(() => { this.layoutChange(); }, "layoutChange");
             }
         }
 
@@ -892,6 +911,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.cancelNamedCallback("render");
             this.cancelNamedCallback("renderMore");
 
+            if (! d.get(this).isRendering)
+            {
+                d.get(this).isRendering = true;
+                this.renderingChanged();
+            }
+
             this.accumulateCallback(() =>
             {
                 this.doRender();
@@ -909,8 +934,15 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             const cellWidth = priv.cellWidth;
             const cellHeight = priv.cellHeight;
 
-            if (! model || ! delegate || this.lifeCycleStatus !== "initialized" || (bbox.width === 0 && bbox.height === 0))
+            if (! model ||
+                ! delegate ||
+                this.lifeCycleStatus !== "initialized" ||
+                (bbox.width === 0 && bbox.height === 0) ||
+                ! this.ancestorsVisible ||
+                ! this.visible)
             {
+                priv.isRendering = false;
+                this.renderingChanged();
                 return;
             }
 
@@ -1053,6 +1085,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     item.parent = this;
                 }
 
+                const avgDuration = (Date.now() - now) / (n + 1);
+                const estimatedRemainingDuration = (items.length - (n + 1)) * avgDuration;
+                //console.log("avg per item: " + avgDuration.toFixed(2) + " ms, estimated remaining: " + estimatedRemainingDuration.toFixed(2) + " ms");
+
                 let distExceeded = false;
                 if (priv.orientation === "vertical")
                 {
@@ -1063,7 +1099,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     distExceeded = dist > bbox.width / 2;
                 }
 
-                if (distExceeded && Date.now() - now > 1000 / 30 && n < items.length - 1)
+                if (/*distExceeded &&*/
+                    estimatedRemainingDuration > 500 &&
+                    Date.now() - now > 1000 / 30 && 
+                    n < items.length - 1)
                 {
                     const remainingItems = items.slice(n + 1);
                     //console.log("render later, remaining: " + remainingItems.length);
@@ -1076,10 +1115,17 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     
                     break;
                 }
-            }
 
-            // update content size after placing items
-            this.updateContentSize();
+                if (n === items.length - 1)
+                {
+                    // all done
+                    priv.isRendering = false;
+                    this.renderingChanged();
+
+                    // update content size after placing all items
+                    this.updateContentSize();
+                }
+            }
         }
 
         /**

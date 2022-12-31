@@ -300,7 +300,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.notifyable("scrollbars");
             this.notifyable("snapMode");
 
-            this.registerEvent("layoutChange");
+            this.registerEvent("newLayout");
 
             let willForceUpdateLayout = false;
             const updateLayoutAccumulated = (force) =>
@@ -564,7 +564,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     });
                     priv.windowRange = [-1, -1];
                     this.updateLayout(false);
-                    this.layoutChange();
+                    this.newLayout();
                     this.countChanged();
                 });
                 mObj.connect("modelInsert", this, (at, size) =>
@@ -586,7 +586,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.render();
                     }
                     this.updateLayout(false);
-                    this.layoutChange();
+                    this.newLayout();
                     this.countChanged();
                 });
                 mObj.connect("modelRemove", this, (at) =>
@@ -612,7 +612,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.render();
                     }
                     this.updateLayout(false);
-                    this.layoutChange();
+                    this.newLayout();
                     this.countChanged();
                 });
                 mObj.connect("modelReplace", this, (at) =>
@@ -766,7 +766,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             if (changedLayout)
             {
                 //console.log("layout change");
-                this.accumulateCallback(() => { this.layoutChange(); }, "layoutChange");
+                this.accumulateCallback(() => { this.newLayout(); }, "newLayout");
             }
         }
 

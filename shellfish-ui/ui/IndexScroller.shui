@@ -149,7 +149,7 @@ MouseBox {
     onBboxChanged: () => { update(); }
     onLabelSizeChanged: () => { update(); }
     onGetLabelChanged: () => { update(); }
-    target.onLayoutChange: () => { update(); }
+    target.onNewLayout: () => { update(); }
 
     onWheel: ev =>
     {

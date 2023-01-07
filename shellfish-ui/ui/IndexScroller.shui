@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -33,6 +33,8 @@ require "shellfish/ui";
  * @property {function} getLabel - A function for returning the index label for the nth item.
  * @property {number} labelSize - (default: `theme.itemHeightMedium`) The minimum size of an index label.
  * @property {string} orientation - The scrolling orientation. One of: `horizontal|vertical`
+ * @property {template} styleOfBackground - The background style template.
+ * @property {template} styleOfItem - The item style template.
  * @property {html.ListView} target - (default: `parent`) The scrolling target.
  *
  */
@@ -44,9 +46,35 @@ MouseBox {
     property orientation: "vertical"
     property labelSize: theme.itemHeightMedium
 
-    visible: target.contentHeight > target.bboxHeight
+    property styleOfBackground: template Box {
+        fillWidth: true
+        fillHeight: true
 
-    color: theme.secondaryBackgroundColor
+        color: theme.secondaryBackgroundColor
+    }
+
+    property styleOfItem: template Box {
+
+        property highlighted: parent.inView || parent.containsMouse
+
+        fillWidth: true
+        fillHeight: true
+
+        color: highlighted ? theme.highlightBackgroundColor
+                           : "transparent"
+
+        layout: "center"
+
+        Label {
+            fontSize: theme.fontSizeSmall
+            color: parent.highlighted ? theme.highlightColor
+                                      : theme.primaryColor
+            bold: true
+            text: parent.parent.text
+        }
+    }
+
+    visible: target.contentHeight > target.bboxHeight
 
     layout: orientation === "vertical" ? "center-column"
                                        : "center-row"
@@ -104,10 +132,9 @@ MouseBox {
 
         for (let i = 0; i < target.count; i += itemsPerRow)
         {
-            const label = indexScroller.getLabel(
-                i < target.count - itemsPerRow ? (i === 0 ? 0 : i + itemsPerRow - 1)
-                                               : target.count - 1
-            );
+            const itemIdx = i < target.count - itemsPerRow ? (i === 0 ? 0 : i + itemsPerRow - 1)
+                                                           : target.count - 1;
+            const label = indexScroller.getLabel(itemIdx);
 
             if (m.length > 0)
             {
@@ -115,7 +142,7 @@ MouseBox {
             }
             if (label !== prevLabel)
             {
-                m.push({ position: pos, until: pos + cellSize - 1, label: label });
+                m.push({ position: pos, until: pos + cellSize - 1, label: label, index: itemIdx });
                 prevLabel = label;
             }
             pos += cellSize;
@@ -146,7 +173,7 @@ MouseBox {
         labelRepeater.model.reset(m);
     }
 
-    onBboxChanged: () => { update(); }
+    onBboxChanged: () => { console.log("bbox changed"); update(); }
     onLabelSizeChanged: () => { update(); }
     onGetLabelChanged: () => { update(); }
     target.onNewLayout: () => { update(); }
@@ -159,7 +186,7 @@ MouseBox {
             return;
         }
 
-        const stepSize = bboxHeight / labelRepeater.count;
+        const stepSize = target.contentHeight / labelRepeater.count;
         if (ev.deltaY < 0)
         {
             target.contentY = target.contentY - stepSize;
@@ -170,29 +197,39 @@ MouseBox {
         }
     }
 
+    Loader {
+        position: "free"
+        fillWidth: true
+        fillHeight: true
+
+        sourceTemplate: indexScroller.styleOfBackground
+    }
+
     Repeater {
         id: labelRepeater
 
         model: ListModel { }
 
-        delegate: template Button {
+        delegate: template MouseBox {
             fillWidth: true
             fillHeight: true
-            flat: true
 
-            checked: target.contentY < modelData.value.until &&
-                     target.contentY + target.bboxHeight > modelData.value.position
-            text: modelData.value.label
-
-            labelProfile: Object {
-                property fontSize: theme.fontSizeSmall
-                property color: theme.primaryColor
-                property bold: true
+            onClick: ev =>
+            {
+                console.log("-> " + modelData.value.position);
+                indexScroller.target.contentY = modelData.value.position;
+                ev.accepted = true;
             }
 
-            onClick: () =>
-            {
-                target.contentY = modelData.value.position;
+            Loader {
+                property containsMouse: parent.containsMouse
+                property inView: indexScroller.target.contentY < parent.modelData.value.until &&
+                                 indexScroller.target.contentY + indexScroller.target.bboxHeight > parent.modelData.value.position
+                property text: parent.modelData.value.label
+
+                fillWidth: true
+                fillHeight: true
+                sourceTemplate: indexScroller.styleOfItem
             }
         }
     }

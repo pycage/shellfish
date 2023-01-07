@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2019 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2019 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -300,6 +300,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.notifyable("scrollbars");
             this.notifyable("snapMode");
 
+            /**
+             * Is triggered when the layout of items has changed.
+             * @event newLayout
+             * @memberof html.ListView
+             */
             this.registerEvent("newLayout");
 
             let willForceUpdateLayout = false;
@@ -1058,6 +1063,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     isNew = true;
                 }
 
+                if (isNew && ! item.parent)
+                {
+                    boxNode.appendChild(item.get());
+                    item.parent = this;
+                }
+
                 if (item.x !== itemPos[0])
                 {
                     item.x = itemPos[0];
@@ -1077,12 +1088,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 {
                     item.height = priv.cellHeight;
                     //console.log("height changed: " + item.height);
-                }
-
-                if (isNew && ! item.parent)
-                {
-                    boxNode.appendChild(item.get());
-                    item.parent = this;
                 }
 
                 const avgDuration = (Date.now() - now) / (n + 1);

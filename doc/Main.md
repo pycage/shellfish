@@ -129,6 +129,10 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### January 2023
+* The new UI element {@link ui.IndexScroller} provides an indexed alternative
+  to a scrollbar for use with {@link html.ListView}.
+
 ### December 2022
 * Reworked the inner HTML and CSS update mechanisms for better performance when
   rendering content in a browser.

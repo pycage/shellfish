@@ -116,7 +116,6 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 propertySupplyHandles: { },
                 dormantProperties: { },
                 customProperties: { },
-                flushingCallbacks: [],
                 childrenCache: null,
                 findCache: { }  // maps ID to child on path to element
             });
@@ -145,11 +144,6 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 d.get(this).childrenCache = null;
                 d.get(this).findCache = { };
-            };
-
-            el.onInitialization = () =>
-            {
-                this.flushPending();
             };
 
             el.onDestruction = () =>
@@ -400,42 +394,25 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 }
                 else
                 {
-                    this.addPendingCallback(() => setup(f));
+                    if (this.lifeCycleStatus.val === "new")
+                    {
+                        this.get().onInitialization = () =>
+                        {
+                            setup(f);
+                        };
+                    }
+                    else
+                    {
+                        console.error("Failed to establish cross-connection: " + this.objectLocation.val + " " + event);
+                    }
                 }
             };
 
             return f =>
             {
-                this.addPendingCallback(() => setup(f));
+                setup(f);
                 return this;
             };
-        }
-
-        /* Adds a pending callback to this element that will be triggered
-         * when the pending callbacks get flushed.
-         *
-         * Elements may be flushed several times and there are two internal
-         * flushing points: (1) after the element's hierarchy with child elements
-         * got created, and (2) at initialization.
-         */
-        addPendingCallback(cb)
-        {
-            d.get(this).flushingCallbacks.push(cb);
-            return this;
-        }
-
-        /**
-         * Flushes pending callbacks and executes them.
-         */
-        flushPending()
-        {
-            const cbs = d.get(this).flushingCallbacks;
-            d.get(this).flushingCallbacks = [];
-
-            cbs.forEach(cb =>
-            {
-                cb();
-            });
         }
 
         /* Returns the nth child element of this element.
@@ -1265,25 +1242,13 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                     handles.push(handle);
                 }
 
-                // try again after embedded as a component
-                //console.log("retry again later: " + JSON.stringify(chain));
-                if (root.lifeCycleStatus.val === "new")
+                // this value won't change anymore
+                if (b._sh_annotation !== "")
                 {
-                    // there's still a chance to resolve later
-                    root.addPendingCallback(setup);
+                    //console.log("The reference " + root.objectLocation.val + " " + b._sh_annotation + " remains undefined");
                 }
-                else
-                {
-                    // this value won't change anymore
-                    /*
-                    if (b._sh_annotation !== "")
-                    {
-                        console.log("The reference " + b._sh_annotation + " remains undefined");
-                    }
-                    */
-                    b._sh_really_undefined = true;
-                    b.update();
-                }
+                b._sh_really_undefined = true;
+                b.update();
             }
             else if (dvs.length > 0)
             {
@@ -1328,7 +1293,17 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             }    
         }
 
-        root.addPendingCallback(setup);
+        if (root.lifeCycleStatus.val === "initialized")
+        {
+            setup();
+        }
+        else
+        {
+            root.get().onInitialization = () =>
+            {
+                setup();
+            };
+        }
 
         b.unwatched(() =>
         {

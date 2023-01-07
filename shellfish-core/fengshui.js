@@ -53,7 +53,7 @@ exports.tools = {
                             .property("modelData", { }, true);
                 const proto = Object.getPrototypeOf(el);
 
-                ["add", "property", "get", "find", "children", "call", "crossConnect", "flushPending", "addPendingCallback"]
+                ["add", "property", "get", "find", "children", "call", "crossConnect"]
                 .forEach(f => { el[f] = (...args) => { return proto[f].apply(el, args); }; });
 
                 return el;
@@ -82,7 +82,7 @@ exports.tools = {
                                .property("modelData", { }, true);
                     const proto = Object.getPrototypeOf(el);
 
-                    ["add", "property", "get", "find", "children", "call", "crossConnect", "flushPending", "addPendingCallback"]
+                    ["add", "property", "get", "find", "children", "call", "crossConnect"]
                     .forEach(f => { el[f] = (...args) => { return proto[f].apply(el, args); }; });
 
                     return el;
@@ -843,7 +843,6 @@ exports.tools = {
                 ${rslv}
 
                 self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
-                .flushPending()
             `;
         }
         else
@@ -856,7 +855,6 @@ exports.tools = {
                     ${rslv}
 
                     self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
-                    .flushPending();
                     return self;
                 })(__rslv__)
             `;

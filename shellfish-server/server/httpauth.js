@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -73,8 +73,7 @@ shRequire(["shellfish/core"], core =>
         const password = tokenParts[1];
         const passwordHash = md5(userName + ":" + realm + ":" + password);
 
-        if (users[userName] !== undefined &&
-            (users[userName] === "" || users[userName] === passwordHash))
+        if (users[userName] !== undefined && users[userName] === passwordHash)
         {
             return userName;
         }

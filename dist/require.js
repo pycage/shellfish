@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -225,7 +225,7 @@ const shRequire = (function ()
         }
         else
         {
-            const json = localStorage.getItem("shellfish-require:" + url);
+            const json = localStorage.getItem("shellfish-cache:" + url);
             if (json)
             {
                 return JSON.parse(json);
@@ -255,7 +255,7 @@ const shRequire = (function ()
         {
             try
             {
-                localStorage.setItem("shellfish-require:" + url, JSON.stringify(data));
+                localStorage.setItem("shellfish-cache:" + url, JSON.stringify(data));
                 return true;
             }
             catch (err)
@@ -267,13 +267,36 @@ const shRequire = (function ()
 
     /**
      * Fetches a resource from the given URL, or from the local storage, if
-     * cached there.
+     * cached there, and the caching is enabled via `shellfish-use-cache = "true"`
+     * set in the local storage.
      * 
      * @param {string} url - The URL to fetch from.
      * @param {function} callback - The callback function to invoke with the resource data.
      */
     function storeFetch(url, callback)
     {
+        if (typeof localStorage === "undefined" || localStorage.getItem("shellfish-use-cache") !== "true")
+        {
+            fetch(url, { cache: "no-cache" })
+            .then(response =>
+            {
+                if (! response.ok)
+                {
+                    throw `${response.status} ${response.statusText}`;
+                }
+                return response.text()
+            })
+            .then(data =>
+            {
+                callback(data);
+            })
+            .catch(err =>
+            {
+                callback(null);
+            });
+            return;
+        }
+
         let lastModified = Date.now();
         fetch(url, { cache: "no-cache", method: "HEAD" })
         .then(response =>
@@ -284,7 +307,6 @@ const shRequire = (function ()
             }
 
             const obj = storeGet(url);
-            //console.log("shellfish-require " + url + " " + obj?.lastModified + " vs " + lastModified);
             if (! obj || obj.lastModified < lastModified)
             {
                 fetch(url, { cache: "no-cache" })

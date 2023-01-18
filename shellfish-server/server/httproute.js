@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -32,7 +32,7 @@ shRequire(["shellfish/core"], core =>
      * Routes may be used to implement virtual servers, or just for handling
      * different URLs with different backends.
      * 
-     * The `when` property holds a boolean function that determines whether to
+     * The `prefix` property holds a path prefix that determines whether to
      * handle a particular request.
      * 
      * The `delegate` property holds a {@link server.HTTPSession} element as
@@ -50,6 +50,7 @@ shRequire(["shellfish/core"], core =>
      * @property {server.HTTPAuth} authentication - (default: `null`) The authentication method, or `null`.
      * @property {server.HTTPSession} delegate - (default: `null`) The session delegate.
      * @property {function} generateSessionId - A function for generating a session ID out of a request.
+     * @property {string} prefix - (default: `"/"`) The path prefix for which this route is to be used.
      * @property {function} when - (default: `() => true`) A function for testing whether a request is to be handled by a request.
      */
     class HTTPRoute extends core.Object
@@ -63,6 +64,7 @@ shRequire(["shellfish/core"], core =>
                 connecting: false,
                 sessions: new Map(),
                 when: request => true,
+                prefix: "/",
                 generateSessionId: request =>
                 {
                     return request.connection.remoteAddress + ":" + request.connection.remotePort;
@@ -70,6 +72,7 @@ shRequire(["shellfish/core"], core =>
             });
 
             this.notifyable("authentication");
+            this.notifyable("prefix");
         }
 
         get authentication() { return d.get(this).authentication; }
@@ -77,6 +80,13 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).authentication = a;
             this.authenticationChanged();
+        }
+
+        get prefix() { return d.get(this).prefix; }
+        set prefix(p)
+        {
+            d.get(this).prefix = p;
+            this.prefixChanged();
         }
 
         get generateSessionId() {return d.get(this).generateSessionId; }

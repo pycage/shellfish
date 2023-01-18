@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -194,6 +194,7 @@ shRequire(["shellfish/core"], core =>
                 let handled = false;
                 this.children
                 .filter(c => c.when !== undefined && c.handleRequest !== undefined)
+                .filter(c => request.url.startsWith(c.prefix))
                 .filter(c => c.when(request))
                 .forEach((route, idx) =>
                 {

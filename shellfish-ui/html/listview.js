@@ -354,10 +354,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             // CSS snapping doesn't work with custom scroll bars,
             // so we implement our own snapping
             const na = new numberanimation.NumberAnimation();
+            na.parent = this;
             na.duration = 300;
             na.easing = "InOutQuad";
             na.onBegin = () => { this.css("touch-action", "none"); }
-            na.onFinish = () => { this.css("touch-action", "auto"); }
+            na.onFinish = () => { this.css("touch-action", "auto"); na.parent = null; }
 
             this.onScrollingChanged = () =>
             {

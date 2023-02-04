@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -111,6 +111,11 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             this.notifyable("selectable");
             this.notifyable("text");
             this.notifyable("verticalAlignment");
+
+            this.onBboxWidthChanged = () =>
+            {
+                d.get(this).contentSizeInvalidated = true;
+            };
         }
 
         get bold() { return d.get(this).bold; }

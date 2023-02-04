@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -94,13 +94,13 @@ shRequire([__dirname + "/object.js"], obj =>
                         }
                     }
 
-                    this.saveDocument();
+                    //this.saveDocument();
                     priv.ready = true;
                     this.readyChanged();
                 })
                 .catch(err =>
                 {
-                    this.saveDocument();
+                    //this.saveDocument();
                     priv.ready = true;
                     this.readyChanged();
                 });
@@ -111,10 +111,17 @@ shRequire([__dirname + "/object.js"], obj =>
         {
             const priv = d.get(this);
 
+            if (! priv.ready)
+            {
+                return;
+            }
+
             if (priv.filesystem !== null && priv.path !== "")
             {
                 let blob = null;
-                if (typeof Blob !== "undefined")
+                console.log("Saving File Storage: " + priv.path);
+                console.log(JSON.stringify(priv.doc));
+                if (shRequire.environment === "web")
                 {
                     blob = new Blob([JSON.stringify(priv.doc, null, 2)], { type: "application/json" });
                 }

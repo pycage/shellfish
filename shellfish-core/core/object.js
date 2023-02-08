@@ -201,11 +201,18 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             {
                 ++this.depth;
                 //console.log("processing " + this.afterTriggerHandlers.length + " after-trigger handlers after " + emitter.objectLocation + "." + event);
+                let count = 0;
                 while (this.afterTriggerHandlers.length > 0)
                 {
                     const f = this.afterTriggerHandlers.shift();
                     f();
-                }
+                    ++count;
+                    if (count > 10)
+                    {
+                        //console.log("processing break, " + this.afterTriggerHandlers.length + " left");
+                        break;
+                    }
+                }               
                 --this.depth;
             }
         }
@@ -644,8 +651,9 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             }
             
             d.get(this).lifeCycleStatus = "initialized";
+            // not needed anymore
+            d.get(this).typeCache = { };
             this.trigger("initialization");
-
         }
 
         /**
@@ -708,6 +716,20 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             {
                 // remove from DOM
                 this.get().remove();
+            }
+
+            d.get(this).refCountMap = { };
+            d.get(this).customProperties = [];
+            d.get(this).connectionMonitors = { };
+            d.get(this).children = [];
+
+            // release orphaned named callbacks
+            for (const key of namedCallbacks.keys())
+            {
+                if (key.startsWith(this.objectId + "#"))
+                {
+                    namedCallbacks.delete(key);
+                }
             }
 
             --objCounter;
@@ -1679,7 +1701,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             byType: typeMap,
             byLifeCycleStatus: statusMap,
             byReferences: refCountMap,
-            focusedNode: document.activeElement
+            focusedNode: document.activeElement,
+            namedCallbacks
         };
     }
     exports.dumpStatus = dumpStatus;

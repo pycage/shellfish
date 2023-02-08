@@ -52,7 +52,8 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
     const elementRegistry = new Map();
 
     // a warehouse for storing pre-created elements for quick delivery
-    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); }, 100);
+    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); },
+                                                     25);
 
     /**
      * Returns if the given object is a dynamic value.
@@ -157,15 +158,22 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                     //console.log("property watcher unwatched on " + el.constructor.name);
                     d.get(this).propertySupplyHandles[key].unwatch();
                 }
+                d.get(this).propertySupplyHandles = { };
     
                 d.get(this).changeWatchers.forEach(handle =>
                 {
                     //console.log("change watcher unwatched on " + el.constructor.name);
                     handle.unwatch();
                 });
+                d.get(this).changeWatchers = [];
     
                 d.get(this).childrenCache = null;
                 d.get(this).findCache = { };
+
+                d.get(this).dormantProperties = { };
+                d.get(this).customProperties = { };
+
+                d.get(this).element = null;
 
                 elementRegistry.delete(el);
                 //console.log(`Discarded high-level element: ${el.constructor.name} (${el.objectLocation}), ${elementRegistry.size} elements remaining`);
@@ -521,10 +529,10 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 }
             };
 
-            const handle = priv.propertySupplyHandles[prop];
-            if (handle)
+            const existingHandle = priv.propertySupplyHandles[prop];
+            if (existingHandle)
             {
-                handle.unwatch();
+                existingHandle.unwatch();
             }
 
             if (value instanceof DynamicValue)
@@ -636,18 +644,14 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 return;
             }
 
-            // the cached value allows for quick access to the property's value
-            // without having to re-evaluate it
-            let cachedValue = undefined;
-
             const isCustomProperty = priv.customProperties[prop];
 
             // build property setter and getter function
             //let p = exports.dynamicValue();
             let p = new DynamicValue();
             p._sh_annotation = el.objectType + "@" + el.objectLocation + "." + prop;
-            p.setter = (v) => { return this.setProperty(prop, v); };
-            p.getter = () => { return cachedValue || this.getProperty(prop); };
+            p.setter = (v) => this.setProperty(prop, v);
+            p.getter = () => this.getProperty(prop);
             
             // every newly bound property except for "profiles" starts as dormant
             if (prop !== "profiles")
@@ -672,9 +676,8 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             });
             p.unwatched(() =>
             {
-                // an unwatched property becomes dormant and its cachedValue useless
+                // an unwatched property becomes dormant
                 priv.dormantProperties[prop] = true;
-                cachedValue = undefined;
 
                 if (isCustomProperty)
                 {
@@ -697,11 +700,6 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                     // don't update if dormant
                     if (! priv.dormantProperties[prop])
                     {
-                        if (prop !== "bbox")
-                        {
-                            // quite a hack, but we shall not cache bbox on this level
-                            cachedValue = this.getProperty(prop);
-                        }
                         p.update();
                     }
                 };
@@ -1053,7 +1051,6 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
         //console.log("Creating binding for " + annotation);
 
         let handles = [];
-        let cachedValue = null;
         
         function setup(b, newDeps)
         {
@@ -1071,7 +1068,6 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 {
                     //console.log("Evaluating: " + b._sh_annotation + " -> " + b.val +
                     //            " (triggered by: " + dep._sh_annotation + " = " + dep.val + ")");
-                    cachedValue = null;
                     b.update();
                 });
                 handles.push(handle);
@@ -1080,14 +1076,9 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
 
         //const b = exports.dynamicValue(undefined);
         const b = new DynamicValue(undefined);
-        b._sh_annotation = annotation || "";
+        b._sh_annotation = "binding " + (annotation || "");
         b.getter = () =>
         {
-            if (cachedValue !== null)
-            {
-                return cachedValue;
-            }
-
             // as long as not all dependencies have been resolved, the binding is undefined
             if (deps.filter(d => d.val === undefined && ! d._sh_really_undefined).length !== 0)
             {
@@ -1096,8 +1087,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
 
             try
             {
-                cachedValue = evaluator(...deps);
-                return cachedValue;
+                return evaluator(...deps);
             }
             catch (err)
             {
@@ -1112,6 +1102,9 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 h.unwatch();
             });
+            handles = [];
+
+            b.getter = null;
         });
         
         setup(b, deps);
@@ -1201,34 +1194,16 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
 
             //console.log("init: " + JSON.stringify(chain));
             let obj = null;
-            let targetObj = null;
             let dvs = [];
             chain.forEach((c, i) =>
             {
                 obj = resolveChain(obj, [c]);
-                /*
-                if (i === 0 && obj)
-                {
-                    targetObj = obj;
-                }
-                */
                 if (obj instanceof DynamicValue)
                 {
                     dvs.push(obj);
                 }
             });
 
-            /*
-            if (targetObj)
-            {
-                if (! refCache.has(targetObj))
-                {
-                    refCache.set(targetObj, { });
-                }
-                refCache.get(targetObj)[chain] = b;
-            }
-            */
-    
             //console.log(chain + " -> " + JSON.stringify(obj));
             if (obj === undefined)
             {
@@ -1303,7 +1278,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 setup();
             };
-        }
+         }
 
         b.unwatched(() =>
         {
@@ -1313,6 +1288,8 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 h.unwatch();
             });
             handles = [];
+            // break cycle (setup <-> resolveChain)
+            resolveChain = null;
         });
 
         return b;

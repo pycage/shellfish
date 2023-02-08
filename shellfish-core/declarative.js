@@ -1185,6 +1185,11 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
 
         function setup()
         {
+            if (! resolveChain)
+            {
+                return;
+            }
+
             // stop watching old DVs first
             handles.forEach(h =>
             {

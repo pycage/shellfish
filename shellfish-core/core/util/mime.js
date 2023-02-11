@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2018 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2018 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -53,6 +53,7 @@ const EXTENSIONS = {
     ".json":  "application/x-json",
     ".m4v":   "video/mp4",
     ".md":    "text/x-markdown",
+    ".mkv":   "video/x-matroska",
     ".mp3":   "audio/mp3",
     ".mp4":   "video/mp4",
     ".mpeg":  "video/mpeg",
@@ -72,6 +73,7 @@ const EXTENSIONS = {
     ".txt":   "text/plain",
     ".tgz":   "application/gzip",
     ".vcf":   "text/vcard",
+    ".vtt":   "text/vtt",
     ".wasm":  "application/wasm",
     ".webm":  "video/webm",
     ".webp":  "image/webp",

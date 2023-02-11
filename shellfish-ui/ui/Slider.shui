@@ -103,7 +103,7 @@ MouseBox {
     function setValue(v)
     {
         const nv = Math.max(minValue, Math.min(maxValue, v));
-        if (nv !== value)
+        if (! isNaN(nv) && nv !== value)
         {
             value = nv;
         }

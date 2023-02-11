@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -59,12 +59,14 @@ Label {
             break;
         case "text/plain":
         case "text/rtf":
+        case "text/vtt":
             icon = "core-file-text";
             break;
         case "video/mp4":
         case "video/mpeg":
         case "video/webm":
         case "video/x-flv":
+        case "video/x-matroska":
         case "video/x-msvideo":
             icon = "core-file-play";
             break;

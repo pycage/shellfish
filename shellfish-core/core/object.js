@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -539,14 +539,16 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.registerEvent("initialization");
 
             /**
-             * Is triggered immediately before the object will be discarded.
+             * Is triggered immediately before the object will be destroyed.
+             * The object is still intact at this place.
              * @event destruction
              * @memberof core.Object
              */
             this.registerEvent("destruction");
 
             /**
-             * Is triggered after the object was discarded.
+             * Is triggered after the object was destroyed.
+             * The object is not intact anymore at this place.
              * @event termination
              * @memberof core.Object
              */
@@ -600,10 +602,11 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             {
                 p.attachChild(this);
                 this.referenceAdd(p);
-            }
-            if (this.lifeCycleStatus !== "destroyed")
-            {
-                this.parentChanged();
+
+                if (this.lifeCycleStatus !== "destroyed")
+                {
+                    this.parentChanged();
+                }
             }
         }
 
@@ -684,6 +687,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             d.get(this).lifeCycleStatus = "destroyed";
             this.trigger("destruction");
+            this.trigger("termination");
 
             connHub.removeReceiver(this);
             connHub.removeEmitter(this);
@@ -705,8 +709,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             d.get(this).blobUrls.forEach(url =>
             {
-                console.log("Revoking object URL: " + url);
                 URL.revokeObjectURL(url);
+                console.log(d.get(this).objectType + "@" + d.get(this).objectLocation + " released object URL: " + url);
             });
             d.get(this).blobUrls = [];
 

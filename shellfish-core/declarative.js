@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -126,7 +126,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             const el = new type();
             d.get(this).element = el;
             elementRegistry.set(el, this);
-            //console.log("Created high " + el.constructor.name + " after " + (Date.now() - now) + " ms");
+            //console.log("Created high " + el.constructor.name);
 
             if (! propertiesCache.has(type))
             {
@@ -135,7 +135,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             }
             propertiesCache.get(type)
             .forEach((prop) => { this.bindProperty(prop); });
-            //console.log("Bound properties of high " + el.constructor.name + " after " + (Date.now() - now) + " ms (" + propertiesCache.get(type).length + " properties)");
+            //console.log("Bound properties of high " + el.constructor.name + " (" + propertiesCache.get(type).length + " properties)");
 
             // each high-level element has a "profiles" property
             this.property("profiles", [], true);
@@ -147,7 +147,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 d.get(this).findCache = { };
             };
 
-            el.onDestruction = () =>
+            el.onTermination = () =>
             {
                 //console.log("Destroying high-level element: " +
                 //            el.constructor.name +
@@ -573,6 +573,12 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
         getProperty(prop)
         {
             const priv = d.get(this);
+            if (! priv.element)
+            {
+                // accessing a dead element
+                //console.error(`[${core.dbgctx}] Accessing <destroyed element>.${prop}`);
+                return undefined;
+            }
 
             if (priv.dormantProperties[prop])
             {
@@ -1091,7 +1097,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             }
             catch (err)
             {
-                console.error(`[${core.dbgctx}] Could not evaluate binding: ${b._sh_annotation}\n${deps.map(d => "- " + d._sh_annotation + " = " + d.val).join("\n")}`);
+                console.error(`[${core.dbgctx}] Could not evaluate binding: ${b._sh_annotation}\n${deps.map(d => "- " + d._sh_annotation + " = " + d.val).join("\n")}\n${err}`);
                 return undefined;
             }
         };

@@ -446,6 +446,7 @@ shRequire(["shellfish/low",
 
                     priv.mayUpdateSize = true;
                     this.updatePosition();
+                    this.updateSizeFrom(null, false, true);
                 }
 
                 this.updateFocusTrap();

@@ -162,3 +162,7 @@ div.sh-layout-center-row {
     align-items: center;
     align-content: center;
 }
+
+::cue {
+    visibility: hidden;
+}

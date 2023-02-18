@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -29,17 +29,22 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
     /**
      * Class representing a video player component.
      * 
+     * Subtitles in VTT format may be loaded from an external source and are
+     * emitted via the `cues` property.
+     * 
      * @memberof html
      * @extends html.Item
      * 
+     * @property {string[]} cues - [readonly] The current set of subtitle cues.
      * @property {number} currentTime - The current time position in seconds.
      * @property {number} duration - [readonly] The duration of the video in seconds.
      * @property {string} fitMode - (default: `"contain"`) The mode for fitting the original image into this element. One of: `fill|contain|cover|scale-down|none`
      * @property {number} originalWidth - [readonly] The original width of the image.
      * @property {number} originalHeight - [readonly] The original height of the image.
      * @property {bool} playing - [readonly] Whether the video is currently playing.
-     * @property {string} source - The video source URL.
+     * @property {string} source - (default: `""`) The video source URL.
      * @property {string} status - [readonly] The current status. One of: `empty|loading|error|success`
+     * @property {string} subtitles - (default: `""`) The subtitles source URL. Subtitles must be in VTT format.
      * @property {number} volume - (default: `1.0`) The current audio volume as a value between `0.0` and `1.0`.
      */
     class Video extends item.Item
@@ -49,6 +54,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
             super();
             d.set(this, {
                 source: "",
+                subtitles: "",
+                cues: [],
                 status: "empty",
                 playing: false,
                 fitMode: "contain",
@@ -60,10 +67,15 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
                     .style("display", "block")
                     .style("object-fit", "contain")
                     .attr("autoplay", "true")
+                    .content(
+                        low.tag("track")
+                        .attr("kind", "subtitles")
+                    )
                     .html()
                 )
             });
 
+            this.notifyable("cues");
             this.notifyable("currentTime");
             this.notifyable("duration");
             this.notifyable("fitMode");
@@ -71,6 +83,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
             this.notifyable("originalHeight");
             this.notifyable("playing");
             this.notifyable("source");
+            this.notifyable("subtitles");
             this.notifyable("status");
             this.notifyable("volume");
 
@@ -131,11 +144,22 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
                 this.durationChanged();
             });
 
-
-
             this.addHtmlEventListener(item, "progress", () =>
             {
 
+            });
+
+            this.addHtmlEventListener(item.childNodes[0], "cuechange", () =>
+            {
+                const track = d.get(this).item.childNodes[0].track;
+                const cues = track.activeCues;
+                const texts = [];
+                for (let i = 0; i < cues.length; ++i)
+                {
+                    texts.push(cues[i].text);
+                }
+                d.get(this).cues = texts;
+                this.cuesChanged();
             });
         }
 
@@ -162,6 +186,21 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
             priv.item.setAttribute("src", shRequire.resource(s));
             this.sourceChanged();
         }
+
+        get subtitles() { return d.get(this).subtitles; }
+        set subtitles(s)
+        {
+            d.get(this).subtitles = s;
+
+            const item = d.get(this).item;
+            const subtitlesItem = item.childNodes[0];
+            subtitlesItem.src = s;
+            subtitlesItem.default = true;
+
+            this.subtitlesChanged();
+        }
+
+        get cues() { return d.get(this).cues; }
 
         get originalWidth() { return d.get(this).item.videoWidth || 0; }
         get originalHeight() { return d.get(this).item.videoHeight || 0; }

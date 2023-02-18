@@ -314,7 +314,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 {
                     willForceUpdateLayout = true;
                 }
-                this.accumulateCallback(() =>
+                this.defer(() =>
                 {
                     this.updateLayout(willForceUpdateLayout);
                 }, "updateLayout");
@@ -772,7 +772,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             if (changedLayout)
             {
                 //console.log("layout change");
-                this.accumulateCallback(() => { this.newLayout(); }, "newLayout");
+                this.defer(() => { this.newLayout(); }, "newLayout");
             }
         }
 
@@ -840,7 +840,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             {
                 priv.itemMeta.set(idx, undefined);
                 priv.recycleBin.push(item);
-                item.x = -1;
+                item.x = -window.outerWidth;
                 item.y = 0;
                 item.visible = false;
             }
@@ -923,7 +923,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 this.renderingChanged();
             }
 
-            this.accumulateCallback(() =>
+            this.defer(() =>
             {
                 this.doRender();
             }, "render");

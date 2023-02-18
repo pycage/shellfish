@@ -374,7 +374,7 @@ shRequire(["shellfish/low",
                         this.contentXChanged();
                         this.contentYChanged();
 
-                        this.accumulateCallback(() =>
+                        this.defer(() =>
                         {
                             updateScrollingStatus();
                             
@@ -1187,7 +1187,7 @@ shRequire(["shellfish/low",
 
         updateSizeAccumulated()
         {
-            this.accumulateCallback(() =>
+            this.defer(() =>
             {
                 this.updateSizeFrom(null, false, true);
             }, "updateSizeFrom");

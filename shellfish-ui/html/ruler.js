@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -141,8 +141,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 maxChanged = true;
             }
 
-            if (minChanged) this.accumulateCallback(() => { this.minChanged(); }, "minChanged");
-            if (maxChanged) this.accumulateCallback(() => { this.maxChanged(); }, "maxChanged");
+            if (minChanged) this.defer(() => { this.minChanged(); }, "minChanged");
+            if (maxChanged) this.defer(() => { this.maxChanged(); }, "maxChanged");
         }
     }
     exports.Ruler = Ruler;

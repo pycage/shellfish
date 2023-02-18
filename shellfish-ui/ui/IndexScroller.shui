@@ -81,7 +81,7 @@ MouseBox {
 
     function update()
     {
-        accumulateCallback(() =>
+        defer(() =>
         {
             doUpdate();
         }, "update");

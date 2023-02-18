@@ -148,7 +148,7 @@ MouseBox {
             // opened
             if (contentTemplate && loading)
             {
-                accumulateCallback(() => { page.loadContent(); }, "loadContent");
+                defer(() => { page.loadContent(); }, "loadContent");
             }
         }
     }

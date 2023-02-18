@@ -129,6 +129,16 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### February 2023
+* The element {@link html.Video} can now load subtitles in VTT format with
+  the properties `subtitles` and `cues`.
+* The new UI element {@link ui.ListHeader} provides a simple list header with
+  multiple columns for placing directly above a {@link html.ListView}.
+* **API-Break:** The properties `withDirectories`, `withFiles`, and `withHidden`
+  have been removed from the element {@link core.FSModel}. Use the `filter`
+  property instead for setting a filtering function. Simple filtering functions
+  can be created via {@link core.FSModel#makeFilter}.
+
 ### January 2023
 * The new UI element {@link ui.IndexScroller} provides an indexed alternative
   to a scrollbar for use with {@link html.ListView}.

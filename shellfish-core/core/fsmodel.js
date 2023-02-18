@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,10 +37,10 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
      * 
      * @property {bool} directoriesFirst - (default: `true`) Whether to list directories first.
      * @property {html.Filesystem} filesystem - (default: `null`) The filesystem to use.
-     * @property {function} filter - A filtering function.
+     * @property {function} filter - A filtering function. By default, hidden files are filtered out.
      * @property {bool} loading - [readonly] `true` if the model is currently being loaded.
      * @property {string} path - (default: `""`) The path represented by the model.
-     * @property {function} sorter - A sorting function.
+     * @property {function} sorter - A sorting function. By default, items are sorted in ascending case-insensitive order by their name.
      */
     class FSModel extends lm.ListModel
     {

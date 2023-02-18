@@ -494,8 +494,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
      * lifecycle management. Unlike plain JavaScript objects, this class has the
      * concept of a destructor method.
      * 
-     * Every mid-level class is a descendant of this class.
-     * 
      * @alias core.Object
      * 
      * @property {core.Object[]} children - [readonly] The child objects.
@@ -787,8 +785,11 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          * Wraps a callback function to give it a name handle by which it may be
          * canceled before execution.
          * 
-         * When setting multiple callbacks with the same name, only the last
+         * When setting multiple callbacks of the same name, only the last
          * one will be executed.
+         * 
+         * @see {@link core.Object#cancelNamedCallback cancelNamedCallback}
+         * @see {@link core.Object#namedCallbackPending namedCallbackPending}
          * 
          * @param {function} callback - The callback function.
          * @param {string} name - The name.
@@ -813,6 +814,9 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         /**
          * Returns if the given named callback is currently pending.
          * 
+         * @see {@link core.Object#cancelNamedCallback cancelNamedCallback}
+         * @see {@link core.Object#namedCallback namedCallback}
+         * 
          * @param {string} name - The name.
          * @returns {bool} `true` if the callback is currently pending.
          */
@@ -824,6 +828,9 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
         /**
          * Cancels the given pending named callback before it gets executed.
+         * 
+         * @see {@link core.Object#namedCallback namedCallback}
+         * @see {@link core.Object#namedCallbackPending namedCallbackPending}
          * 
          * @param {string} name - The name.
          */
@@ -1485,6 +1492,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          * will be executed before the JavaScript engine finished executing its
          * current code.
          * 
+         * @deprecated Use defer instead.
+         * 
          * @param {function} f - The function to invoke.
          * @param {string} name - The accumulation name.
          */
@@ -1493,6 +1502,21 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.wait(0).then(this.namedCallback(this.safeCallback(f), name));
         }
 
+        /**
+         * Defers the execution of the given function associated with a name.
+         * 
+         * Only the most recent one of the defered functions under a name
+         * will be executed before the JavaScript engine finished executing its
+         * current code.
+         * 
+         * @param {function} f - The function to invoke.
+         * @param {string} name - The function name.
+         */
+        defer(f, name)
+        {
+            this.wait(0).then(this.namedCallback(f, name));
+        }
+        
         /**
          * Returns a Promise that resolves after a given amount of milliseconds.
          * 
@@ -1528,6 +1552,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          * Waits in a named queue and returns a Promise that resolves to a
          * `next` function when it's the caller's turn. After the caller has
          * finished its turn, that `next` function must be invoked.
+         *
+         * @see {@link core.Object#clearQueue clearQueue}
          * 
          * @param {string} qName - The name of the queue.
          * @return {Promise<function>} The Promise object.
@@ -1539,6 +1565,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
         /**
          * Clears the given waiting queue.
+         * 
+         * @see {@link core.Object#waitQueued waitQueued}
          * 
          * @param {string} qName - The name of the queue.
          */

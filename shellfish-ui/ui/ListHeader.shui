@@ -1,0 +1,200 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element representing a list header with multiple columns. It is intended to
+ * be placed directly above a {@link html.ListView} element.
+ *
+ * The model of columns supports several attributes:
+ * - `title` (string): The title text
+ * - `width` (number): The initial width
+ * - `resizable` (bool): Whether the columns is resizable
+ *
+ * @memberof ui
+ * @name ListHeader
+ * @class
+ * @extends html.Box
+ *
+ * @property {core.ListModel} model - The model of columns.
+ * @property {number[]} columnWidths - [readonly] The widths of the particular columns.
+ */
+Box {
+    id: header
+
+    property model: ListModel { }
+    property columnWidths: []
+
+    /**
+     * Is triggered when the user clicks on a column header.
+     *
+     * @memberof ui.ListHeader.prototype
+     * @name columnClick
+     * @event
+     * @param {number} idx - The index number of the clicked column.
+     */
+    event columnClick
+
+    /**
+     * Resets the column widths.
+     *
+     * @memberof ui.ListHeader.prototype
+     * @name resetColumns
+     * @method
+     */
+    function resetColumns()
+    {
+        if (colRepeater.count === 0)
+        {
+            return;
+        }
+
+        let sizes = colRepeater.items.map((item, idx) =>
+        {
+            const modelItem = model.at(idx);
+            const prefered = modelItem.width || -1;
+
+            return prefered === -1 ? 0 : prefered;
+        });
+
+        const sum = sizes.reduce((a, b) => a + b, 0);
+        const remainder = bboxWidth - sum;
+        const flexAmount = sizes.filter(s => s === 0).length;
+        
+        if (flexAmount > 0)
+        {
+            const size = Math.max(theme.itemWidthSmall, remainder / sizes.filter(s => s === 0).length);
+            sizes = sizes.map(s => s === 0 ? size : s);
+        }
+
+        columnWidths = sizes;
+
+        columnWidths.forEach((w, idx) =>
+        {
+            colRepeater.items[idx].width = w;
+        });
+    }
+
+    /**
+     * Resizes the given column width by a delta amount.
+     *
+     * @memberof ui.ListHeader.prototype
+     * @name resizeColumn
+     * @method
+     *
+     * @param {number} idx - The index number of the column to resize.
+     * @param {number} n - The amount to add to the column's width.
+     */
+    function resizeColumn(idx, n)
+    {
+        const ws = colRepeater.items.map(item =>
+        {
+            return item.width;
+        });
+        const totalWidth = ws.reduce((a, b) => a + b);
+
+        colRepeater.items[idx].width += n;
+
+        columnWidths = colRepeater.items.map(item =>
+        {
+            return item.width;
+        });
+    }
+
+    fillWidth: true
+    height: theme.itemHeightSmall
+    layout: "row"
+
+    onBboxWidthChanged: () => { resetColumns(); }
+
+    Repeater {
+        id: colRepeater
+
+        model: header.model
+
+        delegate: template MouseBox {
+            width: 100
+            fillHeight: true
+            color: containsMouse ? theme.highlightBackgroundColor : "transparent"
+
+            layout: "center-row"
+
+            onInitialization: () =>
+            {
+                if (modelData.index === 0)
+                {
+                    wait(0).then(() =>
+                    {
+                        header.resetColumns();
+                    });
+                }
+            }
+
+            onClick: ev =>
+            {
+                ev.accepted = true;
+                header.columnClick(modelData.index);
+            }
+
+            Label {
+                fillWidth: true
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                overflowBehavior: "ellipsis"
+                color: parent.containsMouse ? theme.highlightColor : theme.primaryColor
+                text: parent.modelData.value.title
+            }
+
+            MouseBox {
+                width: 6
+                fillHeight: true
+                cursor: "col-resize"
+
+                onDrag: ev =>
+                {
+                    ev.accepted = true;
+
+                    const resizable = parent.modelData.value.resizable ?? true;
+                    if (resizable)
+                    {
+                        header.resizeColumn(parent.modelData.index, ev.deltaX);
+                    }
+                }
+
+                onDoubleClick: ev =>
+                {
+                    ev.accepted = true;
+                    header.resetColumns();
+                }
+
+                Box {
+                    position: "free"
+                    origin: "top-right"
+                    width: 1
+                    fillHeight: true
+                    color: theme.borderColor
+                }
+            }
+        }
+    }
+}

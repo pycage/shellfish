@@ -37,11 +37,10 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
      * 
      * @property {bool} directoriesFirst - (default: `true`) Whether to list directories first.
      * @property {html.Filesystem} filesystem - (default: `null`) The filesystem to use.
+     * @property {function} filter - A filtering function.
      * @property {bool} loading - [readonly] `true` if the model is currently being loaded.
      * @property {string} path - (default: `""`) The path represented by the model.
-     * @property {bool} withDirectories - (default: `true`) Whether to include directories.
-     * @property {bool} withFiles - (default: `true`) Whether to include files.
-     * @property {bool} withHidden - (default: `false`) Whether to include hidden files and directories.
+     * @property {function} sorter - A sorting function.
      */
     class FSModel extends lm.ListModel
     {
@@ -51,21 +50,21 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             d.set(this, {
                 fs: null,
                 path: "",
+                query: "",
+                filter: item => ! item.name.startsWith("."),
+                sorter: (a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1,
                 directoriesFirst: true,
-                withDirectories: true,
-                withFiles: true,
-                withHidden: false,
                 loading: false,
-                updating: false
+                items: []
             });
             
             this.notifyable("directoriesFirst");
             this.notifyable("filesystem");
+            this.notifyable("filter");
             this.notifyable("loading");
             this.notifyable("path");
-            this.notifyable("withDirectories");
-            this.notifyable("withFiles");
-            this.notifyable("withHidden");
+            this.notifyable("query");
+            this.notifyable("sorter");
         }
 
         get filesystem() { return d.get(this).fs; }
@@ -102,38 +101,96 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             this.update(true);
         }
 
+        get query() { return d.get(this).query; }
+        set query(q)
+        {
+            d.get(this).query = q;
+            this.queryChanged();
+            this.update(true);
+        }
+
         get loading() { return d.get(this).loading; }
+
+        get filter() { return d.get(this).filter; }
+        set filter(f)
+        {
+            d.get(this).filter = f;
+            this.processItems(d.get(this).items, true);
+            this.filterChanged();
+        }
 
         get directoriesFirst() { return d.get(this).directoriesFirst; }
         set directoriesFirst(value)
         {
             d.get(this).directoriesFirst = value;
-            this.update(true);
+            this.processItems(d.get(this).items, true);
             this.directoriesFirstChanged();
         }
 
-        get withFiles() { return d.get(this).withFiles; }
-        set withFiles(value)
+        get sorter() { return d.get(this).sorter; }
+        set sorter(s)
         {
-            d.get(this).withFiles = value;
-            this.update(false);
-            this.withFilesChanged();
+            d.get(this).sorter = s;
+            this.processItems(d.get(this).items, true);
+            this.sorterChanged();
         }
 
-        get withDirectories() { return d.get(this).withDirectories; }
-        set withDirectories(value)
+        /**
+         * Creates a filtering function for the `filter` property.
+         * 
+         * @param {bool} withDirectories - Whether to include directories.
+         * @param {bool} withFiles - Whether to include files.
+         * @param {bool} withHidden - Whether to include hidden entries (name starting with `.`).
+         * @returns {function} The filtering function.
+         */
+        makeFilter(withDirectories, withFiles, withHidden)
         {
-            d.get(this).withDirectories = value;
-            this.update(false);
-            this.withDirectoriesChanged();
+            return item =>
+            {
+                if (item.type === "d" && ! withDirectories)
+                {
+                    return false;
+                }
+                if (item.type === "f" && ! withFiles)
+                {
+                    return false;
+                }
+                if (item.name.startsWith(".") && ! withHidden)
+                {
+                    return false;
+                }
+                return true;
+            };
         }
 
-        get withHidden() { return d.get(this).withHidden; }
-        set withHidden(value)
+        /**
+         * Creates a sorting function for the `sorter` property.
+         * 
+         * @param {string} role - The sort role name.
+         * @param {bool} ascending - Whether to sort in ascending order.
+         * @return {function} The sorting function.
+         */
+        makeSorter(role, ascending)
         {
-            d.get(this).withHidden = value;
-            this.update(false);
-            this.withHiddenChanged();
+            return (a, b) =>
+            {
+                const aValue = a[role];
+                const bValue = b[role];
+                const comp = (a, b) =>
+                {
+                    return ascending ? (a < b ? -1 : 1)
+                                     : (a > b ? -1 : 1);
+                };
+                
+                if (role === "name")
+                {
+                    return comp(aValue.toLowerCase(), bValue.toLowerCase());
+                }
+                else
+                {
+                    return comp(aValue, bValue);
+                }    
+            };
         }
 
         comparator(a, b)
@@ -149,7 +206,8 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                     return 1;
                 }
             }
-            return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+
+            return d.get(this).sorter(a, b);
         }
 
         mergeWithUpdate(newItems)
@@ -187,24 +245,21 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
         update(reset)
         {
             const priv = d.get(this);
-            if (! priv.updating)
+
+            if (! priv.loading)
             {
                 priv.loading = true;
                 this.loadingChanged();
-
-                priv.updating = true;
-                this.wait(0)
-                .then(() =>
-                {
-                    this.doUpdate(reset);
-                    priv.updating = false;
-                });
             }
+
+            this.defer(() =>
+            {
+                this.doUpdate(reset);
+            }, "update");
         }
 
         doUpdate(reset)
         {
-            console.log("update fs model");
             const priv = d.get(this);
 
             if (! priv.fs)
@@ -213,35 +268,50 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 return;
             }
 
-            priv.fs.list(priv.path)
-            .then(items =>
+            if (priv.query !== "")
             {
-                console.log(items);
-                const newItems = items
-                .filter(item =>
+                priv.fs.search(priv.path, priv.query)
+                .then(this.safeCallback(items =>
                 {
-                    return (! item.name.startsWith(".") || priv.withHidden);
-                })
-                .filter(item =>
+                    console.log(items);
+                    priv.items = items;
+                    this.processItems(items, reset);
+    
+                    priv.loading = false;
+                    this.loadingChanged();
+                }));
+            }
+            else
+            {
+                priv.fs.list(priv.path)
+                .then(this.safeCallback(items =>
                 {
-                    return (item.type === "f" && priv.withFiles ||
-                            item.type === "d" && priv.withDirectories);
-                })
-                .sort((a, b) => this.comparator(a, b));
-                console.log(newItems);
+                    console.log(items);
+                    priv.items = items;
+                    this.processItems(items, reset);
+    
+                    priv.loading = false;
+                    this.loadingChanged();
+                }));
+            }
+        }
 
-                if (reset)
-                {
-                    this.reset(newItems);
-                }
-                else
-                {
-                    this.mergeWithUpdate(newItems);
-                }
+        processItems(items, reset)
+        {
+            const priv = d.get(this);
+            const newItems = items
+            .filter(priv.filter)
+            .sort((a, b) => this.comparator(a, b));
+            console.log(newItems);
 
-                priv.loading = false;
-                this.loadingChanged();
-            });
+            if (reset)
+            {
+                this.reset(newItems);
+            }
+            else
+            {
+                this.mergeWithUpdate(newItems);
+            }
         }
     }
     exports.FSModel = FSModel;

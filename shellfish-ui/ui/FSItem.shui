@@ -74,14 +74,14 @@ MouseBox {
                 nameLabel.text = low.escapeMarkup(parts.join("."));
 
                 let size = Math.ceil(item.file.size / 1024);
-                const units = ["KB", "MB", "GB", "TB"];
+                const units = ["K", "M", "G", "T"];
 
                 for (let i = 0; i < units.length; ++i)
                 {
                     const unit = units[i];
                     if (size < 1024)
                     {
-                        sizeLabel.text = (i === 0 ? size : size.toFixed(1)) + " " + unit;
+                        sizeLabel.text = (i === 0 ? size : size.toFixed(1)) + unit;
                         break;
                     }
                     size /= 1024;
@@ -188,6 +188,7 @@ MouseBox {
             marginLeft: theme.paddingSmall
             marginRight: theme.paddingSmall
             horizontalAlignment: item.displayMode === "list" ? "left" : "center"
+            overflowBehavior: "ellipsis"
             fontSize: item.displayMode === "list" ? theme.fontSizeMedium : theme.fontSizeSmall
             color: item.highlighted || item.containsMouse ? theme.highlightColor : theme.secondaryColor
         }
@@ -207,6 +208,7 @@ MouseBox {
             marginLeft: theme.paddingSmall
             marginRight: theme.paddingSmall
             horizontalAlignment: item.displayMode === "list" ? "right" : "center"
+            overflowBehavior: "ellipsis"
             fontSize: item.displayMode === "list" ? theme.fontSizeMedium : theme.fontSizeSmall
             color: item.highlighted || item.containsMouse ? theme.highlightColor : theme.secondaryColor
          }

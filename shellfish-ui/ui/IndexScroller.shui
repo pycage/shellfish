@@ -74,7 +74,7 @@ MouseBox {
         }
     }
 
-    visible: target.contentHeight > target.bboxHeight
+    visible: target.contentHeight > target.bboxHeight && labelRepeater.count > 1
 
     layout: orientation === "vertical" ? "center-column"
                                        : "center-row"
@@ -173,7 +173,7 @@ MouseBox {
         labelRepeater.model.reset(m);
     }
 
-    onBboxChanged: () => { console.log("bbox changed"); update(); }
+    onBboxChanged: () => { console.log("bbox changed " + JSON.stringify(bbox)); update(); }
     onLabelSizeChanged: () => { update(); }
     onGetLabelChanged: () => { update(); }
     target.onNewLayout: () => { update(); }

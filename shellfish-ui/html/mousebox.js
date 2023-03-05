@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -416,7 +416,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             this.registerEvent("pointerMove", () =>
             {
                 // disable disturbing browser touch actions
-                //this.css("touch-action", "none");
+                this.css("touch-action", "none");
 
                 this.ensureListener(POINTER_EVENT ? "pointermove" : "mousemove", this.pointerMove, makePointerEvent);
                 if (! POINTER_EVENT)

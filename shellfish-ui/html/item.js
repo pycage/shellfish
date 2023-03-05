@@ -446,7 +446,6 @@ shRequire(["shellfish/low",
 
                     priv.mayUpdateSize = true;
                     this.updatePosition();
-                    this.updateSizeFrom(null, false, true);
                 }
 
                 this.updateFocusTrap();
@@ -462,6 +461,20 @@ shRequire(["shellfish/low",
             {
                 this.updateTabIndex();
                 this.updateFocusTrap();
+                if (this.ancestorsVisible && this.visible)
+                {
+                    if (priv.cssCache)
+                    {
+                        const item = this.get();
+                        for (let key in priv.cssCache)
+                        {
+                            low.css(item, key, priv.cssCache[key]);
+                        }
+                        priv.cssCache = null;
+                    }
+
+                    this.updatePosition();
+                }
             };
 
             this.onParentChanged = () =>
@@ -469,7 +482,6 @@ shRequire(["shellfish/low",
                 this.ancestorsVisibleChanged();
                 this.ancestorsEnabledChanged();
                 this.updatePosition();
-                this.updateSizeFrom(null, false, true);
             };
         }
 

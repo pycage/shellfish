@@ -269,7 +269,318 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
     const connHub = new ConnectionsHub();
 
     /**
+     * Class representing a sparse matrix of infinite size.
+     * @private
+     */
+    class SparseMatrix
+    {
+        constructor(zero)
+        {
+            this.data = new Map();
+            this.maxId = 0;
+            this.zero = zero;
+            this.edgeLength = n => n + 1;
+            this.c = n => this.edgeLength(n) * this.edgeLength(n) - 1;
+            this.indexAt = (y, x) =>
+            {
+                if (x > y) return this.c(x - 1) + 1 + y * 2;
+                if (x < y) return this.c(y - 1) + 2 + x * 2;
+                return this.c(x);
+            };
+        }
+
+        valueAt(y, x)
+        {
+            const idx = this.indexAt(x, y);
+            if (this.data.has(idx))
+            {
+                return this.data.get(idx);
+            }
+            else
+            {
+                return this.zero;
+            }
+        }
+
+        setValue(y, x, v)
+        {
+            const idx = this.indexAt(x, y);
+            if (v === this.zero)
+            {
+                this.data.delete(idx);
+            }
+            else
+            {
+                this.data.set(idx, v);
+            }
+            this.maxId = Math.max(x, y, this.maxId);
+        }
+
+        cellOperation(y, x, op)
+        {
+            this.setValue(y, x, op(this.valueAt(y, x)));
+        }
+
+        rowOperation(a, b, op)
+        {
+            for (let i = 0; i <= this.maxId; ++i)
+            {
+                this.setValue(a, i, op(this.valueAt(a, i), this.valueAt(b, i)));
+            }
+        }
+
+        columnOperation(a, b, op)
+        {
+            for (let i = 0; i <= this.maxId; ++i)
+            {
+                this.setValue(i, a, op(this.valueAt(i, a), this.valueAt(i, b)));
+            }
+        }
+    }
+
+    /**
+     * Class representing a reference tracker with cycles detection.
+     * @private
+     */
+    class RefsTracker
+    {
+        constructor()
+        {
+            this.matrix = new SparseMatrix(0);
+
+            this.cyclesMatrix = new SparseMatrix(0);
+            this.cyclesMap = new Map();
+            this.participantsMap = new Map();
+        }
+
+        dump()
+        {
+            console.log("max: " + this.matrix.maxId);
+            for (let y = 0; y <= this.matrix.maxId; ++y)
+            {
+                const row = [];
+                for (let x = 0; x <= this.matrix.maxId; ++x)
+                {
+                    row.push(this.matrix.valueAt(y, x));
+                }
+                console.log(y + " " + JSON.stringify(row));
+            }
+        }
+
+        cycleAdd(closer, target)
+        {
+            console.log("Reference cycle detected between objects " + closer + " <-> " + target);
+
+            // register cycle in cycles matrix
+            this.cyclesMatrix.cellOperation(closer, target, v => v + 1);
+
+            // find participants of the cycle
+            const aRefs = [];
+            const bRefedBy = [];
+
+            for (let i = 0; i <= this.matrix.maxId; ++i)
+            {
+                if (this.matrix.valueAt(closer, i) > 0)
+                {
+                    aRefs.push(i);
+                }
+                if (this.matrix.valueAt(i, target) > 0)
+                {
+                    bRefedBy.push(i);
+                }
+            }
+
+            const participants = aRefs.filter(i => bRefedBy.includes(i));
+            participants.push(closer);
+            participants.push(target);
+
+            // build the cycle information object
+            const cycleInfo = {
+                closer: closer,
+                target: target,
+                participants: participants
+            };
+
+            // store the cycle information
+            if (! this.cyclesMap.has(target))
+            {
+                this.cyclesMap.set(target, []);
+            }
+            this.cyclesMap.get(target).push(cycleInfo);
+
+            participants.forEach(i =>
+            {
+                if (! this.participantsMap.has(i))
+                {
+                    this.participantsMap.set(i, []);
+                }
+                this.participantsMap.get(i).push(cycleInfo);
+            });
+        }
+
+        cycleRemove(closer, target)
+        {
+            console.log("Reference cycle removed between objects " + closer + " <-> " + target);
+
+            // unregister cycle in cycles matrix
+            this.cyclesMatrix.cellOperation(closer, target, v => Math.max(0, v - 1));
+
+            const cycleInfos = this.cyclesMap.get(target);
+            const idx = cycleInfos.findIndex(info => info.closer === closer);
+            const info = cycleInfos.splice(idx)[0];
+            if (cycleInfos.length === 0)
+            {
+                this.cyclesMap.delete(target);
+            }
+
+            info.participants.forEach(i =>
+            {
+                const infos = this.participantsMap.get(i);
+                const infoIdx = infos.findIndex(finfo => finfo === info);
+                infos.splice(infoIdx);
+                if (infos.length === 0)
+                {
+                    this.participantsMap.delete(i);
+                }
+            });
+        }
+
+        checkCycles(participant)
+        {
+            if (! this.participantsMap.has(participant))
+            {
+                return;
+            }
+
+            const cycles = this.participantsMap.get(participant);
+            cycles.forEach(info =>
+            {
+                if (this.matrix.valueAt(info.target, info.closer) > 0)
+                {
+                    return;
+                }
+
+                //console.log("no longer a cycle: " + info.closer + " -> " + info.target);
+                this.cycleRemove(info.closer, info.target);
+                this.refAdd(info.closer, info.target);
+            });
+        }
+
+        refAdd(objA, objB)
+        {
+            //console.log(objA.objectId + " " + objA.objectType + "@" + objA.objectLocation + " ref " + objB.objectId + " " + objB.objectType + "@" + objB.objectLocation);
+
+            // test if this would create a cycle
+            if (this.matrix.valueAt(objB, objA) > 0)
+            {
+                this.cycleAdd(objA, objB);
+                return;
+            }
+
+            // set direct reference
+            this.matrix.cellOperation(objA, objB, v => v + 1);
+            //this.addCell(objA.objectId, objB.objectId, 1);
+
+            // A gets all outgoing references of B
+            this.matrix.rowOperation(objA, objB, (a, b) => a + b);
+            
+            // all X referencing A n times get B (X,B += n) and all outgoing references of B (row X += n * B)
+            for (let i = 0; i <= this.matrix.maxId; ++i)
+            {
+                const n = this.matrix.valueAt(i, objA);
+                if (n > 0)
+                {
+                    this.matrix.cellOperation(i, objB, v => v + n);
+                    this.matrix.rowOperation(i, objB, (a, b) => a + n * b);
+                }
+            }
+        }
+
+        refRemove(objA, objB)
+        {
+            //console.log(objA.objectId + " " + objA.objectType + "@" + objA.objectLocation + " unref " + objB.objectId + " " + objB.objectType + "@" + objB.objectLocation);
+
+            // test if we're touching a cycle
+            if (this.cyclesMatrix.valueAt(objA, objB) > 0)
+            {
+                this.cycleRemove(objA, objB);
+                return;
+            }
+
+            // every X that references A n times (A column) loses B (X,B -= n) and all outgoing references of B (row X -= n * B)
+            for (let i = 0; i <= this.matrix.maxId; ++i)
+            {
+                const n = this.matrix.valueAt(i, objA);
+                if (n > 0)
+                {
+                    this.matrix.cellOperation(i, objB, v => Math.max(0, v - n));
+                    this.matrix.rowOperation(i, objB, (a, b) => a - n * b);
+                }
+            }
+
+            // A löses B (A,B -= 1) and all outgoing references of B (row A -= B)
+            this.matrix.cellOperation(objA, objB, v => Math.max(0, v - 1));
+            this.matrix.rowOperation(objA, objB, (a, b) => a - b);
+            
+            this.checkCycles(objB);
+        }
+
+        refsCount(obj)
+        {
+            let count = 0;
+            for (let y = 0; y <= this.matrix.maxId; ++y)
+            {
+                count += this.matrix.valueAt(y, obj);
+            }
+
+            // add cycle closers
+            if (this.cyclesMap.has(obj))
+            {
+                count += this.cyclesMap.get(obj).length;
+            }
+
+            return count;
+        }
+
+        refHolders(obj)
+        {
+            const holders = [];
+            for (let y = 0; y <= this.matrix.maxId; ++y)
+            {
+                if (this.matrix.valueAt(y, obj) !== 0)
+                {
+                    holders.push([y, this.matrix.valueAt(y, obj)]);
+                }
+            }
+
+            // add cycle closers
+            if (this.cyclesMap.has(obj))
+            {
+                this.cyclesMap.get(obj).forEach(info => holders.push([info.closer, 1]));
+            }
+
+            return holders;
+        }
+
+        cycles()
+        {
+            const objs = [];
+            this.cyclesMap.forEach(entry =>
+            {
+                entry.forEach(info =>
+                {
+                    info.participants.forEach(i => objs.push(i));
+                });
+            });
+
+            return objs;
+        }
+    }
+    const refsTracker = new RefsTracker();  
+
+    /**
      * Class representing named task queues.
+     * @private
      */
     class TaskQueues
     {
@@ -511,8 +822,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             super();
             d.set(this, {
                 lifeCycleStatus: "new",
-                referenceCount: 0,
-                referenceMap: { },
                 customProperties: [],
                 parent: null,
                 children: [],
@@ -655,6 +964,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             // not needed anymore
             d.get(this).typeCache = { };
             this.trigger("initialization");
+
+            //console.log(`Initialized: ${this.constructor.name}:${this.objectId} (${this.objectLocation}), ${objCounter} objects remaining`);
         }
 
         /**
@@ -679,7 +990,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         {
             if (d.get(this).lifeCycleStatus === "destroyed")
             {
-                console.error(`Attempted to destroy an already destroyed object: ${this.constructor.name} (${this.objectLocation})`);
+                console.error(`Attempted to destroy an already destroyed object: #${this.objectId} ${this.constructor.name} (${this.objectLocation})`);
                 return;
             }
 
@@ -736,7 +1047,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             --objCounter;
             allInstances.delete(this);
-            //console.log(`Destroyed: ${this.constructor.name} (${this.objectLocation}), ${objCounter} objects remaining`);
+            //console.log(`Destroyed: ${this.constructor.name}:${this.objectId} (${this.objectLocation}), ${objCounter} objects remaining`);
         }
 
         /**
@@ -858,20 +1169,15 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 return;
             }
 
-            ++d.get(this).referenceCount;
-            const whichName = which ? which.objectType + "@" + which.objectLocation
-                                    : "<global>";
-            d.get(this).referenceMap[whichName] = (d.get(this).referenceMap[whichName] || 0) + 1;
-
-            if (which === null)
-            {
-                return;
-            }
             /*
             console.log(this.constructor.name + "@" + this.objectLocation +
                         " is referenced by " + which.constructor.name + "@" + which.objectLocation +
                         " (" + d.get(this).referenceCount + " references)");
             */
+
+            refsTracker.refAdd(which.objectId, this.objectId);
+            //console.log(JSON.stringify(refsTracker.refHolders(this)));
+            //console.log(this.objectLocation + " refs+ " + refsTracker.refsCount(this) + " vs " + d.get(this).referenceCount);
 
             if (d.get(this).lifeCycleStatus === "new")
             {
@@ -892,19 +1198,12 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 }
             }
 
-            which.connect("destruction", this, () =>
+            which.connect("destruction", this, this.safeCallback(() =>
             {
                 //console.log("Remove reference on destruction of " + this.objectLocation + " -> " + (d.get(this).referenceCount - 1));
                 //console.log("referenceRemove on " + this.objectLocation + " by destruction of " + which.objectLocation);
-                if (this.parent === which)
-                {
-                    this.parent = null;
-                }
-                else
-                {
-                    this.referenceRemove(which);
-                }
-            });
+                this.referenceRemove(which);
+            }));
         }
 
         /**
@@ -921,14 +1220,9 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 return;
             }
 
-            --d.get(this).referenceCount;
-            const whichName = which ? which.objectType + "@" + which.objectLocation
-                                    : "<global>";
-            --d.get(this).referenceMap[whichName];
-            if (d.get(this).referenceMap[whichName] === 0)
-            {
-                delete d.get(this).referenceMap[whichName];
-            }
+            //console.log(this.objectLocation + " refs- before " + refsTracker.refsCount(this) + " vs " + d.get(this).referenceCount);
+            //console.log("b4: " + JSON.stringify(refsTracker.refHolders(this)));
+            refsTracker.refRemove(which.objectId, this.objectId);
 
             /*
             console.log(this.constructor.name + "@" + this.objectLocation +
@@ -938,9 +1232,14 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             which.disconnect("destruction", this);
 
-            if (d.get(this).referenceCount === 0)
+            //console.log(this.objectId + " " + this.objectLocation + " unref " + refsTracker.refsCount(this) + " vs " + d.get(this).referenceCount + " " + JSON.stringify(refsTracker.refHolders(this)));
+            //console.log(JSON.stringify(refsTracker.refHolders(this)));
+
+            //if (d.get(this).referenceCount === 0)
+            if (refsTracker.refsCount(this.objectId) === 0 && this.objectId > 0)
             {
                 //console.log("Destroy on referenceRemove on " + this.objectLocation + ":" + this.objectId);
+                //console.log("Refs -> 0 at " + this.objectId + " " + this.objectType + "@" + this.objectLocation);
                 this.destroy();
             }
         }
@@ -968,8 +1267,11 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             //console.log("Detach Child: " +
             //            child.objectType + "@" + child.objectLocation + " from " +
             //            this.objectType + "@" + this.objectLocation);
-            d.get(this).children = d.get(this).children.filter(c => c !== child);
-            this.childrenChanged();
+            if (d.get(this).lifeCycleStatus !== "destroyed")
+            {
+                d.get(this).children = d.get(this).children.filter(c => c !== child);
+                this.childrenChanged();
+            }
         }
 
         /**
@@ -1101,12 +1403,12 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 {
                     return;
                 }
-                if (prevV instanceof Obj && ! prevV.isAncestorOf(this)) // this.parent !== prevV)
+                if (prevV instanceof Obj && ! prevV.isAncestorOf(this))
                 {
                     //console.log("referenceRemove on " + prevV.objectLocation + " by set " + name + " on " + this.objectLocation);
                     prevV.referenceRemove(this);
                 }
-                if (v instanceof Obj && ! v.isAncestorOf(this)) //  this.parent !== v)
+                if (v instanceof Obj && ! v.isAncestorOf(this))
                 {
                     v.referenceAdd(this);
                 }
@@ -1673,8 +1975,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 location: obj.objectLocation,
                 lifeCycleStatus: obj.lifeCycleStatus,
                 domNode: obj.get ? obj.get() : null,
-                references: d.get(obj).referenceCount,
-                referenceHolders: d.get(obj).referenceMap,
+                references: refsTracker.refsCount(obj.objectId),
+                referenceHolders: refsTracker.refHolders(obj.objectId),
                 events: connHub.events(obj).map(item => [item[0], item[1].objectType + "@" + item[1].objectLocation]),
                 children: d.get(obj).children.map(dumpObject),
                 parent: d.get(obj).parent ? d.get(obj).parent.objectType + "@" + d.get(obj).parent.objectLocation : "",
@@ -1734,7 +2036,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             byLifeCycleStatus: statusMap,
             byReferences: refCountMap,
             focusedNode: document.activeElement,
-            namedCallbacks
+            namedCallbacks,
+            cycles: refsTracker.cycles().map(id => idMap[id])
         };
     }
     exports.dumpStatus = dumpStatus;

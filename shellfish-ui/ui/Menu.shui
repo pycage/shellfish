@@ -67,7 +67,12 @@ Overlay {
 
         if (parent)
         {
-            const parentBbox = parent.bbox;
+            const parentBbox = {
+                x: parent.bboxX,
+                y: parent.bboxY,
+                width: parent.bboxWidth,
+                height: parent.bboxHeight
+            };
             if (options.horizontal)
             {
                 menuBox.anchorX = parentBbox.x + parentBbox.width;

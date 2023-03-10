@@ -1104,8 +1104,8 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 const tp = d.get(this).touchPoints[n];
                 return {
                     id: tp.pointerId,
-                    x: tp.clientX - this.bbox.x,
-                    y: tp.clientY - this.bbox.y
+                    x: tp.clientX - this.bboxX,
+                    y: tp.clientY - this.bboxY
                 };
             }
             else

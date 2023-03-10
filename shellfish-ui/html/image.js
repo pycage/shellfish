@@ -68,6 +68,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 this.originalWidthChanged();
                 this.originalHeightChanged();
                 this.statusChanged();
+                this.updateSizeFrom(null, false);
             });
 
             d.get(this).item.onerror = this.safeCallback(() =>

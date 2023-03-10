@@ -172,7 +172,8 @@ shRequire(["shellfish/low",
                 rotationAngle: 0,
                 rotationQuaternion: [0, 0, 0, 0],
                 style: [],
-                scrolling: false
+                scrolling: false,
+                usingBboxXY: false
             });
             
             this.notifyable("ancestorsEnabled");
@@ -754,20 +755,67 @@ shRequire(["shellfish/low",
                 return priv.cachedBbox;
             }
 
-            const rect = this.get().getBoundingClientRect();
+            let bx = 0;
+            let by = 0;
+            let bw = 0;
+            let bh = 0;
+
+            let requireBoundingSize = false;
+
+            if (priv.width >= 0 && ! priv.fillWidth && priv.aspectRatio === 0)
+            {
+                bw = Math.max(priv.minWidth > 0 ? priv.minWidth : 0, Math.min(priv.maxWidth > 0 ? priv.maxWidth : priv.width, priv.width));
+            }
+            else
+            {
+                requireBoundingSize = true;
+            }
+
+            if (priv.height >= 0 && ! priv.fillHeight && priv.aspectRatio === 0)
+            {
+                bh = Math.max(priv.minHeight > 0 ? priv.minHeight : 0, Math.min(priv.maxHeight > 0 ? priv.maxHeight : priv.height, priv.height));
+            }
+            else
+            {
+                requireBoundingSize = true;
+            }
+
+            if (requireBoundingSize || priv.usingBboxXY)
+            {
+                const rect = this.get().getBoundingClientRect();
+                if (priv.usingBboxXY)
+                {
+                    bx = rect.left;
+                    by = rect.top;
+                }
+                if (requireBoundingSize)
+                {
+                    bw = rect.width;
+                    bh = rect.height;
+                }
+            }
+
             priv.cachedBbox = {
-                x: rect.left,
-                y: rect.top,
-                width: rect.width,
-                height: rect.height
+                x: bx,
+                y: by,
+                width: bw,
+                height: bh
             };
             //console.log("getBoundingClientRect() of " + this.objectId + "." + this.objectType + "@" + this.objectLocation + ": " + JSON.stringify(priv.cachedBbox));
             //console.log("get bbox of " + this.objectType + "@" + this.objectLocation + " " + JSON.stringify(priv.cachedBbox));
             return priv.cachedBbox;
         }
 
-        get bboxX() { return this.bbox.x; }
-        get bboxY() { return this.bbox.y; }
+        get bboxX()
+        {
+            d.get(this).usingBboxXY = true;
+            return this.bbox.x;
+        }
+        get bboxY()
+        {
+            d.get(this).usingBboxXY = true;
+            return this.bbox.y;
+        }
         get bboxWidth() { return this.bbox.width; }
         get bboxHeight() { return this.bbox.height; }
 
@@ -1224,7 +1272,7 @@ shRequire(["shellfish/low",
 
             priv.inSizeUpdate = true;
 
-            priv.cachedBbox = null
+            priv.cachedBbox = null;
 
             const bbox = this.bbox;
             const bboxHasChangedX = Math.abs(bbox.x - priv.prevBbox.x) > 0.1;
@@ -1296,7 +1344,7 @@ shRequire(["shellfish/low",
                 });
             }
 
-            priv.cachedBbox = null;
+            //priv.cachedBbox = null;
             priv.inSizeUpdate = false;
         }
 

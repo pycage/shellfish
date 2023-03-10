@@ -857,6 +857,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 priv.recycleBin.push(item);
                 item.x = -window.outerWidth;
                 item.y = 0;
+                item.visible = false;
             }
         }
 

@@ -321,17 +321,17 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.setValue(y, x, op(this.valueAt(y, x)));
         }
 
-        rowOperation(a, b, op)
+        rowOperation(a, b, rowsGenerator, op)
         {
-            for (let i = 0; i <= this.maxId; ++i)
+            for (const i of rowsGenerator)
             {
                 this.setValue(a, i, op(this.valueAt(a, i), this.valueAt(b, i)));
             }
         }
 
-        columnOperation(a, b, op)
+        columnOperation(a, b, columnsGenerator, op)
         {
-            for (let i = 0; i <= this.maxId; ++i)
+            for (const i of columnsGenerator)
             {
                 this.setValue(i, a, op(this.valueAt(i, a), this.valueAt(i, b)));
             }
@@ -351,6 +351,14 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.cyclesMatrix = new SparseMatrix(0);
             this.cyclesMap = new Map();
             this.participantsMap = new Map();
+
+            this.colsRowsGenerator = function* ()
+            {
+                for (const obj of allInstances)
+                {
+                    yield obj.objectId;
+                }
+            };
         }
 
         dump()
@@ -482,7 +490,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             //this.addCell(objA.objectId, objB.objectId, 1);
 
             // A gets all outgoing references of B
-            this.matrix.rowOperation(objA, objB, (a, b) => a + b);
+            this.matrix.rowOperation(objA, objB, this.colsRowsGenerator(), (a, b) => a + b);
             
             // all X referencing A n times get B (X,B += n) and all outgoing references of B (row X += n * B)
             for (let i = 0; i <= this.matrix.maxId; ++i)
@@ -491,7 +499,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 if (n > 0)
                 {
                     this.matrix.cellOperation(i, objB, v => v + n);
-                    this.matrix.rowOperation(i, objB, (a, b) => a + n * b);
+                    this.matrix.rowOperation(i, objB, this.colsRowsGenerator(), (a, b) => a + n * b);
                 }
             }
         }
@@ -514,13 +522,13 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 if (n > 0)
                 {
                     this.matrix.cellOperation(i, objB, v => Math.max(0, v - n));
-                    this.matrix.rowOperation(i, objB, (a, b) => a - n * b);
+                    this.matrix.rowOperation(i, objB, this.colsRowsGenerator(), (a, b) => a - n * b);
                 }
             }
 
             // A löses B (A,B -= 1) and all outgoing references of B (row A -= B)
             this.matrix.cellOperation(objA, objB, v => Math.max(0, v - 1));
-            this.matrix.rowOperation(objA, objB, (a, b) => a - b);
+            this.matrix.rowOperation(objA, objB, this.colsRowsGenerator(), (a, b) => a - b);
             
             this.checkCycles(objB);
         }

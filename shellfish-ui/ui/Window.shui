@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -40,6 +40,7 @@ require "shellfish/html";
  * @property {bool} resizable - (default: `true`) If `true`, the window may be resized by the user.
  * @property {bool} resizing - [readonly] `true` if the window is currently being resized by the user.
  * @property {bool} selected - [readonly] `true` if the window is the currently selected/focused one.
+ * @property {html.Box} thisContentArea - [readonly] A reference to this window's content area visible to sub-elements.
  * @property {ui.Window} thisWindow - [readonly] A reference to this window visible to sub-elements.
  */
 MouseBox {
@@ -58,6 +59,7 @@ MouseBox {
 
     property isWindow: true
     property thisWindow: self
+    property thisContentArea: contentArea
 
     function moveAndResize(dx, dy, dw, dh)
     {
@@ -106,8 +108,8 @@ MouseBox {
 
         const wx = x + dx;
         const wy = y + dy;
-        const ww = bbox.width + dw;
-        const wh = bbox.height + dh;
+        const ww = contentArea.bboxWidth + dw;
+        const wh = contentArea.bboxHeight + dh;
 
         if (wx !== x)
         {
@@ -119,11 +121,11 @@ MouseBox {
         }
         if (ww !== width)
         {
-            width = ww;
+            contentArea.width = ww;
         }
         if (wh !== height)
         {
-            height = wh;
+            contentArea.height = wh;
         }
     }
 
@@ -157,8 +159,6 @@ MouseBox {
     }
 
     position: "free"
-    width: 320
-    height: 200
     minWidth: 100
     minHeight: theme.itemHeightMedium
     fillWidth: maximized
@@ -230,9 +230,6 @@ MouseBox {
 
     MouseBox {
         id: contentArea
-
-        fillWidth: true
-        fillHeight: true
 
         onPointerDown: ev =>
         {

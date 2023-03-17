@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -34,6 +34,7 @@ require "shellfish/ui";
  * @extends ui.Overlay
  *
  * @property {string} title - (default: `""`) The title text.
+ * @property {html.Box} thisContentArea - [readonly] A reference to this window's content area visible to sub-elements.
  */
 Overlay {
     id: dialog
@@ -44,6 +45,8 @@ Overlay {
     property shortcutReceiver: self
 
     property title: ""
+
+    property thisContentArea: contentArea
 
     dim: true
 
@@ -88,14 +91,51 @@ Overlay {
         Box {
             id: contentArea
 
-            fillWidth: true
-            fillHeight: true
+            property outerWidth: thisWindow.thisContentArea.width
+            property outerHeight: thisWindow.thisContentArea.height
+
             marginTop: theme.paddingLarge
             marginLeft: theme.paddingLarge
             marginRight: theme.paddingLarge
             marginBottom: theme.paddingLarge
             color: theme.primaryBackgroundColor
             overflowBehavior: "scroll"
+
+            onOuterWidthChanged: () =>
+            {
+                const newWidth = outerWidth - (marginLeft + marginRight);
+                if (outerWidth !== newWidth)
+                {
+                    width = newWidth;
+                }
+            }
+
+            onOuterHeightChanged: () =>
+            {
+                const newHeight = outerHeight - (marginTop + marginBottom + buttonsArea.height);
+                if (outerHeight !== newHeight)
+                {
+                    height = newHeight;
+                }
+            }
+
+            onWidthChanged: () =>
+            {
+                const newOuterWidth = width + (marginLeft + marginRight);
+                if (outerWidth !== newOuterWidth)
+                {
+                    thisWindow.thisContentArea.width = newOuterWidth;
+                }
+            }
+
+            onHeightChanged: () =>
+            {
+                const newOuterHeight = height + (marginTop + marginBottom + buttonsArea.height);
+                if (outerHeight !== newOuterHeight)
+                {
+                    thisWindow.thisContentArea.height = newOuterHeight;
+                }
+            }
         }
 
         ScrollIndicator {
@@ -105,6 +145,8 @@ Overlay {
 
         // buttons
         Box {
+            id: buttonsArea
+
             origin: "bottom-left"
             fillWidth: true
             height: theme.itemHeightMedium + theme.paddingSmall
@@ -124,7 +166,6 @@ Overlay {
                 Box { fillWidth: true }
             }
         }
-
 
     }
 

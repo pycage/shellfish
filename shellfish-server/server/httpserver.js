@@ -74,7 +74,7 @@ shRequire(["shellfish/core"], core =>
 
             this.onInitialization = () =>
             {
-                this.listen();
+                this.wait(0).then(() => { this.listen(); });
             };
         }
 

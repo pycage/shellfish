@@ -358,7 +358,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             na.duration = 300;
             na.easing = "InOutQuad";
             na.onBegin = () => { this.css("touch-action", "none"); }
-            na.onFinish = () => { this.css("touch-action", "auto"); na.parent = null; }
+            na.onFinish = () => { this.css("touch-action", "auto"); }
 
             this.onScrollingChanged = () =>
             {

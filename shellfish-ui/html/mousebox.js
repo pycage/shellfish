@@ -416,7 +416,8 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             this.registerEvent("pointerMove", () =>
             {
                 // disable disturbing browser touch actions
-                this.css("touch-action", "none");
+                // FIXME: this is not the right way...
+                //this.css("touch-action", "none");
 
                 this.ensureListener(POINTER_EVENT ? "pointermove" : "mousemove", this.pointerMove, makePointerEvent);
                 if (! POINTER_EVENT)

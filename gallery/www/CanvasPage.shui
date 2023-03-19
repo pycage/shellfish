@@ -126,6 +126,11 @@ Page {
 
             property penRadius: page.tool === "quill" ? 10 : 3
 
+            onInitialization: () =>
+            {
+                css("touch-action", "none");
+            }
+
             onContextMenu: {
                 const ev = arguments[0];
                 ev.accepted = true;

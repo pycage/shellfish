@@ -357,8 +357,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             na.parent = this;
             na.duration = 300;
             na.easing = "InOutQuad";
-            na.onBegin = () => { this.css("touch-action", "none"); }
-            na.onFinish = () => { this.css("touch-action", "auto"); }
 
             this.onScrollingChanged = () =>
             {
@@ -447,7 +445,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         {
             d.get(this).overflowBehavior = b;
             this.css("overflow", b === "scroll" ? "auto" : "hidden");
-            this.css("touch-action", b === "scroll" ? "auto" : "none");
             this.overflowBehaviorChanged();
         }
 

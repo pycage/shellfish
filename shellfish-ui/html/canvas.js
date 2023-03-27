@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -46,8 +46,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                     low.tag("canvas")
                     .attr("width", "100")
                     .attr("height", "100")
-                    .style("touch-action", "none")
-                    .style("pointer-events", "none")
+                    //.style("pointer-events", "none")
                     .html()
                 )
             });

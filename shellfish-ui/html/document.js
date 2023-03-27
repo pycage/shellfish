@@ -502,6 +502,15 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 this.bboxHeightChanged();
             }
 
+            if (this.bboxWidth < this.contentWidth || this.bboxHeight < this.contentHeight)
+            {
+                low.css(document.body, "touch-action", "pan-x pan-y");
+            }
+            else
+            {
+                low.css(document.body, "touch-action", "none");
+            }
+
             // notify children, excluding from where the update came
             this.children.forEach((c) =>
             {

@@ -808,12 +808,20 @@ shRequire(["shellfish/low",
 
         get bboxX()
         {
-            d.get(this).usingBboxXY = true;
+            if (! d.get(this).usingBboxXY)
+            {
+                d.get(this).usingBboxXY = true;
+                d.get(this).cachedBbox = null;
+            }
             return this.bbox.x;
         }
         get bboxY()
         {
-            d.get(this).usingBboxXY = true;
+            if (! d.get(this).usingBboxXY)
+            {
+                d.get(this).usingBboxXY = true;
+                d.get(this).cachedBbox = null;
+            }
             return this.bbox.y;
         }
         get bboxWidth() { return this.bbox.width; }

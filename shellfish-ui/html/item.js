@@ -173,7 +173,7 @@ shRequire(["shellfish/low",
                 rotationQuaternion: [0, 0, 0, 0],
                 style: [],
                 scrolling: false,
-                usingBboxXY: false
+                usingBboxXY: true  // FIXME: currently must be true initially
             });
             
             this.notifyable("ancestorsEnabled");

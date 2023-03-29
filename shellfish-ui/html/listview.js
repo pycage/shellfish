@@ -340,8 +340,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             };
             this.onBboxChanged = () =>
             {
-                const b = this.bbox;
-                if (d.get(this).bboxWidth !== b.width || d.get(this).bboxHeight !== b.height)
+                if (d.get(this).bboxWidth !== this.bboxWidth || d.get(this).bboxHeight !== this.bboxHeight)
                 {
                     //console.log("bbox changed: " + this.objectLocation + ", " + b.width + " x " + b.height);
                     d.get(this).bboxWidth = b.width;
@@ -669,7 +668,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 return;
             }
 
-            const bbox = this.bbox;
+            const bbox = { width: this.bboxWidth, height: this.bboxHeight };
             const cellWidth = priv.cellWidth;
             const cellHeight = priv.cellHeight;
             const modelSize = priv.model.size;
@@ -923,7 +922,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
             this.defer(() =>
             {
-                this.doRender();
+                //this.doRender();
+                this.withoutSizing(() =>
+                {
+                    this.doRender();
+                });
             }, "render");
         }
 
@@ -933,7 +936,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
             const priv = d.get(this);
             const model = priv.model;
-            const bbox = this.bbox;
+            const bbox = { width: this.bboxWidth, height: this.bboxHeight };
             const delegate = priv.delegate;
             const cellWidth = priv.cellWidth;
             const cellHeight = priv.cellHeight;
@@ -1026,7 +1029,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             }
 
             const now = Date.now();
-            const bbox = this.bbox;
             const priv = d.get(this);
 
             const boxNode = priv.item.children[0];
@@ -1096,11 +1098,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 let distExceeded = false;
                 if (priv.orientation === "vertical")
                 {
-                    distExceeded = dist > bbox.height / 2;
+                    distExceeded = dist > this.bboxHeight / 2;
                 }
                 else
                 {
-                    distExceeded = dist > bbox.width / 2;
+                    distExceeded = dist > this.bboxWidth / 2;
                 }
 
                 if (/*distExceeded &&*/
@@ -1114,7 +1116,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     this.wait(1000 / 60)
                     .then(this.namedCallback(() =>
                     {
-                        this.renderItems(remainingItems);
+                        //this.renderItems(remainingItems);
+                        this.withoutSizing(() =>
+                        {
+                            this.renderItems(remainingItems);
+                        });
                     }, "renderMore"));
                     
                     break;
@@ -1144,7 +1150,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             
             if (priv.orientation === "vertical")
             {
-                const viewSize = this.bbox.height;
+                const viewSize = this.bboxHeight;
                 if (pos[1] + priv.cellHeight > this.contentY + viewSize)
                 {
                     this.contentY = Math.max(0, pos[1] + priv.cellHeight - viewSize);
@@ -1156,7 +1162,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             }
             else
             {
-                const viewSize = this.bbox.width;
+                const viewSize = this.bboxWidth;
                 if (pos[0] + priv.cellWidth > this.contentX + viewSize)
                 {
                     this.contentX = Math.max(0, pos[0] + priv.cellWidth - viewSize);

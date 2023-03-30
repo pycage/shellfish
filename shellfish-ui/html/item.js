@@ -133,7 +133,6 @@ shRequire(["shellfish/low",
             d.set(this, {
                 inSizeUpdate: false,
                 inContentSizeUpdate: false,
-                mayUpdateSize: false,
                 prevBbox: { x: 0, y: 0, width: 0, height: 0 },
                 cachedBbox: null,
                 prevContentSize: { width: 0, height: 0 },
@@ -173,7 +172,7 @@ shRequire(["shellfish/low",
                 rotationQuaternion: [0, 0, 0, 0],
                 style: [],
                 scrolling: false,
-                usingBboxXY: true  // FIXME: currently must be true initially
+                visibility: false
             });
             
             this.notifyable("ancestorsEnabled");
@@ -392,7 +391,7 @@ shRequire(["shellfish/low",
                 }, { passive: true });
 
                 // setup initial size
-                this.updateSizeAccumulated();
+                this.updateVisibility();
             };
 
             this.onAncestorsEnabledChanged = () =>
@@ -418,38 +417,8 @@ shRequire(["shellfish/low",
                     }
                 });
 
-                if (! this.ancestorsVisible)
-                {
-                    // FIXME: causes problems (e.g. when changing themes)
-                    //priv.mayUpdateSize = false;
-                    if (priv.hasFocus)
-                    {
-                        priv.hasFocus = false;
-                        this.focusChanged();
-                    }
-
-                    if (! priv.cssCache)
-                    {
-                        priv.cssCache = { };
-                    }
-                }
-                else
-                {
-                    if (priv.cssCache)
-                    {
-                        const item = this.get();
-                        for (let key in priv.cssCache)
-                        {
-                            low.css(item, key, priv.cssCache[key]);
-                        }
-                        priv.cssCache = null;
-                    }
-
-                    priv.mayUpdateSize = true;
-                    this.updatePosition();
-                }
-
                 this.updateFocusTrap();
+                this.updateVisibility();
             };
 
             this.onEnabledChanged = () =>
@@ -462,27 +431,13 @@ shRequire(["shellfish/low",
             {
                 this.updateTabIndex();
                 this.updateFocusTrap();
-                if (this.ancestorsVisible && this.visible)
-                {
-                    if (priv.cssCache)
-                    {
-                        const item = this.get();
-                        for (let key in priv.cssCache)
-                        {
-                            low.css(item, key, priv.cssCache[key]);
-                        }
-                        priv.cssCache = null;
-                    }
-
-                    this.updatePosition();
-                }
+                this.updateVisibility();
             };
 
             this.onParentChanged = () =>
             {
                 this.ancestorsVisibleChanged();
                 this.ancestorsEnabledChanged();
-                this.updatePosition();
             };
         }
 
@@ -524,7 +479,7 @@ shRequire(["shellfish/low",
                 this.get().classList.add("sh-hidden");
             }
             
-            this.updateSizeAccumulated();
+            //this.updateSizeAccumulated();
             this.visibleChanged();
             
             this.children.forEach(child =>
@@ -566,14 +521,22 @@ shRequire(["shellfish/low",
          */
         updatePosition()
         {
-            if (! d.get(this).mayUpdateSize)
+            if (this.lifeCycleStatus !== "initialized" ||
+                this.x <= -window.outerWidth)
             {
                 return;
             }
 
             const priv = d.get(this);
 
-            const item = this.get();
+            this.updateSizeAccumulated();
+
+            if (! priv.visibility)
+            {
+                // done here
+                return;
+            }
+
             const position = priv.position;
             const origin = priv.origin;
             const fillWidth = priv.fillWidth;
@@ -730,17 +693,13 @@ shRequire(["shellfish/low",
                 this.css("left", "");
                 this.css("right", "");
             }
-
-            this.updateSizeAccumulated();
-            //console.log("will run updateSizeFrom on " + this.objectId);
-            //this.nextFrame(() => { this.updateSizeFrom(null, false, true); });
         }
 
         get bbox()
         {
             const priv = d.get(this);
 
-            if (this.lifeCycleStatus !== "initialized" || ! priv.mayUpdateSize || ! priv.visible)
+            if (this.lifeCycleStatus !== "initialized" || ! priv.visible)
             {
                 return {
                     x: 0,
@@ -748,84 +707,95 @@ shRequire(["shellfish/low",
                     width: 0,
                     height: 0
                 };
-            };
-
-            if (priv.cachedBbox)
+            }
+            else if (priv.cachedBbox)
             {
                 return priv.cachedBbox;
             }
-
-            let bx = 0;
-            let by = 0;
-            let bw = 0;
-            let bh = 0;
-
-            let requireBoundingSize = false;
-
-            if (priv.width >= 0 && ! priv.fillWidth && priv.aspectRatio === 0)
-            {
-                bw = Math.max(priv.minWidth > 0 ? priv.minWidth : 0, Math.min(priv.maxWidth > 0 ? priv.maxWidth : priv.width, priv.width));
-            }
             else
             {
-                requireBoundingSize = true;
-            }
-
-            if (priv.height >= 0 && ! priv.fillHeight && priv.aspectRatio === 0)
-            {
-                bh = Math.max(priv.minHeight > 0 ? priv.minHeight : 0, Math.min(priv.maxHeight > 0 ? priv.maxHeight : priv.height, priv.height));
-            }
-            else
-            {
-                requireBoundingSize = true;
-            }
-
-            if (requireBoundingSize || priv.usingBboxXY)
-            {
+                //console.log("getBoundingClientRect " + this.objectType + "@" + this.objectLocation);
                 const rect = this.get().getBoundingClientRect();
-                if (priv.usingBboxXY)
-                {
-                    bx = rect.left;
-                    by = rect.top;
-                }
-                if (requireBoundingSize)
-                {
-                    bw = rect.width;
-                    bh = rect.height;
-                }
-            }
+                priv.cachedBbox = {
+                    x: rect.left,
+                    y: rect.top,
+                    width: rect.width,
+                    height: rect.height
+                };
 
-            priv.cachedBbox = {
-                x: bx,
-                y: by,
-                width: bw,
-                height: bh
-            };
-            //console.log("getBoundingClientRect() of " + this.objectId + "." + this.objectType + "@" + this.objectLocation + ": " + JSON.stringify(priv.cachedBbox));
-            //console.log("get bbox of " + this.objectType + "@" + this.objectLocation + " " + JSON.stringify(priv.cachedBbox));
-            return priv.cachedBbox;
+                this.defer(() =>
+                {
+                    priv.cachedBbox = null;
+                }, "invalidateBbox");
+
+                return priv.cachedBbox;
+            }
         }
 
         get bboxX()
         {
-            if (! d.get(this).usingBboxXY)
+            const priv = d.get(this);
+
+            if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
             {
-                d.get(this).usingBboxXY = true;
-                d.get(this).cachedBbox = null;
+                return 0;
             }
-            return this.bbox.x;
+            else
+            {
+                return this.bbox.x;
+            }
         }
         get bboxY()
         {
-            if (! d.get(this).usingBboxXY)
+            const priv = d.get(this);
+
+            if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
             {
-                d.get(this).usingBboxXY = true;
-                d.get(this).cachedBbox = null;
+                return 0;
             }
-            return this.bbox.y;
+            else
+            {
+                return this.bbox.y;
+            }
         }
-        get bboxWidth() { return this.bbox.width; }
-        get bboxHeight() { return this.bbox.height; }
+        get bboxWidth()
+        {
+            const priv = d.get(this);
+
+            if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
+            {
+                return 0;
+            }
+            else if (priv.width >= 0 && ! priv.fillWidth && priv.aspectRatio === 0)
+            {
+                return Math.max(priv.minWidth > 0 ? priv.minWidth : 0,
+                                Math.min(priv.maxWidth > 0 ? priv.maxWidth : priv.width,
+                                         priv.width));
+            }
+            else
+            {
+                return this.bbox.width;
+            }
+        }
+        get bboxHeight()
+        {
+            const priv = d.get(this);
+
+            if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
+            {
+                return 0;
+            }
+            else if (priv.height >= 0 && ! priv.fillHeight && priv.aspectRatio === 0)
+            {
+                return Math.max(priv.minHeight > 0 ? priv.minHeight : 0,
+                                Math.min(priv.maxHeight > 0 ? priv.maxHeight : priv.height,
+                                         priv.height));
+            }
+            else
+            {
+                return this.bbox.height;
+            }
+        }
 
         get fillWidth() { return d.get(this).fillWidth; }
         set fillWidth(value)
@@ -1253,6 +1223,47 @@ shRequire(["shellfish/low",
             }
         }
 
+        updateVisibility()
+        {
+            const priv = d.get(this);
+            const visibility = this.lifeCycleStatus === "initialized" && this.visible && this.ancestorsVisible;
+            if (visibility !== priv.visibility)
+            {
+                //console.log("Visibility Changed: " + this.objectType + "@" + this.objectLocation + " = " + visibility);
+                priv.visibility = visibility;
+
+                if (visibility)
+                {
+                    // flush and disable CSS cache
+                    if (priv.cssCache)
+                    {
+                        const item = this.get();
+                        for (let key in priv.cssCache)
+                        {
+                            low.css(item, key, priv.cssCache[key]);
+                        }
+                        priv.cssCache = null;
+                    }
+                }
+                else
+                {
+                    if (priv.hasFocus)
+                    {
+                        priv.hasFocus = false;
+                        this.focusChanged();
+                    }
+                    
+                    // enable CSS cache
+                    if (! priv.cssCache)
+                    {
+                        priv.cssCache = { };
+                    }
+                }
+
+                this.updatePosition();
+            }
+        }
+
         updateSizeAccumulated()
         {
             this.defer(() =>
@@ -1266,8 +1277,8 @@ shRequire(["shellfish/low",
             const priv = d.get(this);
 
             if (this.lifeCycleStatus !== "initialized" ||
+                this.x <= -window.outerWidth ||
                 sizingCalculationsFrozen ||
-                ! priv.mayUpdateSize ||
                 priv.inSizeUpdate)
             {
                 return;
@@ -1344,7 +1355,7 @@ shRequire(["shellfish/low",
             }
 
             // wait until the browser has the content size updated before checking
-            if (! priv.inContentSizeUpdate)
+            if (priv.visibility && ! priv.inContentSizeUpdate)
             {
                 this.nextFrame(() =>
                 {                
@@ -1352,7 +1363,6 @@ shRequire(["shellfish/low",
                 });
             }
 
-            //priv.cachedBbox = null;
             priv.inSizeUpdate = false;
         }
 

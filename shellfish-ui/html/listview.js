@@ -343,8 +343,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 if (d.get(this).bboxWidth !== this.bboxWidth || d.get(this).bboxHeight !== this.bboxHeight)
                 {
                     //console.log("bbox changed: " + this.objectLocation + ", " + b.width + " x " + b.height);
-                    d.get(this).bboxWidth = b.width;
-                    d.get(this).bboxHeight = b.height;
+                    d.get(this).bboxWidth = this.bboxWidth;
+                    d.get(this).bboxHeight = this.bboxHeight;
 
                     updateLayoutAccumulated(true);
                 }

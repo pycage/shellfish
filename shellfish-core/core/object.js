@@ -869,6 +869,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
              */
             this.registerEvent("termination");
 
+            this.registerEvent("__fakeEvent");
+
             ++objCounter;
             allInstances.add(this);
             //console.log("objCounter: " + objCounter + " +" + this.constructor.name);
@@ -1847,6 +1849,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                     {
                         resolve();
                     }));
+                    this.__fakeEvent();
                 }
                 else
                 {

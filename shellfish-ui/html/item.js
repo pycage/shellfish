@@ -172,7 +172,8 @@ shRequire(["shellfish/low",
                 rotationQuaternion: [0, 0, 0, 0],
                 style: [],
                 scrolling: false,
-                visibility: false
+                visibility: false,
+                usingBboxXY: false
             });
             
             this.notifyable("ancestorsEnabled");
@@ -521,8 +522,7 @@ shRequire(["shellfish/low",
          */
         updatePosition()
         {
-            if (this.lifeCycleStatus !== "initialized" ||
-                this.x <= -window.outerWidth)
+            if (this.lifeCycleStatus !== "initialized")
             {
                 return;
             }
@@ -714,7 +714,7 @@ shRequire(["shellfish/low",
             }
             else
             {
-                //console.log("getBoundingClientRect " + this.objectType + "@" + this.objectLocation);
+                //console.log("getBoundingClientRect " + this.objectId + " " + this.objectType + "@" + this.objectLocation);
                 const rect = this.get().getBoundingClientRect();
                 priv.cachedBbox = {
                     x: rect.left,
@@ -723,11 +723,6 @@ shRequire(["shellfish/low",
                     height: rect.height
                 };
 
-                this.defer(() =>
-                {
-                    priv.cachedBbox = null;
-                }, "invalidateBbox");
-
                 return priv.cachedBbox;
             }
         }
@@ -735,26 +730,30 @@ shRequire(["shellfish/low",
         get bboxX()
         {
             const priv = d.get(this);
-
+            priv.usingBboxXY = true;
+            //console.log("Using BBox X " + this.objectType + "@" + this.objectLocation);
             if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
             {
                 return 0;
             }
             else
             {
+                priv.cachedBbox = null;
                 return this.bbox.x;
             }
         }
         get bboxY()
         {
             const priv = d.get(this);
-
+            priv.usingBboxXY = true;
+            //console.log("Using BBox Y " + this.objectType + "@" + this.objectLocation);
             if (this.lifeCycleStatus !== "initialized" || ! priv.visibility)
             {
                 return 0;
             }
             else
             {
+                priv.cachedBbox = null;
                 return this.bbox.y;
             }
         }
@@ -1277,7 +1276,6 @@ shRequire(["shellfish/low",
             const priv = d.get(this);
 
             if (this.lifeCycleStatus !== "initialized" ||
-                this.x <= -window.outerWidth ||
                 sizingCalculationsFrozen ||
                 priv.inSizeUpdate)
             {
@@ -1293,7 +1291,12 @@ shRequire(["shellfish/low",
 
             priv.cachedBbox = null;
 
-            const bbox = this.bbox;
+            const bbox = {
+                x: priv.usingBboxXY ? this.bboxX : 0,
+                y: priv.usingBboxXY ? this.bboxY : 0,
+                width: this.bboxWidth,
+                height: this.bboxHeight
+            };
             const bboxHasChangedX = Math.abs(bbox.x - priv.prevBbox.x) > 0.1;
             const bboxHasChangedY = Math.abs(bbox.y - priv.prevBbox.y) > 0.1;
             const bboxHasChangedWidth = Math.abs(bbox.width - priv.prevBbox.width) > 0.1;

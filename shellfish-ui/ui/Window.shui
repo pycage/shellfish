@@ -81,21 +81,21 @@ MouseBox {
             dy = -y;
             dh = -dy;
         }
-        if (dx > 0 && dw === 0 && x + width + dx > parent.bbox.width)
+        if (dx > 0 && dw === 0 && x + width + dx > parent.bboxWidth)
         {
-            dx = parent.bbox.width - (x + width);
+            dx = parent.bboxWidth - (x + width);
         }
-        if (dx === 0 && dw > 0 && x + width + dw > parent.bbox.width)
+        if (dx === 0 && dw > 0 && x + width + dw > parent.bboxWidth)
         {
-            dw = parent.bbox.width - (x + width);
+            dw = parent.bboxWidth - (x + width);
         }
-        if (dy > 0 && dh === 0 && y + height + dy > parent.bbox.height)
+        if (dy > 0 && dh === 0 && y + height + dy > parent.bboxHeight)
         {
-            dy = parent.bbox.height - (y + height);
+            dy = parent.bboxHeight - (y + height);
         }
-        if (dy === 0 && dh > 0 && y + height + dh > parent.bbox.height)
+        if (dy === 0 && dh > 0 && y + height + dh > parent.bboxHeight)
         {
-            dh = parent.bbox.height - (y + height);
+            dh = parent.bboxHeight - (y + height);
         }
         if (bbox.width + dw < minWidth)
         {
@@ -197,7 +197,7 @@ MouseBox {
 
     onDoubleClick: (ev) =>
     {
-        if (resizable && ev.y < titleArea.bbox.height)
+        if (resizable && ev.y < titleArea.bboxHeight)
         {
             maximized = ! maximized;
             ev.accepted = true;

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -47,8 +47,8 @@ MouseBox {
                                                         : theme.paddingMedium
 
     position: "global"
-    x: parent.bboxX + (orientation === "vertical" ? parent.bboxWidth - width : 0)
-    y: parent.bboxY + (orientation === "horizontal" ? parent.bboxHeight - height : 0)
+    x: visible ? parent.bboxX + (orientation === "vertical" ? parent.bboxWidth - width : 0) : 0
+    y: visible ? parent.bboxY + (orientation === "horizontal" ? parent.bboxHeight - height : 0) : 0
 
     visible: handle.sizePercents < 0.99
 

@@ -658,6 +658,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             p._sh_annotation = el.objectType + "@" + el.objectLocation + "." + prop;
             p.setter = (v) => this.setProperty(prop, v);
             p.getter = () => this.getProperty(prop);
+            p.maybeUndefined = () => false;
             
             // every newly bound property except for "profiles" starts as dormant
             if (prop !== "profiles")
@@ -873,6 +874,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 return this.storedValue;
             };
+            this.maybeUndefined = () => true;
             
             ++dvCounter;
             //if (dvCounter % 1000 === 0) console.log("DV #" + dvCounter + ", watched: " + watchCount);
@@ -1086,7 +1088,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
         b.getter = () =>
         {
             // as long as not all dependencies have been resolved, the binding is undefined
-            if (deps.filter(d => d.val === undefined && ! d._sh_really_undefined).length !== 0)
+            if (deps.filter(d => d.maybeUndefined() && d.val === undefined && ! d._sh_really_undefined).length !== 0)
             {
                 return undefined;
             }
@@ -1100,6 +1102,17 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 console.error(`[${core.dbgctx}] Could not evaluate binding: ${b._sh_annotation}\n${deps.map(d => "- " + d._sh_annotation + " = " + d.val).join("\n")}\n${err}`);
                 return undefined;
             }
+        };
+        b.maybeUndefined = () =>
+        {
+            for (let i = 0; i < deps.length; ++i)
+            {
+                if (deps[i].maybeUndefined())
+                {
+                    return true;
+                }
+            }
+            return false;
         };
         b.unwatched(() =>
         {
@@ -1262,6 +1275,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 if (obj instanceof DynamicValue)
                 {
                     b.getter = () => { return obj.val; }
+                    b.maybeUndefined = () => obj.maybeUndefined();
                 }
                 else
                 {

@@ -413,11 +413,47 @@ shRequire(["shellfish/core"], function (core)
             });
         }
     
-        write(path, blob)
+        write(path, blob, progressCallback)
         {
             const priv = d.get(this);
-            const doFetch = priv.fetchManager ? (...args) => priv.fetchManager.fetch(...args)
-                                              : fetch;
+
+            function uploadWithProgress(url, blob, progressCallback)
+            {
+                // create a monitoring XHR
+                const xhr = new XMLHttpRequest();
+
+                const promise = new Promise((resolve, reject) =>
+                {
+                    xhr.upload.addEventListener("progress", status =>
+                    {
+                        if (status.lengthComputable && status.total > 0)
+                        {
+                            const p = status.loaded / status.total;
+                            progressCallback(p);
+                        }
+                    });
+                    xhr.addEventListener("loadend", () =>
+                    {
+                        progressCallback(1.0);
+                        resolve(xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300);
+                    });
+                    xhr.addEventListener("abort", () =>
+                    {
+                        resolve(false);
+                    });
+                    xhr.addEventListener("error", () =>
+                    {
+                        resolve(false);
+                    });
+                });
+
+                xhr.open("PUT", url, true);
+                xhr.setRequestHeader("Content-Type", "application/octet-stream");
+                progressCallback(0.0);
+                xhr.send(blob);
+
+                return promise;
+            }
 
             return new Promise(async (resolve, reject) =>
             {
@@ -427,13 +463,18 @@ shRequire(["shellfish/core"], function (core)
                     reject(null);
                     return;
                 }
-        
+
+                if (! progressCallback)
+                {
+                    progressCallback = (p) => { };
+                }
+
                 path = this.normalizePath(path);
                 const url = priv.root + path;
 
                 console.log("PUT " + url);
-                const response = await doFetch(url, { method: "PUT", body: blob });
-                if (response.ok)
+                const ok = await uploadWithProgress(url, blob, progressCallback);
+                if (ok)
                 {
                     priv.cache.delete(this.dirname(path));
                     resolve();

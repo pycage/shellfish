@@ -276,9 +276,10 @@ shRequire([__dirname + "/object.js"], obj =>
          * Blob.
          * 
          * @param {string} path - The path of the file to read.
+         * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
          * @returns {Promise} - The Promise object with the file's contents as Blob.
          */
-        read(path)
+        read(path, progressCallback)
         {
             throw "Not implemented";
         }
@@ -288,9 +289,10 @@ shRequire([__dirname + "/object.js"], obj =>
          * 
          * @param {string} path - The path of the file to write.
          * @param {Blob} blob - The Blob of data to write.
+         * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
          * @returns {Promise} The Promise object.
          */
-        write(path, blob)
+        write(path, blob, progressCallback)
         {
             throw "Not implemented";
         }

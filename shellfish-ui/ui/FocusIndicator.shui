@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -42,8 +42,8 @@ Box {
     id: indicator
 
     position: "global"
-    x: parent.bboxX
-    y: parent.bboxY
+    x: visible && borderWidth > 0 ? parent.bboxX : 0
+    y: visible && borderWidth > 0 ? parent.bboxY : 0
     width: parent.bboxWidth
     height: parent.bboxHeight
     enabled: false

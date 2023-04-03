@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -136,7 +136,7 @@ shRequire([__dirname + "/object.js"], obj =>
                 const filename = this.filename(path);
 
                 const files = await this.list(dir);
-                return files.indexof(filename) !== -1;
+                return files.findIndex(item => item.name === filename) !== -1;
             };
             return f();
         }

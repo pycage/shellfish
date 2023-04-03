@@ -857,11 +857,25 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             }
         }
 
+        /**
+         * Returns the item with the given index number. This method may return
+         * `null` if the item is not materialized while not in view.
+         * 
+         * @param {number} idx - The index number.
+         * @returns {core.Object} The item with the index number or `null`.
+         */
         getItem(idx)
         {
-            return d.get(this).itemMeta.at(idx);
+            return d.get(this).itemMeta.at(idx) || null;
         }
 
+        /**
+         * Returns the index number of the item at the given content position.
+         * 
+         * @param {number} x - The X coordinate.
+         * @param {number} y - The Y coordinate.
+         * @returns {number} The index number at that coordinate.
+         */
         indexAt(x, y)
         {
             const priv = d.get(this);
@@ -884,6 +898,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             return idx;
         }
 
+        /**
+         * Returns the content coordinates of the item with the given index number.
+         * 
+         * @param {number} idx - The item's index number.
+         * @returns {number[]} A tuple of the X and Y coordinates.
+         */
         positionOf(idx)
         {
             const priv = d.get(this);

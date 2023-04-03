@@ -129,6 +129,16 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### April 2023
+* The method {@link html.DavFS.write} now takes an optional progress callback
+  function for monitoring the upload progress.
+
+### March 2023
+* Performance optimizations.
+* Reference cycles are detected automatically at run-time and are logged to
+  the debug console. Make sure to keep an eye on your cycles and resolve them
+  properly in order to avoid memory leaks.
+
 ### February 2023
 * The element {@link html.Video} can now load subtitles in VTT format with
   the properties `subtitles` and `cues`.

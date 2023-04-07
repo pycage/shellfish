@@ -846,7 +846,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         {
             //console.log("destroy item " + idx);
             const priv = d.get(this);
-            const item = this.getItem(idx);
+            const item = priv.itemMeta.at(idx);
             if (item)
             {
                 priv.itemMeta.removeAt(idx);
@@ -943,9 +943,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             this.defer(() =>
             {
                 //this.doRender();
-                this.withoutSizing(() =>
+                this.wait(1).then(() =>
                 {
-                    this.doRender();
+                    this.withoutSizing(() =>
+                    {
+                        this.doRender();
+                    });
                 });
             }, "render");
         }
@@ -1055,6 +1058,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
             //console.log("render " + items.length + " items " + JSON.stringify(bbox));
             //console.log("itemsPerRow: " + priv.itemsPerRow);
+
+            const newItems = [];
+
             for (let n = 0; n < items.length; ++n)
             {
 
@@ -1087,7 +1093,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 if (isNew && ! item.parent)
                 {
                     boxNode.appendChild(item.get());
-                    item.parent = this;
+                    newItems.push(item);
+                    //item.parent = this;
                 }
 
                 if (item.x !== itemPos[0])
@@ -1115,23 +1122,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 const estimatedRemainingDuration = (items.length - (n + 1)) * avgDuration;
                 //console.log("avg per item: " + avgDuration.toFixed(2) + " ms, estimated remaining: " + estimatedRemainingDuration.toFixed(2) + " ms");
 
-                let distExceeded = false;
-                if (priv.orientation === "vertical")
-                {
-                    distExceeded = dist > this.bboxHeight / 2;
-                }
-                else
-                {
-                    distExceeded = dist > this.bboxWidth / 2;
-                }
-
-                if (/*distExceeded &&*/
-                    estimatedRemainingDuration > 500 &&
-                    Date.now() - now > 1000 / 30 && 
+                if (estimatedRemainingDuration > 250 &&
+                    Date.now() - now > 250 &&
                     n < items.length - 1)
                 {
                     const remainingItems = items.slice(n + 1);
-                    //console.log("render later, remaining: " + remainingItems.length);
+                    console.log("render later, remaining: " + remainingItems.length + " est. remaining duration: " + estimatedRemainingDuration);
 
                     this.wait(1000 / 60)
                     .then(this.namedCallback(() =>
@@ -1155,6 +1151,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     // update content size after placing all items
                     this.updateContentSize();
                 }
+            }
+
+            for (let i = 0; i < newItems.length; ++i)
+            {
+                newItems[i].parent = this;
             }
         }
 

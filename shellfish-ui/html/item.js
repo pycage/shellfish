@@ -259,137 +259,140 @@ shRequire(["shellfish/low",
                 item.dataset.shObjectType = this.objectType;
                 item.dataset.shObjectLocation = this.objectLocation;
 
-                this.addHtmlEventListener(item, "keydown", (ev) =>
+                this.nextFrame(() =>
                 {
-                    const e = makeKeyEvent(ev);
-                    this.keyDown(e);
-                    if (e.accepted)
+                    this.addHtmlEventListener(item, "keydown", (ev) =>
                     {
-                        ev.stopPropagation();
-                        ev.preventDefault();
-                    }
-                });
-
-                this.addHtmlEventListener(item, "keyup", (ev) =>
-                {
-                    const e = makeKeyEvent(ev);
-                    this.keyUp(e);
-                    if (e.accepted)
-                    {
-                        ev.stopPropagation();
-                        ev.preventDefault();
-                    }
-                });
-
-                this.addHtmlEventListener(item, "focus", (ev) =>
-                {
-                    if (priv.hasFocus)
-                    {
-                        // nothing to do
-                        return;
-                    }
-
-                    if (! this.canFocus)
-                    {
-                        //console.log("cannot receive focus: " + this.objectType + "@" + this.objectLocation);
-
-                        ev.preventDefault();
-
-                        let p = this.parent;
-                        let handled = false;
-                        while (p)
+                        const e = makeKeyEvent(ev);
+                        this.keyDown(e);
+                        if (e.accepted)
                         {
-                            if (p.canFocus)
-                            {
-                                console.log("Ancestor " + p.objectType + "@" + p.objectLocation + " took the focus");
-                                p.get().focus({ preventScroll: true });
-                                handled = true;
-                                break;
-                            }
-                            p = p.parent;
+                            ev.stopPropagation();
+                            ev.preventDefault();
                         }
-
-                        if (handled)
-                        {
-                            // an ancestor took the focus
-                        }
-                        else if (ev.relatedTarget)
-                        {
-                            ev.relatedTarget.focus({ preventScroll: true });
-                        }
-                        else
-                        {
-                            item.blur();
-                        }
-                    }
-                    else if (! priv.hasFocus)
-                    {
-                        //console.log("received focus: " + this.objectType + "@" + this.objectLocation);
-                        this.get().dataset.shFocusTime = ev.timeStamp;
-                        priv.hasFocus = true;
-                        this.focusChanged();
-                    }
-                });
-
-                this.addHtmlEventListener(item, "blur", () =>
-                {
-                    if (document.activeElement === this.get())
-                    {
-                        // not really lost focus
-                        return;
-                    }
-
-                    if (priv.hasFocus)
-                    {
-                        //console.log("lost focus: " + this.objectLocation + ", to: " + document.activeElement);
-                        priv.hasFocus = false;
-                        this.focusChanged();
-                    }
-                });
-
-                let scrollingStatusHandle = null;
-                const updateScrollingStatus = () =>
-                {
-                    if (scrollingStatusHandle)
-                    {
-                        clearTimeout(scrollingStatusHandle);
-                    }
-                    else if (! priv.scrolling)
-                    {
-                        priv.scrolling = true;
-                        this.scrollingChanged();
-                    }
-                    scrollingStatusHandle = setTimeout(this.safeCallback(() =>
-                    {
-                        scrollingStatusHandle = null;
-                        priv.scrolling = false;
-                        this.scrollingChanged();
-                    }), 300);
-                };
-
-                this.addHtmlEventListener(item, "scroll", () =>
-                {
-                    
-                    this.nextFrame(() =>
-                    {
-                        this.contentXChanged();
-                        this.contentYChanged();
-
-                        this.defer(() =>
-                        {
-                            updateScrollingStatus();
-                            
-                            // child bbox positions changed
-                            this.children.forEach((c) =>
-                            {
-                                if (c !== item && c.updateSizeFrom)
-                                {
-                                    c.updateSizeFrom(null, false, false);
-                                }
-                            });
-                        }, "onScroll");
                     });
-                }, { passive: true });
+    
+                    this.addHtmlEventListener(item, "keyup", (ev) =>
+                    {
+                        const e = makeKeyEvent(ev);
+                        this.keyUp(e);
+                        if (e.accepted)
+                        {
+                            ev.stopPropagation();
+                            ev.preventDefault();
+                        }
+                    });
+    
+                    this.addHtmlEventListener(item, "focus", (ev) =>
+                    {
+                        if (priv.hasFocus)
+                        {
+                            // nothing to do
+                            return;
+                        }
+    
+                        if (! this.canFocus)
+                        {
+                            //console.log("cannot receive focus: " + this.objectType + "@" + this.objectLocation);
+    
+                            ev.preventDefault();
+    
+                            let p = this.parent;
+                            let handled = false;
+                            while (p)
+                            {
+                                if (p.canFocus)
+                                {
+                                    console.log("Ancestor " + p.objectType + "@" + p.objectLocation + " took the focus");
+                                    p.get().focus({ preventScroll: true });
+                                    handled = true;
+                                    break;
+                                }
+                                p = p.parent;
+                            }
+    
+                            if (handled)
+                            {
+                                // an ancestor took the focus
+                            }
+                            else if (ev.relatedTarget)
+                            {
+                                ev.relatedTarget.focus({ preventScroll: true });
+                            }
+                            else
+                            {
+                                item.blur();
+                            }
+                        }
+                        else if (! priv.hasFocus)
+                        {
+                            //console.log("received focus: " + this.objectType + "@" + this.objectLocation);
+                            this.get().dataset.shFocusTime = ev.timeStamp;
+                            priv.hasFocus = true;
+                            this.focusChanged();
+                        }
+                    });
+    
+                    this.addHtmlEventListener(item, "blur", () =>
+                    {
+                        if (document.activeElement === this.get())
+                        {
+                            // not really lost focus
+                            return;
+                        }
+    
+                        if (priv.hasFocus)
+                        {
+                            //console.log("lost focus: " + this.objectLocation + ", to: " + document.activeElement);
+                            priv.hasFocus = false;
+                            this.focusChanged();
+                        }
+                    });
+    
+                    let scrollingStatusHandle = null;
+                    const updateScrollingStatus = () =>
+                    {
+                        if (scrollingStatusHandle)
+                        {
+                            clearTimeout(scrollingStatusHandle);
+                        }
+                        else if (! priv.scrolling)
+                        {
+                            priv.scrolling = true;
+                            this.scrollingChanged();
+                        }
+                        scrollingStatusHandle = setTimeout(this.safeCallback(() =>
+                        {
+                            scrollingStatusHandle = null;
+                            priv.scrolling = false;
+                            this.scrollingChanged();
+                        }), 300);
+                    };
+    
+                    this.addHtmlEventListener(item, "scroll", () =>
+                    {
+                        
+                        this.nextFrame(() =>
+                        {
+                            this.contentXChanged();
+                            this.contentYChanged();
+    
+                            this.defer(() =>
+                            {
+                                updateScrollingStatus();
+                                
+                                // child bbox positions changed
+                                this.children.forEach((c) =>
+                                {
+                                    if (c !== item && c.updateSizeFrom)
+                                    {
+                                        c.updateSizeFrom(null, false, false);
+                                    }
+                                });
+                            }, "onScroll");
+                        });
+                    }, { passive: true });
+                });
 
                 // setup initial size
                 this.updateVisibility();

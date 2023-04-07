@@ -225,6 +225,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 }
             };
 
+            this.onInitialization = () =>
+            {
+                this.nextFrame(() => this.setupHandlers());
+            };
+
             this.onDestruction = () =>
             {
                 priv.listeners = { };
@@ -440,7 +445,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
             {
                 if (! haveDragDetection)
                 {
-                    item.style.touchAction = "none";
+                    //item.style.touchAction = "none";
                     this.setupDragDetection();
                     haveDragDetection = true;
                 }
@@ -453,7 +458,53 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
              * @memberof html.MouseBox
              */
             this.registerEvent("dragEnd");
+        }
 
+        get containsMouse() { return d.get(this).containsMouse; }
+        get hovered() { return d.get(this).hovered; }
+        get pressed() { return d.get(this).pressed; }
+        get touchPoints() { return d.get(this).touchPoints.length; }
+
+        get hoverDelay() { return d.get(this).hoverDelay; }
+        set hoverDelay(n)
+        {
+            d.get(this).hoverDelay = n;
+            this.hoverDelayChanged();
+        }
+
+        ensureListener(name, handler, makeEvent)
+        {
+            const priv = d.get(this);
+            if (! priv.listeners[name])
+            {
+                const item = this.get();
+
+                const h = (ev) =>
+                {
+                    //console.log("Event Trace: " + JSON.stringify(ev.shfHistory));
+                    
+                    const e = makeEvent(ev, item);
+                    //console.log("direct on " + this.objectLocation + ": " + e.directTarget);
+                    handler(e);
+                    if (e.accepted)
+                    {
+                        ev.stopPropagation();
+                    }
+                    if ((name !== "pointerdown" && name !== "mousedown") && e.accepted)
+                    {
+                        ev.preventDefault();
+                    }
+                };
+
+                this.addTracedHtmlEventListener(item, name, h, false);
+                priv.listeners[name] = h;
+            }
+        }
+
+        setupHandlers()
+        {
+            const priv = d.get(this);
+            const item = this.get();
 
             // use passive event handlers for monitoring status and touch points
             if (POINTER_EVENT)
@@ -808,47 +859,6 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     this.pressedChanged();
                 }
             });
-        }
-
-        get containsMouse() { return d.get(this).containsMouse; }
-        get hovered() { return d.get(this).hovered; }
-        get pressed() { return d.get(this).pressed; }
-        get touchPoints() { return d.get(this).touchPoints.length; }
-
-        get hoverDelay() { return d.get(this).hoverDelay; }
-        set hoverDelay(n)
-        {
-            d.get(this).hoverDelay = n;
-            this.hoverDelayChanged();
-        }
-
-        ensureListener(name, handler, makeEvent)
-        {
-            const priv = d.get(this);
-            if (! priv.listeners[name])
-            {
-                const item = this.get();
-
-                const h = (ev) =>
-                {
-                    //console.log("Event Trace: " + JSON.stringify(ev.shfHistory));
-                    
-                    const e = makeEvent(ev, item);
-                    //console.log("direct on " + this.objectLocation + ": " + e.directTarget);
-                    handler(e);
-                    if (e.accepted)
-                    {
-                        ev.stopPropagation();
-                    }
-                    if ((name !== "pointerdown" && name !== "mousedown") && e.accepted)
-                    {
-                        ev.preventDefault();
-                    }
-                };
-
-                this.addTracedHtmlEventListener(item, name, h, false);
-                priv.listeners[name] = h;
-            }
         }
 
         setupClickDetection()

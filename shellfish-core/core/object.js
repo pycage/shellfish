@@ -277,7 +277,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         constructor(zero)
         {
             this.data = new Map();
-            this.maxId = 0;
             this.zero = zero;
             this.edgeLength = n => n + 1;
             this.c = n => this.edgeLength(n) * this.edgeLength(n) - 1;
@@ -292,14 +291,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         valueAt(y, x)
         {
             const idx = this.indexAt(x, y);
-            if (this.data.has(idx))
-            {
-                return this.data.get(idx);
-            }
-            else
-            {
-                return this.zero;
-            }
+            const v = this.data.get(idx);
+            return v !== undefined ? v : this.zero;
         }
 
         setValue(y, x, v)
@@ -313,7 +306,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             {
                 this.data.set(idx, v);
             }
-            this.maxId = Math.max(x, y, this.maxId);
         }
 
         cellOperation(y, x, op)
@@ -321,17 +313,19 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.setValue(y, x, op(this.valueAt(y, x)));
         }
 
-        rowOperation(a, b, rowsGenerator, op)
+        rowOperation(a, b, rowsSet, op)
         {
-            for (const i of rowsGenerator)
+            let i = 0;
+            for (i of rowsSet)
             {
                 this.setValue(a, i, op(this.valueAt(a, i), this.valueAt(b, i)));
             }
         }
 
-        columnOperation(a, b, columnsGenerator, op)
+        columnOperation(a, b, columnsSet, op)
         {
-            for (const i of columnsGenerator)
+            let i = 0;
+            for (i of columnsSet)
             {
                 this.setValue(i, a, op(this.valueAt(i, a), this.valueAt(i, b)));
             }
@@ -351,23 +345,20 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.cyclesMatrix = new SparseMatrix(0);
             this.cyclesMap = new Map();
             this.participantsMap = new Map();
+            this.indexSet = new Set();
 
-            this.colsRowsGenerator = function* ()
-            {
-                for (const obj of allInstances)
-                {
-                    yield obj.objectId;
-                }
-            };
+            this.incrementF = v => v + 1;
+            this.sumF = (a, b) => a + b;
         }
 
         dump()
         {
-            console.log("max: " + this.matrix.maxId);
-            for (let y = 0; y <= this.matrix.maxId; ++y)
+            let y = 0;
+            let x = 0;
+            for (y of this.indexSet)
             {
                 const row = [];
-                for (let x = 0; x <= this.matrix.maxId; ++x)
+                for (x of this.indexSet)
                 {
                     row.push(this.matrix.valueAt(y, x));
                 }
@@ -386,7 +377,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             const aRefs = [];
             const bRefedBy = [];
 
-            for (let i = 0; i <= this.matrix.maxId; ++i)
+            let i = 0;
+            for (i of this.indexSet)
             {
                 if (this.matrix.valueAt(closer, i) > 0)
                 {
@@ -486,20 +478,20 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             }
 
             // set direct reference
-            this.matrix.cellOperation(objA, objB, v => v + 1);
-            //this.addCell(objA.objectId, objB.objectId, 1);
+            this.matrix.cellOperation(objA, objB, this.incrementF);
 
             // A gets all outgoing references of B
-            this.matrix.rowOperation(objA, objB, this.colsRowsGenerator(), (a, b) => a + b);
+            this.matrix.rowOperation(objA, objB, this.indexSet, this.sumF);
             
             // all X referencing A n times get B (X,B += n) and all outgoing references of B (row X += n * B)
-            for (let i = 0; i <= this.matrix.maxId; ++i)
+            let i = 0;
+            for (i of this.indexSet)
             {
                 const n = this.matrix.valueAt(i, objA);
                 if (n > 0)
                 {
                     this.matrix.cellOperation(i, objB, v => v + n);
-                    this.matrix.rowOperation(i, objB, this.colsRowsGenerator(), (a, b) => a + n * b);
+                    this.matrix.rowOperation(i, objB, this.indexSet, (a, b) => a + n * b);
                 }
             }
         }
@@ -516,19 +508,20 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             }
 
             // every X that references A n times (A column) loses B (X,B -= n) and all outgoing references of B (row X -= n * B)
-            for (let i = 0; i <= this.matrix.maxId; ++i)
+            let i = 0;
+            for (i of this.indexSet)
             {
                 const n = this.matrix.valueAt(i, objA);
                 if (n > 0)
                 {
                     this.matrix.cellOperation(i, objB, v => Math.max(0, v - n));
-                    this.matrix.rowOperation(i, objB, this.colsRowsGenerator(), (a, b) => a - n * b);
+                    this.matrix.rowOperation(i, objB, this.indexSet, (a, b) => a - n * b);
                 }
             }
 
-            // A löses B (A,B -= 1) and all outgoing references of B (row A -= B)
+            // A loses B (A,B -= 1) and all outgoing references of B (row A -= B)
             this.matrix.cellOperation(objA, objB, v => Math.max(0, v - 1));
-            this.matrix.rowOperation(objA, objB, this.colsRowsGenerator(), (a, b) => a - b);
+            this.matrix.rowOperation(objA, objB, this.indexSet, (a, b) => a - b);
             
             this.checkCycles(objB);
         }
@@ -536,7 +529,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         refsCount(obj)
         {
             let count = 0;
-            for (let y = 0; y <= this.matrix.maxId; ++y)
+            let y = 0;
+            for (y of this.indexSet)
             {
                 count += this.matrix.valueAt(y, obj);
             }
@@ -553,7 +547,8 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         refHolders(obj)
         {
             const holders = [];
-            for (let y = 0; y <= this.matrix.maxId; ++y)
+            let y = 0;
+            for (y of this.indexSet)
             {
                 if (this.matrix.valueAt(y, obj) !== 0)
                 {
@@ -873,6 +868,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             ++objCounter;
             allInstances.add(this);
+            refsTracker.indexSet.add(this.objectId);
             //console.log("objCounter: " + objCounter + " +" + this.constructor.name);
         }
 
@@ -1057,6 +1053,7 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
             --objCounter;
             allInstances.delete(this);
+            refsTracker.indexSet.delete(this.objectId);
             //console.log(`Destroyed: ${this.constructor.name}:${this.objectId} (${this.objectLocation}), ${objCounter} objects remaining`);
         }
 

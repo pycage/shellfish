@@ -69,6 +69,14 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 this.originalHeightChanged();
                 this.statusChanged();
                 this.updateSizeFrom(null, false);
+
+                // work around Chromium not rendering images with
+                // HW acceleration enabled
+                this.css("image-rendering", "pixelated");
+                this.wait(100).then(() =>
+                {
+                    this.css("image-rendering", "auto");
+                });
             });
 
             d.get(this).item.onerror = this.safeCallback(() =>

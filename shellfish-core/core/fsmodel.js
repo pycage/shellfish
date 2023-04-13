@@ -273,7 +273,7 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 priv.fs.search(priv.path, priv.query)
                 .then(this.safeCallback(items =>
                 {
-                    console.log(items);
+                    //console.log(items);
                     priv.items = items;
                     this.processItems(items, reset);
     
@@ -286,7 +286,7 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 priv.fs.list(priv.path)
                 .then(this.safeCallback(items =>
                 {
-                    console.log(items);
+                    //console.log(items);
                     priv.items = items;
                     this.processItems(items, reset);
     
@@ -302,7 +302,7 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             const newItems = items
             .filter(priv.filter)
             .sort((a, b) => this.comparator(a, b));
-            console.log(newItems);
+            //console.log(newItems);
 
             if (reset)
             {

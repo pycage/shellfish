@@ -77,13 +77,15 @@ Overlay {
             {
                 menuBox.anchorX = parentBbox.x + parentBbox.width;
                 menuBox.anchorY = parentBbox.y;
+                menuBox.anchorWidth = parentBbox.width;
                 menuBox.anchorHeight = 0;
             }
             else
             {
                 menuBox.anchorX = parentBbox.x;
-                menuBox.anchorY = parentBbox.y + parentBbox.height * 0.96;
-                menuBox.anchorHeight = parentBbox.height * 0.96;
+                menuBox.anchorY = parentBbox.y + parentBbox.height;
+                menuBox.anchorWidth = 0;
+                menuBox.anchorHeight = parentBbox.height;
             }
             menuRuler.request({
                 x: 0,
@@ -96,6 +98,7 @@ Overlay {
         {
             menuBox.anchorX = documentRoot.pointerX + 4;
             menuBox.anchorY = documentRoot.pointerY + 4;
+            menuBox.anchorWidth = 0;
             menuBox.anchorHeight = 0;
         }
 
@@ -126,7 +129,7 @@ Overlay {
     {
         ev.accepted = true;
         cascadingClose();
-        visible = false;
+        close();
     }
 
     // cheap shadow box
@@ -145,18 +148,23 @@ Overlay {
 
         property anchorX: 0
         property anchorY: 0
+        property anchorWidth: 0
         property anchorHeight: 0
 
         property spaceAbove: anchorY - anchorHeight
         property spaceBelow: menu.bboxHeight - anchorY
-        property showBelow: spaceBelow > 5 * theme.itemHeightMedium ? true
-                                                                    : spaceBelow > spaceAbove
+        property showBelow: spaceBelow > bboxHeight ? true
+                                                    : spaceBelow > spaceAbove
+
+        property spaceLeft: anchorX - anchorWidth
+        property spaceRight: menu.bboxWidth - anchorX
+        property showRight: spaceRight > bboxWidth ? true
+                                                   : spaceRight > spaceLeft
 
         position: "global"
         overflowBehavior: "scroll"
 
-        x: anchorX + bboxWidth < menu.bboxWidth ? anchorX
-                                                : menu.bboxWidth - bboxWidth
+        x: showRight ? anchorX : anchorX - anchorWidth - bboxWidth
         y: showBelow ? anchorY : anchorY - anchorHeight - height
 
         height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bboxHeight + 2 /* borders */)
@@ -176,7 +184,7 @@ Overlay {
                 ev.accepted = true;
 
                 menu.cascadingClose();
-                menu.visible = false;
+                menu.close();
             }
 
             onKeyDown: (ev) =>
@@ -188,12 +196,12 @@ Overlay {
                     ev.accepted = true;
 
                     menu.cascadingClose();
-                    menu.visible = false;
+                    menu.close();
                     return;
                 }
 
                 let current = -1;
-                const cs = children().filter((c) => { return c.isMenuItem && c.enabled && c.visible; });
+                const cs = children().filter((c) => { return c.thisMenuItem && c.enabled && c.visible; });
                 for (let i = 0; i < cs.length; ++i)
                 {
                     if (cs[i].selected)

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -30,7 +30,7 @@ require "shellfish/ui";
  * @class
  * @extends html.MouseBox
  *
- * @property {bool} isMenuItem - (always `true`) Sub-elements may use this property to check if they are within a menu item.
+ * @property {bool} thisMenuItem - (always `true`) Sub-elements may use this property to check if they are within a menu item.
  * @property {bool} selected - (default: `false`) Whether the menu item is currently selected.
  * @property {bool} highlighted - (default: `false`) Whether the menu item is currently highlighted.
  * @property {fengshui.Template} menu - (default: `null`) A template for a submenu.
@@ -39,7 +39,7 @@ require "shellfish/ui";
 MouseBox {
     id: item
 
-    property isMenuItem: true
+    property thisMenuItem: self
 
     property selected: false
     property highlighted: false
@@ -83,7 +83,7 @@ MouseBox {
                 if (ev.x >= cBox.x && ev.x < cBox.x + cBox.width &&
                     ev.y >= cBox.y && ev.y < cBox.y + cBox.height)
                 {
-                    if (child !== self)
+                    if (child !== self && child.thisMenuItem)
                     {
                         child.selectItem(true);
                     }
@@ -135,8 +135,8 @@ MouseBox {
         {
             if (thisMenu)
             {
-                thisMenu.visible = false;
                 thisMenu.cascadingClose();
+                thisMenu.close();
             }
         };
     }
@@ -197,7 +197,7 @@ MouseBox {
     {
         // unhighlight siblings and close menu
         parent.children()
-        .filter((c) => { return c !== self && c.isMenuItem; })
+        .filter((c) => { return c !== self && c.thisMenuItem; })
         .forEach((c) =>
         {
             c.selected = false;
@@ -262,7 +262,7 @@ MouseBox {
      */
     function toSibling(direction, f)
     {
-        const siblings = parent.children().filter((c) => { return c.isMenuItem && c.enabled; });
+        const siblings = parent.children().filter((c) => { return c.thisMenuItem && c.enabled; });
         let selfPos = -1;
         for (let i = 0; i < siblings.length; ++i)
         {
@@ -425,6 +425,4 @@ MouseBox {
 
     color: highlighted ? theme.highlightBackgroundColor
                        : "transparent"
-
-    //FocusIndicator { visible: parent.selected; borderColor: "red" }
 }

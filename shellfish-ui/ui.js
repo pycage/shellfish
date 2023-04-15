@@ -52,6 +52,7 @@ const mods = [
     "ListViewSelector",
     "Loader",
     "Menu",
+    "MenuExpander",
     "MenuItem",
     "MenuItemBase",
     "MenuSeparator",

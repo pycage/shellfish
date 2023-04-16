@@ -58,6 +58,11 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
         runAfterTrigger(f)
         {
             this.afterTriggerHandlers.push(f);
+
+            if (this.handlers.size === 0)
+            {
+                this.trigger(null, "", []);
+            }
         }
 
         connect(emitter, event, receiver, handler)
@@ -175,27 +180,25 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
 
         trigger(emitter, event, args)
         {
-            if (! this.handlersOfEmitter.has(emitter))
+            if (this.handlersOfEmitter.has(emitter))
             {
-                return;
-            }
-
-            ++this.depth;
-            for (let handlerKey of this.handlersOfEmitter.get(emitter))
-            {
-                if (this.eventOfHandler.get(handlerKey) === event)
+                ++this.depth;
+                for (let handlerKey of this.handlersOfEmitter.get(emitter))
                 {
-                    try
+                    if (this.eventOfHandler.get(handlerKey) === event)
                     {
-                        this.handlers.get(handlerKey).apply(null, args || []);
-                    }
-                    catch (err)
-                    {
-                        console.error(`[${exports.dbgctx}] Error triggering event '${emitter.constructor.name}.${event} (${emitter.objectLocation}): ${err}\n${err.stack || "<stacktrace not available>"}`);
+                        try
+                        {
+                            this.handlers.get(handlerKey).apply(null, args || []);
+                        }
+                        catch (err)
+                        {
+                            console.error(`[${exports.dbgctx}] Error triggering event '${emitter.constructor.name}.${event} (${emitter.objectLocation}): ${err}\n${err.stack || "<stacktrace not available>"}`);
+                        }
                     }
                 }
+                --this.depth;
             }
-            --this.depth;
 
             if (this.depth === 0 && this.afterTriggerHandlers.length > 0)
             {
@@ -210,6 +213,10 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                     if (count > 10)
                     {
                         //console.log("processing break, " + this.afterTriggerHandlers.length + " left");
+                        setTimeout(() =>
+                        {
+                            this.trigger(null, "", []);
+                        }, 1);
                         break;
                     }
                 }               
@@ -863,8 +870,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
              * @memberof core.Object
              */
             this.registerEvent("termination");
-
-            this.registerEvent("__fakeEvent");
 
             ++objCounter;
             allInstances.add(this);
@@ -1846,7 +1851,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                     {
                         resolve();
                     }));
-                    this.__fakeEvent();
                 }
                 else
                 {

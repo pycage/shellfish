@@ -470,7 +470,11 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             ns = ns || "";
             //console.log("find " + id + "(" + ns + ") under element with ID " + JSON.stringify(priv.id));
 
-            if (id === priv.id[ns])
+            if (! priv.element)
+            {
+                return undefined;
+            }
+            else if (id === priv.id[ns])
             {
                 return this;
             }

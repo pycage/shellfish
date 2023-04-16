@@ -542,7 +542,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 let prevSize = 0;
                 mObj.connect("modelReset", this, () =>
                 {
-                    console.log("model reset");
+                    console.log("model reset -> " + mObj.size + " items");
                     if (mObj.size === 0 && prevSize === 0)
                     {
                         return;
@@ -565,6 +565,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                         this.destroyItem(idx);
                     });
                     priv.windowRange = [-1, -1];
+
+                    this.render();
                     this.updateLayout(false);
                     this.newLayout();
                     this.countChanged();
@@ -1056,7 +1058,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
 
             const boxNode = priv.item.children[0];
 
-            //console.log("render " + items.length + " items " + JSON.stringify(bbox));
+            //console.log("render " + items.length + " items");
             //console.log("itemsPerRow: " + priv.itemsPerRow);
 
             const newItems = [];

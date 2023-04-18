@@ -268,17 +268,24 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 return;
             }
 
+            const forPath = priv.path;
             if (priv.query !== "")
             {
                 priv.fs.search(priv.path, priv.query)
                 .then(this.safeCallback(items =>
                 {
+                    if (priv.path !== forPath)
+                    {
+                        return;
+                    }
+
                     //console.log(items);
                     priv.items = items;
                     this.processItems(items, reset);
-    
+
                     priv.loading = false;
                     this.loadingChanged();
+    
                 }));
             }
             else
@@ -286,12 +293,18 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                 priv.fs.list(priv.path)
                 .then(this.safeCallback(items =>
                 {
+                    if (priv.path !== forPath)
+                    {
+                        return;
+                    }
+
                     //console.log(items);
                     priv.items = items;
                     this.processItems(items, reset);
-    
+
                     priv.loading = false;
                     this.loadingChanged();
+    
                 }));
             }
         }

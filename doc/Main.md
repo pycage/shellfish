@@ -130,8 +130,8 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### April 2023
-* The method {@link html.DavFS.write} now takes an optional progress callback
-  function for monitoring the upload progress.
+* The method {@link core.Filesystem#write} now takes an optional progress callback
+  function for monitoring the upload progress where supported.
 * The new element {@link ui.MenuExpander} provides an expandable menu item with
   sub items.
 

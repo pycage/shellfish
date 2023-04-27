@@ -72,10 +72,7 @@ shRequire(["shellfish/core"], core =>
             this.notifyable("port");
             this.notifyable("secure");
 
-            this.onInitialization = () =>
-            {
-                this.wait(0).then(() => { this.listen(); });
-            };
+            this.listen();
         }
 
         get enabled() { return d.get(this).enabled; }
@@ -145,12 +142,11 @@ shRequire(["shellfish/core"], core =>
             if (! priv.connecting)
             {
                 priv.connecting = true;
-                this.wait(0)
-                .then(() =>
+                this.defer(() =>
                 {
                     priv.connecting = false;
                     this.doListen();
-                });
+                }, "listen");
             }
         }
 

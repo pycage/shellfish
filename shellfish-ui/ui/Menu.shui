@@ -164,8 +164,11 @@ Overlay {
         position: "global"
         overflowBehavior: "scroll"
 
-        x: showRight ? anchorX : anchorX - anchorWidth - bboxWidth
-        y: showBelow ? anchorY : anchorY - anchorHeight - height
+        x: showRight ? anchorX
+                     : anchorWidth > 0 ? anchorX - anchorWidth - bboxWidth
+                                       : menu.bboxWidth - bboxWidth
+        y: showBelow ? anchorY
+                     : anchorY - anchorHeight - height
 
         height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bboxHeight + 2 /* borders */)
         color: theme.primaryBackgroundColor

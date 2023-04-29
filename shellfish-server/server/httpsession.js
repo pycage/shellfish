@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -63,8 +63,27 @@ shRequire(["shellfish/core"], core =>
         }
     }
 
-    function makeRequestEvent(urlMapper, request, user)
+    function makeRequestEvent(self, urlMapper, request, response, user)
     {
+        const now = Date.now();
+
+        const makeResponse = (code, status) =>
+        {
+            const r = new HTTPResponse(response, code, status, self.safeCallback(res =>
+            {
+                self.log("HTTP",
+                         "info",
+                         (user ? user + "@" : "") +
+                         d.get(self).sessionId + " - " +
+                         request.method + " " +
+                         request.url + ": " +
+                         code + " " + status + " " +
+                         (Date.getTime() - now) + "ms");
+                self.responseReady(res);
+            }));
+            return r;
+        };
+
         const cookies = new Map();
         if (request.headers.cookie)
         {
@@ -104,6 +123,7 @@ shRequire(["shellfish/core"], core =>
             range: headers.has("range") ? parseRange(headers.get("range")) : [],
             body: () => { return readRequest(request); },
             stream: request,
+            response: makeResponse,
             unmappedUrl: request.url,
             url: {
                 hash: urlObj.hash,
@@ -372,7 +392,7 @@ shRequire(["shellfish/core"], core =>
             priv.response = response;
             //priv.user = user;
 
-            this.request(makeRequestEvent(priv.urlMapper, request, user));
+            this.request(makeRequestEvent(this, priv.urlMapper, request, response, user));
 
             if (priv.timeoutHandler)
             {

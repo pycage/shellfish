@@ -232,6 +232,34 @@ shRequire([__dirname + "/object.js"], obj =>
         }
 
         /**
+         * Creates a hierarchy of directories.
+         * 
+         * @param {string} path - The hierarchy of directories to create.
+         * @returns {Promise} The Promise object.
+         */
+        mkdirs(path)
+        {
+            const mkdirRecursive = async (path) =>
+            {
+                if (! await this.exists(path))
+                {
+                    const parentPath = this.dirname(path);
+                    if (await this.exists(parentPath))
+                    {
+                        const name = this.filename(path);
+                        await this.mkdir(parentPath, name);
+                    }
+                    else
+                    {
+                        await this.mkdirRecursive(parentPath);
+                    }
+                }
+            };
+
+            return mkdirRecursive(path);
+        }
+
+        /**
          * Moves a file.
          * 
          * @param {string} sourcePath - The source path.

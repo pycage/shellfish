@@ -402,9 +402,9 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             return f();
         }
 
-        mkdir(path)
+        mkdir(path, name)
         {
-            return fsMkdir(path);
+            return fsMkdir(this.pathJoin(path, name));
         }
 
         move(sourcePath, destPath)

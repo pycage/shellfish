@@ -239,20 +239,17 @@ shRequire([__dirname + "/object.js"], obj =>
          */
         mkdirs(path)
         {
-            const mkdirRecursive = async (path) =>
+            const mkdirRecursive = async path =>
             {
                 if (! await this.exists(path))
                 {
                     const parentPath = this.dirname(path);
-                    if (await this.exists(parentPath))
+                    const name = this.filename(path);
+                    if (! await this.exists(parentPath))
                     {
-                        const name = this.filename(path);
-                        await this.mkdir(parentPath, name);
+                        await mkdirRecursive(parentPath);
                     }
-                    else
-                    {
-                        await this.mkdirRecursive(parentPath);
-                    }
+                    await this.mkdir(parentPath, name);
                 }
             };
 

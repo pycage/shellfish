@@ -25,6 +25,18 @@ require "shellfish/ui";
 /**
  * Element representing a dialog window.
  *
+ * The size of the dialog is determined by its content area, which adapts to
+ * its contents by default.
+ *
+ * If you want to set an explicit size initially, you can do so in the
+ * `initialization` handler.
+ *
+ *     onInitialization: () =>
+ *     {
+ *         thisContentArea.width = 640;
+ *         thisContentArea.height = 400;
+ *     }
+ *
  * Containers:
  * * `buttons` - The buttons box.
  *

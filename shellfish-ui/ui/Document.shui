@@ -26,7 +26,7 @@ require "shellfish/ui";
  * Element representing the document. This is an extension of the {@link html.Document Document class}
  * and adds theming as well as some modal standard dialogs.
  *
- * The document is accessible anywhere from within its subtree by the `documentRoot`
+ * The document is accessible anywhere from within its subtree by the `thisDocument`
  * property.
  *
  * The current theme is accessed by the `theme` property. The theme may be changed
@@ -40,9 +40,11 @@ require "shellfish/ui";
  * Keyboard shortcuts may be defined by any component by connecting to the `keyDown`
  * event of the effective shortcut receiver, accessed by the `shortcutReceiver` reference.
  *
- *     shortcutReceiver.onKeyDown: (ev) =>
- *     {
- *         // handle the shortcuts...
+ *     Box {
+ *         shortcutReceiver.onKeyDown: ev =>
+ *         {
+ *             // handle the shortcuts...
+ *         }
  *     }
  *
  * @memberof ui

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -74,7 +74,7 @@ Page {
 
             marginTop: theme.paddingMedium
             fillWidth: true
-            height: Math.min(bbox.width, documentRoot.windowHeight - 4 * theme.itemHeightLarge)
+            height: Math.min(bbox.width, thisDocument.bboxHeight - 4 * theme.itemHeightLarge)
             color: "black"
             layout: "center"
 

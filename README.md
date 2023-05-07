@@ -81,7 +81,7 @@ label updates accordingly.
 With Shui, this can be expressed like this:
 ```
 Label {
-    text: "The current window width is " + documentRoot.windowWidth
+    text: "The current window width is " + thisDocument.bboxWidth
 }
 ```
 
@@ -89,10 +89,10 @@ You may even use complex JavaScript expressions instead of simple values, like t
 ```
 Label {
     text: "The double of the square root of the window width is " +
-          Math.sqrt(documentRoot.windowWidth) * 2 +
-          ", while the window height is " + documentRoot.windowHeight +
+          Math.sqrt(thisDocument.bboxWidth) * 2 +
+          ", while the window height is " + thisDocument.bboxHeight +
           ". Thus the window's area is " +
-          (documentRoot.windowWidth * documentRoot.windowHeight) +
+          (thisDocument.bboxWidth * thisDocument.bboxHeight) +
           " square pixels."
 }
 ```

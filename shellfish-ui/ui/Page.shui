@@ -114,9 +114,9 @@ MouseBox {
 
     position: priv.frozenInternal ? "global" : "inline"
     
-    width: documentRoot.windowWidth
-    height: priv.frozenInternal ? documentRoot.windowHeight : -1
-    minHeight: documentRoot.windowHeight
+    width: thisDocument.bboxWidth
+    height: priv.frozenInternal ? thisDocument.bboxHeight : -1
+    minHeight: thisDocument.bboxHeight
 
     marginLeft: (1 - openingPercentage) * width
 
@@ -157,8 +157,8 @@ MouseBox {
     {
         if (frozen)
         {
-            const scrollTop = documentRoot.contentY;
-            documentRoot.contentY = 0;
+            const scrollTop = thisDocument.contentY;
+            thisDocument.contentY = 0;
             contentArea.minHeight = contentArea.contentHeight;
             priv.frozenInternal = true;
             page.contentY = scrollTop;
@@ -170,7 +170,7 @@ MouseBox {
             contentArea.minHeight = 0;
             contentArea.contentY = 0;
             priv.frozenInternal = false;
-            documentRoot.contentY = scrollTop;
+            thisDocument.contentY = scrollTop;
         }
     }
     
@@ -178,7 +178,7 @@ MouseBox {
         id: contentArea
 
         width: parent.width
-        height: page.scrollable ? -1 : documentRoot.windowHeight
+        height: page.scrollable ? -1 : thisDocument.bboxHeight
     }
 
     Box {

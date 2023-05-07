@@ -48,7 +48,7 @@ Box {
     height: parent.bboxHeight
     enabled: false
     color: "transparent"
-    borderWidth: documentRoot.inputDevice === "keyboard" ? 3 : 0
+    borderWidth: thisDocument.inputDevice === "keyboard" ? 3 : 0
     borderColor: theme.borderColor
     borderStyle: "dotted"
 }

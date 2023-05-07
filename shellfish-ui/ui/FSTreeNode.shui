@@ -87,7 +87,7 @@ DropArea {
 
     MouseBox {
         property itemHovered: node.path !== target.path &&
-                              ((containsMouse || parent.accepted) && documentRoot.inputDevice !== "touch") &&
+                              ((containsMouse || parent.accepted) && thisDocument.inputDevice !== "touch") &&
                               ! pressed
         property highlighted: node.path === target.path ||
                               pressed

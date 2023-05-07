@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2018 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2018 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -60,7 +60,7 @@ Page {
     Box {
         marginTop: header.height
         fillWidth: true
-        height: documentRoot.windowHeight - header.height
+        height: thisDocument.bboxHeight - header.height
 
         ListView {
             id: rabbitGrid
@@ -69,7 +69,7 @@ Page {
             fillHeight: true
 
             cellWidth: page.viewMode === 0 ? bbox.width
-                                           : (documentRoot.windowWidth - theme.paddingSmall) / 5
+                                           : (thisDocument.bboxWidth - theme.paddingSmall) / 5
             cellHeight: page.viewMode === 0 ? theme.itemHeightLarge
                                             : cellWidth
 
@@ -111,8 +111,8 @@ Page {
             id: infoBox
 
             position: "global"
-            x: (documentRoot.windowWidth - bbox.width) / 2
-            y: (documentRoot.windowHeight - bbox.height) / 2
+            x: (thisDocument.bboxWidth - bbox.width) / 2
+            y: (thisDocument.bboxHeight - bbox.height) / 2
             visible: false
             color: theme.secondaryColor
             borderRadius: bbox.height / 5

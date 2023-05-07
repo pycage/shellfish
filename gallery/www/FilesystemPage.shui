@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -48,7 +48,7 @@ Page {
         id: contentBox
 
         fillWidth: true
-        height: documentRoot.windowHeight
+        height: thisDocument.bboxHeight
 
         OfflineFS {
             id: drive
@@ -431,7 +431,7 @@ Page {
     Loader {
         id: loader
         fillWidth: true
-        height: item ? -1 : documentRoot.windowHeight
+        height: item ? -1 : thisDocument.bboxHeight
         
         Placeholder {
             visible: ! parent.item
@@ -452,8 +452,8 @@ Page {
         Image {
             id: img
 
-            property maxWidth_: documentRoot.windowWidth - 4 * theme.paddingLarge
-            property maxHeight_: documentRoot.windowHeight - 16 * theme.paddingLarge
+            property maxWidth_: thisDocument.bboxWidth - 4 * theme.paddingLarge
+            property maxHeight_: thisDocument.bboxHeight - 16 * theme.paddingLarge
             property ratio: originalWidth > 0 ? originalHeight / originalWidth
                                               : 1                       
             property goForHeight: maxWidth_ * maxWidth_ * ratio > (maxHeight_ / ratio) * maxHeight_

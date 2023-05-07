@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -74,7 +74,7 @@ Document {
         visible: pageStack.loading
         position: "free"
         fillWidth: true
-        height: documentRoot.windowHeight
+        height: thisDocument.bboxHeight
 
         layout: "center"
 
@@ -84,7 +84,7 @@ Document {
         }
 
         Box {
-            width: documentRoot.windowWidth - 2 * theme.paddingLarge
+            width: thisDocument.bboxWidth - 2 * theme.paddingLarge
             height: 1
             marginTop: theme.paddingLarge
             marginBottom: theme.paddingLarge
@@ -92,7 +92,7 @@ Document {
         }
 
         Label {
-            text: "Loading " + documentRoot.title
+            text: "Loading " + thisDocument.title
         }
     }
 

@@ -72,8 +72,8 @@ Overlay {
         y: (parent.bboxHeight - bboxHeight) / 2 - (offset * theme.itemHeightLarge)
         width: -1
         height: -1
-        maxWidth: documentRoot.windowWidth - 2 * theme.paddingLarge
-        maxHeight: documentRoot.windowHeight - 2 * theme.paddingLarge
+        maxWidth: thisDocument.bboxWidth - 2 * theme.paddingLarge
+        maxHeight: thisDocument.bboxHeight - 2 * theme.paddingLarge
 
         offsetTransition: NumberAnimation { duration: 500; easing: "InOutQuad" }
 

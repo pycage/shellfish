@@ -622,12 +622,14 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                 // the declarative-level wrapper instead
                 return elementRegistry.has(obj) ? elementRegistry.get(obj) : obj;
             }
+            /* FIXME: this break pages stuff at the moment
             else if (obj && Array.isArray(obj))
             {
                 // if the mid-level element has a declarative-level wrapper, return
                 // the declarative-level wrapper instead
                 return obj.map(o => elementRegistry.has(o) ? elementRegistry.get(o) : o);
             }
+            */
             else
             {
                 return obj;

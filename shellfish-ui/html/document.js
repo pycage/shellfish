@@ -89,6 +89,162 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
         }
     }
 
+    class TokenQueue
+    {
+        constructor(size)
+        {
+            this.size = size;
+            this.free = size;
+
+            this.queue = [];
+        }
+
+        next()
+        {
+            if (this.queue.length > 0)
+            {
+                const resolve = this.queue.shift();
+                resolve();
+            }
+        }
+
+        waitForToken()
+        {
+            return new Promise(resolve =>
+            {
+                if (this.free > 0)
+                {
+                    resolve();
+                }
+                else
+                {
+                    this.queue.push(resolve);
+                }
+            });
+        }
+
+        getToken()
+        {
+            return new Promise(async resolve =>
+            {
+                await this.waitForToken();
+
+                const token = {
+                    release: () => { ++this.free; this.next(); }
+                };
+
+                if (this.free > 0)
+                {
+                    --this.free;
+                    resolve(token);
+                }
+                else
+                {
+
+                }
+            });
+        }
+    }
+
+    function createResponse(xhr)
+    {
+        const options = {
+            status: xhr.status,
+            statusText: xhr.statusText
+        };
+        return new Response(xhr.response /* blob or arraybuffer */, options);
+    }
+
+    class HttpRequest
+    {
+        constructor(tokenQueue, url, method)
+        {
+            this.tokenQueue = tokenQueue;
+            this.url = url;
+            this.method = method || "GET";
+            this.payload = null;
+
+            // as long as 'fetch()' doesn't support monitoring the progress,
+            // we're using a classic XMLHttpRequest...
+            this.xhr = new XMLHttpRequest();
+            this.xhr.responseType = this.method === "GET" ? "blob" : "arraybuffer";
+            this.xhr.open(this.method, this.url);
+        }
+
+        header(key, value)
+        {
+            this.xhr.setRequestHeader(key, value);
+            return this;
+        }
+
+        body(blob)
+        {
+            this.payload = blob;
+            return this;
+        }
+
+        send(uploadProgressCallback, downloadProgressCallback)
+        {
+            return new Promise(async (resolve, reject) =>
+            {
+                const token = await this.tokenQueue.getToken();
+
+                if (downloadProgressCallback)
+                {
+                    // monitor download progress
+                    this.xhr.addEventListener("progress", status =>
+                    {
+                        if (status.lengthComputable && status.total > 0)
+                        {
+                            downloadProgressCallback(status.loaded, status.total);
+                        }
+                    });
+                }
+
+                if (uploadProgressCallback)
+                {
+                    // monitor upload progress
+                    this.xhr.upload.addEventListener("progress", status =>
+                    {
+                        if (status.lengthComputable && status.total > 0)
+                        {
+                            uploadProgressCallback(status.loaded, status.total);
+                        }
+                    });
+                }
+
+                this.xhr.addEventListener("load", () =>
+                {
+                    if (this.xhr.readyState === 4 /* Ready */)
+                    {
+                        resolve(createResponse(this.xhr));
+                        token.release();
+                    }
+                });
+
+                this.xhr.addEventListener("abort", () =>
+                {
+                    reject("Request aborted.");
+                    token.release();
+                });
+
+                this.xhr.addEventListener("error", () =>
+                {
+                    reject("Communication error.");
+                    token.release();
+                });
+
+                this.xhr.send(this.payload);
+            });
+        }
+
+        abort()
+        {
+            this.xhr.abort();
+        }
+    }
+
+
     const d = new WeakMap();
 
     /**
@@ -99,6 +255,10 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      *
      * @property {bool} active - [readonly] Whether the document is currently active (the window and tab have focus).
      * @property {object} bbox - [readonly] The current bounding box.
+     * @property {number} bboxX - [readonly] The document's bounding box X position in window coordinates.
+     * @property {number} bboxY - [readonly] The document's bounding box Y position in window coordinates.
+     * @property {number} bboxWidth - [readonly] The document's bounding box width in window coordinates.
+     * @property {number} bboxHeight - [readonly] The document's bounding box height in window coordinates.
      * @property {string} color - The document's background color.
      * @property {number} contentHeight - [readonly] The current scrolling viewport height.
      * @property {number} contentWidth - [readonly] The current scrolling viewport width.
@@ -106,11 +266,12 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @property {number} contentY - (default: `0`) The current vertical scrolling position.
      * @property {html.Item} fullscreenItem - (default: `null`) The current item shown in fullscreen mode.
      * @property {string} inputDevice - [readonly] The currently active input device: mouse|touch|pen|keyboard
+     * @property {number} maxHttpRequests - (default: `4`) The maximum number of simultaneous HTTP requests.
      * @property {bool} scrollbars - (default: `false`) Whether to show native scrollbars.
      * @property {bool} systemDarkMode - [readonly] Whether the system is in dark mode (Windows 10, MacOS, Android).
      * @property {string} title - The document's title.
-     * @property {number} windowWidth - [readonly] The current width of the document window.
-     * @property {number} windowHeight - [readonly] The current height of the document window.
+     * @property {number} windowWidth - [readonly] Deprecated: Use `bboxWidth` instead. The current width of the document window.
+     * @property {number} windowHeight - [readonly] Deprecated: Use `bboxHeight` instead. The current height of the document window.
      */
     class Document extends core.Object
     {
@@ -127,7 +288,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 inputDevice: "mouse",
                 fullscreenItem: null,
                 pointerX: 0,
-                pointerY: 0
+                pointerY: 0,
+                httpTokenQueue: new TokenQueue(4)
             });
 
             low.css(document.body, "background-color", "white");
@@ -150,6 +312,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             this.notifyable("bboxWidth");
             this.notifyable("bboxHeight");
             this.notifyable("fullscreenItem");
+            this.notifyable("maxHttpRequests");
 
             /**
              * Is triggered when the browser context menu is requested.
@@ -478,6 +641,13 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
         get pointerX() { return d.get(this).pointerX; }
         get pointerY() { return d.get(this).pointerY; }
 
+        get maxHttpRequests() { return d.get(this).httpTokenQueue.size; }
+        set maxHttpRequests(s)
+        {
+            d.get(this).httpTokenQueue = new TokenQueue(s);
+            this.maxHttpRequestsChanged();
+        }
+
         updateSizeFrom(item, fromChild)
         {
             if (d.get(this).inSizeUpdate)
@@ -520,6 +690,43 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
                 }
             });
             d.get(this).inSizeUpdate = false;
+        }
+
+        /**
+         * Creates and returns an asynchronous HTTP request with progress
+         * monitoring. The maximum number of simultaneous requests is
+         * determined by the property `maxHttpRequests`.
+         * 
+         * #### Example
+         * 
+         *     httpRequest("/path/to/resource")
+         *     .send()
+         *     .then(response => response.text())
+         *     .then(data =>
+         *     {
+         *       console.log("Got data: " + data);
+         *     })
+         *     .catch(err => { console.error(err); }
+         * 
+         * #### Example
+         * 
+         *     httpRequest("/path/to/resource", "POST")
+         *     .header("X-Custom-Header", "42")
+         *     .body(new Blob(["Some data"]))
+         *     .send(p => console.log("upload progress: " + p);
+         * 
+         * #### Example
+         * 
+         *     httpRequest("/path/to/large.file")
+         *     .send(null, p => console.log("download progress: " + p);
+         * 
+         * @param {string} url - The request URL.
+         * @param {string} method - (default: `"GET"`) The HTTP method.
+         * @returns {HttpRequest} The request object.
+         */
+        httpRequest(url, method)
+        {
+            return new HttpRequest(d.get(this).httpTokenQueue, url, method);
         }
 
         detachChild(child)

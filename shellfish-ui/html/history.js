@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -68,7 +68,14 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
          */
         append(state)
         {
-            window.history.pushState(state, "");
+            try
+            {
+                window.history.pushState(state, "");
+            }
+            catch (err)
+            {
+                // Firefox Focus?
+            }
         }
 
         /**
@@ -80,7 +87,14 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
          */
         replace(state)
         {
-            window.history.replaceState(state, "");
+            try
+            {
+                window.history.replaceState(state, "");
+            }
+            catch (err)
+            {
+                // Firefox Focus?
+            }
         }
 
         /**

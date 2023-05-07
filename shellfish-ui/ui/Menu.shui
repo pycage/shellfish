@@ -96,8 +96,8 @@ Overlay {
         }
         else
         {
-            menuBox.anchorX = documentRoot.pointerX + 4;
-            menuBox.anchorY = documentRoot.pointerY + 4;
+            menuBox.anchorX = thisDocument.pointerX + 4;
+            menuBox.anchorY = thisDocument.pointerY + 4;
             menuBox.anchorWidth = 0;
             menuBox.anchorHeight = 0;
         }

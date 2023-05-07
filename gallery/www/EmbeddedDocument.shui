@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -35,24 +35,25 @@ require "shellfish/ui";
  * @extends mid.Box
  */
 Box {
-    property realDocumentRoot: null
+    property realThisDocument: null
     property documentRoot: self
+    property thisDocument: self
 
-    property active: realDocumentRoot ? realDocumentRoot.active : false
+    property active: realThisDocument ? realThisDocument.active : false
     property fullscreenItem: null
-    property inputDevice: realDocumentRoot ? realDocumentRoot.inputDevice : "mouse"
+    property inputDevice: realThisDocument ? realThisDocument.inputDevice : "mouse"
     property title: ""
-    property windowWidth: bbox.width
-    property windowHeight: bbox.height
+    property windowWidth: bboxWidth
+    property windowHeight: bboxHeight
     property shortcutReceiver: self
     property theme: Theme { }
     property scrollable: false
 
-    property showErrorDialog: realDocumentRoot ? realDocumentRoot.showErrorDialog : () => { }
-    property showInfoDialog: realDocumentRoot ? realDocumentRoot.showInfoDialog : () => { }
-    property showMessageDialog: realDocumentRoot ? realDocumentRoot.showMessageDialog : () => { }
-    property showQuestionDialog: realDocumentRoot ? realDocumentRoot.showQuestionDialog : () => { }
-    property showWarningDialog: realDocumentRoot ? realDocumentRoot.showWarningDialog : () => { }
+    property showErrorDialog: realThisDocument ? realThisDocument.showErrorDialog : () => { }
+    property showInfoDialog: realThisDocument ? realThisDocument.showInfoDialog : () => { }
+    property showMessageDialog: realThisDocument ? realThisDocument.showMessageDialog : () => { }
+    property showQuestionDialog: realThisDocument ? realThisDocument.showQuestionDialog : () => { }
+    property showWarningDialog: realThisDocument ? realThisDocument.showWarningDialog : () => { }
 
     fillWidth: true
     fillHeight: ! scrollable
@@ -70,6 +71,6 @@ Box {
         {
             p = p.parent;
         }
-        realDocumentRoot = p;
+        realThisDocument = p;
     }
 }

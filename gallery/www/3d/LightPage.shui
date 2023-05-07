@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,7 +38,7 @@ Page {
         id: view
 
         fillWidth: true
-        height: documentRoot.windowHeight
+        height: thisDocument.bboxHeight
         originalWidth: bbox.width
         originalHeight: bbox.height
 

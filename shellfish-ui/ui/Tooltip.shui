@@ -50,15 +50,15 @@ Object {
 
     property target: parent
     property text: ""
-    property visible: documentRoot.inputDevice === "mouse" && parent.hovered ||
-                      documentRoot.inputDevice === "keyboard" && parent.focus
+    property visible: thisDocument.inputDevice === "mouse" && parent.hovered ||
+                      thisDocument.inputDevice === "keyboard" && parent.focus
 
     onVisibleChanged: () =>
     {
         if (visible)
         {
             box = boxT();
-            documentRoot.add(box);
+            thisDocument.add(box);
         }
         else if (box)
         {
@@ -74,7 +74,7 @@ Object {
 
         position: "global"
         x: 0
-        y: documentRoot.windowHeight
+        y: thisDocument.bboxHeight
         width: innerBox.bboxWidth
         height: innerBox.bboxHeight
 
@@ -89,7 +89,7 @@ Object {
                     height: tooltip.target.bboxHeight
                 };
 
-                if (tbbox.x + bboxWidth < documentRoot.windowWidth)
+                if (tbbox.x + bboxWidth < thisDocument.bboxWidth)
                 {
                     x = tbbox.x;
                 }
@@ -97,7 +97,7 @@ Object {
                 {
                     x = tbbox.x + tbbox.width - bboxWidth;
                 }
-                if (tbbox.y + tbbox.height + bboxHeight + 2 < documentRoot.windowHeight)
+                if (tbbox.y + tbbox.height + bboxHeight + 2 < thisDocument.bboxHeight)
                 {
                     
                     y = tbbox.y + tbbox.height + 2;
@@ -118,7 +118,7 @@ Object {
             id: innerBox
 
             position: "free"
-            y: documentRoot.windowHeight
+            y: thisDocument.bboxHeight
             color: theme.contentBackgroundColor
             borderColor: theme.borderColor
             borderWidth: 1

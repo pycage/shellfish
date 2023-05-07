@@ -43,7 +43,7 @@ MouseBox {
     property target: parent
     property other: null
     property orientation: "vertical"
-    property size: documentRoot.inputDevice === "touch" ? theme.paddingSmall / 2
+    property size: thisDocument.inputDevice === "touch" ? theme.paddingSmall / 2
                                                         : theme.paddingMedium
 
     position: "global"
@@ -156,7 +156,7 @@ MouseBox {
 
         onPointerDown: (ev) =>
         {
-            if (documentRoot.inputDevice === "touch")
+            if (thisDocument.inputDevice === "touch")
             {
                 return;
             }
@@ -166,7 +166,7 @@ MouseBox {
 
         onDrag: (ev) =>
         {
-            if (documentRoot.inputDevice === "touch")
+            if (thisDocument.inputDevice === "touch")
             {
                 return;
             }
@@ -190,7 +190,7 @@ MouseBox {
 
     onPointerDown: (ev) =>
     {
-        if (documentRoot.inputDevice === "touch")
+        if (thisDocument.inputDevice === "touch")
         {
             return;
         }

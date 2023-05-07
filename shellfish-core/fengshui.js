@@ -364,7 +364,7 @@ exports.tools = {
      * .then(module =>
      * {
      *     const element = module.create();
-     *     documentRoot.add(element);
+     *     thisDocument.add(element);
      * });
      *
      * @memberof fengshui

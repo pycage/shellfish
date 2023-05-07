@@ -286,7 +286,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 el.onProfilesChanged = () =>
                 {
-                    el.profiles.forEach(obj =>
+                    el.profiles.filter(obj => obj).forEach(obj =>
                     {
                         Object.keys(d.get(obj).customProperties)
                         .filter(p => p != "profiles")

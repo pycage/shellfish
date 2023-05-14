@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", "shellfish/core", __dirname + "/object.js"], function (low, core, obj)
 {
     let d = new WeakMap();
 
@@ -40,12 +40,15 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
         {
             super();
 
-            this.addHtmlEventListener(window, "gamepadconnected", (ev) =>
+            const uiObj = new obj.Object();
+            this.add(uiObj);
+
+            uiObj.addHtmlEventListener(window, "gamepadconnected", (ev) =>
             {
                 this.update();
             });
 
-            this.addHtmlEventListener(window, "gamepaddisconnected", (ev) =>
+            uiObj.addHtmlEventListener(window, "gamepaddisconnected", (ev) =>
             {
                 this.update();
                 const handle = low.addFrameHandler(() =>
@@ -59,6 +62,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
             {
                 this.update();
             };
+
         }
 
         update()

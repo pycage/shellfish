@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,14 +22,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 {
     let d = new WeakMap();
 
     /**
      * Class representing a gamepad.
      * 
-     * @extends core.Object
+     * @extends html.Object
      * @memberof html
      * 
      * @property {bool} connected - [readonly] Whether the gamepad is currently connected.
@@ -40,7 +40,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @property {bool[]} buttons - [readonly] Array of the states of the buttons.
      * @property {number[]} triggers - [readonly] Array of the analog values of the buttons/triggers.
      */
-    class Gamepad extends core.Object
+    class Gamepad extends obj.Object
     {
         constructor()
         {

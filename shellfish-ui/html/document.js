@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 {
     const POINTER_EVENT = !! window.PointerEvent;
 
@@ -250,7 +250,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
     /**
      * Class representing the root document.
      * 
-     * @extends core.Object
+     * @extends html.Object
      * @memberof html
      *
      * @property {bool} active - [readonly] Whether the document is currently active (the window and tab have focus).
@@ -273,7 +273,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @property {number} windowWidth - [readonly] Deprecated: Use `bboxWidth` instead. The current width of the document window.
      * @property {number} windowHeight - [readonly] Deprecated: Use `bboxHeight` instead. The current height of the document window.
      */
-    class Document extends core.Object
+    class Document extends obj.Object
     {
         constructor()
         {

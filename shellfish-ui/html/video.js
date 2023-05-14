@@ -67,6 +67,11 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
                     .style("display", "block")
                     .style("object-fit", "contain")
                     .attr("autoplay", "true")
+                    .attr("disablepictureinpicture", "true")
+                    .attr("disableremoteplayback", "true")
+                    .attr("x-webkit-airplay", "deny")
+                    .attr("controlslist", "nodownload nofullscreen noremoteplayback")
+                    .attr("pointer-events", "none")
                     .content(
                         low.tag("track")
                         .attr("kind", "subtitles")

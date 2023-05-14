@@ -839,8 +839,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
                 objectId: idCounter++,
                 objectLocation: "<?>",
                 objectType: this.constructor.name,
-                htmlEventListeners: [],
-                blobUrls: [],
                 typeCache: { },
                 connectionMonitors: { }
             });
@@ -1019,20 +1017,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             d.get(this).parent = null;
 
             propsManager.removeObject(this);
-
-            d.get(this).htmlEventListeners.forEach(entry =>
-            {
-                //console.log("removeEventListener: " + entry.type + ", " + JSON.stringify(entry.options));
-                entry.target.removeEventListener(entry.type, entry.listener, entry.options);
-            });
-            d.get(this).htmlEventListeners = [];
-
-            d.get(this).blobUrls.forEach(url =>
-            {
-                URL.revokeObjectURL(url);
-                console.log(d.get(this).objectType + "@" + d.get(this).objectLocation + " released object URL: " + url);
-            });
-            d.get(this).blobUrls = [];
 
             d.get(this).interpolators = { };
 
@@ -1606,70 +1590,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             return connHub.has(this, event);
         }
         
-        /**
-         * Adds a HTML event listener and registers it for proper removal when this
-         * object gets destroyed.
-         * This method is prefered to just using `addEventListener`, which may leak
-         * event listener callbacks along with their closures.
-         * @see {@link core.Object#removeHtmlEventListener removeHtmlEventListener}
-         * 
-         * @param {HTMLElement} target - The target HTML element.
-         * @param {string} type - The event type.
-         * @param {function} listener - The listener function.
-         * @param {object} [options] - Optional HTML event listener options.
-         */
-        addHtmlEventListener(target, type, listener, options)
-        {
-            target.addEventListener(type, listener, options);
-            d.get(this).htmlEventListeners.push({
-                target, type, listener, options
-            });
-        }
-
-        /**
-         * Removes the given HTML event listener. This is prefered to just using
-         * `removeEventListener`.
-         * @see {@link core.Object#addHtmlEventListener addHtmlEventListener}
-         * 
-         * @param {HTMLElement} target - The target HTML element.
-         * @param {string} type - The event type.
-         * @param {function} listener - The listener function.
-         * @param {object} [options] - Optional HTML event listener options.
-         */
-        removeHtmlEventListener(target, type, listener, options)
-        {
-            target.removeEventListener(type, listener, options);
-            const listeners = d.get(this).htmlEventListeners;
-            
-            const idx = listeners.findIndex(entry =>
-            {
-                return entry.target === target &&
-                       entry.type === type &&
-                       entry.listener === listener &&
-                       entry.options === options;
-            });
-
-            if (idx !== -1)
-            {
-                listeners.splice(idx, 1);
-            }
-        }
-
-        /**
-         * Creates an URL for the given blob. The URL is automatically revoked
-         * on destruction of this object.
-         * 
-         * @param {Blob} blob - The blob to create an URL for.
-         * @returns {string} - The URL.
-         */
-        blobUrl(blob)
-        {
-            const url = URL.createObjectURL(blob);
-            //console.log("Creating object URL (object size: " + blob.size + " bytes, type: " + (blob.type || "<unknown>") + "): " + url);
-            d.get(this).blobUrls.push(url);
-            return url;
-        }
-
         /**
          * Retrieves a shared resource identified by a key. If the resource did
          * not yet exist, it will be created using the supplied factory function.

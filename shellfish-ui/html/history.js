@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 {
     const d = new WeakMap();
 
@@ -32,10 +32,10 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * This element allows you to forge artificial history entries in order to
      * make use of the Back and Forward buttons of the browser.
      * 
-     * @extends core.Object
+     * @extends html.Object
      * @memberof html
      */
-    class History extends core.Object
+    class History extends obj.Object
     {
         constructor()
         {

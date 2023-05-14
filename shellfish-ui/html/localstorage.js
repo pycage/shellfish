@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 {
     const HAS_STORAGE = typeof localStorage !== undefined;
 
@@ -42,12 +42,12 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * **Note:** Multiple instances of the same document share the same local storage and
      * instances will see changes made by other instances immediately.
      * 
-     * @extends core.Object
+     * @extends html.Object
      * @memberof html
      * 
      * @property {string} namespace - (default: `""`) A namespace for distinguishing multiple instances.
      */
-    class LocalStorage extends core.Object
+    class LocalStorage extends obj.Object
     {
         constructor()
         {

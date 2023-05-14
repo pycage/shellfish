@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", "shellfish/core"], function (low, core)
+shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 {
     const d = new WeakMap();
 
@@ -30,7 +30,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * Class representing a file selector trigger.
      * 
      * @memberof html
-     * @extends core.Object
+     * @extends html.Object
      * 
      * @example
      * Button {
@@ -55,7 +55,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @property {bool} directory - (default: `false`) Whether to select directories instead of files.
      * @property {bool} multiple - (default: `false`) Whether to allow multi-selection.
      */
-    class FileSelector extends core.Object
+    class FileSelector extends obj.Object
     {
         constructor()
         {

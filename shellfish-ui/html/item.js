@@ -34,9 +34,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 shRequire(["shellfish/low",
-           "shellfish/core",
+           __dirname + "/object.js",
            "shellfish/core/matrix",
-           "shellfish/core/vector"], (low, core, mat, vec) =>
+           "shellfish/core/vector"], (low, obj, mat, vec) =>
 {
     /**
      * A keyboard event.
@@ -78,7 +78,7 @@ shRequire(["shellfish/low",
     /**
      * Base class representing a visual mid-level object.
      * @abstract
-     * @extends core.Object
+     * @extends html.Object
      * @memberof html
      * 
      * @property {bool} ancestorsEnabled - [readonly] Whether all ancestors are enabled.
@@ -125,7 +125,7 @@ shRequire(["shellfish/low",
      * @property {number} x - (default: `0`) The X coordinate value.
      * @property {number} y - (default: `0`) The Y coordinate value.
      */
-    class Item extends core.Object
+    class Item extends obj.Object
     {
         constructor()
         {

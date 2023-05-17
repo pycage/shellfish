@@ -133,6 +133,8 @@ Layouting elements on screen is intuitive, yet powerful.
 * The method {@link html.Document#httpRequest} creates a HTTP request with
   progress monitoring. It acts as a replacement for the `fetch` command.
   The property `maxHttpRequests` limits the number of simultaneous HTTP requests.
+* **API-Break:** The `when` function property of {@link server.HTTPRoute} takes
+  a {@link server.HTTPServer.HTTPRequestEvent} object now.
 
 ### April 2023
 * The method {@link core.Filesystem#write} now takes an optional progress callback

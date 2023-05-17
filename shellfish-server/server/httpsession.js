@@ -26,43 +26,6 @@ shRequire(["shellfish/core"], core =>
 {
     const modUrl = require("url");
 
-    /* Reads the HTTP request body.
-    */
-    function readRequest(request)
-    {
-        return new Promise((resolve, reject) =>
-        {
-            const chunks = [];
-            
-            request.on("data", chunk =>
-            {
-                chunks.push(chunk);
-            });
-    
-            request.on("end", () =>
-            {
-                resolve(Buffer.concat(chunks).toString("binary"));
-            });
-        });
-    }
-
-    /* Parses a HTTP range attribute and returns a [from, to] tuple.
-     * Returns an empty tuple if the range could not be parsed.
-     */
-    function parseRange(range)
-    {
-        let parts = range.split("=");
-        if (parts[0] === "bytes")
-        {
-            parts = parts[1].split("-");
-            return [parseInt(parts[0], 10), parseInt(parts[1] || "-1", 10)];
-        }
-        else
-        {
-            return [];
-        }
-    }
-
     function makeRequestEvent(self, urlMapper, request, response, user)
     {
         const now = Date.now();
@@ -76,7 +39,7 @@ shRequire(["shellfish/core"], core =>
                          (user ? user + "@" : "") +
                          d.get(self).sessionId + " - " +
                          request.method + " " +
-                         request.url + ": " +
+                         request.unmappedUrl.path + ": " +
                          code + " " + status + " " +
                          (Date.getTime() - now) + "ms");
                 self.responseReady(res);
@@ -84,27 +47,7 @@ shRequire(["shellfish/core"], core =>
             return r;
         };
 
-        const cookies = new Map();
-        if (request.headers.cookie)
-        {
-            const cookieString = request.headers.cookie;
-            cookieString.split(";").forEach(part =>
-            {
-                const cookie = part.split("=");
-                cookies.set(
-                    cookie[0].replace(/^ /g, ""),
-                    decodeURIComponent(cookie[1])
-                );
-            });
-        }
-
-        const headers = new Map();
-        for (const key in request.headers)
-        {
-            headers.set(key.toLowerCase(), request.headers[key]);
-        }
-
-        const urlObj = new modUrl.URL(urlMapper("" + request.url), "http://localhost");
+        const urlObj = new modUrl.URL(urlMapper("" + request.original.url), "http://localhost");
 
         const params = { };
         for (const entry of urlObj.searchParams.entries())
@@ -112,35 +55,28 @@ shRequire(["shellfish/core"], core =>
             params[entry[0]] = entry[1];
         }
 
-        return {
-            original: request,
-            accepted: false,
-            sourceAddress: request.connection.remoteAddress,
-            sourcePort: request.connection.remotePort,
-            cookies: cookies,
-            headers: headers,
-            method: request.method,
-            range: headers.has("range") ? parseRange(headers.get("range")) : [],
-            body: () => { return readRequest(request); },
-            stream: request,
-            response: makeResponse,
-            unmappedUrl: request.url,
-            url: {
-                hash: urlObj.hash,
-                host: urlObj.host,
-                hostname: urlObj.hostname,
-                href: urlObj.href,
-                origin: urlObj.origin,
-                parameters: params,
-                password: urlObj.password,
-                path: urlObj.pathname,
-                port: urlObj.port,
-                protocol: urlObj.protocol,
-                search: urlObj.search,
-                username: urlObj.username
-            },
-            user: user
-        };
+        request.body = () => { return readRequest(request.original); },
+        request.stream = request.original,
+        request.response = makeResponse,
+        request.unmappedUrl = request.url;
+        request.url = {
+            hash: urlObj.hash,
+            host: urlObj.host,
+            hostname: urlObj.hostname,
+            href: urlObj.href,
+            origin: urlObj.origin,
+            parameters: params,
+            password: urlObj.password,
+            path: urlObj.pathname,
+            port: urlObj.port,
+            protocol: urlObj.protocol,
+            search: urlObj.search,
+            username: urlObj.username
+        },
+        request.user = user;
+
+        return request;
+
     }
 
     /**
@@ -418,7 +354,7 @@ shRequire(["shellfish/core"], core =>
                      (d.get(this).user ? d.get(this).user + "@" : "") +
                      d.get(this).sessionId + " - " +
                      d.get(this).request.method + " " +
-                     d.get(this).request.url + ": " +
+                     d.get(this).request.unmappedUrl.path + ": " +
                      code + " " + status);
             const r = new HTTPResponse(d.get(this).response,
                                        code,

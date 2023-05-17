@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -60,28 +60,8 @@ shRequire(["shellfish/core"], core =>
         {
             const priv = d.get(this);
 
-            const headers = new Map();
-            for (const key in request.headers)
-            {
-                headers.set(key.toLowerCase(), request.headers[key]);
-            }
-
-            const cookies = new Map();
-            if (request.headers.cookie)
-            {
-                const cookieString = request.headers.cookie;
-                cookieString.split(";").forEach(part =>
-                {
-                    const cookie = part.split("=");
-                    cookies.set(
-                        cookie[0].replace(/^ /g, ""),
-                        decodeURIComponent(cookie[1])
-                    );
-                });
-            }
-
-            const authToken = cookies.get("AuthToken");
-            const sourceAddress = request.connection.remoteAddress;
+            const authToken = request.cookies.get("AuthToken");
+            const sourceAddress = request.sourceAddress;
 
             return new Promise((resolve, reject) =>
             {

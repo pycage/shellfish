@@ -32,14 +32,30 @@ shRequire(["shellfish/core"], core =>
      * Routes may be used to implement virtual servers, or just for handling
      * different URLs with different backends.
      * 
-     * The `prefix` property holds a path prefix that determines whether to
-     * handle a particular request.
+     * The function of the `when` property decides if a request is to be handled
+     * by a HTTP route.
+     * 
+     * ### Example
+     * 
+     * Implement virtual servers by evaluating the HTTP Host header.
+     * 
+     *     HTTPRoute {
+     *         when: req.headers.get("Host") === "virtualhost1.com"
+     *     }
      * 
      * The `delegate` property holds a {@link server.HTTPSession} element as
      * a template from which sessions handlers are created dynamically.
      * A session is identified by the result of the `generateSessionId` function,
      * and the same session will reuse the same session handler for further
      * requests.
+     * 
+     * ### Example
+     * 
+     * Identify sessions by cookie.
+     * 
+     *     HTTPRoute {
+     *         generateSessionId: req => req.cookies.get("Session-Cookie") || ""
+     *     }
      * 
      * If the `authentication` property is set to an authentication method, only
      * authenticated requests will be accepted.
@@ -50,8 +66,8 @@ shRequire(["shellfish/core"], core =>
      * @property {server.HTTPAuth} authentication - (default: `null`) The authentication method, or `null`.
      * @property {server.HTTPSession} delegate - (default: `null`) The session delegate.
      * @property {function} generateSessionId - A function for generating a session ID out of a request.
-     * @property {string} prefix - (default: `"/"`) The path prefix for which this route is to be used.
-     * @property {function} when - (default: `() => true`) A function for testing whether a request is to be handled by a request.
+     * @property {string} prefix - (default: `"/"`) Deprecated: Use the `when` property instead. The path prefix for which this route is to be used.
+     * @property {function} when - (default: `request => true`) A function for testing whether a request is to be handled by a request.
      */
     class HTTPRoute extends core.Object
     {
@@ -67,7 +83,7 @@ shRequire(["shellfish/core"], core =>
                 prefix: "/",
                 generateSessionId: request =>
                 {
-                    return request.connection.remoteAddress + ":" + request.connection.remotePort;
+                    return request.sourceAddress + ":" + request.sourcePort;
                 }
             });
 
@@ -146,8 +162,8 @@ shRequire(["shellfish/core"], core =>
                     if (user === null)
                     {
                         this.log("HTTP", "info", "Requesting Authorization for " +
-                                 request.connection.remoteAddress + ":" + request.connection.remotePort +
-                                 " - " + request.method + " " + request.url);
+                                 request.sourceAddress + ":" + request.sourcePort +
+                                 " - " + request.method + " " + request.url.path);
     
                         priv.authentication.requestAuthorization(response);
                         

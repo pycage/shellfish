@@ -186,7 +186,7 @@ shRequire(["shellfish/core"], core =>
         authorize(request)
         {
             const priv = d.get(this);
-            const authHeader = request.headers["authorization"];
+            const authHeader = request.headers.get("authorization");
    
             return new Promise((resolve, reject) =>
             {

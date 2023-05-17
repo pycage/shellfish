@@ -27,6 +27,97 @@ shRequire(["shellfish/core"], core =>
     const modFs = require("fs");
     const modHttp = require("http");
     const modHttps = require("https");
+    const modUrl = require("url");
+
+
+    /* Parses a HTTP range attribute and returns a [from, to] tuple.
+     * Returns an empty tuple if the range could not be parsed.
+     */
+    function parseRange(range)
+    {
+        let parts = range.split("=");
+        if (parts[0] === "bytes")
+        {
+            parts = parts[1].split("-");
+            return [parseInt(parts[0], 10), parseInt(parts[1] || "-1", 10)];
+        }
+        else
+        {
+            return [];
+        }
+    }
+
+    /**
+     * A HTTP request event.
+     * @typedef HTTPRequestEvent
+     * @memberof server.HTTPServer
+     * 
+     * @property {bool} accepted - (default: `false`) Set to `true` to accept the event and prevent it from bubbling up.
+     * @property {Map} cookies - A map of the HTTP cookies.
+     * @property {Map} headers - A map of the HTTP headers.
+     * @property {string} method - The name of the HTTP method.
+     * @property {HTTPRequest} original - The original HTTP request of Node.js.
+     * @property {string} sourceAddress - The remote source address.
+     * @property {number} sourcePort - The remote source port.
+     * @property {object} url - The URL.
+     */
+    function makeRequestEvent(request)
+    {
+        const now = Date.now();
+
+        const cookies = new Map();
+        if (request.headers.cookie)
+        {
+            const cookieString = request.headers.cookie;
+            cookieString.split(";").forEach(part =>
+            {
+                const cookie = part.split("=");
+                cookies.set(
+                    cookie[0].replace(/^ /g, ""),
+                    decodeURIComponent(cookie[1])
+                );
+            });
+        }
+
+        const headers = new Map();
+        for (const key in request.headers)
+        {
+            headers.set(key.toLowerCase(), request.headers[key]);
+        }
+
+        const urlObj = new modUrl.URL("" + request.url, "http://localhost");
+
+        const params = { };
+        for (const entry of urlObj.searchParams.entries())
+        {
+            params[entry[0]] = entry[1];
+        }
+
+        return {
+            accepted: false,
+            original: request,
+            sourceAddress: request.connection.remoteAddress,
+            sourcePort: request.connection.remotePort,
+            cookies: cookies,
+            headers: headers,
+            method: request.method,
+            range: headers.has("range") ? parseRange(headers.get("range")) : [],
+            url: {
+                hash: urlObj.hash,
+                host: urlObj.host,
+                hostname: urlObj.hostname,
+                href: urlObj.href,
+                origin: urlObj.origin,
+                parameters: params,
+                password: urlObj.password,
+                path: urlObj.pathname,
+                port: urlObj.port,
+                protocol: urlObj.protocol,
+                search: urlObj.search,
+                username: urlObj.username
+            }
+        };
+    }
 
     const d = new WeakMap();
 
@@ -34,7 +125,33 @@ shRequire(["shellfish/core"], core =>
      * Class representing a HTTP server.
      * 
      * The HTTP server passes requests to its {@link server.HTTPRoute} child
-     * elements.
+     * elements. The HTTP route handling the request will create or re-use a
+     * delegate {@link server.HTTPSession} handler.
+     * 
+     * Every request is handled by at most one HTTP route.
+     * 
+     * ### Example
+     * 
+     *     HTTPServer {
+     *         port: 8080
+     * 
+     *         HTTPRoute {
+     *             // handle requests with path starting with "/api"
+     *             when: req => req.url.path.startsWith("/api")
+     * 
+     *             delegate: template HTTPSession {
+     * 
+     *             }
+     *         }
+     * 
+     *         HTTPRoute {
+     *             // handle all remaining requests
+     * 
+     *             delegate: template WebSession {
+     * 
+     *             }
+     *         }
+     *     }
      * 
      * @extends core.Object
      * @memberof server
@@ -187,16 +304,18 @@ shRequire(["shellfish/core"], core =>
 
             priv.server.on("request", (request, response) =>
             {
+                const ev = makeRequestEvent(request);
+
                 let handled = false;
                 this.children
                 .filter(c => c.when !== undefined && c.handleRequest !== undefined)
                 .filter(c => request.url.startsWith(c.prefix))
-                .filter(c => c.when(request))
+                .filter(c => c.when(ev))
                 .forEach((route, idx) =>
                 {
                     if (idx === 0)
                     {
-                        route.handleRequest(request, response);
+                        route.handleRequest(ev, response);
                         handled = true;
                     }
                 });

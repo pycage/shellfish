@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -32,7 +32,7 @@ HTTPServer {
     port: 8000
 
     HTTPRoute {
-        when: req => req.url.startsWith("/shellfish/doc")
+        when: req => req.url.path.startsWith("/shellfish/doc")
 
         delegate: template WebSession {
             filesystem: LocalFS { }
@@ -45,7 +45,7 @@ HTTPServer {
     }
 
     HTTPRoute {
-        when: req => req.url.startsWith("/shellfish/ui-gallery")
+        when: req => req.url.path.startsWith("/shellfish/ui-gallery")
 
         delegate: template HTTPSession {
 
@@ -61,7 +61,7 @@ HTTPServer {
     }
 
     HTTPRoute {
-        when: req => req.url.startsWith("/shellfish")
+        when: req => req.url.path.startsWith("/shellfish")
 
         delegate: template WebSession {
             filesystem: LocalFS { }

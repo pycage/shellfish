@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -38,7 +38,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @extends core.Object
      * 
      * @property {RegExp} regexp - (default: `/./`) The regular expression to match the token.
-     * @property {html.Color} color - (default: `"black"`) The color of the token.
+     * @property {core.Color} color - (default: `"black"`) The color of the token.
      */
     class SyntaxToken extends core.Object
     {

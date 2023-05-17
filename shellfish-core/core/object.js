@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire([__dirname + "/util/color.js"], (colUtil) =>
+shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, vec) =>
 {
 
     /**
@@ -956,6 +956,18 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
          */
         colorName(name) { return colUtil.color(name); }
 
+        /**
+         * Creates a 3-component vector.
+         * 
+         * @param {number} x - The X component.
+         * @param {number} y - The Y component.
+         * @param {number} z - The Z component.
+         * @returns {core.Vec3} The vector.
+         */
+        vec3(x, y, z)
+        {
+            return vec.vec3(x, y, z);
+        }
 
         /**
          * Initializes this object. Call this method after creating the object
@@ -975,18 +987,6 @@ shRequire([__dirname + "/util/color.js"], (colUtil) =>
             this.trigger("initialization");
 
             //console.log(`Initialized: ${this.constructor.name}:${this.objectId} (${this.objectLocation}), ${objCounter} objects remaining`);
-        }
-
-        /**
-         * Discards this object.
-         * 
-         * @deprecated Objects are discarded automatically once the reference count reaches 0.
-         */
-        discard()
-        {
-            console.warn(this.objectType + "@" + this.objectLocation +
-                         ": Calling discard() is deprecated and should not be used.");
-            this.destroy();
         }
 
         /**

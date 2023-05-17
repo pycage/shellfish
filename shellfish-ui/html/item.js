@@ -35,8 +35,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire(["shellfish/low",
            __dirname + "/object.js",
-           "shellfish/core/matrix",
-           "shellfish/core/vector"], (low, obj, mat, vec) =>
+           "shellfish/core/matrix"], (low, obj, mat) =>
 {
     /**
      * A keyboard event.
@@ -1099,19 +1098,6 @@ shRequire(["shellfish/low",
             {
                 item.focus();
             }
-        }
-
-        /**
-         * Creates a 3-component vector.
-         * 
-         * @param {number} x - The X component.
-         * @param {number} y - The Y component.
-         * @param {number} z - The Z component.
-         * @returns {html.Vec3} The vector.
-         */
-        vec3(x, y, z)
-        {
-            return vec.vec3(x, y, z);
         }
 
         /**

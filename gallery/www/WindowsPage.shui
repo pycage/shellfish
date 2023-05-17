@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit examples.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -93,9 +93,13 @@ Page {
             resizable: resizableCheckBox.checked
             draggable: draggableCheckBox.checked
 
-            x: parent.bbox.width - width
-            width: 300
-            height: 400
+            x: parent.bboxWidth - bboxWidth
+
+            onInitialization: () =>
+            {
+                thisContentArea.width = 300;
+                thisContentArea.height = 400;
+            }
 
             into title WindowTitle {
                 visible: titleCheckBox.checked
@@ -193,8 +197,11 @@ Page {
                 property contentType: modelData.value.type
                 property icon: modelData.value.icon
 
-                width: 600
-                height: 400
+                onInitialization: () =>
+                {
+                    thisContentArea.width = 600;
+                    thisContentArea.height = 400;
+                }
 
                 into title WindowTitle {
                     icon: win.modelData.value.icon

@@ -231,6 +231,9 @@ MouseBox {
     MouseBox {
         id: contentArea
 
+        fillWidth: win.maximized
+        fillHeight: win.maximized
+
         onPointerDown: ev =>
         {
             if (! ev.directTarget)

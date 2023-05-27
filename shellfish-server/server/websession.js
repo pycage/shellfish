@@ -220,8 +220,8 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                         // redirect to index file
                         this.response(302, "Relocate")
                         .header("Location",
-                                ev.unmappedUrl +
-                                (ev.unmappedUrl.endsWith("/") ? "" : "/") +
+                                ev.unmappedUrl.path +
+                                (ev.unmappedUrl.path.endsWith("/") ? "" : "/") +
                                 priv.indexFile)
                         .send();
                     }
@@ -232,7 +232,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                         .then(files =>
                         {
                             this.response(200, "OK")
-                            .body(makeIndexDocument(ev.unmappedUrl, priv.root, path, files), "text/html")
+                            .body(makeIndexDocument(ev.unmappedUrl.path, priv.root, path, files), "text/html")
                             .send();
                         })
                         .catch(err =>

@@ -26,6 +26,26 @@ shRequire(["shellfish/core"], core =>
 {
     const modUrl = require("url");
 
+    /* Reads the HTTP request body.
+     */
+    function readRequest(request)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            const chunks = [];
+
+            request.on("data", chunk =>
+            {
+                chunks.push(chunk);
+            });
+
+            request.on("end", () =>
+            {
+                resolve(Buffer.concat(chunks).toString("binary"));
+            });
+        });
+    }
+
     function makeRequestEvent(self, urlMapper, request, response, user)
     {
         const now = Date.now();
@@ -41,7 +61,7 @@ shRequire(["shellfish/core"], core =>
                          request.method + " " +
                          request.unmappedUrl.path + ": " +
                          code + " " + status + " " +
-                         (Date.getTime() - now) + "ms");
+                         (Date.now() - now) + "ms");
                 self.responseReady(res);
             }));
             return r;

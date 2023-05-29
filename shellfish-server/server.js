@@ -40,6 +40,7 @@ const includes = [
     "httpserver",
     "httpsession",
     "localfs",
+    "rpcsession",
     "tokenauth",
     "websession"
 ];

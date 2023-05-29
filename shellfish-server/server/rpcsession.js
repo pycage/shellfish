@@ -26,7 +26,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
 
     let idCounter = 0;
 
-    function processInParameters(self, parameters)
+    function processInParameters(self, clientId, parameters)
     {
         return parameters.map(p =>
         {
@@ -38,7 +38,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                     const callbackId = p.safeCallback;
                     return (...parameters) =>
                     {
-                        self.postMessage({ type: "callback", callback: callbackId, parameters });
+                        self.postMessage(clientId, { type: "callback", callback: callbackId, parameters });
                     };
                 }
                 else
@@ -67,22 +67,13 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
         }
     }
 
-    function handleMessage(self, msg)
+    function handleMessage(self, clientId, msg)
     {
         const priv = d.get(self);
 
-        if (msg.type === "task")
+        if (msg.type === "heartbeat")
         {
-            const result = eval(msg.code);
-            handleResult(result, r =>
-            {
-                self.postMessage({ type: "result", value: r });
-            },
-            err =>
-            {
-                self.postMessage({ type: "error", value: "" + err });
-                self.postMessage({ type: "exit" });
-            });
+            priv.clients.get(clientId).expires = Date.now() + 60000;
         }
         else if (msg.type === "call")
         {
@@ -90,41 +81,91 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
 
             if (priv.methods.has(msg.name))
             {
-                const parameters = processInParameters(self, msg.parameters);
+                const parameters = processInParameters(self, clientId, msg.parameters);
                 try
                 {
                     const result = priv.methods.get(msg.name)(...parameters);
                     handleResult(result, r =>
                     {
-                        self.postMessage({ type: "methodResult", callId: msg.callId, value: r });
+                        self.postMessage(clientId, { type: "methodResult", callId: msg.callId, value: r });
                     },
                     err =>
                     {
-                        self.postMessage({ type: "methodError", callId: msg.callId, value: "" + err });
+                        self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: "" + err });
                     });
                 }
                 catch (err)
                 {
-                    self.postMessage({ type: "methodError", callId: msg.callId, value: "" + err });
+                    self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: "" + err });
                 }
             }
             else
             {
                 const err = "No such method to call: " + msg.name;
-                self.postMessage({ type: "methodError", callId: msg.callId, value: err });
+                self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: err });
             }
         }
     }
 
     const d = new WeakMap();
 
+    /**
+     * Class representing a session for handling remote procedure calls (RPC)
+     * to use with {@link html.RpcProxy} as the client-side counter part.
+     * 
+     * The RPC session runs on a {@link server.HTTPServer} and uses the server's
+     * SSL encryption, if available. The {@link server.HTTPRoute} may assign
+     * an authentication method to the RPC session as well.
+     * 
+     * ### Example
+     *     HTTPRoute {
+     *         when: req => req.url.path === "/::rpc"
+     * 
+     *         delegate: template RpcSession {
+     *             onInitialization: () =>
+     *             {
+     *                 registerMethod("sum", (a, b) => a + b);
+     *                 registerMethod("countDown", cb =>
+     *                 {
+     *                     for (let i = 10; i > 0; --i)
+     *                     {
+     *                         cb(i);
+     *                     }
+     *                 });
+     *             }
+     *         }
+     *     }
+     * 
+     * ### Example: Creating and returning a RPC proxy object to the client
+     * 
+     *     class MyClass
+     *     {
+     *         constructor(initial)
+     *         {
+     *             this.value = initial;
+     *         }
+     * 
+     *         add(n) { this.value += n; }
+     *
+     *         value() { return this.value; }
+     *     }
+     * 
+     *     registerMethod("getMyClass", (initial) =>
+     *     {
+     *         return proxyObject(new MyClass(initial));
+     *     });
+     * 
+     * @extends server.HTTPSession
+     * @memberof server
+     */
     class RpcSession extends httpsession.HTTPSession
     {
         constructor()
         {
             super();
             d.set(this, {
-                reverseChannel: null,
+                clients: new Map(),
+                reverseChannels: new Map(),
                 methods: new Map()
             });
 
@@ -132,41 +173,125 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
 
             const priv = d.get(this);
 
+            this.heartbeat();
+            this.closeExpired();
+
             this.onRequest = req =>
             {
-                console.log("message request " + req.method);
                 if (req.method === "GET")
                 {
+                    const clientId = this.generateClientId();
+                    this.log("RPC", "info", clientId + "@" + req.sourceAddress + " CONNECT");
+
                     // open reverse channel
-                    priv.reverseChannel = new modStream.PassThrough();
+                    const reverseChannel = new modStream.PassThrough();
+                    reverseChannel.on("close", () =>
+                    {
+                        console.log("Reverse channel closed");
+                        priv.clients.delete(clientId);
+                    });
+
+                    reverseChannel.on("error", err =>
+                    {
+                        console.log("Reverse channel closed on error: " + err);
+                        priv.clients.delete(clientId);
+                    });
+
+                    priv.clients.set(clientId, { reverseChannel, expires: Date.now() + 60000 });
 
                     req.response(200, "OK")
-                    .stream(priv.reverseChannel, "application/x-shellfish-socket", -1)
+                    .stream(reverseChannel, "application/x-shellfish-rpc", -1)
                     .send();
 
-                    this.postMessage({ type: "ready" });
+                    this.postMessage(clientId, { type: "ready", clientId: clientId });
                 }
                 else if (req.method === "POST")
                 {
                     // incoming message
                     req.body().then(data =>
                     {
-                        console.log(data);
                         const msg = JSON.parse(data);
-                        handleMessage(this, msg);
-                        //this.message(msg);
+                        this.log("RPC", "info", msg.clientId + "@" + req.sourceAddress + " RECEIVE " + msg.type);
+
+                        if (! priv.clients.has(msg.clientId))
+                        {
+                            this.log("RPC", "error", msg.clientId + "@" + req.sourceAddress + " NOT CONNECTED");
+                            req.response(500, "Not Connected")
+                            .send();
+                        }
+                        else
+                        {
+                            handleMessage(this, msg.clientId, msg);
+                            req.response(200, "OK")
+                            .send();
+                        }
                     });
                 }
             };
         }
 
-        postMessage(message)
+        generateClientId()
+        {
+            let clientId = "";
+            do
+            {
+                clientId = Math.floor(Math.random() * 16777216).toString(16) + "-" +
+                           Math.floor(Math.random() * 16777216).toString(16) + "-" +
+                           Math.floor(Math.random() * 16777216).toString(16);
+            }
+            while (d.get(this).clients.has(clientId));
+
+            return clientId;
+        }
+
+        heartbeat()
+        {
+            const priv = d.get(this);
+            const clientIds = [...priv.clients.keys()];
+
+            clientIds.forEach(clientId =>
+            {
+                this.postMessage(clientId, { type: "heartbeat" });
+            });
+
+            this.wait(30000)
+            .then(() =>
+            {
+                this.heartbeat();
+            });
+        }
+
+        closeExpired()
+        {
+            console.log("Checking for expired connections");
+            const priv = d.get(this);
+            const clientIds = [...priv.clients.keys()];
+
+            clientIds.forEach(clientId =>
+            {
+                const client = priv.clients.get(clientId);
+                if (client.expires < Date.now())
+                {
+                    console.log("Removing dead client " + clientId);
+                    client.reverseChannel.end();
+                    priv.clients.delete(clientId);
+                }
+            });
+
+            this.wait(60000)
+            .then(() =>
+            {
+                this.closeExpired();
+            });
+        }
+
+        postMessage(clientId, message)
         {
             const priv = d.get(this);
 
             const enc = new TextEncoder();
             const data = enc.encode(JSON.stringify(message));
-            console.log("POST " + JSON.stringify(message));
+            this.log("RPC", "info", clientId + " SEND " + message.type);
 
             const size = data.length;
             const buffer = new ArrayBuffer(size + 4);
@@ -175,14 +300,27 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
             const view8 = new Uint8Array(buffer);
             view8.set(data, 4);
 
-            priv.reverseChannel.write(view8);
+            priv.clients.get(clientId).reverseChannel.write(view8);
         }
 
+        /**
+         * Registers a function as RPC method.
+         * 
+         * @param {string} name - The name of the method.
+         * @param {function} f - The method's implementation.
+         */
         registerMethod(name, f)
         {
             d.get(this).methods.set(name, f);
         }
 
+        /**
+         * Creates a RPC proxy object of the given object, which can then be
+         * passed to the RPC client.
+         * 
+         * @param {object} obj - The object for which to create the proxy.
+         * @returns {object} The RPC proxy object.
+         */
         proxyObject(obj)
         {
             const proxyId = idCounter;

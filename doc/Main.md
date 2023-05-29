@@ -130,6 +130,8 @@ Layouting elements on screen is intuitive, yet powerful.
 ## News
 
 ### May 2023
+* The new elements {@link server.RpcSession} and {@link html.RpcProxy} allow
+  for a HTTP-based asynchronous RPC connection between client and server.
 * The method {@link html.Document#httpRequest} creates a HTTP request with
   progress monitoring. It acts as a replacement for the `fetch` command.
   The property `maxHttpRequests` limits the number of simultaneous HTTP requests.

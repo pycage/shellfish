@@ -83,6 +83,7 @@ const mods = [
     "numberanimation",
     "offlinefs",
     "parallelanimation",
+    "rpcproxy",
     "ruler",
     "scriptaction",
     "sequentialanimation",
@@ -93,7 +94,7 @@ const mods = [
     "tileset",
     "video",
     "waitaction",
-    "websocket",
+    "websocket"
 ];
 
 shRequire(css.map(s => __dirname + "/style/" + s + ".css"), () =>

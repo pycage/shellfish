@@ -28,35 +28,67 @@ shRequire(["shellfish/core"], core =>
 
     class MessageSocket
     {
-
-        constructor(host, port, handler)
+        constructor(endpoint, handler)
         {
-            fetch("/shrpc")
+            this.reader = null;
+            this.endpoint = endpoint;
+            this.handler = handler;
+        }
+
+        postMessage(message)
+        {
+            console.log("Send: " + JSON.stringify(message));
+
+            fetch(this.endpoint, {
+                method: "POST",
+                body: JSON.stringify(message)
+            })
+            .catch(err =>
+            {
+                console.error(err);
+            });
+        }
+
+        connect()
+        {
+            fetch(this.endpoint)
             .then(async response =>
             {
                 if (response.ok)
                 {
-                    console.log("got RPC reverse channel");
+                    console.log("Established reverse channel");
                     let buffer = null;
                     let bufferOffset = 0;
                     let dataOffset = 0;
 
-                    const reader = response.body.getReader();
+                    this.reader = response.body.getReader();
 
-                    while (true)
+                    let done = false;
+                    let value = null;
+
+                    while (! done)
                     {
-                        const { done, value } = await reader.read();
-
+                        if (value === null)
+                        {
+                            console.log("Reverse channel is waiting for data");
+                            const r = await this.reader.read();
+                            done = r.done;
+                            value = r.value;
+                            dataOffset = 0;
+                        }
+                        
                         if (buffer === null)
                         {
-                            const view32 = new Uint32Array(value.buffer, 0, 1);
-                            const size = view32[0];
+                            const size = value[dataOffset++] +
+                                         (value[dataOffset++] << 8) +
+                                         (value[dataOffset++] << 16) +
+                                         (value[dataOffset++] << 24);
+
                             buffer = new ArrayBuffer(size);
-                            dataOffset = 4;
                             bufferOffset = 0;
                         }
 
-                        const view8 = new Uint8Array(value.buffer, dataOffset);
+                        const view8 = new Uint8Array(value.buffer, dataOffset, Math.min(value.length, buffer.byteLength));
                         new Uint8Array(buffer, bufferOffset).set(view8);
                         bufferOffset += view8.length;
                         dataOffset += view8.length;
@@ -67,14 +99,20 @@ shRequire(["shellfish/core"], core =>
                             const json = dec.decode(buffer);
                             try
                             {
+                                console.log("Receive: " + json);
                                 const message = JSON.parse(json);
-                                handler(message);
+                                this.handler(message);
                             }
                             catch (err)
                             {
                                 console.error(err);
                             }
                             buffer = null;
+                        }
+
+                        if (dataOffset === value.byteLength)
+                        {
+                            value = null;
                         }
 
                         if (done)
@@ -87,184 +125,163 @@ shRequire(["shellfish/core"], core =>
             })
             .catch(err =>
             {
-                console.log(err);
+                console.log("Connection closed: " + err);
+                this.handler({ type: "exit" });
             });
+
         }
 
-        postMessage(message)
+        close()
         {
-            fetch("/shrpc", {
-                method: "POST",
-                body: JSON.stringify(message)
-            });
+            if (this.reader)
+            {
+                this.reader.cancel();
+            }
         }
-
     }
 
 
     const d = new WeakMap();
 
+    /**
+     * Class representing a proxy for handling remote procedure calls (RPC)
+     * on a server with {@link server.RpcSession} as counter part.
+     * 
+     * ### Example: Invoke a remote function
+     *     RpcProxy {
+     * 
+     *         onInitialization: () =>
+     *         {
+     *             console.log("Invoking a remote function");
+     *             invoke("remoteCall", [1, 2, 3])
+     *             .then(result =>
+     *             {
+     *                 console.log("Result: " + result);
+     *             }
+     *         }
+     * 
+     *     }
+     * 
+     * It is possible to pass callback functions to a RPC call.
+     * 
+     * ### Example: Using callbacks
+     * 
+     *     invoke("doSomething", progress =>
+     *     {
+     *         console.log("Current progress: " + Math.round(progress * 100) + "%");
+     *     })
+     *     .then(result =>
+     *     {
+     *         console.log("Result: " + result);
+     *     });
+     * 
+     * The RPC endpoint may return proxy objects for complex interfaces.
+     * 
+     * ### Example: Using a proxy object
+     * 
+     *     invoke("getProxyInstance")
+     *     .then(async proxy =>
+     *     {
+     *         const sum = await proxy.addRemote(1, 2);
+     *         await proxy.countDown(n => console.log(n));
+     *     });
+     * 
+     * @extends core.Object
+     * @memberof html
+     * 
+     * @property {string} endpoint - (default: `"/"`) The address of the RPC endpoint.
+     */
     class RpcProxy extends core.Object
     {
         constructor()
         {
             super();
             d.set(this, {
-                size: 1,
-                workers: [],
-                queue: [],
-                taskMap: new Map(),
+                endpoint: "/",
+                socket: null,
+                task: { },
+                callbacks: [],
                 callMap: new Map(),
-                callbackMap: new Map()
+                callbackMap: new Map(),
+                clientId: "",
+                messageQueue: []
             });
 
-            this.notifyable("free");
-            this.notifyable("pending");
-            this.notifyable("size");
-            this.notifyable("waiting");
-
-            this.scale(1);
+            this.notifyable("endpoint");
 
             this.onDestruction = () =>
             {
+                console.log("Destroying RPC proxy " + this.objectId);
                 const priv = d.get(this);
-                priv.queue = [];
-                priv.workers.forEach(item =>
-                {
-                    item.worker.terminate();
-                });
-                priv.workers = [];
-                priv.taskMap.clear();
+                priv.socket.close();
                 priv.callMap.clear();
                 priv.callbackMap.clear();
             };
         }
 
-        get free() { return d.get(this).workers.filter(item => item.free).length; }
-        get waiting() { return d.get(this).queue.length; }
-        get pending() { return d.get(this).workers.filter(item => ! item.free).length; }
-
-        get size() { return d.get(this).size; }
-        set size(s)
+        get endpoint() { return d.get(this).endpoint; }
+        set endpoint(e)
         {
-            if (s !== d.get(this).size)
-            {
-                d.get(this).size = s;
-                this.scale(s);
-                this.sizeChanged();
-            }
+            d.get(this).endpoint = e;
+            this.endpointChanged();
+            this.connect();
         }
 
-        scale(n)
+        connect()
         {
             const priv = d.get(this);
 
-            // re-order so we terminate free tasks first
-            priv.workers = priv.workers.sort((a, b) => ! a.free && b.free ? -1 : 1);
-
-            while (n < priv.workers.length)
+            if (priv.socket)
             {
-                const item = priv.workers.pop();
-                item.worker.terminate();
+                priv.socket.close();
             }
 
-            while (n > priv.workers.length)
+            priv.socket = new MessageSocket(priv.endpoint, msg =>
             {
-                const w = new MessageSocket("localhost", 8000, msg =>
+                if (msg.type === "ready")
                 {
-                    console.log("HANDLE");
-                    console.log(msg);
-                    if (msg.type === "ready")
+                    priv.clientId = msg.clientId;
+                    priv.messageQueue.forEach(callId => this.call(callId));
+                    priv.messageQueue = [];
+                }
+                else if (msg.type === "heartbeat")
+                {
+                    console.log("Got heartbeat from RPC endpoint");
+                    priv.socket.postMessage({ type: "heartbeat", clientId: priv.clientId });
+                }
+                else if (msg.type === "exit")
+                {
+                    console.log("RPC connection closed");
+                    priv.callbacks.forEach(cbId =>
                     {
-                        workerItem.ready = true;
-                        this.checkQueue();
-                    }
-                    else if (msg.type === "exit")
+                        priv.callbackMap.delete(cbId);
+                    });
+                    priv.callbacks = [];
+                    priv.clientId = "";
+                    priv.socket = null;
+                }
+                else if (msg.type === "methodResult")
+                {
+                    console.log(priv.callMap);
+                    priv.callMap.get(msg.callId).resolve(this.processOutParameters([msg.value])[0]);
+                    priv.callMap.delete(msg.callId);
+                }
+                else if (msg.type === "methodError")
+                {
+                    priv.callMap.get(msg.callId).reject(msg.value);
+                    priv.callMap.delete(msg.callId);
+                }
+                else if (msg.type === "callback")
+                {
+                    const params = this.processOutParameters(msg.parameters);
+                    const remove = priv.callbackMap.get(msg.callback)(...params);
+                    if (remove)
                     {
-                        priv.taskMap.get(workerItem.taskId).callbacks.forEach(cbId =>
-                        {
-                            priv.callbackMap.delete(cbId);
-                        });
-                        priv.taskMap.delete(workerItem.taskId);
-                        workerItem.free = true;
-                        workerItem.taskId = -1;
-                        this.freeChanged();
-                        this.pendingChanged();
-                        this.checkQueue();
+                        priv.callbackMap.delete(msg.callback);
                     }
-                    else if (msg.type === "methodResult")
-                    {
-                        priv.callMap.get(msg.callId).resolve(this.processOutParameters(workerItem.taskId, [msg.value])[0]);
-                        priv.callMap.delete(msg.callId);
-                    }
-                    else if (msg.type === "methodError")
-                    {
-                        priv.callMap.get(msg.callId).reject(msg.value);
-                        priv.callMap.delete(msg.callId);
-                    }
-                    else if (msg.type === "result")
-                    {
-                        priv.taskMap.get(workerItem.taskId).resolve(this.processOutParameters(workerItem.taskId, [msg.value])[0]);
-                    }
-                    else if (msg.type === "error")
-                    {
-                        priv.taskMap.get(workerItem.taskId).reject(msg.value);
-
-                    }
-                    else if (msg.type === "callback")
-                    {
-                        //console.log("Callback parameters: " + JSON.stringify(msg));
-                        const params = this.processOutParameters(workerItem.taskId, msg.parameters);
-                        const remove = priv.callbackMap.get(msg.callback)(...params);
-                        if (remove)
-                        {
-                            priv.callbackMap.delete(msg.callback);
-                        }
-                    }
-                });
-
-                const workerItem = { worker: w, free: true, ready: false, taskId: -1 };
-                priv.workers.push(workerItem);
-            }
-
-            this.freeChanged();
-        }
-
-        checkQueue()
-        {
-            const priv = d.get(this);
-            const freeWorkers = priv.workers.filter(item => item.free);
-            let freeCount = freeWorkers.length;
-
-            while (freeCount > 0 && priv.queue.length > 0)
-            {
-                const taskId = priv.queue.shift();
-                this.run(taskId);
-                --freeCount;
-                this.waitingChanged();
-            }
-        }
-
-        run(taskId)
-        {
-            const priv = d.get(this);
-            const freeWorkers = priv.workers.filter(item => item.free && item.ready);
-            if (freeWorkers.length > 0)
-            {
-                // run
-                const taskItem = priv.taskMap.get(taskId);
-                const workerItem = freeWorkers[0];
-                workerItem.taskId = taskId;
-                workerItem.free = false;
-                workerItem.worker.postMessage({ type: "task", code: taskItem.code, parameters: taskItem.parameters });
-                this.freeChanged();
-                this.pendingChanged();
-            }
-            else
-            {
-                priv.queue.push(taskId);
-                this.waitingChanged();
-            }
+                }
+            });
+            priv.socket.connect();
         }
 
         call(callId)
@@ -272,19 +289,23 @@ shRequire(["shellfish/core"], core =>
             const priv = d.get(this);
             const callItem = priv.callMap.get(callId);
 
-            const workerItem = priv.workers.find(item => item.taskId === callItem.taskId);
-            if (workerItem)
+            if (! priv.socket)
+            {
+                this.connect();
+            }
+
+            if (priv.clientId !== "")
             {
                 console.log("Calling method " + callItem.name);
-                workerItem.worker.postMessage({ type: "call", name: callItem.name, callId, parameters: callItem.parameters });
+                priv.socket.postMessage({ type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters });
             }
             else
             {
-                console.error("Failed to call " + callItem.name + ": task " + callItem.taskId + " is not available");
+                priv.messageQueue.push(callId);
             }
         }
 
-        processInParameters(taskId, parameters)
+        processInParameters(parameters)
         {
             const priv = d.get(this);
 
@@ -298,8 +319,8 @@ shRequire(["shellfish/core"], core =>
                     const callbackId = idCounter;
                     ++idCounter;
                     priv.callbackMap.set(callbackId, p);
-                    priv.taskMap.get(taskId).callbacks.push(callbackId);
-                    return { type: "callback", safeCallback: callbackId };
+                    priv.callbacks.push(callbackId);
+                    return { type: "callback", clientId: priv.clientId, safeCallback: callbackId };
                 }
                 else
                 {
@@ -308,7 +329,7 @@ shRequire(["shellfish/core"], core =>
             });
         }
 
-        processOutParameters(taskId, results)
+        processOutParameters(results)
         {
             const priv = d.get(this);
 
@@ -326,12 +347,11 @@ shRequire(["shellfish/core"], core =>
                         {
                             return new Promise((resolve, reject) =>
                             {
-                                const params = this.processInParameters(taskId, parameters);
+                                const params = this.processInParameters(parameters);
 
                                 const callId = idCounter;
                                 ++idCounter;
                                 priv.callMap.set(callId, {
-                                    taskId,
                                     name: r.instance + "." + method,
                                     parameters: params,
                                     resolve,
@@ -350,81 +370,24 @@ shRequire(["shellfish/core"], core =>
             });
         }
 
-        createTaskHandle(taskId, promise)
+        postCall(name, ...parameters)
         {
             const priv = d.get(this);
 
-            const p = { };
-            p.then = (cb) =>
+            return new Promise((resolve, reject) =>
             {
-                promise.then(cb);
-                return p;
-            };
-            p.catch = (cb) =>
-            {
-                promise.catch(cb);
-                return p;
-            };
-            p.call = (name, ...parameters) =>
-            {
-                return new Promise((resolve, reject) =>
-                {
-                    const params = this.processInParameters(taskId, parameters);
+                const params = this.processInParameters(parameters);
 
-                    const callId = idCounter;
-                    ++idCounter;
-                    priv.callMap.set(callId, {
-                        taskId,
-                        name,
-                        parameters: params,
-                        resolve,
-                        reject
-                    });
-                    this.call(callId);
-                });
-            };
-
-            return p;
-
-        }
-
-        /**
-         * Posts the given task to the next free worker thread and returns a
-         * TaskHandle object.
-         *
-         * Functions may be passed as parameters to act as callbacks.
-         *
-         * @param {string} code - The code to execute.
-         * @param {any[]} parameters - The parameters.
-         * @returns {html.ThreadPool.TaskHandle} The TaskHandle object for retrieving the result or an exception.
-         */
-        postTask(code, ...parameters)
-        {
-            const priv = d.get(this);
-
-            const taskId = idCounter;
-            ++idCounter;
-
-            let resolveCall = null;
-            const callbacks = [];
-
-            const promise = new Promise((resolve, reject) =>
-            {
-                priv.taskMap.set(taskId, {
-                    code,
-                    parameters: [],
+                const callId = idCounter;
+                ++idCounter;
+                priv.callMap.set(callId, {
+                    name,
+                    parameters: params,
                     resolve,
-                    reject,
-                    resolveCall,
-                    callbacks
+                    reject
                 });
-
-                priv.taskMap.get(taskId).parameters = this.processInParameters(taskId, parameters);
-
-                this.run(taskId);
+                this.call(callId);
             });
-
-            return this.createTaskHandle(taskId, promise);
         }
 
     }

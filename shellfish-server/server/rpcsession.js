@@ -53,13 +53,18 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
         });
     }
 
-    function handleResult(r, onResult, onError)
+    function handleResult(self, clientId, r, onResult, onError)
     {
         if (typeof r === "object" && r.constructor.name === "Promise")
         {
             r
             .then(v => onResult(v))
             .catch(err => onError(err));
+        }
+        else if (typeof r === "object" && r.type === "proxy")
+        {
+            d.get(self).clients.get(clientId).proxies.push(r.instance);
+            onResult(r);
         }
         else
         {
@@ -85,7 +90,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 try
                 {
                     const result = priv.methods.get(msg.name)(...parameters);
-                    handleResult(result, r =>
+                    handleResult(self, clientId, result, r =>
                     {
                         self.postMessage(clientId, { type: "methodResult", callId: msg.callId, value: r });
                     },
@@ -197,7 +202,11 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                         priv.clients.delete(clientId);
                     });
 
-                    priv.clients.set(clientId, { reverseChannel, expires: Date.now() + 60000 });
+                    priv.clients.set(clientId, {
+                        reverseChannel,
+                        proxies: [],
+                        expires: Date.now() + 60000
+                    });
 
                     req.response(200, "OK")
                     .stream(reverseChannel, "application/x-shellfish-rpc", -1)
@@ -274,6 +283,18 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 {
                     console.log("Removing dead client " + clientId);
                     client.reverseChannel.end();
+                    client.proxies.forEach(proxyId =>
+                    {
+                        const methods = [...priv.methods.keys()];
+                        methods.forEach(methodId =>
+                        {
+                            if (methodId.startsWith(proxyId + "."))
+                            {
+                                console.log("Releasing proxy method " + methodId);
+                                priv.methods.delete(methodId);
+                            }
+                        });
+                    });
                     priv.clients.delete(clientId);
                 }
             });

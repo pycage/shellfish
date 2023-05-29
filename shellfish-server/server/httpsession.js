@@ -92,8 +92,7 @@ shRequire(["shellfish/core"], core =>
             protocol: urlObj.protocol,
             search: urlObj.search,
             username: urlObj.username
-        },
-        request.user = user;
+        };
 
         return request;
 

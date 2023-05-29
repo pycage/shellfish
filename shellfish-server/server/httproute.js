@@ -172,6 +172,7 @@ shRequire(["shellfish/core"], core =>
                     }
                     else
                     {
+                        request.user = user;
                         const sessionId = priv.generateSessionId(request);
                         const session = this.getSession(sessionId);
                         session.user = user;
@@ -181,6 +182,7 @@ shRequire(["shellfish/core"], core =>
             }
             else
             {
+                request.user = user;
                 const sessionId = priv.generateSessionId(request);
                 const session = this.getSession(sessionId);
                 session.user = user;

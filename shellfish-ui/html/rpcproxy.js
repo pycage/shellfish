@@ -30,17 +30,23 @@ shRequire(["shellfish/core"], core =>
     {
         constructor(endpoint, handler)
         {
+            this.socketId = idCounter;
             this.reader = null;
             this.endpoint = endpoint;
             this.handler = handler;
+
+            ++idCounter;
         }
 
         postMessage(message)
         {
             console.log("Send: " + JSON.stringify(message));
 
+            const headers = new Headers();
+            headers.append("x-shellfish-rpc-socket", this.socketId);
             fetch(this.endpoint, {
                 method: "POST",
+                headers,
                 body: JSON.stringify(message)
             })
             .catch(err =>
@@ -51,7 +57,10 @@ shRequire(["shellfish/core"], core =>
 
         connect()
         {
-            fetch(this.endpoint)
+            const headers = new Headers();
+            headers.append("x-shellfish-rpc-socket", this.socketId);
+
+            fetch(this.endpoint, { headers })
             .then(async response =>
             {
                 if (response.ok)

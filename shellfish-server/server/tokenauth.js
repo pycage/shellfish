@@ -28,6 +28,13 @@ shRequire(["shellfish/core"], core =>
 
     const d = new WeakMap();
 
+    /**
+     * Class representing a token-based authentication method.
+     * The authentication token is expected in the HTTP cookie `AuthToken`.
+     * 
+     * @extends core.Object
+     * @memberof server
+     */
     class TokenAuth extends core.Object
     {
         constructor()
@@ -112,7 +119,7 @@ shRequire(["shellfish/core"], core =>
 
         /**
          * Awaits the authorization of a given code before a token will be issued
-         * abd returns a promise object for the token.
+         * and returns a promise object for the token.
          * 
          * @param {string} code - The authorization code.
          * @param {string} user - The user name associated with the new token.

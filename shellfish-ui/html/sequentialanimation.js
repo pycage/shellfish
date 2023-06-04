@@ -31,6 +31,8 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
      * 
      * The sequential animation runs its child animations consecutively.
      * 
+     * @deprecated Use {@link core.SequentialAction} instead.
+     * 
      * @memberof html
      * @extends html.Animation
      */

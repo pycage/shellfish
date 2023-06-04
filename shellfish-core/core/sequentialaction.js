@@ -59,14 +59,18 @@ shRequire([__dirname + "/action.js"], act =>
         {
             this.wait(0).then(async () =>
             {
-                while (d.get(this).repeat && this.enabled)
+                if (this.enabled)
                 {
-                    const actions = d.get(this).actions.slice();
-                    for (let i = 0; i < actions.length && this.enabled; ++i)
+                    do
                     {
-                        const action = actions[i];
-                        await action.start();
+                        const actions = d.get(this).actions.slice();
+                        for (let i = 0; i < actions.length && this.enabled; ++i)
+                        {
+                            const action = actions[i];
+                            await action.start();
+                        }
                     }
+                    while (d.get(this).repeat && this.enabled)
                 }
                 this.finish();
             });

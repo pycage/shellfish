@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2019 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2019 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"], function (low, anim, bezier)
+shRequire(["shellfish/low", "shellfish/core", "shellfish/core/bezier"], function (low, core, bezier)
 {
     /* Creates an interpolation function for the given key points.
      */
@@ -223,24 +223,22 @@ shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"
      * See the Easing Functions Cheat Sheet {@link https://easings.net}
      * for illustrations of the particular easing functions.
      * 
-     * @extends html.Animation
+     * @extends core.Action
      * @memberof html
      * 
      * @property {number} duration - (default: `300`) The duration of the animation in ms.
      * @property {string} easing - (default: `"InOutQuad"`) The easing curve of the animation.
-     * @property {bool} enabled - (default: `true`) Whether the animation is enabled.
      * @property {function} interpolate - (default: `(v1, v2, x) => v1 + (v2 - v1) * x`) The interpolation function.
      * @property {number} from - (default: `0`) The starting value.
      * @property {number} to - (default: `1`) The ending value.
      */
-    class NumberAnimation extends anim.Animation
+    class NumberAnimation extends core.Action
     {
         constructor()
         {
             super();
             d.set(this, {
                 interpolate: (v1, v2, x) => v1 + (v2 - v1) * x,
-                enabled: true,
                 duration: 300,
                 from: 0,
                 to: 1,
@@ -248,7 +246,6 @@ shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"
                 handle: null
             });
 
-            this.notifyable("enabled");
             this.notifyable("duration");
             this.notifyable("from");
             this.notifyable("to");
@@ -269,13 +266,6 @@ shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"
                     d.get(this).handle.cancel();
                 }
             };
-        }
-
-        get enabled() { return d.get(this).enabled; }
-        set enabled(v)
-        {
-            d.get(this).enabled = v;
-            this.enabledChanged();
         }
 
         get duration() { return d.get(this).duration; }
@@ -344,16 +334,9 @@ shRequire(["shellfish/low", __dirname + "/animation.js", "shellfish/core/bezier"
 
                 if (t >= duration)
                 {
-                    if (this.repeat)
-                    {
-                        t = 0;
-                    }
-                    else
-                    {
-                        priv.handle.cancel();
-                        priv.handle = null;
-                        this.finish();
-                    }
+                    priv.handle.cancel();
+                    priv.handle = null;
+                    this.finish();
                 }
             };
 

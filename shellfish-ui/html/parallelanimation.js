@@ -31,6 +31,8 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
      * 
      * The parallel animation runs its child animations in parallel.
      * 
+     * @deprecated Use {@link core.ParallelAction} instead.
+     * 
      * @memberof html
      * @extends html.Animation
      */

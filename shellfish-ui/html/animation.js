@@ -32,6 +32,8 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
      * @memberof html
      * @extends core.Object
      * 
+      @deprecated Use {@link core.Action} instead.
+     * 
      * @property {bool} busy - [readonly] Whether the animation is currently running.
      * @property {bool} repeat - (default: `false`) Whether the animation repeats itself.
      * @property {running} running - (default: `false`) Whether the animation should be running.
@@ -42,6 +44,7 @@ shRequire(["shellfish/low", "shellfish/core"], function (low, core)
         {
             super();
             this._sh_animation = true;
+            this._sh_action = true;
             d.set(this, {
                 busy: false,
                 repeat: false,

@@ -110,7 +110,7 @@ Page {
             shf3d.Cube {
                 id: exit
 
-                property foundExit: frontCollider.collisions.indexOf(self.get()) !== -1
+                property foundExit: frontCollider.collisions.indexOf(self) !== -1
 
                 location: vec3(8.5, 0.5, -0.5)
                 material: shf3d.Material { color: colorName("black") }

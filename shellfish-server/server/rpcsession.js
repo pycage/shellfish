@@ -122,9 +122,14 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
      * SSL encryption, if available. The {@link server.HTTPRoute} may assign
      * an authentication method to the RPC session as well.
      * 
+     * Use the route's `generateSessionId` property to make sure that a client
+     * that opened a RPC connection will get the same connection on all its
+     * RPC calls.
+     * 
      * ### Example
      *     HTTPRoute {
      *         when: req => req.url.path === "/::rpc"
+     *         generateSessionId: req => req.sourceAddress
      * 
      *         delegate: template RpcSession {
      *             onInitialization: () =>
@@ -173,8 +178,6 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 reverseChannels: new Map(),
                 methods: new Map()
             });
-
-            this.registerEvent("message");
 
             const priv = d.get(this);
 
@@ -272,7 +275,6 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
 
         closeExpired()
         {
-            console.log("Checking for expired connections");
             const priv = d.get(this);
             const clientIds = [...priv.clients.keys()];
 
@@ -281,7 +283,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 const client = priv.clients.get(clientId);
                 if (client.expires < Date.now())
                 {
-                    console.log("Removing dead client " + clientId);
+                    this.log("RPC", "info", "Client " + clientId + " expired");
                     client.reverseChannel.end();
                     client.proxies.forEach(proxyId =>
                     {
@@ -290,7 +292,6 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                         {
                             if (methodId.startsWith(proxyId + "."))
                             {
-                                console.log("Releasing proxy method " + methodId);
                                 priv.methods.delete(methodId);
                             }
                         });

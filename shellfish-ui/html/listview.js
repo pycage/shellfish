@@ -595,7 +595,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 });
                 mObj.connect("modelRemove", this, (at) =>
                 {
-                    console.log("model remove at " + at);
+                    //console.log("model remove at " + at);
                     
                     // cancel pending renderings
                     this.cancelNamedCallback("render");

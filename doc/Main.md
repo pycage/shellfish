@@ -129,6 +129,16 @@ Layouting elements on screen is intuitive, yet powerful.
 
 ## News
 
+### June 2023
+* The method {@link core.Object#wait} now has an optional `name` parameter
+  which may be used to abort the waiting anytime via the method
+  {@link core.Object#abortWait}.
+* The new elements {@link core.Action}, {@link core.SequentialAction},
+  {@link core.ParallelAction}, {@link core.ScriptAction}, and
+  {@link core.WaitAction} let you setup schedules of actions.
+  The element {@link html.ScriptAction} moved to {@link core.ScriptAction}.
+* It is now possible to use the `async` keyword for functions on Shui elements.
+
 ### May 2023
 * The new elements {@link server.RpcSession} and {@link html.RpcProxy} allow
   for a HTTP-based asynchronous RPC connection between client and server.

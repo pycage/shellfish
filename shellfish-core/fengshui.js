@@ -925,9 +925,15 @@ exports.tools = {
             {
                 code += "\n" + parseContainer(data, pos);
             }
+            else if (next(data, pos, "async "))
+            {
+                expect(data, pos, "async");
+                skipWhitespace(data, pos, true, true);
+                code += "\n" + parseFunctionProperty(data, pos, modules, true);
+            }
             else if (next(data, pos, "function "))
             {
-                code += "\n" + parseFunctionProperty(data, pos, modules);
+                code += "\n" + parseFunctionProperty(data, pos, modules, false);
             }
             else
             {
@@ -1004,7 +1010,7 @@ exports.tools = {
         return code;
     }
 
-    function parseFunctionProperty(data, pos, modules)
+    function parseFunctionProperty(data, pos, modules, isAsync)
     {
         //console.log("parseFunctionProperty at " + pos.value + " " + data.substr(pos.value, 80));
         
@@ -1014,6 +1020,10 @@ exports.tools = {
         skipWhitespace(data, pos, true, true);
         
         let code = ".use(self).property(\"" + propName + "\", ";
+        if (isAsync)
+        {
+            code += "async ";
+        }
 
         let params = [];
         const scopes = [modules.map(m => m.alias), ["self"]];
@@ -1027,7 +1037,7 @@ exports.tools = {
         //const debugCode = btoa(code);
         //code += `.property("__code__${propName}", "${debugCode}")`;
 
-        //console.log("function code: " + code);
+        console.log("function code: " + code);
         return code;
     }
 

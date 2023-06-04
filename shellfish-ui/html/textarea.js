@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -62,6 +62,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                     .attr("wrap", "off")
                     .attr("spellcheck", "false")
                     .style("color", "black")
+                    .style("line-height", "1.2")
                     .style("caret-color", "black")
                     .style("--sh-selection-color", "white")
                     .style("--sh-selection-background-color", "navy")

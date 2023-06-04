@@ -121,7 +121,7 @@ Page {
         }
     }
 
-    SequentialAnimation {
+    SequentialAction {
         id: animation
 
         ScriptAction {
@@ -136,7 +136,7 @@ Page {
         }
 
         // charge
-        ParallelAnimation {
+        ParallelAction {
 
             // move rabbit horizontally
             NumberAnimation {
@@ -177,12 +177,12 @@ Page {
         }
 
         // wait a moment
-        NumberAnimation {
-            duration: 100
+        WaitAction {
+            until: seconds(0.1)
         }
 
         // hit the ground
-        ParallelAnimation {
+        ParallelAction {
 
             NumberAnimation {
                 from: 0
@@ -227,7 +227,7 @@ Page {
         }
 
         // roll back
-        ParallelAnimation {
+        ParallelAction {
 
             NumberAnimation {
                 from: 1

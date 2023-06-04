@@ -48,9 +48,17 @@ Page {
         fontSize: theme.fontSizeSmall
         text: "Look at the Shui code of each example. [icon:ui-bold_arrow_up]"
 
-        SequentialAnimation {
-            running: ! page.frozen
+        SequentialAction {
+            enabled: ! page.frozen
             repeat: true
+
+            onEnabledChanged: () =>
+            {
+                if (enabled)
+                {
+                    start();
+                }
+            }
 
             NumberAnimation {
                 from: 0

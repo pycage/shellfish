@@ -647,6 +647,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
     const taskQueues = new TaskQueues();
 
     const namedCallbacks = new Map();
+    const waitAborters = new Map();
 
     /**
      * Class managing the custom object properties.
@@ -1758,28 +1759,76 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
          * after the JavaScript engine finished executing its current code,
          * without using a timer.
          * 
+         * If the wait operation is given a name, it is abortable via the
+         * {@link core.Object#abortWait} method. In this case, the promise
+         * resolves to `false`.
+         * 
          * @param {number} ms - The amount of milliseconds to wait.
+         * @param {string} name - An optional name for aborting via {@link core.Object#abortWait}.
          * @returns {Promise} The Promise object.
          */
-        wait(ms)
+        wait(ms, name)
         {
             return new Promise((resolve, reject) =>
             {
                 if (ms === 0)
                 {
+                    let aborted = false;
                     connHub.runAfterTrigger(this.safeCallback(() =>
                     {
-                        resolve();
-                    }));
+                        if (name)
+                        {
+                            waitAborters.delete(this.objectId + "#" + name);
+                        }
+                        resolve(true);
+                    }, () => ! aborted && this.lifeCycleStatus !== "destroyed"));
+
+                    if (name)
+                    {
+                        waitAborters.set(this.objectId + "#" + name, () =>
+                        {
+                            aborted = true;
+                            waitAborters.delete(this.objectId + "#" + name);
+                            resolve(false);
+                        });
+                    }
                 }
                 else
                 {
-                    setTimeout(this.safeCallback(() =>
+                    const handle = setTimeout(this.safeCallback(() =>
                     {
-                        resolve();
+                        if (name)
+                        {
+                            waitAborters.delete(this.objectId + "#" + name);
+                        }
+                        resolve(true);
                     }), ms);
+
+                    if (name)
+                    {
+                        waitAborters.set(this.objectId + "#" + name, () =>
+                        {
+                            clearTimeout(handle);
+                            waitAborters.delete(this.objectId + "#" + name);
+                            resolve(false);
+                        });
+                    }
                 }
             });
+        }
+
+        /**
+         * Aborts a named wait operation from {@link core.Object#wait}.
+         * 
+         * @param {string} name - The name of the wait operation.
+         */
+        abortWait(name)
+        {
+            const f = waitAborters.get(this.objectId + "#" + name);
+            if (f)
+            {
+                f();
+            }
         }
 
         /**

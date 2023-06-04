@@ -85,7 +85,6 @@ const mods = [
     "parallelanimation",
     "rpcproxy",
     "ruler",
-    "scriptaction",
     "sequentialanimation",
     "syntaxhighlighter",
     "textarea",

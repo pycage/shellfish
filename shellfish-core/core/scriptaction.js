@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,21 +20,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
-
-shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
+shRequire([__dirname + "/action.js"], act =>
 {
     const d = new WeakMap();
 
     /**
-     * Class representing a script action during an animation.
+     * Class representing an action that runs a function script.
      * 
-     * @memberof html
-     * @extends html.Animation
+     * @memberof core
+     * @extends core.Action
      * 
      * @property {function} script - The function to execute.
      */
-    class ScriptAction extends anim.Animation
+    class ScriptAction extends act.Action
     {
         constructor()
         {
@@ -52,21 +50,26 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
 
         start()
         {
-            const doRun = () =>
+            this.wait(0).then(async () =>
             {
-                d.get(this).script();
-                while (this.repeat)
+                if (this.enabled)
                 {
-                    d.get(this).script();
+                    try
+                    {
+                        const r = d.get(this).script();
+                        if (r.constructor && r.constructor.name === "Promise")
+                        {
+                            await r;
+                        }
+                    }
+                    catch (err)
+                    {
+    
+                    }
                 }
-                this.finish();                
-            };
-
-            const handle = low.addFrameHandler(() =>
-            {
-                handle.cancel();
-                doRun();
+                this.finish();
             });
+
             return super.start();
         }
     }

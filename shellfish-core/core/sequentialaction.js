@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,75 +20,73 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-"use strict";
-
-shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
+shRequire([__dirname + "/action.js"], act =>
 {
+
     const d = new WeakMap();
 
     /**
-     * Class representing a parallel animation.
+     * Class representing a sequential action.
      * 
-     * The parallel animation runs its child animations in parallel.
+     * The sequential action runs its child actions consecutively.
      * 
-     * @memberof html
-     * @extends html.Animation
+     * @memberof core
+     * @extends core.Action
+     * 
+     * @property {bool} repeat - (default: `false`) While `true`, the sequence of action is repeated over and over.
      */
-    class ParallelAnimation extends anim.Animation
+    class SequentialAction extends act.Action
     {
         constructor()
         {
             super();
             d.set(this, {
-                animations: []
+                actions: [],
+                repeat: false
             });
+
+            this.notifyable("repeat");
+        }
+
+        get repeat() { return d.get(this).repeat; }
+        set repeat(r)
+        {
+            d.get(this).repeat = r;
+            this.repeatChanged();
         }
 
         start()
         {
-            const doRun = () =>
+            this.wait(0).then(async () =>
             {
-                const animations = d.get(this).animations.slice();
-                const promises = animations.map(a => a.start());
-    
-                Promise.all(promises)
-                .then(() =>
+                while (d.get(this).repeat && this.enabled)
                 {
-                    if (this.repeat)
+                    const actions = d.get(this).actions.slice();
+                    for (let i = 0; i < actions.length && this.enabled; ++i)
                     {
-                        const handle = low.addFrameHandler(() =>
-                        {
-                            handle.cancel();
-                            doRun();
-                        });
+                        const action = actions[i];
+                        await action.start();
                     }
-                    else
-                    {
-                        this.finish();
-                    }
-                });
-            };
-
-            const handle = low.addFrameHandler(() =>
-            {
-                handle.cancel();
-                doRun();
+                }
+                this.finish();
             });
+
             return super.start();
         }
 
         add(child)
         {
-            if (child._sh_animation || child._sh_action)
+            if (child._sh_action)
             {
                 child.parent = this;
-                d.get(this).animations.push(child);
+                d.get(this).actions.push(child);
             }
             else
             {
-                console.error("Only animations may be added to a ParallelAnimation.");
+                console.error("Only actions may be added to a SequentialAction.");
             }
         }
     }
-    exports.ParallelAnimation = ParallelAnimation;
+    exports.SequentialAction = SequentialAction;
+
 });

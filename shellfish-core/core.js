@@ -45,14 +45,19 @@ const mods = [
 ];
 
 const includes = [
+    "action",
     "filestorage",
     "filesystem",
     "fsmodel",
     "listmodel",
     "object",
+    "parallelaction",
     "repeater",
+    "scriptaction",
+    "sequentialaction",
     "threadpool",
     "timer",
+    "waitaction",
     "wasm"
 ];
 

@@ -88,7 +88,7 @@ shRequire(["shellfish/low", __dirname + "/animation.js"], function (low, anim)
 
         add(child)
         {
-            if (child._sh_animation)
+            if (child._sh_animation || child._sh_action)
             {
                 child.parent = this;
                 d.get(this).animations.push(child);

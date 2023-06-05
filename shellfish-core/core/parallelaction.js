@@ -41,6 +41,14 @@ shRequire([__dirname + "/action.js"], act =>
             d.set(this, {
                 actions: [],
             });
+
+            this.onStatusChanged = () =>
+            {
+                if (this.status === "stopping")
+                {
+                    d.get(this).actions.forEach(action => action.stop());
+                }
+            };
         }
 
         start()

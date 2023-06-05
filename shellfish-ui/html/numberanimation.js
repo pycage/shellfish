@@ -332,7 +332,7 @@ shRequire(["shellfish/low", "shellfish/core", "shellfish/core/bezier"], function
                     valueCallback(value);
                 }
 
-                if (t >= duration)
+                if (t >= duration || ! this.enabled || this.status === "stopping")
                 {
                     priv.handle.cancel();
                     priv.handle = null;

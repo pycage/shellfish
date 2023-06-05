@@ -46,6 +46,14 @@ shRequire([__dirname + "/action.js"], act =>
             });
 
             this.notifyable("repeat");
+
+            this.onStatusChanged = () =>
+            {
+                if (this.status === "stopping")
+                {
+                    d.get(this).actions.forEach(action => action.stop());
+                }
+            };
         }
 
         get repeat() { return d.get(this).repeat; }
@@ -64,13 +72,13 @@ shRequire([__dirname + "/action.js"], act =>
                     do
                     {
                         const actions = d.get(this).actions.slice();
-                        for (let i = 0; i < actions.length && this.enabled; ++i)
+                        for (let i = 0; i < actions.length && this.enabled && this.status === "running"; ++i)
                         {
                             const action = actions[i];
                             await action.start();
                         }
                     }
-                    while (d.get(this).repeat && this.enabled)
+                    while (d.get(this).repeat && this.enabled && this.status === "running")
                 }
                 this.finish();
             });

@@ -53,6 +53,14 @@ shRequire([__dirname + "/action.js"], act =>
                     this.abortWait("wait");
                 }
             }
+
+            this.onStatusChanged = () =>
+            {
+                if (this.status === "stopping")
+                {
+                    this.abortWait("wait");
+                }
+            };
         }
 
         get until() { return d.get(this).until; }

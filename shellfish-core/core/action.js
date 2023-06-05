@@ -40,6 +40,7 @@ shRequire([__dirname + "/object.js"], obj =>
      * 
      * @property {bool} busy - [readonly] `true` while the action is running.
      * @property {bool} enabled - (default: `true`) If `false` this action is skipped.
+     * @property {string} status - [readonly] The current status. One of `idle|running|stopping`
      */
     class Action extends obj.Object
     {
@@ -51,11 +52,14 @@ shRequire([__dirname + "/object.js"], obj =>
             d.set(this, {
                 busy: false,
                 enabled: true,
-                finishHandler: null
+                finishHandlers: [],
+                stopHandlers: [],
+                status: "idle"
             });
 
             this.notifyable("busy");
             this.notifyable("enabled");
+            this.notifyable("status");
 
             /**
              * Is triggered when the action begins.
@@ -74,22 +78,26 @@ shRequire([__dirname + "/object.js"], obj =>
             {
                 d.get(this).busy = true;
                 this.busyChanged();
+                d.get(this).status = "running";
+                this.statusChanged();
             };
 
             this.onFinish = () =>
             {
-                const f = d.get(this).finishHandler;
-                if (f)
-                {
-                    d.get(this).finishHandler = null;
-                    f();
-                }
+                d.get(this).finishHandlers.forEach(f => f());
+                d.get(this).finishHandlers = [];
+                d.get(this).stopHandlers.forEach(f => f());
+                d.get(this).stopHandlers = [];
+
                 d.get(this).busy = false;
                 this.busyChanged();
+                d.get(this).status = "idle";
+                this.statusChanged();
             };
         }
 
         get busy() { return d.get(this).busy; }
+        get status() { return d.get(this).status; }
 
         get enabled() { return d.get(this).enabled; }
         set enabled(e)
@@ -109,7 +117,36 @@ shRequire([__dirname + "/object.js"], obj =>
 
             return new Promise((resolve, reject) =>
             {
-                d.get(this).finishHandler = resolve;
+                d.get(this).finishHandlers.push(resolve);
+            });
+        }
+
+        /**
+         * Requests the action to stop and returns a promise that resolves when
+         * stopped.
+         * Subclasses must monitor the `status` property for the `stopping`
+         * status and act accordingly.
+         */
+        stop()
+        {
+            const priv = d.get(this);
+
+            return new Promise((resolve, reject) =>
+            {
+                if (priv.status === "running")
+                {
+                    priv.stopHandlers.push(resolve);
+                    priv.status = "stopping";
+                    this.statusChanged();
+                }
+                else if (priv.status === "stopping")
+                {
+                    priv.stopHandlers.push(resolve);
+                }
+                else
+                {
+                    resolve();
+                }
             });
         }
     }

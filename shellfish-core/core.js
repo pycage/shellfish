@@ -53,6 +53,7 @@ const includes = [
     "object",
     "parallelaction",
     "repeater",
+    "rpcproxy",
     "scriptaction",
     "sequentialaction",
     "threadpool",

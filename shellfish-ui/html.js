@@ -83,7 +83,6 @@ const mods = [
     "numberanimation",
     "offlinefs",
     "parallelanimation",
-    "rpcproxy",
     "ruler",
     "sequentialanimation",
     "syntaxhighlighter",

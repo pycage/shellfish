@@ -20,7 +20,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-shRequire(["shellfish/core"], core =>
+shRequire([__dirname + "/object.js"], obj =>
 {
 
     let idCounter = 0;
@@ -149,6 +149,165 @@ shRequire(["shellfish/core"], core =>
         }
     }
 
+    class MessageSocketNode
+    {
+        constructor(endpoint, handler)
+        {
+            this.modHttp = require("node:http");
+            this.socketId = idCounter;
+            this.reader = null;
+            this.endpoint = endpoint;
+            this.handler = handler;
+        }
+
+        postMessage(message)
+        {
+            console.log("Send: " + JSON.stringify(message));
+
+            const req = this.modHttp.request(this.endpoint, {
+                method: "POST",
+                headers: {
+                    "x-shellfish-rpc-socket": this.socketId
+                }
+            });
+            req.write(JSON.stringify(message));
+            req.end();
+        }
+
+        async connect()
+        {
+            let done = false;
+            let value = null;
+
+            const headers = {
+                "x-shellfish-rpc-socket": this.socketId
+            };
+
+            const req = this.modHttp.request(this.endpoint, { headers });
+
+            let dataResolver = null;
+            req.on("response", res =>
+            {
+                this.reader = res;
+                res.on("data", chunk =>
+                {
+                    if (dataResolver)
+                    {
+                        const f = dataResolver;
+                        dataResolver = null;
+                        f({ done: false, value: new Uint8Array(chunk)});
+                    }
+                });
+
+                res.on("end", () =>
+                {
+                    if (dataResolver)
+                    {
+                        const f = dataResolver;
+                        dataResolver = null;
+                        f({ done: true, value: null});
+                    }
+                });
+
+                res.on("error", err =>
+                {
+                    
+                });
+            });
+
+            req.on("close", () =>
+            {
+                console.log("Connection closed");
+                this.handler({ type: "exit" });
+                done = true;
+            });
+
+            req.on("error", err =>
+            {
+                console.error("Connection error: " + err.code);
+            });
+
+            req.end();
+
+            function readData()
+            {
+                return new Promise((resolve, reject) =>
+                {
+                    dataResolver = resolve;
+                });
+            }
+
+            console.log("Established reverse channel");
+            let buffer = null;
+            let bufferOffset = 0;
+            let dataOffset = 0;
+
+            while (! done)
+            {
+                if (value === null)
+                {
+                    console.log("Reverse channel is waiting for data");
+                    const r = await readData();
+                    done = r.done;
+                    value = r.value;
+                    dataOffset = 0;
+                }
+                
+                if (buffer === null)
+                {
+                    const size = value[dataOffset++] +
+                                 (value[dataOffset++] << 8) +
+                                 (value[dataOffset++] << 16) +
+                                 (value[dataOffset++] << 24);
+
+                    buffer = new ArrayBuffer(size);
+                    bufferOffset = 0;
+                }
+
+                const view8 = new Uint8Array(value.buffer, dataOffset, Math.min(value.length, buffer.byteLength));
+                new Uint8Array(buffer, bufferOffset).set(view8);
+                bufferOffset += view8.length;
+                dataOffset += view8.length;
+
+                if (bufferOffset === buffer.byteLength)
+                {
+                    const dec = new TextDecoder();
+                    const json = dec.decode(buffer);
+                    try
+                    {
+                        console.log("Receive: " + json);
+                        const message = JSON.parse(json);
+                        this.handler(message);
+                    }
+                    catch (err)
+                    {
+                        console.error(err);
+                    }
+                    buffer = null;
+                }
+
+                if (dataOffset === value.byteLength)
+                {
+                    value = null;
+                }
+
+                if (done)
+                {
+                    break;
+                }
+            }
+
+        }
+
+        close()
+        {
+            if (this.reader)
+            {
+                this.reader.destroy();
+            }
+        }
+    }
+
 
     const d = new WeakMap();
 
@@ -196,11 +355,11 @@ shRequire(["shellfish/core"], core =>
      *     });
      * 
      * @extends core.Object
-     * @memberof html
+     * @memberof core
      * 
      * @property {string} endpoint - (default: `"/"`) The address of the RPC endpoint.
      */
-    class RpcProxy extends core.Object
+    class RpcProxy extends obj.Object
     {
         constructor()
         {
@@ -245,7 +404,8 @@ shRequire(["shellfish/core"], core =>
                 priv.socket.close();
             }
 
-            priv.socket = new MessageSocket(priv.endpoint, msg =>
+            const MSock = shRequire.environment === "node" ? MessageSocketNode : MessageSocket;
+            priv.socket = new MSock(priv.endpoint, msg =>
             {
                 if (msg.type === "ready")
                 {
@@ -379,7 +539,7 @@ shRequire(["shellfish/core"], core =>
             });
         }
 
-        postCall(name, ...parameters)
+        invoke(name, ...parameters)
         {
             const priv = d.get(this);
 

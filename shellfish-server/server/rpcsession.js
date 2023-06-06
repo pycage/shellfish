@@ -175,14 +175,10 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
             super();
             d.set(this, {
                 clients: new Map(),
-                reverseChannels: new Map(),
                 methods: new Map()
             });
 
             const priv = d.get(this);
-
-            this.heartbeat();
-            this.closeExpired();
 
             this.onRequest = req =>
             {
@@ -216,13 +212,29 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                     .send();
 
                     this.postMessage(clientId, { type: "ready", clientId: clientId });
+
+                    if (priv.clients.size === 1)
+                    {
+                        this.heartbeat();
+                        this.closeExpired();
+                    }
                 }
                 else if (req.method === "POST")
                 {
                     // incoming message
                     req.body().then(data =>
                     {
-                        const msg = JSON.parse(data);
+                        let msg = null;
+                        try
+                        {
+                            msg = JSON.parse(data);
+                        }
+                        catch (err)
+                        {
+                            console.error(err);
+                            return;
+                        }
+
                         this.log("RPC", "info", msg.clientId + "@" + req.sourceAddress + " RECEIVE " + msg.type);
 
                         if (! priv.clients.has(msg.clientId))
@@ -259,6 +271,11 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
         heartbeat()
         {
             const priv = d.get(this);
+            if (priv.clients.size === 0)
+            {
+                return;
+            }
+
             const clientIds = [...priv.clients.keys()];
 
             clientIds.forEach(clientId =>
@@ -276,6 +293,11 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
         closeExpired()
         {
             const priv = d.get(this);
+            if (priv.clients.size === 0)
+            {
+                return;
+            }
+
             const clientIds = [...priv.clients.keys()];
 
             clientIds.forEach(clientId =>

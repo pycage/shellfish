@@ -82,7 +82,7 @@ shRequire([__dirname + "/mesh.js",
                 return;
             }
 
-            console.log("Loading model: " + s);
+            this.log("", "debug", "Loading model: " + s);
             d.get(this).status = "loading";
             this.statusChanged();
 
@@ -116,7 +116,7 @@ shRequire([__dirname + "/mesh.js",
 
             if (type === "obj")
             {
-                console.log("Building mesh from model.");
+                this.log("", "debug", "Building mesh from model.");
                 const obj = objParser.parseObj(data);
 
                 // create materials
@@ -176,7 +176,7 @@ shRequire([__dirname + "/mesh.js",
                     const mtl = priv.materials[entry.name];
                     if (mtl)
                     {
-                        console.log("set material color on " + entry.name);
+                        this.log("", "debug", "Set material color on " + entry.name);
                         // set properties on material
                         mtl.color = entry.kd;
                         mtl.shininess = entry.ns;

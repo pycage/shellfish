@@ -67,13 +67,13 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 
             this.addHtmlEventListener(window, "gamepadconnected", (ev) =>
             {
-                console.log("Gamepad connected");
+                this.log("", "debug", "Gamepad connected");
                 this.setupGamepad();
             });
 
             this.addHtmlEventListener(window, "gamepaddisconnected", (ev) =>
             {
-                console.log("Gamepad disconnected");
+                this.log("", "debug", "Gamepad disconnected");
                 this.setupGamepad();
             });
 

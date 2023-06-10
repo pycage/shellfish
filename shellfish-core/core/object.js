@@ -904,10 +904,12 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
             {
                 if (p !== null)
                 {
-                    console.warn("The object " +
-                                 this.constructor.name + " at " + this.objectLocation + " " +
-                                 "has already a parent " +
-                                 d.get(this).parent.constructor.name + " at " + d.get(this).parent.objectLocation + ".");
+                    this.log("",
+                             "warning",
+                             "The object " +
+                             this.constructor.name + " at " + this.objectLocation + " " +
+                             "has already a parent " +
+                             d.get(this).parent.constructor.name + " at " + d.get(this).parent.objectLocation + ".");
                 }
                 //console.log("Removing parent reference of " + this.objectLocation);
                 d.get(this).parent.detachChild(this);
@@ -1055,7 +1057,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
             this.wait(0)
             .then(() =>
             {
-                console.log("releaseLater " + this.objectId);
+                //console.log("releaseLater " + this.objectId);
                 this.parent = null;
             });
         }
@@ -1521,7 +1523,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
             {
                 if (localRecursionDepth > 3)
                 {
-                    console.warn(`Binding loop in ${this.constructor.name}.${name} (${this.objectLocation})`);
+                    this.log("", "warning", `Binding loop in ${this.constructor.name}.${name} (${this.objectLocation})`);
                     return;
                 }
 

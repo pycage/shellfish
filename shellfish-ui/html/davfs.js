@@ -279,7 +279,6 @@ shRequire(["shellfish/core"], function (core)
             {
                 const dirPath = this.normalizePath(this.pathJoin(path, name));
                 const url = priv.root + dirPath;
-                console.log("mkdir: " + dirPath);
 
                 const response = await doFetch(url, { method: "MKCOL" });
                 if (response.status === 201 /* Created */)
@@ -472,7 +471,6 @@ shRequire(["shellfish/core"], function (core)
                 path = this.normalizePath(path);
                 const url = priv.root + path;
 
-                console.log("PUT " + url);
                 const ok = await uploadWithProgress(url, blob, progressCallback);
                 if (ok)
                 {

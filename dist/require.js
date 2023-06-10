@@ -151,9 +151,25 @@ const shRequire = (function ()
 
     let nextScheduled = false;
 
+
+    function log(domain, level, message)
+    {
+        if (isWeb || level === "error")
+        {
+            if (level === "error")
+            {
+                logError(message);
+            }
+            else
+            {
+                console.log(message);
+            }
+        }
+    }
+
     function logError(message)
     {
-        if (hasDom)
+        if (isWeb)
         {
             // remember the good old days..?
             const node = document.createElement("pre");
@@ -329,7 +345,7 @@ const shRequire = (function ()
                         lastModified: lastModified,
                         data: data
                     });
-                    console.log("Fetched from remote: " + url);
+                    log("", "debug", "Fetched from remote: " + url);
                     callback(data);
                 })
                 .catch(err =>
@@ -339,7 +355,7 @@ const shRequire = (function ()
             }
             else
             {
-                console.log("Fetched from cache: " + url);
+                log("", "debug", "Fetched from cache: " + url);
                 callback(obj.data);
             }
         })
@@ -377,7 +393,7 @@ const shRequire = (function ()
             scriptNode.addEventListener("error", function ()
             {
                 URL.revokeObjectURL(codeUrl);
-                logError(`Failed to import script.`);
+                log("", "error", `Failed to import script.`);
                 callback(false);
             }, false);
     
@@ -395,8 +411,7 @@ const shRequire = (function ()
             }
             catch (err)
             {
-                console.log(code.substring(0, 1000));
-                logError(`Failed to import script: ${err}`);
+                log("", "error", `Failed to import script: ${err}`);
                 callback(false);
             }
             
@@ -421,7 +436,7 @@ const shRequire = (function ()
             catch (err)
             {
                 URL.revokeObjectURL(codeUrl);
-                logError(`Failed to import script: ${err}`);
+                log("", "error", `Failed to import script: ${err}`);
                 callback(false);
             }
         }
@@ -446,7 +461,7 @@ const shRequire = (function ()
             {
                 try
                 {
-                    console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
+                    log("", "debug", `Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
                     const bundleName = url;
                     processBundle(bundleName, JSON.parse(data), () =>
                     {
@@ -455,12 +470,12 @@ const shRequire = (function ()
                 }
                 catch (err)
                 {
-                    logError(`Failed to process JS bundle '${url}': ${err}`);
+                    log("", "error", `Failed to process JS bundle '${url}': ${err}`);
                 }  
             })
             .catch (err =>
             {
-                logError(`Failed to load bundle from '${url}': ${err}`);
+                log("", "error", `Failed to load bundle from '${url}': ${err}`);
             });
         }
         else if (isNode)
@@ -470,7 +485,7 @@ const shRequire = (function ()
             {
                 if (err)
                 {
-                    logError(`Failed to load bundle from '${url}': ${err}`);
+                    log("", "error", `Failed to load bundle from '${url}': ${err}`);
                     return;
                 }
 
@@ -478,7 +493,7 @@ const shRequire = (function ()
 
                 try
                 {
-                    console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
+                    log("", "debug", `Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
                     const bundleName = url;
                     processBundle(bundleName, JSON.parse(data), () =>
                     {
@@ -487,7 +502,7 @@ const shRequire = (function ()
                 }
                 catch (err)
                 {
-                    logError(`Failed to process JS bundle '${url}': ${err}`);
+                    log("", "error", `Failed to process JS bundle '${url}': ${err}`);
                 }                
 
             });
@@ -498,12 +513,12 @@ const shRequire = (function ()
             {
                 if (! data)
                 {
-                    logError(`Failed to load bundle from '${url}'`);
+                    log("", "error", `Failed to load bundle from '${url}'`);
                 }
 
                 try
                 {
-                    console.log(`Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
+                    log("", "debug", `Loaded JS bundle '${url}' from server in ${Date.now() - now} ms.`);
                     const bundleName = url;
                     processBundle(bundleName, JSON.parse(data), () =>
                     {
@@ -512,7 +527,7 @@ const shRequire = (function ()
                 }
                 catch (err)
                 {
-                    logError(`Failed to process JS bundle '${url}': ${err}`);
+                    log("", "error", `Failed to process JS bundle '${url}': ${err}`);
                 }
             });
 
@@ -593,7 +608,7 @@ const shRequire = (function ()
                 {
                     if (! ok)
                     {
-                        logError(`Failed to load bundle '${name}'.`);
+                        log("", "error", `Failed to load bundle '${name}'.`);
                     }
                     else
                     {
@@ -636,7 +651,7 @@ const shRequire = (function ()
             })
             .catch(err =>
             {
-                logError(`Failed to load module: '${url}': ${err}`);
+                log("", "error", `Failed to load module: '${url}': ${err}`);
                 callback("");
             });
         }
@@ -647,7 +662,7 @@ const shRequire = (function ()
             {
                 if (err)
                 {
-                    logError(`Failed to load module: '${url}': ${err}`);
+                    log("", "error", `Failed to load module: '${url}': ${err}`);
                     callback("");
                 }
                 else
@@ -662,7 +677,7 @@ const shRequire = (function ()
             {
                 if (! data)
                 {
-                    logError(`Failed to load module '${url}'`);
+                    log("", "error", `Failed to load module '${url}'`);
                 }
                 callback(data);
             });
@@ -758,7 +773,7 @@ const shRequire = (function ()
             const jsmodule = cache[url];
             if (jsmodule.__id)
             {
-                console.log(`Registered module '${url}' as '${jsmodule.__id}'.`);
+                log("", "debug", `Registered module '${url}' as '${jsmodule.__id}'.`);
                 idsMap[jsmodule.__id] = url;
             }
     
@@ -798,7 +813,7 @@ const shRequire = (function ()
                     catch (err)
                     {
                         code = "";
-                        console.error("Failed to process '" + url + "': " + err);
+                        log("", "error", "Failed to process '" + url + "': " + err);
                     }
                 }
     
@@ -846,7 +861,7 @@ const shRequire = (function ()
     
                         if (jsmodule && jsmodule.__id)
                         {
-                            console.log(`Registered module '${url}' as '${jsmodule.__id}'.`);
+                            log("", "debug", `Registered module '${url}' as '${jsmodule.__id}'.`);
                             idsMap[jsmodule.__id] = url;
                         }
                 
@@ -859,7 +874,7 @@ const shRequire = (function ()
                     }
                     else
                     {
-                        logError(`Failed to initialize module '${url}': ${this}`);
+                        log("", "error", `Failed to initialize module '${url}': ${this}`);
     
                         if (statusNode)
                         {
@@ -884,7 +899,7 @@ const shRequire = (function ()
     {
         function fail(err)
         {
-            logError(`Failed to load WASM module '${url}': ${err}`);
+            log("", "error", `Failed to load WASM module '${url}': ${err}`);
             callback("");
         }
 
@@ -1072,7 +1087,7 @@ const shRequire = (function ()
         }
         else
         {
-            logError(`Cannot load invalid module '${url}'.`);
+            log("", "error", `Cannot load invalid module '${url}'.`);
             nextScheduled = false;
             ctx.modules.push(null);
             tryImmediateCallback();
@@ -1366,7 +1381,7 @@ const shRequire = (function ()
         }
     }// if (hasDom)
 
-    console.log("Initialized Shellfish module manager. Detected environment: " + __require.environment);
+    log("", "debug", "Initialized Shellfish module manager. Detected environment: " + __require.environment);
 
     // In order to support both module systems, ESM and CJS, exports are not used.
     // Instead, we assign the Shellfish environment to a certain variable in scope,

@@ -126,7 +126,7 @@ shRequire(["shellfish/core"], (core) =>
         {
             if (v && ! window.createImageBitmap /* Hello, Safari! */)
             {
-                console.warn("This platform does not support GPU-based tiles. Falling back to CPU-based implementation.");
+                this.log("", "warning", "This platform does not support GPU-based tiles. Falling back to CPU-based implementation.");
                 v = false;
             }
 
@@ -156,8 +156,6 @@ shRequire(["shellfish/core"], (core) =>
             window.createImageBitmap(priv.image)
             .then(bitmap =>
             {
-                console.log("updated GPU image");
-                console.log(bitmap);
                 priv.gpuImage = bitmap;
                 if (callback)
                 {

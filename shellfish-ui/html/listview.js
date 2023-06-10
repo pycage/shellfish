@@ -476,7 +476,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         get model() { return d.get(this).model; }
         set model(m)
         {
-            console.log("set model");
             const priv = d.get(this);
 
             let mObj = null;
@@ -542,7 +541,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 let prevSize = 0;
                 mObj.connect("modelReset", this, () =>
                 {
-                    console.log("model reset -> " + mObj.size + " items");
+                    this.log("", "debug", "ListView model reset with " + mObj.size + " items");
                     if (mObj.size === 0 && prevSize === 0)
                     {
                         return;
@@ -573,7 +572,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 });
                 mObj.connect("modelInsert", this, (at, size) =>
                 {
-                    console.log("model insert at " + at + ", size: " + size);
+                    this.log("", "debug", "ListView insert into model at " + at + ", size: " + size);
                     const windowRange = priv.windowRange;
                     for (let i = 0; i < size; ++i)
                     {
@@ -1129,7 +1128,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                     n < items.length - 1)
                 {
                     const remainingItems = items.slice(n + 1);
-                    console.log("render later, remaining: " + remainingItems.length + " est. remaining duration: " + estimatedRemainingDuration);
+                    this.log("", "debug", "ListView will render later, remaining items: " + remainingItems.length + " est. remaining duration: " + estimatedRemainingDuration);
 
                     this.wait(1000 / 60)
                     .then(this.namedCallback(() =>

@@ -116,7 +116,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
 
     /**
      * Class representing a session for handling remote procedure calls (RPC)
-     * to use with {@link html.RpcProxy} as the client-side counter part.
+     * to use with {@link core.RpcProxy} as the client-side counter part.
      * 
      * The RPC session runs on a {@link server.HTTPServer} and uses the server's
      * SSL encryption, if available. The {@link server.HTTPRoute} may assign
@@ -191,13 +191,13 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                     const reverseChannel = new modStream.PassThrough();
                     reverseChannel.on("close", () =>
                     {
-                        console.log("Reverse channel closed");
+                        this.log("", "debug", "Reverse channel closed");
                         priv.clients.delete(clientId);
                     });
 
                     reverseChannel.on("error", err =>
                     {
-                        console.log("Reverse channel closed on error: " + err);
+                        this.log("", "debug", "Reverse channel closed on error: " + err);
                         priv.clients.delete(clientId);
                     });
 

@@ -207,7 +207,7 @@ shRequire([__dirname + "/mesh.js", __dirname + "/util/util.js"], (mesh, util) =>
                 priv.status = "error";
                 this.statusChanged();
             };
-            console.log("Loading height map: " + s);
+            //console.log("Loading height map: " + s);
             img.src = shRequire.resource(s);
         }
 

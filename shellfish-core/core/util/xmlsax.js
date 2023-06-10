@@ -389,7 +389,7 @@ class Handler
                 }
                 else
                 {
-                    console.log("nesting error: " + tagObj.name);
+                    console.error("nesting error: " + tagObj.name);
                 }
             }
         }
@@ -427,7 +427,7 @@ class Handler
 
     error(pos, description)
     {
-        console.log("Parse error at position " + pos + ": " + description);
+        console.error("Parse error at position " + pos + ": " + description);
         this.xmlDocument = null;
     }
 

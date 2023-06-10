@@ -334,7 +334,7 @@ shRequire(["shellfish/core", "shellfish/core/matrix"], (core, mat) =>
             {
                 console.error("Failed to load bump map: " + b);
             }
-            console.log("Loading bump map: " + b);
+            //console.log("Loading bump map: " + b);
             img.src = shRequire.resource(b);
         }
 

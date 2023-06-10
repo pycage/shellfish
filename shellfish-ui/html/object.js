@@ -46,7 +46,7 @@ shRequire(["shellfish/core"], core =>
                 d.get(this).blobUrls.forEach(url =>
                 {
                     URL.revokeObjectURL(url);
-                    console.log(this.objectType + "@" + this.objectLocation + " released object URL: " + url);
+                    this.log("", "debug", "Destruction of object " + this.objectType + "@" + this.objectLocation + " released object URL: " + url);
                 });
                 d.get(this).blobUrls = [];
                 

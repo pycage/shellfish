@@ -66,16 +66,17 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
                     const key = stripNs(d.get(this).namespace, ev.key);
                     if (d.get(this).properties.has(key))
                     {
-                        console.log("storage changed: " + ev.key + " = " + ev.newValue);
                         this[key] = JSON.parse(ev.newValue);
                     }
                 });
             }
             else
             {
-                console.warn(this.objectType + "@" + this.objectLocation +
-                             ": LocalStorage is not available. " +
-                             "Properties will not be persisted.");
+                this.log("",
+                         "warning",
+                         this.objectType + "@" + this.objectLocation +
+                         ": LocalStorage is not available. " +
+                         "Properties will not be persisted.");
             }
         }
 

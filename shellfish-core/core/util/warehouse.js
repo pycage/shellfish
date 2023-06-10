@@ -81,7 +81,7 @@ class Warehouse
         else
         {
             this.inProduction.set(type, false);
-            console.log("Warehouse stock filled: " + stock.length);
+            //console.log("Warehouse stock filled: " + stock.length);
         }
     }
 }

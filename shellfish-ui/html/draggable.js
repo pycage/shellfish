@@ -130,8 +130,8 @@ shRequire(["shellfish/low", __dirname + "/box.js", __dirname + "/droparea.js"], 
 
             this.addHtmlEventListener(item, "dragend", (ev) =>
             {
-                console.log("drag end");
-                console.log(ev.dataTransfer);
+                //console.log("drag end");
+                //console.log(ev.dataTransfer);
                 this.dragEnd(makeDragEndEvent(ev));
                 dropArea.setDragSource(null);
                 ev.stopPropagation();

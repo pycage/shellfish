@@ -569,8 +569,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             ev.body()
             .then(xml =>
             {
-                console.log(xml);
-
                 const saxHandler = new xmlsax.Handler();
                 const saxParser = new xmlsax.Parser(saxHandler);
                 saxParser.parseString(xml);
@@ -597,8 +595,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                             const propName = propNode.name;
                             const propValue = propNode.children[0].data;
 
-                            console.log("SET " + propName + " = " + propValue);
-
                             out += "<D:propstat>" +
                                    "<D:prop><" + propName + "/></D:prop>" +
                                    "<D:status>HTTP/1.1 424 Failed Dependency</D:status>" +
@@ -611,8 +607,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         {
                             const propName = propNode.name;
 
-                            console.log("REMOVE " + propName);
-
                             out += "<D:propstat>" +
                                     "<D:prop><" + propName + "/></D:prop>" +
                                     "<D:status>HTTP/1.1 409 Conflict</D:status>" +
@@ -620,7 +614,6 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         });
                     }
 
-                    console.log(out);
                 });
 
                 out += "</D:multistatus>";

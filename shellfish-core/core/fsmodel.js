@@ -83,7 +83,7 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
             {
                 f.connect("fsChange", this, (changedPath) =>
                 {
-                    console.log("fs change " + changedPath);
+                    //console.log("fs change " + changedPath);
                     if (changedPath === d.get(this).path)
                     {
                         this.update(false);

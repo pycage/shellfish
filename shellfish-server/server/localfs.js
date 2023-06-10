@@ -237,7 +237,6 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
     {
         return new Promise((resolve, reject) =>
         {
-            console.log("MOVE " + sourcePath + " -> " + destPath);
             modFs.rename(sourcePath, destPath, err =>
             {
                 if (err)

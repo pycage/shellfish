@@ -342,9 +342,9 @@ exports.tools = {
             const now = Date.now();
             let pos = { value: 0 };
             thePreviousLine = -1;
-            console.log(`Compiling Shui Document '${url}'.`);
+            //console.log(`Compiling Shui Document '${url}'.`);
             let obj = parseShui(url, name, data, pos);
-            console.log(`Compiled Shui Document in ${Date.now() - now} ms.`);
+            //console.log(`Compiled Shui Document in ${Date.now() - now} ms.`);
             return obj;
         }
         else
@@ -400,7 +400,7 @@ exports.tools = {
                                 {
                                     let root = shui[key].create(rslv);
                                     root.set("objectType", url);
-                                    console.log("Created Shui Document '" + url + "' in " + (Date.now() - now) + " ms.");
+                                    //console.log("Created Shui Document '" + url + "' in " + (Date.now() - now) + " ms.");
                                     resolve(root);
                                 }
                                 catch (err)
@@ -525,7 +525,7 @@ exports.tools = {
         }
         else
         {
-            console.log(data.substr(pos.value, 80));
+            //console.log(data.substr(pos.value, 80));
             throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + what + "' expected, but '" + data[pos.value] + "' found.";
         }
     }

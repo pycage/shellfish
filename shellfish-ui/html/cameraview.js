@@ -90,13 +90,12 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             {
                 const enumerate = () =>
                 {
-                    console.log("enumerate camera devices");
                     navigator.mediaDevices.enumerateDevices()
                     .then((devs) =>
                     {
                         if (! devs)
                         {
-                            console.warn("The browser may have refused to enumerate the camera devices.");
+                            this.log("", "warning", "The browser may have refused to enumerate the camera devices.");
                             return;
                         }
 
@@ -113,7 +112,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                                 ++n;
                             }
                         });
-                        console.log(JSON.stringify(devices));
+                        //console.log(JSON.stringify(devices));
                         d.get(this).devices = devices;
                         this.devicesChanged();
                     });
@@ -176,8 +175,6 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             const prevDevId = d.get(this).deviceId;
             d.get(this).deviceId = deviceId;
             this.deviceIdChanged();
-
-            console.log("set deviceId = " + deviceId);
 
             if (d.get(this).status === "active" && deviceId !== prevDevId)
             {
@@ -270,7 +267,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                         break;
                     }
                     
-                    console.log(JSON.stringify(constraints));
+                    //console.log(JSON.stringify(constraints));
                     navigator.mediaDevices.getUserMedia(constraints)
                     .then((stream) =>
                     {

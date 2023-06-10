@@ -255,13 +255,11 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             return new Promise(async (resolve, reject) =>
             {
                 path = this.normalizePath(path);
-                console.log("mkdir: " + path);
                 const db = await this.open();
                 const tx = db.transaction(["toc"], "readwrite");
     
                 tx.oncomplete = (ev) =>
                 {
-                    console.log("mkdir: Created directory.");
                     resolve();
                     this.fsChange(path);
                 };
@@ -493,7 +491,6 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                     if (result === null)
                     {
                         // add new entry
-                        console.log("file is new: " + path);
                         tx
                         .objectStore("toc")
                         .add(item);
@@ -504,7 +501,6 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                     else
                     {
                         // modify existing
-                        console.log("overwriting file: " + path);
                         tx
                         .objectStore("toc")
                         .put(item);

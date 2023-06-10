@@ -364,13 +364,5 @@ MouseBox {
             ScrollIndicator { size: theme.paddingSmall }
         }
 
-        Placeholder {
-            text: "[icon:core-spinner]"
-
-            onInitialization: () =>
-            {
-                low.later().then(safeCallback(() => { visible = false; }));
-            }
-        }
     }
 }

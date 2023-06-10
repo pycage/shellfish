@@ -22,8 +22,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const modPath = require("path");
 
-console.log("[Shellfish on Node]");
-
 const js = process.argv.filter((item, idx) =>
 {
     return idx > 1 && item.toLowerCase().endsWith(".js");
@@ -67,7 +65,7 @@ if (typeof shellfishRun !== "function")
 
 if (haveError)
 {
-    console.log("Aborting on fatal error.");
+    console.error("Aborting on fatal error.");
     process.exit(1);
 }
 

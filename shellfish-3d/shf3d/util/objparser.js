@@ -121,7 +121,6 @@ function expect(data, pos, what)
     }
     else
     {
-        console.log(data.substr(pos.value, 80));
         throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + what + "' expected.";
     }
 }
@@ -487,12 +486,12 @@ function parseMtlEntry(data, pos, mtl)
 
     case "map_Kd":
         mtl.materials[mtl.materials.length - 1].kdMap = parseMtlMap(data, pos);
-        console.log("parsed mapKd: " + mtl.materials[mtl.materials.length - 1].kdMap);
+        //console.log("parsed mapKd: " + mtl.materials[mtl.materials.length - 1].kdMap);
         break;
 
     case "map_Bump":
         mtl.materials[mtl.materials.length - 1].bumpMap = parseMtlMap(data, pos);
-        console.log("parsed bump map: " + mtl.materials[mtl.materials.length - 1].bumpMap);
+        //console.log("parsed bump map: " + mtl.materials[mtl.materials.length - 1].bumpMap);
         break;
 
     case "Ks":

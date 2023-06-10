@@ -67,7 +67,6 @@ ListView {
     property delegate: template Draggable {
         onDragStart: ev =>
         {
-            console.log("drag start");
             const uris = [];
             fsview.selector.selection.forEach(idx =>
             {
@@ -82,8 +81,6 @@ ListView {
 
             if (uris.length > 0)
             {
-                console.log(JSON.stringify(uris));
-
                 ev.setData("text/uri-list", uris.join("\r\n"));
                 ev.setData("text/plain", uris.join("\r\n"));
                 ev.accepted = true;

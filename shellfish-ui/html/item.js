@@ -302,7 +302,7 @@ shRequire(["shellfish/low",
                             {
                                 if (p.canFocus)
                                 {
-                                    console.log("Ancestor " + p.objectType + "@" + p.objectLocation + " took the focus");
+                                    this.log("", "debug", "Ancestor " + p.objectType + "@" + p.objectLocation + " took the focus");
                                     p.get().focus({ preventScroll: true });
                                     handled = true;
                                     break;

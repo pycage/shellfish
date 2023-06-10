@@ -33,7 +33,6 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      */
     function setDragSource(obj)
     {
-        console.log("current drag source: " + obj);
         dragSource = obj;
     }
     exports.setDragSource = setDragSource;
@@ -173,7 +172,6 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 {
                     ev.dataTransfer.dropEffect = e.dropEffect;
                     d.get(this).dropEffect = e.dropEffect;
-                    console.log("STORE DROP EFFECT: " + d.get(this).dropEffect);
                     ev.preventDefault();
                     ev.stopPropagation();
                     return false;
@@ -212,7 +210,6 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
 
                 const e = makeDropEvent(ev);
                 // buggy browser doesn't convey dropEffect, so set it manually
-                console.log("LOAD DROP EFFECT: " + d.get(this).dropEffect);
                 e.dropEffect = d.get(this).dropEffect;
                 this.drop(e);
 

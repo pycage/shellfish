@@ -70,7 +70,7 @@ shRequire(["shellfish/low", "shellfish/core", __dirname + "/object.js"], functio
             const pads = navigator.getGamepads();
             const items = [];
 
-            console.log(pads);
+            //console.log(pads);
 
             for (let i = 0; i < pads.length; ++i)
             {

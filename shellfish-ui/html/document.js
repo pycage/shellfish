@@ -84,7 +84,6 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 
         if (focusable)
         {
-            console.log("Restored focus to " + focusable.objectType + "@" + focusable.objectLocation + ", last focused " + maxTime);
             focusable.get().focus({ preventScroll: true });
         }
     }
@@ -494,7 +493,7 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
                     const focusTrap = activeTraps[activeTraps.length - 1];
                     if (focusTrap)
                     {
-                        console.log("Activated focus trap: " + focusTrap.objectType + "@" + focusTrap.objectLocation);
+                        this.log("", "debug", "Activated focus trap: " + focusTrap.objectType + "@" + focusTrap.objectLocation);
                         restoreFocusWithin(focusTrap);
                     }
                 }
@@ -536,7 +535,6 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
 
             this.onInitialization = () =>
             {
-                console.log("Initializing Document.");
                 window.requestAnimationFrame(() =>
                 {
                     this.updateSizeFrom(null, false);

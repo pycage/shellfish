@@ -145,7 +145,7 @@ shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
                 };
                 priv.socket.onclose = (ev) =>
                 {
-                    console.log("WebSocket closed with code " + ev.code + " " + ev.reason);
+                    this.log("", "debug", "WebSocket closed with code " + ev.code + " " + ev.reason);
                     priv.protocol = "";
                     this.protocolChanged();
                     priv.status = "closed";

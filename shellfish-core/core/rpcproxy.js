@@ -40,7 +40,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         postMessage(message)
         {
-            console.log("Send: " + JSON.stringify(message));
+            //console.log("Send: " + JSON.stringify(message));
 
             const headers = new Headers();
             headers.append("x-shellfish-rpc-socket", this.socketId);
@@ -65,7 +65,7 @@ shRequire([__dirname + "/object.js"], obj =>
             {
                 if (response.ok)
                 {
-                    console.log("Established reverse channel");
+                    //console.log("Established reverse channel");
                     let buffer = null;
                     let bufferOffset = 0;
                     let dataOffset = 0;
@@ -79,7 +79,7 @@ shRequire([__dirname + "/object.js"], obj =>
                     {
                         if (value === null)
                         {
-                            console.log("Reverse channel is waiting for data");
+                            //console.log("Reverse channel is waiting for data");
                             const r = await this.reader.read();
                             done = r.done;
                             value = r.value;
@@ -108,7 +108,7 @@ shRequire([__dirname + "/object.js"], obj =>
                             const json = dec.decode(buffer);
                             try
                             {
-                                console.log("Receive: " + json);
+                                //console.log("Receive: " + json);
                                 const message = JSON.parse(json);
                                 this.handler(message);
                             }
@@ -134,7 +134,7 @@ shRequire([__dirname + "/object.js"], obj =>
             })
             .catch(err =>
             {
-                console.log("Connection closed: " + err);
+                //console.log("Connection closed: " + err);
                 this.handler({ type: "exit" });
             });
 
@@ -162,7 +162,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         postMessage(message)
         {
-            console.log("Send: " + JSON.stringify(message));
+            //console.log("Send: " + JSON.stringify(message));
 
             const req = this.modHttp.request(this.endpoint, {
                 method: "POST",
@@ -217,7 +217,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
             req.on("close", () =>
             {
-                console.log("Connection closed");
+                //console.log("Connection closed");
                 this.handler({ type: "exit" });
                 done = true;
             });
@@ -237,7 +237,7 @@ shRequire([__dirname + "/object.js"], obj =>
                 });
             }
 
-            console.log("Established reverse channel");
+            //console.log("Established reverse channel");
             let buffer = null;
             let bufferOffset = 0;
             let dataOffset = 0;
@@ -246,7 +246,7 @@ shRequire([__dirname + "/object.js"], obj =>
             {
                 if (value === null)
                 {
-                    console.log("Reverse channel is waiting for data");
+                    //console.log("Reverse channel is waiting for data");
                     const r = await readData();
                     done = r.done;
                     value = r.value;
@@ -275,7 +275,7 @@ shRequire([__dirname + "/object.js"], obj =>
                     const json = dec.decode(buffer);
                     try
                     {
-                        console.log("Receive: " + json);
+                        //console.log("Receive: " + json);
                         const message = JSON.parse(json);
                         this.handler(message);
                     }
@@ -379,7 +379,6 @@ shRequire([__dirname + "/object.js"], obj =>
 
             this.onDestruction = () =>
             {
-                console.log("Destroying RPC proxy " + this.objectId);
                 const priv = d.get(this);
                 priv.socket.close();
                 priv.callMap.clear();
@@ -415,12 +414,12 @@ shRequire([__dirname + "/object.js"], obj =>
                 }
                 else if (msg.type === "heartbeat")
                 {
-                    console.log("Got heartbeat from RPC endpoint");
+                    this.log("", "debug", "Got heartbeat from RPC endpoint");
                     priv.socket.postMessage({ type: "heartbeat", clientId: priv.clientId });
                 }
                 else if (msg.type === "exit")
                 {
-                    console.log("RPC connection closed");
+                    this.log("", "debug", "RPC connection closed");
                     priv.callbacks.forEach(cbId =>
                     {
                         priv.callbackMap.delete(cbId);
@@ -431,7 +430,6 @@ shRequire([__dirname + "/object.js"], obj =>
                 }
                 else if (msg.type === "methodResult")
                 {
-                    console.log(priv.callMap);
                     priv.callMap.get(msg.callId).resolve(this.processOutParameters([msg.value])[0]);
                     priv.callMap.delete(msg.callId);
                 }
@@ -465,7 +463,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
             if (priv.clientId !== "")
             {
-                console.log("Calling method " + callItem.name);
+                this.log("", "debug", "Calling RPC method: " + callItem.name);
                 priv.socket.postMessage({ type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters });
             }
             else

@@ -63,8 +63,7 @@ Box {
             })
             .catch(err =>
             {
-                console.error("Failed to load item: " + err);
-                console.log(err);
+                log("", "error", "Loader failed to load item: " + err);
                 loading = false;
             });
         }

@@ -192,8 +192,6 @@ Overlay {
 
             onKeyDown: (ev) =>
             {
-                console.log("menu key down " + ev.key);
-
                 if (ev.key === "Escape" || ev.key === " " || ev.key === "Enter")
                 {
                     ev.accepted = true;
@@ -213,8 +211,6 @@ Overlay {
                         break;
                     }
                 }
-
-                console.log("current " + current + " of " + cs.length);
 
                 if (ev.key === "ArrowUp")
                 {

@@ -119,8 +119,8 @@ shRequire([__dirname + "/object.js"], obj =>
             if (priv.filesystem !== null && priv.path !== "")
             {
                 let blob = null;
-                console.log("Saving File Storage: " + priv.path);
-                console.log(JSON.stringify(priv.doc));
+                this.log("", "debug", "Saving File Storage: " + priv.path);
+                //console.log(JSON.stringify(priv.doc));
                 if (shRequire.environment === "web")
                 {
                     blob = new Blob([JSON.stringify(priv.doc, null, 2)], { type: "application/json" });

@@ -115,7 +115,7 @@ shRequire([__dirname + "/object.js", __dirname + "/util/compat.js"], (obj, compa
     const WORKER_CODE = `
         "use strict";
 
-        console.log("Starting new worker thread.");
+        //console.log("Starting new worker thread.");
 
         let idCounter = 0;
         
@@ -141,11 +141,11 @@ shRequire([__dirname + "/object.js", __dirname + "/util/compat.js"], (obj, compa
         const modVm = isNode ? require("vm") : null;
         const worker = isWeb ? self : this;
 
-        console.log("isWeb: " + isWeb + ", isNode: " + isNode);
+        //console.log("isWeb: " + isWeb + ", isNode: " + isNode);
 
         function importCodeCompat(code)
         {
-            console.log("import code " + code.length);
+            //console.log("import code " + code.length);
             if (isWeb)
             {
                 const codeBlob = new Blob([code], { type: "application/type" });
@@ -353,7 +353,7 @@ shRequire([__dirname + "/object.js", __dirname + "/util/compat.js"], (obj, compa
          */
         worker.registerWorkerMethod = (name, f) =>
         {
-            console.log("Registering worker method: " + name);
+            //console.log("Registering worker method: " + name);
             methods.set(name, f);
         };
 
@@ -371,8 +371,8 @@ shRequire([__dirname + "/object.js", __dirname + "/util/compat.js"], (obj, compa
             if (taskCache.has(code))
             {
                 taskId = taskCache.get(code);
-                console.log("from cache " + taskId);
-                console.log(moduleCache);
+                //console.log("from cache " + taskId);
+                //console.log(moduleCache);
             }
             else
             {

@@ -59,21 +59,15 @@ DropArea {
 
     onDropAccept: (ev) =>
     {
-        console.log("ACCEPT? " + JSON.stringify(ev.types));
         if (ev.types.includes("text/plain"))
         {
             ev.accepted = true;
         }
-        console.log(ev);
     }
 
     onDrop: (ev) =>
     {
-        console.log("Drop");
-        console.log(ev);
         const uris = ev.data["text/plain"].split("\r\n");
-        console.log(uris);
-
         uris.forEach(uri =>
         {
             const fs = node.filesystem;
@@ -152,11 +146,6 @@ DropArea {
             filesystem: node.collapsed ? null : node.filesystem
             path: node.path
             filter: makeFilter(true, false, true)
-
-            onFilesystemChanged: () =>
-            {
-                console.log("fs: " + filesystem);
-            }
         }
 
         delegate: template FSTreeNode {

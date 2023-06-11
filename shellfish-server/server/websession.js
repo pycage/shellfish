@@ -197,7 +197,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                 this.webHead(ev);
                 break;
             default:
-                this.response(500, "Unsupported")
+                ev.response(500, "Unsupported")
                 .send();
             }
         }
@@ -210,6 +210,8 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             this.log("WWW", "info", "GET " + path);
             const range = ev.range;
 
+            const mayCompress = (ev.headers.get("accept-encoding") || "").indexOf("gzip") !== -1;
+
             priv.filesystem.fileInfo(path)
             .then(finfo =>
             {
@@ -218,7 +220,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                     if (priv.indexFile !== "")
                     {
                         // redirect to index file
-                        this.response(302, "Relocate")
+                        ev.response(302, "Relocate")
                         .header("Location",
                                 ev.unmappedUrl.path +
                                 (ev.unmappedUrl.path.endsWith("/") ? "" : "/") +
@@ -231,14 +233,14 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                         priv.filesystem.list(path)
                         .then(files =>
                         {
-                            this.response(200, "OK")
+                            ev.response(200, "OK", mayCompress)
                             .body(makeIndexDocument(ev.unmappedUrl.path, priv.root, path, files), "text/html")
                             .send();
                         })
                         .catch(err =>
                         {
                             this.log("WWW", "error", err);
-                            this.response(500, "Internal Server Error")
+                            ev.response(500, "Internal Server Error")
                             .send();
                         });
                     }
@@ -251,7 +253,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                     if (range.length === 0)
                     {
                         // no range
-                        this.response(200, "OK")
+                        ev.response(200, "OK", mayCompress)
                         .header("Accept-Ranges", "bytes")
                         .stream(file.stream(), finfo.mimetype, finfo.size)
                         .send();
@@ -263,7 +265,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                                                             : finfo.size - 1,
                                             finfo.size - 1);
                         this.log("WWW", "info", "Bytes Range: " + from + "-" + to + "/" + finfo.size);
-                        this.response(206, "Partital Content")
+                        ev.response(206, "Partital Content", mayCompress)
                         .header("Accept-Ranges", "bytes")
                         .header("Content-Range", "bytes " + from + "-" + to + "/" + finfo.size)
                         .header("Last-Modified", new Date(finfo.mtime).toUTCString())
@@ -274,14 +276,14 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
                 .catch(err =>
                 {
                     this.log("WWW", "error", err);
-                    this.response(500, "Internal Server Error")
+                    ev.response(500, "Internal Server Error")
                     .send();
                 });
             })
             .catch(err =>
             {
                 this.log("WWW", "error", err);
-                this.response(403, "Forbidden")
+                ev.response(403, "Forbidden")
                 .send();
             });
         }
@@ -296,7 +298,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             priv.filesystem.fileInfo(path)
             .then(finfo =>
             {
-                this.response(200, "OK")
+                ev.response(200, "OK")
                 .header("Content-Size", "" + finfo.size)
                 .header("Content-Type", finfo.mimetype)
                 .header("Last-Modified", new Date(finfo.mtime).toUTCString())
@@ -305,7 +307,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
             .catch(err =>
             {
                 this.log("WWW", "error", err);
-                this.response(403, "Forbidden")
+                ev.response(403, "Forbidden")
                 .send();
             });
         }

@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 shRequire(["shellfish/core"], core =>
 {
     const modUrl = require("url");
+    const modZlib = require("zlib");
 
     /* Reads the HTTP request body.
      */
@@ -50,9 +51,9 @@ shRequire(["shellfish/core"], core =>
     {
         const now = Date.now();
 
-        const makeResponse = (code, status) =>
+        const makeResponse = (code, status, compress) =>
         {
-            const r = new HTTPResponse(response, code, status, self.safeCallback(res =>
+            const r = new HTTPResponse(response, code, status, compress, self.safeCallback(res =>
             {
                 self.log("HTTP",
                          "info",
@@ -114,7 +115,7 @@ shRequire(["shellfish/core"], core =>
      */
     class HTTPResponse
     {
-        constructor(response, code, status, callback)
+        constructor(response, code, status, compress, callback)
         {
             this.code = code;
             this.status = status;
@@ -124,6 +125,7 @@ shRequire(["shellfish/core"], core =>
             this.data = "";
             this.dataStream = null;
             this.dataSize = -1;
+            this.compress = compress || false;
             this.callback = callback;
         }
         
@@ -133,6 +135,11 @@ shRequire(["shellfish/core"], core =>
         send()
         {
             this.callback(this);
+
+            if (this.compress)
+            {
+                this.response.setHeader("Content-Encoding", "gzip");
+            }
 
             const cookies = [...this.cookies].map(item =>
             {
@@ -148,19 +155,52 @@ shRequire(["shellfish/core"], core =>
                 this.response.setHeader(item[0], item[1]);
             });
 
-            this.response.writeHead(this.code, this.status);
             if (this.data.length > 0)
             {
-                this.response.write(this.data);
+                if (this.compress)
+                {
+                    modZlib.gzip(this.data, (err, data) =>
+                    {
+                        this.response.setHeader("Content-Length", "" + data.length);
+                        this.response.writeHead(this.code, this.status);
+                        this.response.write(data);
+                        this.response.end();
+                    })
+                }
+                else
+                {
+                    this.response.setHeader("Content-Length", "" + this.data.length);
+                    this.response.writeHead(this.code, this.status);
+                    this.response.write(this.data);
+                    this.response.end();
+                }
             }
-            if (this.dataStream)
+            else if (this.dataStream)
             {
                 this.dataStream.on("error", err =>
                 {
                     console.error("broken pipe: " + err);
                     this.response.end();
                 });
-                this.dataStream.pipe(this.response);
+
+                if (this.dataSize !== -1 && ! this.compress)
+                {
+                    this.response.setHeader("Content-Length", "" + this.dataSize);
+                }
+                else
+                {
+                    this.response.setHeader("Transfer-Encoding", "chunked");
+                }
+                this.response.writeHead(this.code, this.status);
+
+                if (this.compress)
+                {
+                    this.dataStream.pipe(modZlib.createGzip()).pipe(this.response);
+                }
+                else
+                {
+                    this.dataStream.pipe(this.response);
+                }
             }
             else
             {
@@ -177,7 +217,6 @@ shRequire(["shellfish/core"], core =>
          */
         body(s, mimetype)
         {
-            this.header("Content-Length", "" + Buffer.from(s).length);
             this.header("Content-Type", mimetype);
             this.data = s;
             return this;
@@ -194,14 +233,6 @@ shRequire(["shellfish/core"], core =>
         stream(s, mimetype, dataSize)
         {
             this.header("Content-Type", mimetype);
-            if (dataSize === -1)
-            {
-                this.header("Transfer-Encoding", "chunked");
-            }
-            else
-            {
-                this.header("Content-Length", "" + dataSize);
-            }
             this.dataStream = s;
             this.dataSize = dataSize;
             return this;
@@ -378,6 +409,7 @@ shRequire(["shellfish/core"], core =>
             const r = new HTTPResponse(d.get(this).response,
                                        code,
                                        status,
+                                       false,
                                        this.safeCallback(res =>
             {
                 this.responseReady(res);

@@ -820,8 +820,8 @@ const shRequire = (function ()
                 const js = `/* Module ${url} */
                     (function (Module)
                     {
-                        const __dirname = "${dirname}";
-                        const __filename = "${url}";
+                        const __dirname = "${dirname.replace(/\\/g, "\\\\")}";
+                        const __filename = "${url.replace(/\\/g, "\\\\")}";
     
                         const haveShellfish = typeof shRequire !== "undefined";
                         const currentDependencyCounter = haveShellfish ? shRequire.dependencyCounter : 0;
@@ -843,7 +843,7 @@ const shRequire = (function ()
                         {
                             const mod = typeof Module !== "undefined" ? Module : module.exports ? module.exports : exports;
                             mod.hasDependencies = currentDependencyCounter !== shRequire.dependencyCounter;
-                            shRequire.registerModule("${url}", mod);
+                            shRequire.registerModule("${url.replace(/\\/g, "\\\\")}", mod);
                         }
                     })(typeof Module !== "undefined" ? Module : undefined);
                 `;

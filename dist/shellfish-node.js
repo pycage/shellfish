@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,12 @@ const js = process.argv.filter((item, idx) =>
     return idx > 1 && item.toLowerCase().endsWith(".js");
 });
 
+const shuis = process.argv.filter((item, idx) =>
+{
+    return idx > 1 && item.toLowerCase().endsWith(".shui");
+})
+.map(p => modPath.resolve(p).split(modPath.sep).join(modPath.posix.sep));
+
 const bundles = process.argv.filter((item, idx) =>
 {
     return idx > 1 && item.toLowerCase().endsWith(".pkg");
@@ -34,27 +40,26 @@ const bundles = process.argv.filter((item, idx) =>
 
 if (js.length === 0)
 {
-    console.log("Provides a Shellfish environment for node.");
+    console.log("Provides a Shellfish environment on Node.");
     console.log("");
-    console.log("Usage: node shellfish-node.js <require.js> [<bundle file>...] <js-file>");
+    console.log("Usage: node shellfish-node.js <require.js> [<bundle file>...] [<js-file>] [<shui-file>]");
+    console.log("");
+    console.log("The first .js file must be require.js.");
     process.exit(1);
 }
 
 let haveError = false;
 
 global.shellfishRun = true;
-if (js.length === 2)
+try
 {
-    try
-    {
-        require(modPath.resolve(js[0]));
-    }
-    catch (err)
-    {
-        console.error("Failed to import: " + f);
-        console.error(err);
-        haveError = true;
-    }
+    require(modPath.resolve(js[0]));
+}
+catch (err)
+{
+    console.error("Failed to import: " + js[0]);
+    console.error(err);
+    haveError = true;
 }
 
 if (typeof shellfishRun !== "function")
@@ -69,10 +74,19 @@ if (haveError)
     process.exit(1);
 }
 
+
 shellfishRun(bundles, shRequire =>
 {
-    shRequire([js[1]], js =>
+    if (js.length > 1)
     {
-        
-    });
+        shRequire(js.slice(1).map(f => modPath.resolve(f)), () => { });
+    }
+
+    if (shuis.length > 0)
+    {
+        shRequire(["shui-loader.js"], loader =>
+        {
+            shuis.forEach(shui => loader.load(shui));
+        });
+    }
 });

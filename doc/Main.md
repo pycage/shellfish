@@ -137,7 +137,13 @@ Layouting elements on screen is intuitive, yet powerful.
   {@link core.ParallelAction}, {@link core.ScriptAction}, and
   {@link core.WaitAction} let you setup schedules of actions.
   The element {@link html.ScriptAction} moved to {@link core.ScriptAction}.
+* The element {@link html.RpcProxy} moved to {@link core.RpcProxy} and is
+  usable on node.  
 * It is now possible to use the `async` keyword for functions on Shui elements.
+* The elements {@link server.WebSession} and {@link server.DavSession} compress
+  files for transfer, if the client states to accept `gzip` compression.
+* The element {@link core.RpcProxy} notifies the server on destruction for
+  immediate clean up.
 
 ### May 2023
 * The new elements {@link server.RpcSession} and {@link html.RpcProxy} allow

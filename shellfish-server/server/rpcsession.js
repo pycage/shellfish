@@ -110,6 +110,10 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: err });
             }
         }
+        else if (msg.type === "exit")
+        {
+            self.removeClient(clientId);
+        }
     }
 
     const d = new WeakMap();
@@ -185,19 +189,19 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 if (req.method === "GET")
                 {
                     const clientId = this.generateClientId();
-                    this.log("RPC", "info", clientId + "@" + req.sourceAddress + " CONNECT");
+                    this.log("RPC", "info", "RPC client " + clientId + " connected from " + req.sourceAddress);
 
                     // open reverse channel
                     const reverseChannel = new modStream.PassThrough();
                     reverseChannel.on("close", () =>
                     {
-                        this.log("", "debug", "Reverse channel closed");
+                        this.log("RPC", "debug", "RPC reverse channel to client " + clientId + " closed");
                         priv.clients.delete(clientId);
                     });
 
                     reverseChannel.on("error", err =>
                     {
-                        this.log("", "debug", "Reverse channel closed on error: " + err);
+                        this.log("RPC", "debug", "RPC reverse channel to client " + clientId + " closed on error: " + err);
                         priv.clients.delete(clientId);
                     });
 
@@ -235,11 +239,11 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                             return;
                         }
 
-                        this.log("RPC", "info", msg.clientId + "@" + req.sourceAddress + " RECEIVE " + msg.type);
+                        this.log("RPC", "info", "RPC message from client " + msg.clientId + ", type: " + msg.type);
 
                         if (! priv.clients.has(msg.clientId))
                         {
-                            this.log("RPC", "error", msg.clientId + "@" + req.sourceAddress + " NOT CONNECTED");
+                            this.log("RPC", "error", "RPC client " + msg.clientId + " is not connected");
                             req.response(500, "Not Connected")
                             .send();
                         }
@@ -305,20 +309,8 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 const client = priv.clients.get(clientId);
                 if (client.expires < Date.now())
                 {
-                    this.log("RPC", "info", "Client " + clientId + " expired");
-                    client.reverseChannel.end();
-                    client.proxies.forEach(proxyId =>
-                    {
-                        const methods = [...priv.methods.keys()];
-                        methods.forEach(methodId =>
-                        {
-                            if (methodId.startsWith(proxyId + "."))
-                            {
-                                priv.methods.delete(methodId);
-                            }
-                        });
-                    });
-                    priv.clients.delete(clientId);
+                    this.log("RPC", "info", "RPC client " + clientId + " expired");
+                    this.removeClient(clientId);
                 }
             });
 
@@ -329,13 +321,32 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
             });
         }
 
+        removeClient(clientId)
+        {
+            const priv = d.get(this);
+            const client = priv.clients.get(clientId);
+            client.reverseChannel.end();
+            client.proxies.forEach(proxyId =>
+            {
+                const methods = [...priv.methods.keys()];
+                methods.forEach(methodId =>
+                {
+                    if (methodId.startsWith(proxyId + "."))
+                    {
+                        priv.methods.delete(methodId);
+                    }
+                });
+            });
+            priv.clients.delete(clientId);
+        }
+
         postMessage(clientId, message)
         {
             const priv = d.get(this);
 
             const enc = new TextEncoder();
             const data = enc.encode(JSON.stringify(message));
-            this.log("RPC", "info", clientId + " SEND " + message.type);
+            this.log("RPC", "info", "RPC send message to client " + clientId + ", type: " + message.type);
 
             const size = data.length;
             const buffer = new ArrayBuffer(size + 4);

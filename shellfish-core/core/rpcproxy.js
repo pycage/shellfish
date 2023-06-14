@@ -380,6 +380,7 @@ shRequire([__dirname + "/object.js"], obj =>
             this.onDestruction = () =>
             {
                 const priv = d.get(this);
+                priv.socket.postMessage({ type: "exit", clientId: priv.clientId });
                 priv.socket.close();
                 priv.callMap.clear();
                 priv.callbackMap.clear();

@@ -204,6 +204,7 @@ shRequire(["shellfish/core"], core =>
             }
             else
             {
+                this.response.writeHead(this.code, this.status);
                 this.response.end();
             }
         }

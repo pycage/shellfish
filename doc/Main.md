@@ -144,6 +144,8 @@ Layouting elements on screen is intuitive, yet powerful.
   files for transfer, if the client states to accept `gzip` compression.
 * The element {@link core.RpcProxy} notifies the server on destruction for
   immediate clean up.
+* There is now `dist/require2.js` as an experimental Promise-based version of
+  the Shellfish module manager. It should replace the old one when ready.
 
 ### May 2023
 * The new elements {@link server.RpcSession} and {@link html.RpcProxy} allow

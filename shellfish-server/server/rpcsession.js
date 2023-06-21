@@ -287,7 +287,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 this.postMessage(clientId, { type: "heartbeat" });
             });
 
-            this.wait(30000)
+            this.wait(30000, "heartbeat")
             .then(() =>
             {
                 this.heartbeat();
@@ -314,7 +314,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 }
             });
 
-            this.wait(60000)
+            this.wait(60000, "closeExpired")
             .then(() =>
             {
                 this.closeExpired();
@@ -338,6 +338,13 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                 });
             });
             priv.clients.delete(clientId);
+
+            if (priv.clients.size === 0)
+            {
+                this.log("RPC", "debug", "All clients disconnected");
+                this.abortWait("heartbeat");
+                this.abortWait("closeExpired");
+            }
         }
 
         postMessage(clientId, message)

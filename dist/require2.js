@@ -144,7 +144,7 @@ const shRequire = (function ()
 
     function log(domain, level, message)
     {
-        if (true) //(isWeb || level === "error")
+        if (isWeb || level === "error")
         {
             if (level === "error")
             {

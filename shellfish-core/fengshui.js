@@ -631,7 +631,7 @@ exports.tools = {
         }
         const result = data.substring(pos.value + 3, idx);
         pos.value = idx + 3;
-        return result.replace(/"/g, "\\\"").replace(/\n/g, "\\n");
+        return result.replace(/"/g, "\\\"").replace(/\r?\n/g, "\\n");
     }
 
     function readRegExp(data, pos)

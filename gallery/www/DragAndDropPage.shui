@@ -215,7 +215,7 @@ Page {
                         {
                             const dlg = imageDialog();
                             dlg.show();
-                            dlg.title = itemBox.modelData.value.name;
+                            dlg.title = low.escapeMarkup(itemBox.modelData.value.name);
                             dlg.file = itemBox.modelData.value.obj;
                         }
                     }

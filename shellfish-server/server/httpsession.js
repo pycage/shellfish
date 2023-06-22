@@ -394,6 +394,8 @@ shRequire(["shellfish/core"], core =>
         /**
          * Creates and returns a response object.
          * 
+         * @deprecated Use the `response` method of {@link server.HTTPServer.HTTPRequestEvent} instead.
+         * 
          * @param {number} code - The HTTP status code.
          * @param {string} status - The HTTP status text.
          * @returns {server.HTTPResponse} The response object.

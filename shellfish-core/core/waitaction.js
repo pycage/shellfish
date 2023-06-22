@@ -46,14 +46,6 @@ shRequire([__dirname + "/action.js"], act =>
 
             this.notifyable("until");
 
-            this.onEnabledChanged = () =>
-            {
-                if (! this.enabled)
-                {
-                    this.abortWait("wait");
-                }
-            }
-
             this.onStatusChanged = () =>
             {
                 if (this.status === "stopping")

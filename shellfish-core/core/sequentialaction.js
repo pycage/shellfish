@@ -71,7 +71,9 @@ shRequire([__dirname + "/action.js"], act =>
                 {
                     do
                     {
-                        const actions = d.get(this).actions.slice();
+                        const actions = d.get(this).actions
+                        .filter(action => action.enabled);
+                        
                         for (let i = 0; i < actions.length && this.enabled && this.status === "running"; ++i)
                         {
                             const action = actions[i];

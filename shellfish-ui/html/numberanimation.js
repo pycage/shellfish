@@ -332,7 +332,7 @@ shRequire(["shellfish/low", "shellfish/core", "shellfish/core/bezier"], function
                     valueCallback(value);
                 }
 
-                if (t >= duration || ! this.enabled || this.status === "stopping")
+                if (t >= duration || this.status === "stopping")
                 {
                     priv.handle.cancel();
                     priv.handle = null;
@@ -344,7 +344,14 @@ shRequire(["shellfish/low", "shellfish/core", "shellfish/core/bezier"], function
             {
                 priv.handle.cancel();
             }
-            priv.handle = low.addFrameHandler(runFrame, this.objectType + "@" + this.objectLocation);
+            if (this.enabled)
+            {
+                priv.handle = low.addFrameHandler(runFrame, this.objectType + "@" + this.objectLocation);
+            }
+            else
+            {
+                this.wait(0).then(() => { this.finish(); });
+            }
 
             return super.start();
         }

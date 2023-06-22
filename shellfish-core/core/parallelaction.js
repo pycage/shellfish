@@ -57,7 +57,9 @@ shRequire([__dirname + "/action.js"], act =>
             {
                 if (this.enabled)
                 {
-                    const promises = d.get(this).actions.map(action => action.start());
+                    const promises = d.get(this).actions
+                    .filter(action => action.enabled)
+                    .map(action => action.start());
                     await Promise.all(promises);
                 }
                 this.finish();

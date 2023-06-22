@@ -754,13 +754,13 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
      * 
      * @example <caption>Trees of elements may be created and parameterized by chaining commands</caption>
      * const tree = declarative.element(html.Box).id("theBox")
-     *              .color("black")
+     *              .set("color", "black")
      *              .add(
      *                  declarative.element(html.MouseBox)
-     *                  .fillWidth(true)
-     *                  .fillHeight(true)
-     *                  .marginLeft(12)
-     *                  .marginRight(12)
+     *                  .set("fillWidth", true)
+     *                  .set("fillHeight", true)
+     *                  .set("marginLeft", 12)
+     *                  .set("marginRight", 12)
      *                  .click((ev) =>
      *                  {
      *                      console.log("clicked the box");

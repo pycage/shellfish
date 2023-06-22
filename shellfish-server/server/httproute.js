@@ -40,7 +40,7 @@ shRequire(["shellfish/core"], core =>
      * Implement virtual servers by evaluating the HTTP Host header.
      * 
      *     HTTPRoute {
-     *         when: req.headers.get("Host") === "virtualhost1.com"
+     *         when: req => req.headers.get("Host") === "virtualhost1.com"
      *     }
      * 
      * The `delegate` property holds a {@link server.HTTPSession} element as

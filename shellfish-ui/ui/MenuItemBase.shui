@@ -71,6 +71,15 @@ MouseBox {
             }
         };
 
+        _menu.get().onCascadingClose = () =>
+        {
+            menuOpened = false;
+            if (thisMenu)
+            {
+                selected = true;
+            }
+        };
+
         _menu.get().onPointerMove = (ev) =>
         {
             let onItem = false;

@@ -140,7 +140,7 @@ Layouting elements on screen is intuitive, yet powerful.
 * The element {@link html.RpcProxy} moved to {@link core.RpcProxy} and is
   usable on node.  
 * It is now possible to use the `async` keyword for functions on Shui elements.
-* The elements {@link server.WebSession} and {@link server.DavSession} compress
+* The elements {@link server.WebSession} and {@link server.DAVSession} compress
   files for transfer, if the client states to accept `gzip` compression.
 * The element {@link core.RpcProxy} notifies the server on destruction for
   immediate clean up.

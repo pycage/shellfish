@@ -201,8 +201,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             if (isLiteral)
             {
                 out = low.escapeHtml(out)
-                         .replace(/\n /g, "<br>&nbsp;")
-                         .replace(/\n/g, "<br>")
+                         .replace(/\r?\n /g, "<br>&nbsp;")
+                         .replace(/\r?\n/g, "<br>")
                          .replace(/  /g, "&nbsp; ");
             }
             else if (typeof priv.filter === "function")

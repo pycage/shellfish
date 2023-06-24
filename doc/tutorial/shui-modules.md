@@ -2,7 +2,7 @@ Modules are external files loaded by a Shui file. This can be:
 * other Shui files (i.e. Shui components)
 * files with JavaScript code
 * WebAssembly compiled binaries
-* CSS files
+* CSS files (icons sets are loaded this way)
 
 ### Loading Modules
 
@@ -81,6 +81,8 @@ a path on the filesystem.
 * `shellfish/html`: The {@link html html} module with elements for HTML UIs.
 * `shellfish/ui`: The {@link ui ui} module with lots of UI elements.
 * `shellfish/3d`: The {@link shf3d shf3d} module with elements for building 3D scenes with OpenGL.
+* `shellfish/server`: The {@link server server} module with
+  elements for modeling the server-side.
 * `shellfish/fengshui`: The {@link fengshui fengshui} module.
 * `shellfish/core/matrix`: The {@link matrix matrix} module for matrix and vector algebra.
 
@@ -115,8 +117,8 @@ Therefore, the filename of a component must begin with a capital letter.
 
 ### JavaScript Modules
 
-When loading a JavaScript file, only exported functions are accessible from
-outside. To export a function, assign it to the predefined `exports` object.
+When loading a JavaScript file, only **exported members** are accessible from
+outside. To export a member, assign it to the predefined `exports` object.
 
 ```
 // somecode.js

@@ -24,7 +24,7 @@ Document {
 ```
 
 Every Shui file consists of exactly one root element, which in turn may contain child elements.
-The root element of the main file must be `Document` for things to appear on screen.
+The root element of the main file of a web UI must be `Document` for things to appear on screen.
 
 ### Properties
 
@@ -40,7 +40,7 @@ Label {
 }
 ```
 
-The type of the property is determined by the type of the assigned value.
+The data type of the property is determined by the type of the assigned value.
 
 You may put several properties on a single line by separating them with semi-colons (`;`).
 
@@ -88,7 +88,7 @@ Document {
 }
 ```
 
-Identifiers are used to reference an element or its properties. To access a property's current
+Identifiers are used to reference elements or their properties. To access a property's current
 value, put a dot (`.`) between the identifier and the property name.
 
 ```
@@ -107,7 +107,7 @@ Document {
 ```
 
 You cannot reference an element's identifier as a property. In other words,
-this will **not** work:
+this would **not** work:
 
 ```
 Label {

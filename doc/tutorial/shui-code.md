@@ -1,6 +1,10 @@
 Method functions and event handlers are code blocks inside a Shui document. Code
 blocks are written in JavaScript language.
 
+**Attention:** While JavaScript tolerates the omission of the semi-colon after a statement, Shui does not. Every statement
+must be properly terminated by a semi-colon, as is good
+JavaScript-style anyway.
+
 ### Accessing Elements
 
 Elements may be accessed by their identifier and used like normal objects.

@@ -2,15 +2,18 @@
 
 ## Introduction
 
-Shellfish is a **declarative toolkit library** for creating HTML5 user
-interfaces.
-The runtime has **no additional dependencies** and works on any browser or HTML5
-runtime environment (such as e.g. Electron or Capacitor) that supports
-modern ECMAScript, which pretty much every recent browser out there does.
+In short, Shellfish is a **declarative toolkit** for JavaScript environments and targets
+**full-stack development**. This means, it covers both, the client UI and the server side.
 
-It also features Shui, a **UI modeling language** taking full advantage
-of Shellfish's declarative nature, loosely inspired by QML. If you are into
-QML, you will quickly feel at home with Shui.
+Its runtime has **no additional dependecies** and works on any compatible JavaScript
+runtime environment, including:
+
+* Modern web browsers
+* Node.js
+* Runtime environments like Electron or Capacitor
+
+Shellfish also features Shui, a **modeling language** taking full advantage
+of Shellfish's declarative nature.
 
 This is what the obligatory "Hello, world!" example could look like in Shui code:
 
@@ -29,7 +32,7 @@ Document {
 ```
 
 Shui code is translated to JavaScript code before execution. This can either
-be done on the fly as the code gets loaded, or by the web server on demand, 
+happen on the fly as the code gets loaded, or on the server-side on demand, 
 or even by shipping only pre-translated code. It's your choice.
 
 ## Learn to Use Shellfish *(work in progress)*
@@ -53,9 +56,9 @@ Shui is the declarative description language used by Shellfish.
 * {@tutorial shui-templates}
 * {@tutorial shui-scope}
 
-### Layout Concepts
+### Layout Concepts for UI
 
-Layouting elements on screen is intuitive, yet powerful.
+Layouting UI elements on screen is intuitive, yet powerful.
 
 * {@tutorial layout-visible}
 * {@tutorial layout-size}
@@ -65,7 +68,7 @@ Layouting elements on screen is intuitive, yet powerful.
 * {@tutorial layout-scrolling}
 * {@tutorial layout-ruler}
 
-### UI
+### UI Topics
 
 * {@tutorial ui-colors}
 * {@tutorial ui-theme}

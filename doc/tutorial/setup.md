@@ -7,7 +7,7 @@ The Shellfish SDK assists you with tools to
 
 ## Installing the Requirements
 
-First of all, you need [Node.js](https://nodejs.org) (the LTS version ought to be fine)
+First of all, you need [Node.js](https://nodejs.org), version 16 or higher (the LTS version ought to be fine)
 along with the `npm` package manager.
 
 In the `shellfish` directory, run
@@ -51,13 +51,13 @@ When distributing a Shellfish application, all you need are the files
  * `require.js` (found in the `dist` subdirectory)
  * `shellfish.pkg` (the file you have built in the previous step)
  * some of the other `.pkg` files if needed
- * and of course an `index.html` as the application's entry point
+ * in case of HTML UI, an `index.html` as the application's entry point (this is the only time you will ever need a `.html` file)
 
 along with your code.
 
 These are all static files, so put them on your webserver of choice. For the
 `index.html` file, just use the one you can find in the `gallery/www` subdirectory
-as a base.
+as a base and customize it to your needs.
 
 Add another file `main.shui` with this code:
 
@@ -75,7 +75,7 @@ Shellfish application in action.
 
 ## The Purpose of `index.html`
 
-The only purpose of `index.html` is to provide an entry point for your
+The only purpose of `index.html` is to provide an entry point and splash screen for your
 application. Take a look at the one you just copied and you will notice these
 lines:
 

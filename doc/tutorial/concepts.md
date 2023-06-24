@@ -62,6 +62,8 @@ But there are also elements in a UI that have no representation on screen. These
 elements are called *abstract elements*. For example, a timer element that triggers
 a piece of code to be run periodically would be such an abstract element.
 
+Server code, on the other hand, only consists of abstract elements, such as a HTTP server, authentication mechanisms, routings, or session handlers.
+
 Elements are configured by a number of properties, which they expose as dynamic values.
 By assigning bindings to properties, you may model complex UI dependencies that
 would otherwise be a pain to maintain in procedural or object-oriented code.

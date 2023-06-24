@@ -5,7 +5,7 @@ The content area is the total area occuppied by the content of an overflowing bo
 only the portion inside the viewport is visible at a time.
 
 The read-only properties `contentWidth` and `contentHeight` tell the current
-size of the content area.
+total size of the content area.
 
 ### The Viewport
 
@@ -15,7 +15,8 @@ scrolling viewport inside a box.
 You may modify these properties to scroll manually. Otherwise, they
 are updated automatically as the user scrolls.
 
-The size of the viewport is described by the read-only `bbox` property.
+The size of the viewport is described by the read-only `bboxWidth` and `bboxHeight` properties, since it is the
+same as the element's size.
 
 ### Scrollbars
 

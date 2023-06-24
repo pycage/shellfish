@@ -132,6 +132,9 @@ been initialized.
 The `destruction` event is fired when the element is about to be destroyed. At
 this moment, the element is still functional.
 
+Finally, the `termination` event is fired when the element is being destroyed. At this moment the element must not be used
+anymore.
+
 ```
 Box {
 
@@ -145,8 +148,16 @@ Box {
         console.log("The box will be destroyed.");
     }
     
+    onTermination: () =>
+    {
+        console.log("The box is now being destroyed.");
+    }
+
 }
 ```
+
+Finally, the `termination` event is fired when the element is being destroyed. At this moment the element must not be used
+anymore.
 
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-elements}

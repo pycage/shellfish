@@ -6,7 +6,7 @@ controlling their size.
 The properties `width` and `height` control the width and height requested by
 the element.
 
-The values represent CSS pixels as defined by the HTML standard. The actual size
+**Attention:** The values represent CSS pixels as defined by the HTML standard. The actual size
 of a CSS pixel depends on the display scale and may be affected by the user.
 
 ```
@@ -60,7 +60,7 @@ is distributed equally.
 ### Size Constraints
 
 The properties `minWidth` and `minHeight` dictate the minimum size of an element.
-It is under no circumstances allowed to shrink smaller.
+It is under no circumstances allowed to shrink any smaller.
 
 ```
 Box {
@@ -72,7 +72,7 @@ Box {
 
 The properties `maxWidth` and `maxHeight`, on the other hand, dictate the
 maximum size of an element.
-It is under no circumstances allowed to grow larger.
+It is under no circumstances allowed to grow any larger.
 
 ```
 Box {
@@ -109,14 +109,14 @@ The aspect ratio is the width divided by the height.
 Since the `width` and `height` properties are size constraints rather than absolute
 size values, they cannot be used for determining an element's true size in general.
 
-Every element has the read-only `bbox` property containing the element's bounding box for
+Every element has read-only `bbox` properties containing the element's bounding box for
 accessing the actual size and position on screen.
 
-The `bbox` holds an object with
-* `x`: The actual X position in document coordinates.
-* `y`: The actual Y position in document coordinates.
-* `width`: The actual width.
-* `height`: The actual height.
+The `bbox` properties are:
+* `bboxX`: The actual X position in document coordinates.
+* `bboxY`: The actual Y position in document coordinates.
+* `bboxWidth`: The actual width.
+* `bboxHeight`: The actual height.
 
 ```
 Box {
@@ -124,14 +124,14 @@ Box {
     height: 300
 
     Box {
-        width: parent.bbox.width
-        height: parent.bbox.height / 2
+        width: parent.bboxWidth
+        height: parent.bboxHeight / 2
         color: "red"
     }
 
     Box {
-        width: parent.bbox.width / 2
-        height: parent.bbox.height / 2
+        width: parent.bboxWidth / 2
+        height: parent.bboxHeight / 2
         color: "green"
     }
 }

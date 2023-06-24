@@ -9,7 +9,7 @@ Since `inline` is the default value, it may be omitted.
 
 ### Free Positioning
 
-If the `position` property has the value `free`, the element is positioned
+If the `position` property has the value `free`, the element is freely positioned
 inside its parent element with absolute coordinates specified by the `x` and
 `y` properties.
 
@@ -31,7 +31,7 @@ Box {
 
 ### Global Positioning
 
-If the `position` property has the value `global`, the element is positioned
+If the `position` property has the value `global`, the element is freely positioned
 inside the document window with absolute coordinates specified by the `x` and
 `y` properties.
 
@@ -54,7 +54,7 @@ Box {
 ### Origin of the Coordinate System
 
 The property `origin` specifies the corner where the origin of the coordinate
-system lies in the free and global positioning modes. By default, `origin` has
+system lies in the `free` and `global` positioning modes. By default, `origin` has
 the value `top-left`.
 
 `origin` may have one of these values:

@@ -1,7 +1,8 @@
 When elements are laid out according to the layout flow, there are by default
 no gaps inbetween. By specifying margins, you can add some gaps.
 
-The margin properties control the margin of an element to its neighbors.
+The margin properties control the margin of an element to its neighbors within the flow.
+
 * `marginLeft` controls the margin to the left.
 * `marginRight`: controls the margin to the right.
 * `marginTop` controls the margin above.

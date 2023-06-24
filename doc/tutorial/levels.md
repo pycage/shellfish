@@ -2,8 +2,7 @@ In the article {@tutorial concepts}, you learned about the basic concepts of
 Shellfish's declarative nature. This is quite a high-level abstraction of
 code programming, compared to procedural code.
 
-Shellfish itself is structured into three *levels of abstraction* with an API for
-each level.
+Shellfish itself is structured into multiple *levels of abstraction*.
 
 ### low
 
@@ -74,12 +73,11 @@ This is where *Shui* -- short for Shellfish UI -- comes into play.
 
 ### Shui
 
-Did I say there were three levels? Well, *Shui* is not a level, but a language
-different from JavaScript. It was designed for creating declarative high level code
+*Shui* is a language different from JavaScript. It was designed for creating declarative high level code
 with ease and is the prefered way to go.
 
-Let's take a look at the example code from above. Here is the same code written
-in Shui:
+Let's take a look at the example code from above. This is the
+same code written in Shui:
 
 ```
 Document {
@@ -92,7 +90,7 @@ Document {
 
         Label {
             text: "I am Label 2. By the way, Label 1 shows " +
-                    label1.text.length + " characters of text."
+                  label1.text.length + " characters of text."
         }
     }
 

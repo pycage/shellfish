@@ -67,6 +67,6 @@ Document {
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
-<span class="go-previous">{@tutorial ui-animations}</span>
-<span class="go-next">{@tutorial ui-defered}</span>
+<span class="go-previous">{@tutorial ui-profiles}</span>
+<span class="go-next">{@tutorial ui-listmodel}</span>
 </div>

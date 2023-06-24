@@ -1,4 +1,4 @@
-# Shellfish
+# Shellfish Declarative Toolkit
 
 In short, Shellfish is a **declarative toolkit** for JavaScript environments and targets
 **full-stack development**. This means, it covers both, the client UI and the server side.
@@ -20,7 +20,7 @@ require "shellfish/ui";
 
 Document {
 
-    title: "Hello, world of declarative UI programming!"
+    title: "Hello, world of declarative programming!"
 
     Label {
         text: parent.title

@@ -231,5 +231,5 @@ Draggable {
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
-<span class="go-previous">{@tutorial ui-listmodel}</span>
+<span class="go-previous">{@tutorial ui-defered}</span>
 </div>

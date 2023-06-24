@@ -114,6 +114,6 @@ Document {
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
-<span class="go-previous">{@tutorial ui-profiles}</span>
+<span class="go-previous">{@tutorial ui-theme}</span>
 <span class="go-next">{@tutorial ui-animations}</span>
 </div>

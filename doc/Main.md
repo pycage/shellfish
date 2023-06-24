@@ -1,4 +1,4 @@
-# Shellfish
+# Shellfish Declarative Toolkit
 
 ## Introduction
 
@@ -22,7 +22,7 @@ require "shellfish/ui";
 
 Document {
 
-    title: "Hello, world of declarative UI programming!"
+    title: "Hello, world of declarative programming!"
 
     Label {
         text: parent.title
@@ -68,16 +68,19 @@ Layouting UI elements on screen is intuitive, yet powerful.
 * {@tutorial layout-scrolling}
 * {@tutorial layout-ruler}
 
-### UI Topics
+### Generic Topics
 
 * {@tutorial ui-colors}
-* {@tutorial ui-theme}
 * {@tutorial ui-profiles}
+* {@tutorial ui-timer}
+* {@tutorial ui-listmodel}
+
+### UI Topics
+
+* {@tutorial ui-theme}
 * {@tutorial ui-transitions}
 * {@tutorial ui-animations}
-* {@tutorial ui-timer}
 * {@tutorial ui-defered}
-* {@tutorial ui-listmodel}
 * {@tutorial ui-dragndrop}
 <!--
 -->

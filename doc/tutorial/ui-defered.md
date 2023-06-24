@@ -199,7 +199,7 @@ Document {
     ListView {
         fillWidth: true
         height: 300
-        cellWidth: bbox.width
+        cellWidth: bboxWidth
         cellHeight: theme.fontSizeMedium
         scrollbars: true
 
@@ -242,7 +242,7 @@ Document {
     ListView {
         fillWidth: true
         height: 300
-        cellWidth: bbox.width
+        cellWidth: bboxWidth
         cellHeight: theme.fontSizeMedium
         cacheMargin: 200
         scrollbars: true
@@ -323,6 +323,6 @@ the root element of the loaded content.
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
-<span class="go-previous">{@tutorial ui-timer}</span>
-<span class="go-next">{@tutorial ui-listmodel}</span>
+<span class="go-previous">{@tutorial ui-animations}</span>
+<span class="go-next">{@tutorial ui-dragndrop}</span>
 </div>

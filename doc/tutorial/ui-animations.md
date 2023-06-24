@@ -264,5 +264,5 @@ Document {
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
 <span class="go-previous">{@tutorial ui-transitions}</span>
-<span class="go-next">{@tutorial ui-timer}</span>
+<span class="go-next">{@tutorial ui-defered}</span>
 </div>

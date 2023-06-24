@@ -2,6 +2,7 @@ The Shellfish SDK assists you with tools to
 
  * build the API documentation locally
  * build the Shellfish runtime bundle files, such as `shellfish.pkg`
+ * run the examples gallery
 
 # Setup
 
@@ -33,7 +34,7 @@ Run
 
 to build the API documentation in HTML format in the directory `dist/doc/`.
 
-## Exploring the Gallery
+## Exploring the Examples Gallery
 
 Shellfish comes with a gallery of examples along with their source code in
 the `gallery` subdirectory. Run

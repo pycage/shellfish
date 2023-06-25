@@ -238,8 +238,11 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             else
             {
                 item = priv.delegate();
-                item.modelData = modelData;
-                item.referenceAdd(this);
+                if (item)
+                {
+                    item.modelData = modelData;
+                    item.referenceAdd(this);
+                }
             }
 
             return item;

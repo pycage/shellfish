@@ -526,7 +526,14 @@ exports.tools = {
         else
         {
             //console.log(data.substr(pos.value, 80));
-            throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + what + "' expected, but '" + data[pos.value] + "' found.";
+            if (pos.value >= data.length)
+            {
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + what + "' expected, but end of file reached.";
+            }
+            else
+            {
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + what + "' expected, but '" + data[pos.value] + "' found.";
+            }
         }
     }
 

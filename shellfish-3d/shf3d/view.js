@@ -150,7 +150,14 @@ shRequire(["shellfish/low", "shellfish/html", "shellfish/core/matrix"], (low, ht
                 priv.renderPending = true;
                 this.nextFrame(() =>
                 {
-                    this.renderScene();
+                    try
+                    {
+                        this.renderScene();
+                    }
+                    catch (err)
+                    {
+                        console.error(err);
+                    }
                     priv.renderPending = false;
                 });
             }

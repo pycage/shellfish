@@ -347,8 +347,9 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             const p = this[prop];
             if (p === undefined)
             {
-                throw "Object " + d.get(this).element.objectType + "@" +
-                      d.get(this).element.objectLocation + " has no property '" + prop + "'.";
+                console.error("Object " + d.get(this).element.objectType + "@" +
+                              d.get(this).element.objectLocation + " has no property '" + prop + "'.");
+                return this;
             }
 
             if (prop.startsWith("on") && prop.endsWith("Changed"))

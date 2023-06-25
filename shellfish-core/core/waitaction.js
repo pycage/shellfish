@@ -148,7 +148,10 @@ shRequire([__dirname + "/action.js"], act =>
     
                     await this.wait(diff, "wait");
                 }
-                this.finish();
+                if (this.lifeCycleStatus !== "destroyed")
+                {
+                    this.finish();
+                }
             });
 
             return super.start();

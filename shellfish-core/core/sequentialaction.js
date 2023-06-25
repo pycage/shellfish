@@ -73,7 +73,7 @@ shRequire([__dirname + "/action.js"], act =>
                     {
                         const actions = d.get(this).actions
                         .filter(action => action.enabled);
-                        
+
                         for (let i = 0; i < actions.length && this.enabled && this.status === "running"; ++i)
                         {
                             const action = actions[i];
@@ -82,7 +82,10 @@ shRequire([__dirname + "/action.js"], act =>
                     }
                     while (d.get(this).repeat && this.enabled && this.status === "running")
                 }
-                this.finish();
+                if (this.lifeCycleStatus !== "destroyed")
+                {
+                    this.finish();
+                }
             });
 
             return super.start();

@@ -62,7 +62,10 @@ shRequire([__dirname + "/action.js"], act =>
                     .map(action => action.start());
                     await Promise.all(promises);
                 }
-                this.finish();
+                if (this.lifeCycleStatus !== "destroyed")
+                {
+                    this.finish();
+                }
             });
 
             return super.start();

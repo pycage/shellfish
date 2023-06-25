@@ -1264,6 +1264,11 @@ shRequire(["shellfish/low",
         {
             const priv = d.get(this);
 
+            if (item === null)
+            {
+                priv.inSizeUpdate = false;
+            }
+
             if (this.lifeCycleStatus !== "initialized" ||
                 sizingCalculationsFrozen ||
                 priv.inSizeUpdate)
@@ -1459,7 +1464,14 @@ shRequire(["shellfish/low",
             else
             {
                 sizingCalculationsFrozen = true;
-                f();
+                try
+                {
+                    f();
+                }
+                catch (err)
+                {
+                    console.log(err);
+                }
                 sizingCalculationsFrozen = false;
             }
         }

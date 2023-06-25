@@ -131,12 +131,14 @@ Object {
                 window.setTimeout(() =>
                 {
                     target.insertAt(target.positionAt(r, c) + 1, s);
+                    /*
                     if (blockOpened)
                     {
                         // close block after cursor
                         const s2 = s.substr(0, Math.max(0, s.length - tabWidth));
                         target.insertAt(target.positionAt(r, c) + 1 + s.length, "\n" + s2 + "}");
                     }
+                    */
                     target.setCursor(r + 1, s.length);
                 }, 50 /* must not be 0 for the sake of Mozilla */);
             }

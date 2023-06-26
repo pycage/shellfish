@@ -159,6 +159,7 @@ const shRequire = (function ()
 
     function logError(message)
     {
+        /*
         if (isWeb)
         {
             // remember the good old days..?
@@ -181,6 +182,7 @@ const shRequire = (function ()
             node.onclick = () => { node.remove(); }
             document.body.appendChild(node);
         }
+        */
         console.error(message);
     }
 
@@ -772,28 +774,29 @@ const shRequire = (function ()
             ++idCounter;
 
             const js = `/* Module ${url} */
-                (async function (Module)
+                (() =>
                 {
-                    const __dirname = "${dirname.replace(/\\/g, "\\\\")}";
-                    const __filename = "${url.replace(/\\/g, "\\\\")}";
+                    const origRequire = typeof shRequire !== "undefined" ? shRequire : undefined;
+                    (function (Module)
+                    {
+                        const __dirname = "${dirname.replace(/\\/g, "\\\\")}";
+                        const __filename = "${url.replace(/\\/g, "\\\\")}";
 
-                    const exports = {
-                        include: (mod) => {
-                            for (let key in mod)
-                            {
-                                if (key !== "include" && key !== "__id")
+                        const exports = {
+                            include: (mod) => {
+                                for (let key in mod)
                                 {
-                                    exports[key] = mod[key];
+                                    if (key !== "include" && key !== "__id")
+                                    {
+                                        exports[key] = mod[key];
+                                    }
                                 }
                             }
-                        }
-                    };
+                        };
 
-                    const origRequire = typeof shRequire !== "undefined" ? shRequire : undefined;
-                    let reqQueue = [];
+                        let reqQueue = [];
+                        const shRequire = origRequire ? origRequire.withQueue(reqQueue) : undefined;
 
-                    (async (shRequire) =>
-                    {                       
                         const module = { };
                         ${code}
                         if (shRequire)
@@ -801,11 +804,17 @@ const shRequire = (function ()
                             const mod = typeof Module !== "undefined" ? Module : module.exports ? module.exports : exports;
                             shRequire.registerModule("${url.replace(/\\/g, "\\\\")}", mod);
                         }
-                    })(origRequire ? origRequire.withQueue(reqQueue) : undefined);
 
-                    while (reqQueue.length > 0) await reqQueue.shift();
-                    origRequire.invokeCallback(${scriptId});
-                })(typeof Module !== "undefined" ? Module : undefined);
+                        if (origRequire)
+                        {
+                            (async () =>
+                            {
+                                while (reqQueue.length > 0) await reqQueue.shift();
+                                origRequire.invokeCallback(${scriptId});
+                            })();
+                        }
+                    })(typeof Module !== "undefined" ? Module : undefined);
+                })();
             `;
 
             if (statusNode)

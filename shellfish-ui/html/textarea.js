@@ -91,15 +91,12 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.addHtmlEventListener(d.get(this).item, "keydown", (ev) =>
             {
-                this.nextFrame(() =>
+                this.wait(5).then(() =>
                 {
-                    if (this.lifeCycleStatus === "initialized")
-                    {
-                        this.selectionStartChanged();
-                        this.selectionEndChanged();
-                        this.columnChanged();
-                        this.rowChanged();
-                    }
+                    this.selectionStartChanged();
+                    this.selectionEndChanged();
+                    this.columnChanged();
+                    this.rowChanged();
                 });
 
                 if (! ev.altKey && ! ev.ctrlKey && ! ev.metaKey)
@@ -119,15 +116,12 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.addHtmlEventListener(d.get(this).item, "click", () =>
             {
-                this.nextFrame(() =>
+                this.wait(5).then(() =>
                 {
-                    if (this.lifeCycleStatus === "initialized")
-                    {
-                        this.selectionStartChanged();
-                        this.selectionEndChanged();
-                        this.columnChanged();
-                        this.rowChanged();
-                    }
+                    this.selectionStartChanged();
+                    this.selectionEndChanged();
+                    this.columnChanged();
+                    this.rowChanged();
                 });
             });
 
@@ -135,13 +129,10 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             {
                 if (ev.buttons !== 0)
                 {
-                    this.nextFrame(() =>
+                    this.wait(5).then(() =>
                     {
-                        if (this.lifeCycleStatus === "initialized")
-                        {
-                            this.columnChanged();
-                            this.rowChanged();
-                        }
+                        this.columnChanged();
+                        this.rowChanged();
                     });
                 }
             });

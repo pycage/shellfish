@@ -189,7 +189,10 @@ shRequire(["shellfish/core"], core =>
             this.notifyable("port");
             this.notifyable("secure");
 
-            this.listen();
+            this.onInitialization = () =>
+            {
+                this.listen();
+            };
         }
 
         get enabled() { return d.get(this).enabled; }
@@ -256,7 +259,7 @@ shRequire(["shellfish/core"], core =>
         listen()
         {
             const priv = d.get(this);
-            if (! priv.connecting)
+            if (! priv.connecting && this.lifeCycleStatus !== "new")
             {
                 priv.connecting = true;
                 this.defer(() =>

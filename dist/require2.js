@@ -777,7 +777,7 @@ const shRequire = (function ()
                 (() =>
                 {
                     const origRequire = typeof shRequire !== "undefined" ? shRequire : undefined;
-                    (function (Module)
+                    (async function (Module)
                     {
                         const __dirname = "${dirname.replace(/\\/g, "\\\\")}";
                         const __filename = "${url.replace(/\\/g, "\\\\")}";

@@ -1060,7 +1060,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             //console.log("render " + items.length + " items");
             //console.log("itemsPerRow: " + priv.itemsPerRow);
 
-            const newItems = [];
+            //const newItems = [];
 
             for (let n = 0; n < items.length; ++n)
             {
@@ -1094,8 +1094,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 if (isNew && ! item.parent)
                 {
                     boxNode.appendChild(item.get());
-                    newItems.push(item);
-                    //item.parent = this;
+                    //newItems.push(item);
+                    item.parent = this;
                 }
 
                 if (item.x !== itemPos[0])
@@ -1154,10 +1154,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 }
             }
 
+            /*
             for (let i = 0; i < newItems.length; ++i)
             {
                 newItems[i].parent = this;
             }
+            */
         }
 
         /**

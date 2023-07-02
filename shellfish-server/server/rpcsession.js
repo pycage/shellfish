@@ -351,18 +351,27 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
         {
             const priv = d.get(this);
 
-            const enc = new TextEncoder();
-            const data = enc.encode(JSON.stringify(message));
-            this.log("RPC", "info", "RPC send message to client " + clientId + ", type: " + message.type);
+            const client = priv.clients.get(clientId);
+            if (client)
+            {
+                const enc = new TextEncoder();
+                const data = enc.encode(JSON.stringify(message));
+                this.log("RPC", "info", "RPC send message to client " + clientId + ", type: " + message.type);
+    
+                const size = data.length;
+                const buffer = new ArrayBuffer(size + 4);
+                const view32 = new Uint32Array(buffer, 0, 1);
+                view32[0] = size;
+                const view8 = new Uint8Array(buffer);
+                view8.set(data, 4);
+    
+                client.reverseChannel.write(view8);
+            }
+            else
+            {
+                this.log("RPC", "debug", "Client " + clientId + " is not available");
+            }
 
-            const size = data.length;
-            const buffer = new ArrayBuffer(size + 4);
-            const view32 = new Uint32Array(buffer, 0, 1);
-            view32[0] = size;
-            const view8 = new Uint8Array(buffer);
-            view8.set(data, 4);
-
-            priv.clients.get(clientId).reverseChannel.write(view8);
         }
 
         /**

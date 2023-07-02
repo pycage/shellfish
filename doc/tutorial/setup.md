@@ -43,7 +43,7 @@ the `gallery` subdirectory. Run
 
 to start a web server. Then point your browser to
 
-    http://localhoat:8000
+    http://localhost:8000
 
 # Distributing the Shellfish Runtime
 

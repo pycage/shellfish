@@ -118,6 +118,19 @@ shRequire(["shellfish/core"], core =>
     /**
      * Class representing a HTTP authentication method.
      * 
+     * Password hashes for use with the `users` property can be generated with
+     * the {@link server.HTTPAuth#passwordHash passwordHash} method, or with
+     * the following code on Node.js:
+     * 
+     *     const crypto = require("crypto");
+     *
+     *     function md5(data)
+     *     {
+     *         return crypto.createHash("md5").update(data).digest("hex");
+     *     }
+     * 
+     *     console.log(md5("<username>:<realm>:<password>"));
+     * 
      * @extends core.Object
      * @memberof server
      * 

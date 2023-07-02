@@ -798,6 +798,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
     let objCounter = 0;
     let idCounter = 0;
     const allInstances = new Set();
+    const generatedUids = new Set();
     const d = new WeakMap();
 
 
@@ -1916,6 +1917,30 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
         }
     }
     exports.Object = Obj;
+
+    /**
+     * Generates a random UID string. The UID is unique within the Shellfish
+     * environment where it was generated.
+     * 
+     * @memberof core
+     * 
+     * @return {string} The generated UID.
+     */
+    function generateUid()
+    {
+        let uid = "";
+        do
+        {
+            uid = Math.floor(Math.random() * 16777216).toString(16) + "-" +
+                  Math.floor(Math.random() * 16777216).toString(16) + "-" +
+                  Math.floor(Math.random() * 16777216).toString(16);
+        }
+        while (generatedUids.has(uid));
+        generatedUids.add(uid);
+
+        return uid;
+    }
+    exports.generateUid = generateUid;
 
     /**
      * Creates a dump of the current status for debugging purposes.

@@ -38,12 +38,13 @@ shRequire([__dirname + "/object.js"], obj =>
             ++idCounter;
         }
 
-        postMessage(message)
+        postMessage(sessionId, message)
         {
             //console.log("Send: " + JSON.stringify(message));
 
             const headers = new Headers();
             headers.append("x-shellfish-rpc-socket", this.socketId);
+            headers.append("x-shellfish-rpc-session", sessionId);
             fetch(this.endpoint, {
                 method: "POST",
                 headers,
@@ -160,14 +161,15 @@ shRequire([__dirname + "/object.js"], obj =>
             this.handler = handler;
         }
 
-        postMessage(message)
+        postMessage(sessionId, message)
         {
             //console.log("Send: " + JSON.stringify(message));
 
             const req = this.modHttp.request(this.endpoint, {
                 method: "POST",
                 headers: {
-                    "x-shellfish-rpc-socket": this.socketId
+                    "x-shellfish-rpc-socket": this.socketId,
+                    "x-shellfish-rpc-session": sessionId
                 }
             });
             req.write(JSON.stringify(message));
@@ -371,6 +373,7 @@ shRequire([__dirname + "/object.js"], obj =>
                 callbacks: [],
                 callMap: new Map(),
                 callbackMap: new Map(),
+                sessionId: "",
                 clientId: "",
                 messageQueue: []
             });
@@ -380,7 +383,7 @@ shRequire([__dirname + "/object.js"], obj =>
             this.onDestruction = () =>
             {
                 const priv = d.get(this);
-                priv.socket.postMessage({ type: "exit", clientId: priv.clientId });
+                priv.socket.postMessage(priv.sessionId, { type: "exit", clientId: priv.clientId });
                 priv.socket.close();
                 priv.callMap.clear();
                 priv.callbackMap.clear();
@@ -410,13 +413,14 @@ shRequire([__dirname + "/object.js"], obj =>
                 if (msg.type === "ready")
                 {
                     priv.clientId = msg.clientId;
+                    priv.sessionId = msg.sessionId;
                     priv.messageQueue.forEach(callId => this.call(callId));
                     priv.messageQueue = [];
                 }
                 else if (msg.type === "heartbeat")
                 {
                     this.log("", "debug", "Got heartbeat from RPC endpoint");
-                    priv.socket.postMessage({ type: "heartbeat", clientId: priv.clientId });
+                    priv.socket.postMessage(priv.sessionId, { type: "heartbeat", clientId: priv.clientId });
                 }
                 else if (msg.type === "exit")
                 {
@@ -426,6 +430,7 @@ shRequire([__dirname + "/object.js"], obj =>
                         priv.callbackMap.delete(cbId);
                     });
                     priv.callbacks = [];
+                    priv.sessionId = "";
                     priv.clientId = "";
                     priv.socket = null;
                 }
@@ -465,7 +470,7 @@ shRequire([__dirname + "/object.js"], obj =>
             if (priv.clientId !== "")
             {
                 this.log("", "debug", "Calling RPC method: " + callItem.name);
-                priv.socket.postMessage({ type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters });
+                priv.socket.postMessage(priv.sessionId, { type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters });
             }
             else
             {

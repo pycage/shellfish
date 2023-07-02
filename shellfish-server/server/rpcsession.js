@@ -20,7 +20,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-shRequire([__dirname + "/httpsession.js"], httpsession =>
+shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession) =>
 {
     const modStream = require("stream");
 
@@ -130,10 +130,14 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
      * that opened a RPC connection will get the same connection on all its
      * RPC calls.
      * 
+     * RPC requests have the HTTP header `x-shellfish-rpc-session` set with the
+     * session ID, except for the initial connection. This header may be used
+     * to open a session per client.
+     * 
      * ### Example
      *     HTTPRoute {
      *         when: req => req.url.path === "/::rpc"
-     *         generateSessionId: req => req.sourceAddress
+     *         generateSessionId: req => req.headers.get("x-shellfish-rpc-session") || core.generateUid()
      * 
      *         delegate: template RpcSession {
      *             onInitialization: () =>
@@ -188,7 +192,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
             {
                 if (req.method === "GET")
                 {
-                    const clientId = this.generateClientId();
+                    const clientId = core.generateUid();
                     this.log("RPC", "info", "RPC client " + clientId + " connected from " + req.sourceAddress);
 
                     // open reverse channel
@@ -215,7 +219,7 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                     .stream(reverseChannel, "application/x-shellfish-rpc", -1)
                     .send();
 
-                    this.postMessage(clientId, { type: "ready", clientId: clientId });
+                    this.postMessage(clientId, { type: "ready", clientId: clientId, sessionId: this.sessionId });
 
                     if (priv.clients.size === 1)
                     {
@@ -256,20 +260,6 @@ shRequire([__dirname + "/httpsession.js"], httpsession =>
                     });
                 }
             };
-        }
-
-        generateClientId()
-        {
-            let clientId = "";
-            do
-            {
-                clientId = Math.floor(Math.random() * 16777216).toString(16) + "-" +
-                           Math.floor(Math.random() * 16777216).toString(16) + "-" +
-                           Math.floor(Math.random() * 16777216).toString(16);
-            }
-            while (d.get(this).clients.has(clientId));
-
-            return clientId;
         }
 
         heartbeat()

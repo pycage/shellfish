@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -29,7 +29,7 @@ const modChildProcess = require("child_process"),
       modFengshui = require("../shellfish-core/fengshui.js");
 
 
-const MODULE_ID_REGEXP = new RegExp("\n *exports.__id *= *\"([^\"]+)\";");
+const MODULE_ID_REGEXP = new RegExp("\n? *exports\.__id *= *\"([^\"]+)\";");
 
 const TEXT_TYPES = ["css", "js", "shui"];
 
@@ -161,7 +161,7 @@ function updateBundle(path, config)
     };
     findFiles("", path, "");
 
-    return JSON.stringify(bundle);
+    return JSON.stringify(bundle, null, 2);
 }
 
 const config = {

@@ -495,7 +495,7 @@ exports.tools = {
 
     function next(data, pos, what)
     {
-        return data.substr(pos.value, what.length) === what;
+        return data.substring(pos.value, pos.value + what.length) === what;
     }
 
     function nextIsUpperCase(data, pos)
@@ -508,7 +508,7 @@ exports.tools = {
     {
         if (pos.value < data.length)
         {
-            return regExp.test(data.substr(pos.value));
+            return regExp.test(data.substring(pos.value));
         }
         else
         {
@@ -518,7 +518,7 @@ exports.tools = {
     
     function expect(data, pos, what)
     {
-        if (data.substr(pos.value, what.length) === what)
+        if (data.substring(pos.value, pos.value + what.length) === what)
         {
             pos.value += what.length;
             return what;
@@ -561,7 +561,7 @@ exports.tools = {
         let s = "";
         if (pos.value < data.length)
         {
-            let matches = regExp.exec(data.substr(pos.value));
+            let matches = regExp.exec(data.substring(pos.value));
             if (matches)
             {
                 let result = matches[0];
@@ -736,7 +736,7 @@ exports.tools = {
         let moduleDir = ".";
         if (moduleLocation.indexOf("/") !== -1)
         {
-            moduleDir = moduleLocation.substr(0, moduleLocation.lastIndexOf("/"));
+            moduleDir = moduleLocation.substring(0, moduleLocation.lastIndexOf("/"));
         }
 
         const code = `/* Compiled from Shui by Feng Shui Code Processor */
@@ -771,7 +771,9 @@ exports.tools = {
 
                     function __xsdv__(a, setter, functor)
                     {
-                        return declarative.isDynamicValue(a) ? a : typeof a === "function" && functor ? { val: functor } : new __FakeDV__(a, setter);
+                        return declarative.isDynamicValue(a) ? a 
+                                                             : typeof a === "function" && functor ? { val: functor } 
+                                                                                                  : new __FakeDV__(a, setter);
                     }
 
                     exports.${name} = {
@@ -973,7 +975,7 @@ exports.tools = {
     {
         //console.log("parseCustomProperty at " + pos.value + " " + data.substr(pos.value, 80));
         
-        const scopes = [modules.map(m => m.alias), ["self"]];
+        const scopes = [modules.map(m => m.alias), [/*"self"*/]];
 
         expect(data, pos, "property");
         skipWhitespace(data, pos, true, true);
@@ -1033,7 +1035,7 @@ exports.tools = {
         }
 
         let params = [];
-        const scopes = [modules.map(m => m.alias), ["self"]];
+        const scopes = [modules.map(m => m.alias), [/*"self"*/]];
         code += parseJsParameters(data, pos, (p) => { params.push(p); });
         skipWhitespace(data, pos, true, true);
         code += " => ";
@@ -1130,7 +1132,7 @@ exports.tools = {
             {
                 throw "Syntax error in line " + lineOfPos(data, pos) + ": '" + slotName + "' is not a valid event slot";
             }
-            const eventName = slotName[2].toLowerCase() + slotName.substr(3);
+            const eventName = slotName[2].toLowerCase() + slotName.substring(3);
             //console.log(JSON.stringify(parts));
             code = `.use(self).crossConnect(() => { return __rslv__("${elName}"); }, "${eventName}")(`;
         }
@@ -1146,7 +1148,7 @@ exports.tools = {
         if (next(data, pos, "{"))
         {
             // simple function
-            const codeBlock = parseJsBlock(data, pos, modules, [["self"]], chainResolver);
+            const codeBlock = parseJsBlock(data, pos, modules, [[/*"self"*/]], chainResolver);
             //console.log("Code: " + codeBlock);
             // use function to have "arguments" available
             code += "function () " + codeBlock;
@@ -1154,7 +1156,7 @@ exports.tools = {
         else if (nextIsToken(data, pos, TOKEN_ARROW_FUNCTION) ||
                  nextIsToken(data, pos, TOKEN_ARROW_FUNCTION_COMPACT))
         {
-            const scopes = [modules.map(m => m.alias), ["self"]];
+            const scopes = [modules.map(m => m.alias), [/*"self"*/]];
             code += parseJsArrowFunction(data, pos, modules, scopes, chainResolver);
         }
         else if (next(data, pos, "template"))
@@ -1238,7 +1240,7 @@ exports.tools = {
         const beginAt = pos.value;
         const line = lineOfPos(data, pos);
         // put the imported modules into the initial scopes
-        const scopes = [modules.map(m => m.alias), ["self"]];
+        const scopes = [modules.map(m => m.alias), [/*"self"*/]];
         let code = parseJsExpression(data, pos, modules, scopes, bindingResolver);
         const originalCode = data.substring(beginAt, pos.value);
         const debugAnnotation = `[l. ${line}] ${originalCode}`;
@@ -1655,14 +1657,16 @@ exports.tools = {
                     const c = parseJsExpression(data, pos, modules, scopes, resolver);
 
                     // insert "new" into expression where appropriate
-                    if (c.trimLeft()[0] === "(")
+                    if (c.trimStart()[0] === "(")
                     {
                         // fill in the last "__new__" placeholder in the
                         // expression as that ought to be the right one
+                        // we may have multiple "__new__" in case of "new a.B()",
+                        // for instance
                         const idx = c.lastIndexOf("/*__new__*/");
                         if (idx !== -1)
                         {
-                            code += c.substr(0, idx) + "new" + c.substr(idx + 11);
+                            code += c.substring(0, idx) + "new" + c.substring(idx + 11);
                         }
                         else
                         {
@@ -2094,6 +2098,10 @@ exports.tools = {
 
     function chainResolver(parts, protectedOnes, scopes, line)
     {
+        // protectedOnes is a list of booleans stating the protection status
+        // of each part. The protection status is used for implementing
+        // the optional chaining operator "?."
+
         const names = parts
         .map((p, i) => p.startsWith("(") ? "CALL_" + i
                                          : p.startsWith("[") ? "ACCESS_" + i
@@ -2216,45 +2224,28 @@ exports.tools = {
         // this function does pure magic and is the essence of Shui,
         // in other words, it allows transparent use of dynamic values
 
-        /*
-        function makeFakeDv(item)
-        {
-            if (item)
-            {
-                return `__fakeDv__(a, v => { ${item} = v; })`;
-            }
-            else
-            {
-                return `__fakeDv__(a, v => { })`;
-            }
-        }
-        
-        function makeFunctor(item)
-        {
-            // "__new__" is the placeholder where a "new" operator may be
-            // inserted, if needed
-            return item ? `{ val: (...args) => { return / *__new__* / (${item})(...args); } }` : "undefined";
-        }
-        */
+        // if "item" is a DV, __xsdv__ just returns it, otherwise, it constructs
+        // a wrapper simulating a DV for uniform access
 
-        // if "item" is a DV, just return it, otherwise, construct a wrapper
-        // simulating a DV
         if (item.endsWith(")"))
         {
             // not a valid left-hand-side; the expression may be optimized
-            //return `((a) => { return declarative.isDynamicValue(a) ? a : ${makeFakeDv()}; })(${item})`;
             return `__xsdv__(${item}, () => { })`;
         }
         else
         {
-            const setter = item ? `v => { ${item} = v; }` : `v => { }`;
+            // the setter states how the simulated DV sets its value
+            const setter = item ? `v => { ${item} = v; }`
+                                : `v => { }`;
+
+            // the functor wraps a function to provide a placeholder for placing
+            // a potential "new" operator
 
             // "__new__" is the placeholder where a "new" operator may be
             // inserted, if needed
-            //const functor = item ? `{ val: (...args) => { return /*__new__*/ (${item})(...args); } }` : "undefined";
-            const functor = item ? `(...args) => { return /*__new__*/ (${item})(...args); }` : "undefined";
+            const functor = item ? `(...args) => { return /*__new__*/ (${item})(...args); }`
+                                 : "undefined";
 
-            //return `((a) => { return declarative.isDynamicValue(a) ? a : typeof a === "function" ? ${makeFunctor(item)} : ${makeFakeDv(item)}; })(${item})`;
             return `__xsdv__(${item}, ${setter}, ${functor})`;
         }
     }

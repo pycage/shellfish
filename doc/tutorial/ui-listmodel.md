@@ -4,7 +4,7 @@ for defining their contents.
 
 The list model encapsulates a list of arbitrary items together with methods
 for accessing and modifying the list. A range of events notifies observers
-such as the {link html.ListView ListView} about changes.
+such as the {@link html.ListView ListView} about changes.
 
 ### Creating a List Model
 

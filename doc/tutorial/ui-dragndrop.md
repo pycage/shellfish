@@ -170,7 +170,7 @@ DropArea {
 ### Making Elements Draggable
 
 The {@link html.Draggable Draggable} element provides a box that can be dragged
-by the user. A copy of the contents of the draggable box stick to the mouse
+by the user. A copy of the contents of the draggable box sticks to the mouse
 cursor while being dragged.
 
 **Note:** The draggable element must not be a descendant of the target drop

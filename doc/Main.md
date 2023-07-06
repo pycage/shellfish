@@ -135,6 +135,10 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ## News
 
+### July 2023
+* The new function {@link core.generateUid} generates a UID that is unique
+  within the Shellfish environment.
+
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter
   which may be used to abort the waiting anytime via the method

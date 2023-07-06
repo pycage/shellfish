@@ -140,7 +140,7 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
      * When requesting a folder, a simple HTML page with the folder's contents
      * is generated.
      * 
-     * @extends server.WebSession
+     * @extends server.HTTPSession
      * @memberof server
      * 
      * @property {string} indexFile - (default: `""`) If set, a redirect is made to this file (e.g. `"index.html"`) when attempting to open a directory.

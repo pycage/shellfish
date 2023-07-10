@@ -138,6 +138,8 @@ Layouting UI elements on screen is intuitive, yet powerful.
 ### July 2023
 * The new function {@link core.generateUid} generates a UID that is unique
   within the Shellfish environment.
+* The element {@link ui.ScrollIndicator} has a new property `reverse` for
+  reversing the scrolling direction.
 
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter

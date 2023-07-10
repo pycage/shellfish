@@ -35,6 +35,7 @@ require "shellfish/ui";
  *                                        are two indicators, one for horizontal
  *                                        scrolling, and one for vertical scrolling.
  * @property {string} orientation - The scrolling orientation. One of: `horizontal|vertical`
+ * @property {bool} reverse - (default: `false`) If `true`, the scrolling direction is reversed.
  * @property {number} size - The size of the indicator.
  */
 MouseBox {
@@ -43,6 +44,7 @@ MouseBox {
     property target: parent
     property other: null
     property orientation: "vertical"
+    property reverse: false
     property size: thisDocument.inputDevice === "touch" ? theme.paddingSmall / 2
                                                         : theme.paddingMedium
 
@@ -55,8 +57,20 @@ MouseBox {
     Object {
         id: priv
 
-        property contentPos: box.target ? (box.orientation === "vertical" ? box.target.contentY
-                                                                          : box.target.contentX)
+        function applyPolarity(pos)
+        {
+            if (box.reverse)
+            {
+                return contentSize - viewSize - pos;
+            }
+            else
+            {
+                return pos;
+            }
+        }
+
+        property contentPos: box.target ? (box.orientation === "vertical" ? applyPolarity(box.target.contentY, contentSize, viewSize)
+                                                                          : applyPolarity(box.target.contentX, contentSize, viewSize))
                                         : 0
         property contentSize: box.target ? (box.orientation === "vertical" ? box.target.contentHeight
                                                                            : box.target.contentWidth)
@@ -176,7 +190,7 @@ MouseBox {
             if (box.orientation === "vertical")
             {
                 const scale = box.bboxHeight / Math.max(1, priv.contentSize);
-                target.contentY = priv.contentPos + ev.deltaY / scale;
+                target.contentY = priv.applyPolarity(priv.contentPos + ev.deltaY / scale);
             }
             else
             {
@@ -317,7 +331,7 @@ MouseBox {
         {
             if (box.orientation === "vertical")
             {
-                target.contentY = value;
+                target.contentY = priv.applyPolarity(value);
             }
             else
             {

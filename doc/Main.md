@@ -140,6 +140,13 @@ Layouting UI elements on screen is intuitive, yet powerful.
   within the Shellfish environment.
 * The element {@link ui.ScrollIndicator} has a new property `reverse` for
   reversing the scrolling direction.
+* The new element {@link core.InertialEngine} provides a simple physics engine
+  for inertial motion with friction.
+* The new element {@link ui.FlickGesture} adds flick gestures for scrolling to
+  a {@link html.MouseBox}.
+* Ancestor references such as `thisDocument` or `thisMenu` are now implemented
+  via the resolver in Shui code and no longer take up a property. Thus, the
+  `this...` references are now available for all elements in Shui code.
 
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter

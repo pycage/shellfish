@@ -41,7 +41,6 @@ require "shellfish/html";
  * @property {bool} resizing - [readonly] `true` if the window is currently being resized by the user.
  * @property {bool} selected - [readonly] `true` if the window is the currently selected/focused one.
  * @property {html.Box} thisContentArea - [readonly] A reference to this window's content area visible to sub-elements.
- * @property {ui.Window} thisWindow - [readonly] A reference to this window visible to sub-elements.
  */
 MouseBox {
     id: win
@@ -58,7 +57,6 @@ MouseBox {
     property dragging: false
 
     property isWindow: true
-    property thisWindow: self
     property thisContentArea: contentArea
 
     function moveAndResize(dx, dy, dw, dh)

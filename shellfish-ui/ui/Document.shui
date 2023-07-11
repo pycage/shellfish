@@ -55,12 +55,9 @@ require "shellfish/ui";
  * @property {ui.Document} documentRoot - [readonly] **Deprecated:** Use `thisDocument` instead. A reference to this document. Elements within the document may use this reference.
  * @property {ui.Document} shortcutReceiver - [readonly] A reference to this document for functioning as a receiver of keyboard shortcuts.
  * @property {ui.Theme} theme - (default: `Theme { }`) The current UI theme.
- * @property {ui.Document} thisDocument - [readonly] A reference to this document. Elements within the document may use this reference.
  */
 html.Document {
 
-    // the Document element can be accessed from anywhere by 'thisDocument'
-    property thisDocument: self
     property documentRoot: self
     property shortcutReceiver: self
 

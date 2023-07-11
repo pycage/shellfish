@@ -30,7 +30,6 @@ require "shellfish/ui";
  * @class
  * @extends html.MouseBox
  *
- * @property {bool} thisMenuItem - (always `true`) Sub-elements may use this property to check if they are within a menu item.
  * @property {bool} selected - (default: `false`) Whether the menu item is currently selected.
  * @property {bool} highlighted - (default: `false`) Whether the menu item is currently highlighted.
  * @property {fengshui.Template} menu - (default: `null`) A template for a submenu.
@@ -38,8 +37,6 @@ require "shellfish/ui";
  */
 MouseBox {
     id: item
-
-    property thisMenuItem: self
 
     property selected: false
     property highlighted: false
@@ -92,7 +89,7 @@ MouseBox {
                 if (ev.x >= cBox.x && ev.x < cBox.x + cBox.width &&
                     ev.y >= cBox.y && ev.y < cBox.y + cBox.height)
                 {
-                    if (child !== self && child.thisMenuItem)
+                    if (child !== self && child.selectItem)
                     {
                         child.selectItem(true);
                     }
@@ -206,7 +203,7 @@ MouseBox {
     {
         // unhighlight siblings and close menu
         parent.children()
-        .filter((c) => { return c !== self && c.thisMenuItem; })
+        .filter((c) => { return c !== self && c.selectItem; })
         .forEach((c) =>
         {
             c.selected = false;
@@ -271,7 +268,7 @@ MouseBox {
      */
     function toSibling(direction, f)
     {
-        const siblings = parent.children().filter((c) => { return c.thisMenuItem && c.enabled; });
+        const siblings = parent.children().filter((c) => { return c.selectItem && c.enabled; });
         let selfPos = -1;
         for (let i = 0; i < siblings.length; ++i)
         {

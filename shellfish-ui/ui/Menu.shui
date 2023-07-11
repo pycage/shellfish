@@ -31,7 +31,6 @@ require "shellfish/ui";
  * @class
  * @extends ui.Overlay
  *
- * @property {ui.Menu} thisMenu - [readonly] A reference to this menu visible to sub-elements.
  * @property {bool} menuOpened - [readonly] Whether the menu is currently opened.
  * @property {html.Ruler} menuRuler - (default: `Ruler { }`) A ruler for layouting the menu items.
  */
@@ -40,7 +39,6 @@ Overlay {
 
     container default: menuBoxContent
 
-    property thisMenu: self
     property menuOpened: visible
     property menuRuler: Ruler { }
 
@@ -202,7 +200,7 @@ Overlay {
                 }
 
                 let current = -1;
-                const cs = children().filter((c) => { return c.thisMenuItem && c.enabled && c.visible; });
+                const cs = children().filter((c) => { return c.selectItem && c.enabled && c.visible; });
                 for (let i = 0; i < cs.length; ++i)
                 {
                     if (cs[i].selected)

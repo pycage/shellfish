@@ -37,7 +37,6 @@ require "shellfish/html";
  * @memberof ui
  *
  * @property {fengshui.Container} header - A container for displaying a page header.
- * @property {ui.Page} thisPage - [readonly] A reference to this page.
  * @property {ui.Page} shortcutReceiver - [readonly] A reference to this page for receiving shortcuts.
  * @property {bool} scrollable - If `true`, the page is scrollable with dynamic height. Otherweise, the page's height is fixed to the screen.
  * @property {ui.PageStack} pageStack - The page stack to use.
@@ -53,7 +52,6 @@ MouseBox {
     container default: contentArea
     container header: headerArea
 
-    property thisPage: self
     property shortcutReceiver: self
 
     property scrollable: true

@@ -1506,12 +1506,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
 
             const s = (cb) =>
             {
-                connHub.connect(this, name, this, cb);
-                const mon = d.get(this).connectionMonitors[name];
-                if (mon)
-                {
-                    mon();
-                }
+                this.connect(name, this, cb);
             };
 
             const g = () => true;
@@ -1555,6 +1550,11 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
         connect(event, receiver, handler)
         {
             connHub.connect(this, event, receiver, handler);
+            const mon = d.get(this).connectionMonitors[event];
+            if (mon)
+            {
+                mon();
+            }
         }
 
         /**

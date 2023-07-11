@@ -216,6 +216,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                     });
 
                     req.response(200, "OK")
+                    .header("Keep-Alive", "timeout=60")
                     .stream(reverseChannel, "application/x-shellfish-rpc", -1)
                     .send();
 

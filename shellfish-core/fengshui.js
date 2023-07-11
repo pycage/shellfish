@@ -49,6 +49,7 @@ exports.tools = {
             else
             {
                 const el = declarative.element(cacheItem, null)
+                            .property("elementType", elementName)
                             .property("defaultContainer", "", true)
                             .property("modelData", { }, true);
                 const proto = Object.getPrototypeOf(el);
@@ -78,6 +79,7 @@ exports.tools = {
                 else
                 {
                     const el = declarative.element(modules[key][elementName], null)
+                               .property("elementType", elementName)
                                .property("defaultContainer", "", true)
                                .property("modelData", { }, true);
                     const proto = Object.getPrototypeOf(el);
@@ -105,6 +107,8 @@ exports.tools = {
         }
 
         result = self[name] ||
+                 (name === "this" + self.get().elementType ? self : undefined) ||
+                 (name === "this" + self.get().objectType ? self : undefined) ||
                  self.find(name, namespace) ||
                  pRslv(name) || 
                  modules[name];

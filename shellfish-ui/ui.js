@@ -41,6 +41,7 @@ const mods = [
     "DatePicker",
     "Dialog",
     "Document",
+    "FlickGesture",
     "FocusIndicator",
     "FSIcon",
     "FSItem",

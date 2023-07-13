@@ -124,6 +124,7 @@ MouseBox {
 
     enabled: ! frozen
 
+    canFocus: true
     trapFocus: true
 
     style: openingPercentage < 1 ? ["sh-no-scrollbars", "sh-dropshadow"]

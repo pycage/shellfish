@@ -1214,7 +1214,7 @@ shRequire(["shellfish/low",
         updateVisibility()
         {
             const priv = d.get(this);
-            const visibility = this.lifeCycleStatus === "initialized" && this.visible && this.ancestorsVisible;
+            const visibility = this.lifeCycleStatus === "initialized" && this.visible && this.ancestorsVisible && !! this.parent;
             if (visibility !== priv.visibility)
             {
                 //console.log("Visibility Changed: " + this.objectType + "@" + this.objectLocation + " = " + visibility);

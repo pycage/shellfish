@@ -11,6 +11,7 @@ and follows this strategy:
 
 * If the identifier is `self`, that element is returned.
 * Otherwise, if the element has a member (property, method, event) with that identifier, that member is returned.
+* Otherwise, if the identifier is `this<Type>`, and the element is of type `<Type>`, that element is returned.
 * Otherwise, the children and descendents of the element are searched for an element
   with the identifier inside the local namespace (see below).
   If such an element exists, it is returned.
@@ -75,6 +76,28 @@ Namespaces are assigned automatically by the Shui compiler (see {@link fengshui 
 at compile time and may be accessed by the `__namespace` constant as a string value.
 
 All Shui files and also templates get their own namespace this way.
+
+### Typed References
+
+Identifiers starting with `this` followed by an element type, e.g. `thisListView`
+reference the nearest ancestor in the hierarchy of the given type.
+
+```
+  ListView {
+      fillWidth: true
+      fillHeight: true
+        
+      cellWidth: bboxWidth
+      cellHeight: theme.itemSizeSmall
+  
+      model: 30
+        
+      delegate: template Label {
+          text: "Element " + (modelData.index + 1) + " of " + thisListView.count
+      }
+  }
+```
+
 
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-templates}

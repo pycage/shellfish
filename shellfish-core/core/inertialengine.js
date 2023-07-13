@@ -20,7 +20,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-shRequire(["shellfish/core"], core =>
+shRequire([__dirname + "/object.js"], obj =>
 {
 
     const d = new WeakMap();
@@ -39,7 +39,7 @@ shRequire(["shellfish/core"], core =>
      * @property {number} friction - (default: `0.08`) The friction coefficient. A friction of `0` lets the inertial motion continue forever, while a friction of `1` allows no inertial motion.
      * @property {bool} running - [readonly] If the engine is currently running.
      */
-    class InertialEngine extends core.Object
+    class InertialEngine extends obj.Object
     {
         constructor()
         {
@@ -60,6 +60,16 @@ shRequire(["shellfish/core"], core =>
             this.notifyable("friction");
             this.notifyable("running");
 
+            /**
+             * Is triggered when a motion shall occur. This event is also
+             * emitted while taking samples.
+             * 
+             * @event motion
+             * @param {number} dx - The motion in X direction.
+             * @param {number} dy - The motion in Y direction.
+             * @param {number} dz - The motion in Z direction.
+             * @memberof core.InertialEngine
+             */
             this.registerEvent("motion");
         }
 

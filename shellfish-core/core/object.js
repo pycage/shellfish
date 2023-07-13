@@ -923,10 +923,10 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
                 p.attachChild(this);
                 this.referenceAdd(p);
 
-                if (this.lifeCycleStatus !== "destroyed")
-                {
-                    this.parentChanged();
-                }
+            }
+            if (this.lifeCycleStatus !== "destroyed")
+            {
+                this.parentChanged();
             }
         }
 

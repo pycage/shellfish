@@ -98,7 +98,9 @@ shRequire([__dirname + "/object.js"], obj =>
                             bufferOffset = 0;
                         }
 
-                        const view8 = new Uint8Array(value.buffer, dataOffset, Math.min(value.length, buffer.byteLength));
+                        const view8 = new Uint8Array(value.buffer,
+                                                     dataOffset,
+                                                     Math.min(value.length - dataOffset, buffer.byteLength - bufferOffset));
                         new Uint8Array(buffer, bufferOffset).set(view8);
                         bufferOffset += view8.length;
                         dataOffset += view8.length;
@@ -135,7 +137,7 @@ shRequire([__dirname + "/object.js"], obj =>
             })
             .catch(err =>
             {
-                //console.log("Connection closed: " + err);
+                console.error("RPC connection closed on error: " + err);
                 this.handler({ type: "exit" });
             });
 
@@ -266,7 +268,9 @@ shRequire([__dirname + "/object.js"], obj =>
                     bufferOffset = 0;
                 }
 
-                const view8 = new Uint8Array(value.buffer, dataOffset, Math.min(value.length, buffer.byteLength));
+                const view8 = new Uint8Array(value.buffer,
+                                             dataOffset,
+                                             Math.min(value.length - dataOffset, buffer.byteLength - bufferOffset));
                 new Uint8Array(buffer, bufferOffset).set(view8);
                 bufferOffset += view8.length;
                 dataOffset += view8.length;

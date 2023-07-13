@@ -65,7 +65,7 @@ MenuItemBase {
                 const key = text[idx + 1].toLowerCase();
                 if (ev.key === key)
                 {
-                    click(ev);
+                    pointerDown(ev);
                     ev.accepted = true;
                 }
             }
@@ -93,7 +93,7 @@ MenuItemBase {
             });
             if (parts.length === 0)
             {
-                click(ev);
+                pointerDown(ev);
                 ev.accepted = true;
             }
         }

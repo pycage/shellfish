@@ -74,10 +74,13 @@ MouseBox {
         }
     }
 
-    visible: target.contentHeight > target.bboxHeight && labelRepeater.count > 1
-
     layout: orientation === "vertical" ? "center-column"
                                        : "center-row"
+
+    Object {
+        id: priv
+        property setup: ""
+    }
 
     function update()
     {
@@ -94,8 +97,6 @@ MouseBox {
             return;
         }
 
-        //console.log("Update Index Scroller");
-
         let itemsPerRow = 1;
         let cellSize = 0;
         if (target.orientation === "vertical")
@@ -109,7 +110,7 @@ MouseBox {
             cellSize = target.cellWidth;
         }
 
-        if (itemsPerRow === 0)
+        if (itemsPerRow <= 0)
         {
             return;
         }
@@ -130,50 +131,61 @@ MouseBox {
         let pos = 0;
         let prevLabel = "";
 
-        for (let i = 0; i < target.count; i += itemsPerRow)
-        {
-            const itemIdx = i < target.count - itemsPerRow ? (i === 0 ? 0 : i + itemsPerRow - 1)
-                                                           : target.count - 1;
-            const label = indexScroller.getLabel(itemIdx);
-
-            if (m.length > 0)
-            {
-                m[m.length - 1].until = pos - 1;
-            }
-            if (label !== prevLabel)
-            {
-                m.push({ position: pos, until: pos + cellSize - 1, label: label, index: itemIdx });
-                prevLabel = label;
-            }
-            pos += cellSize;
-        }
+        const targetCount = target.count;
+        const getLabel = indexScroller.getLabel;
         
-        // remove exceeding items, but not the first or the last
-        while (m.length > 0 && maxItems > 1 && m.length > maxItems)
+        unresolved
         {
-            const tooMany = m.length - maxItems;
-
-            const sizes = m
-            .map((item, idx) => { return { size: item.until - item.position, index: idx }; })
-            .slice(1, -1)
-            .sort((itemA, itemB) => itemA.size - itemB.size);
-
-            const toRemove = sizes
-            .slice(0, tooMany)
-            .map(item => item.index);
-
-            if (toRemove.length === 0)
+            for (let i = 0; i < targetCount; i += itemsPerRow)
             {
-                break;
+                const itemIdx = i < targetCount - itemsPerRow ? (i === 0 ? 0 : i + itemsPerRow - 1)
+                                                              : targetCount - 1;
+                const label = getLabel(itemIdx);
+
+                if (m.length > 0)
+                {
+                    m[m.length - 1].until = pos - 1;
+                }
+                if (label !== prevLabel)
+                {
+                    m.push({ position: pos, until: pos + cellSize - 1, label: label, index: itemIdx });
+                    prevLabel = label;
+                }
+                pos += cellSize;
             }
 
-            m = m.filter((nil, idx) => toRemove.indexOf(idx) === -1);
+            // remove exceeding items, but not the first or the last
+            while (m.length > 0 && maxItems > 1 && m.length > maxItems)
+            {
+                const tooMany = m.length - maxItems;
+
+                const sizes = m
+                .map((item, idx) => { return { size: item.until - item.position, index: idx }; })
+                .slice(1, -1)
+                .sort((itemA, itemB) => itemA.size - itemB.size);
+
+                const toRemove = sizes
+                .slice(0, tooMany)
+                .map(item => item.index);
+
+                if (toRemove.length === 0)
+                {
+                    break;
+                }
+
+                m = m.filter((nil, idx) => toRemove.indexOf(idx) === -1);
+            }
         }
 
-        labelRepeater.model.reset(m);
+        const newSetup = JSON.stringify(m);
+        if (newSetup !== priv.setup)
+        {
+            priv.setup = newSetup;
+            labelRepeater.model.reset(m);
+        }
     }
 
-    onBboxChanged: () => { console.log("bbox changed " + JSON.stringify(bbox)); update(); }
+    onBboxChanged: () => { update(); }
     onLabelSizeChanged: () => { update(); }
     onGetLabelChanged: () => { update(); }
     target.onNewLayout: () => { update(); }
@@ -216,7 +228,6 @@ MouseBox {
 
             onClick: ev =>
             {
-                console.log("-> " + modelData.value.position);
                 indexScroller.target.contentY = modelData.value.position;
                 ev.accepted = true;
             }

@@ -115,6 +115,23 @@ Label {
 }
 ```
 
+### Typed References
+
+References starting with `this` followed by an element type, e.g. `thisDocument`
+reference the nearest ancestor in the hierarchy of the given type.
+
+```
+Document {
+
+    title: "This is the title text."
+
+    Label {
+        text: thisDocument.title
+    }
+
+}
+```
+
 ### Property Bindings
 
 Instead of values you may also assign JavaScript expressions to properties.

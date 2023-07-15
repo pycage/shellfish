@@ -77,28 +77,6 @@ at compile time and may be accessed by the `__namespace` constant as a string va
 
 All Shui files and also templates get their own namespace this way.
 
-### Typed References
-
-Identifiers starting with `this` followed by an element type, e.g. `thisListView`
-reference the nearest ancestor in the hierarchy of the given type.
-
-```
-  ListView {
-      fillWidth: true
-      fillHeight: true
-        
-      cellWidth: bboxWidth
-      cellHeight: theme.itemSizeSmall
-  
-      model: 30
-        
-      delegate: template Label {
-          text: "Element " + (modelData.index + 1) + " of " + thisListView.count
-      }
-  }
-```
-
-
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-templates}
 </span></div>

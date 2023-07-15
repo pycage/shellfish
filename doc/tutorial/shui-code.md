@@ -61,6 +61,31 @@ Local variables may be declared with the JavaScript keywords `var`, `let`, and `
    to a `const` after its declaration, but it is allowed to modify the value itself
    (for example, you may append items to a `const` list).
 
+### Unresolved Code
+
+JavaScript code in Shui modules comes with a performance overhead for resolving
+Shui references and properties. If you have code that does not need the
+Shui overhead, you may put it in an `unresolved` block to make it run faster.
+
+```
+const currentWidth = bboxWidth;  // this is code using the resolver
+let sum = 0;
+
+unresolved
+{
+    // this is code that is not using the resolver
+    for (let i = 0; i < 100; ++i)
+    {
+        sum += currentWidth;
+    }
+}
+
+myLabel.text = "Sum: " + sum;  // this code is using the resolver again
+```
+
+Keep in mind that Shui references and properties are not available in
+unresolved code.
+
 <div class="navstrip"><span class="go-home"><a href="index.html">Contents</a></span><span class="go-previous">
 {@tutorial shui-methods}
 </span><span class="go-next">

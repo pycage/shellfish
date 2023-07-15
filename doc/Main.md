@@ -148,6 +148,8 @@ Layouting UI elements on screen is intuitive, yet powerful.
   via the resolver function in Shui code and no longer take up a property.
   Thus, the `this...` references are now available for all elements in
   Shui code.
+* The new keyword `unresolved` can be used before JavaScript blocks in Shui to
+  process the block as unresolved, i.e. without the Shui resolver overhead.
 
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter

@@ -47,6 +47,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @extends core.Object
  *
  * @property {bool} enabled - (default: `true`) Whether flicking is currently enabled.
+ * @property {bool} reverseX - (default: `false`) If `true`, the scrolling is reversed in X direction.
+ * @property {bool} reverseY - (default: `false`) If `true`, the scrolling is reversed in Y direction.
  * @property {html.Item} target - (default: `parent`) The target element for flicking.
  */
 Object {
@@ -54,14 +56,16 @@ Object {
 
     property target: parent  // for content
     property enabled: true
+    property reverseX: false
+    property reverseY: false
 
     InertialEngine {
         id: inertialEngine
 
         onMotion: (dx, dy) =>
         {
-            target.contentX += dx;
-            target.contentY += dy;
+            target.contentX += dx * (flicker.reverseX ? -1 : 1);
+            target.contentY += dy * (flicker.reverseY ? -1 : 1);
         }
     }
 

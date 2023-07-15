@@ -1703,24 +1703,17 @@ exports.tools = {
                 {
                     throw "Keyword 'class' at " + lineOfPos(data, pos) + " is currently not supported.";
                 }
+                else if (identifier === "unresolved")
+                {
+                    skipWhitespace(data, pos, true, true);
+                    code += parseJsBlock(data, pos, modules, scopes, nullResolver);
+                }
                 else if (identifier === "direct")
                 {
                     // FIXME: is still required for Emscripten embind enums...
                     //console.warn(`The "direct" keyword is not required anymore and is deprecated. Used in line ${lineOfPos(data, pos)}.`);
                     skipWhitespace(data, pos, true, true);
-                    code += parseJsChain(data, pos, modules, scopes, (parts, protectedOnes, scopes) =>
-                    {
-                        // do not attempt to resolve anything
-                        let code = parts[0];
-                        parts.shift();
-                        protectedOnes.shift();
-                        parts.forEach((p, idx) =>
-                        {               
-                            code += (p[0] !== "(" && p[0] !== "[") ? (protectedOnes[idx + 1] ? "?." : ".") + p
-                                                                   : p; 
-                        });
-                        return code;
-                    });
+                    code += parseJsChain(data, pos, modules, scopes, nullResolver);
                 }
                 else
                 {
@@ -2095,8 +2088,22 @@ exports.tools = {
         }
         else
         {
-            code += parseJsExpression(data, pos, modules, scopes.concat([params]), chainResolver);
+            code += parseJsExpression(data, pos, modules, scopes.concat([params]), resolver);
         }
+        return code;
+    }
+
+    function nullResolver(parts, protectedOnes, scopes)
+    {
+        // do not attempt to resolve anything
+        let code = parts[0];
+        parts.shift();
+        protectedOnes.shift();
+        parts.forEach((p, idx) =>
+        {               
+            code += (p[0] !== "(" && p[0] !== "[") ? (protectedOnes[idx + 1] ? "?." : ".") + p
+                                                   : p; 
+        });
         return code;
     }
 

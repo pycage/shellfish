@@ -399,10 +399,10 @@ shRequire([__dirname + "/object.js"], obj =>
         {
             d.get(this).endpoint = e;
             this.endpointChanged();
-            this.connect();
+            this.connectRpc();
         }
 
-        connect()
+        connectRpc()
         {
             const priv = d.get(this);
 
@@ -468,7 +468,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
             if (! priv.socket)
             {
-                this.connect();
+                this.connectRpc();
             }
 
             if (priv.clientId !== "")

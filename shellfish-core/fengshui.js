@@ -2254,7 +2254,8 @@ exports.tools = {
 
             // "__new__" is the placeholder where a "new" operator may be
             // inserted, if needed
-            const functor = item ? `(...args) => { return /*__new__*/ (${item})(...args); }`
+            const placeNew = item.split(".").filter(c => c[0] >= "A" && c[0] <= "Z").length > 0;
+            const functor = item ? `(...args) => { return ${placeNew ? "/*__new__*/" : ""} (${item})(...args); }`
                                  : "undefined";
 
             return `__xsdv__(${item}, ${setter}, ${functor})`;

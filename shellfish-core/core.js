@@ -46,6 +46,7 @@ const mods = [
 
 const includes = [
     "action",
+    "filefs",
     "filestorage",
     "filesystem",
     "fsmodel",

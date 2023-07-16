@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -403,7 +403,7 @@ shRequire(["shellfish/core"], function (core)
                 const response = await doFetch(url, { method: "GET" });
                 if (response.ok)
                 {
-                    resolve(await response.blob());
+                    resolve(new core.FileData(await response.blob()));
                 }
                 else
                 {
@@ -412,11 +412,11 @@ shRequire(["shellfish/core"], function (core)
             });
         }
     
-        write(path, blob, progressCallback)
+        write(path, fileData, progressCallback)
         {
             const priv = d.get(this);
 
-            function uploadWithProgress(url, blob, progressCallback)
+            function uploadWithProgress(url, fileData, progressCallback)
             {
                 // create a monitoring XHR
                 const xhr = new XMLHttpRequest();
@@ -449,16 +449,16 @@ shRequire(["shellfish/core"], function (core)
                 xhr.open("PUT", url, true);
                 xhr.setRequestHeader("Content-Type", "application/octet-stream");
                 progressCallback(0.0);
-                xhr.send(blob);
+                xhr.send(fileData.blob());
 
                 return promise;
             }
 
             return new Promise(async (resolve, reject) =>
             {
-                if (! blob instanceof Blob)
+                if (! fileData instanceof core.FileData)
                 {
-                    console.error("Write error: Blob expected.");
+                    console.error("Write error: FileData expected.");
                     reject(null);
                     return;
                 }
@@ -471,7 +471,7 @@ shRequire(["shellfish/core"], function (core)
                 path = this.normalizePath(path);
                 const url = priv.root + path;
 
-                const ok = await uploadWithProgress(url, blob, progressCallback);
+                const ok = await uploadWithProgress(url, fileData, progressCallback);
                 if (ok)
                 {
                     priv.cache.delete(this.dirname(path));

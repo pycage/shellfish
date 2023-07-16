@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -428,13 +428,13 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             const f = async () =>
             {
                 const finfo = await this.fileInfo(path);
-                return new File(finfo);
+                return new core.FileData(finfo);
             };
 
             return f();
         }
 
-        write(path, stream)
+        write(path, fileData)
         {
             return new Promise((resolve, reject) =>
             {
@@ -453,23 +453,16 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                         resolve();
                     });
 
-                    if (typeof stream === "string")
+                    const stream = fileData.stream();
+                    stream.on("data", data =>
                     {
-                        writeStream.write(stream);
+                        writeStream.write(data);
+                    });
+
+                    stream.on("end", () =>
+                    {
                         writeStream.end();
-                    }
-                    else
-                    {
-                        stream.on("data", data =>
-                        {
-                            writeStream.write(data);
-                        });
-    
-                        stream.on("end", () =>
-                        {
-                            writeStream.end();
-                        });
-                    }
+                    });
                 });
             });
         }

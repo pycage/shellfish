@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire([__dirname + "/object.js"], obj =>
+shRequire([__dirname + "/object.js", __dirname + "/filesystem.js"], (obj, fs) =>
 {
     const d = new WeakMap();
 
@@ -118,19 +118,10 @@ shRequire([__dirname + "/object.js"], obj =>
 
             if (priv.filesystem !== null && priv.path !== "")
             {
-                let blob = null;
                 this.log("", "debug", "Saving File Storage: " + priv.path);
                 //console.log(JSON.stringify(priv.doc));
-                if (shRequire.environment === "web")
-                {
-                    blob = new Blob([JSON.stringify(priv.doc, null, 2)], { type: "application/json" });
-                }
-                else
-                {
-                    blob = JSON.stringify(priv.doc, null, 2);
-                }
-
-                priv.filesystem.write(priv.path, blob)
+                const fileData = new fs.FileData(JSON.stringify(priv.doc, null, 2));
+                priv.filesystem.write(priv.path, fileData)
                 .then(() =>
                 {
 

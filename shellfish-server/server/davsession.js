@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 "use strict";
 
-shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession, xmlsax) =>
+shRequire(["shellfish/core", __dirname + "/httpsession.js", "shellfish/core/xmlsax"], (core, httpSession, xmlsax) =>
 {
     function escapeXml(text)
     {
@@ -339,9 +339,8 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                     return;
                 }
 
-                this.filesystem.read(path)
                 this.readFile(path, finfo, ev)
-                .then(file =>
+                .then(fileData =>
                 {
                     if (range.length === 0)
                     {
@@ -349,21 +348,22 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
                         ev.response(200, "OK", mayCompress)
                         .header("Accept-Ranges", "bytes")
                         .header("Last-Modified", new Date(finfo.mtime).toUTCString())
-                        .stream(file.stream(), file.mimetype, file.size)
+                        .stream(fileData.stream(), fileData.mimetype, fileData.size)
                         .send();
                     }
                     else
                     {
-                        const from = Math.min(range[0], file.size - 1);
+                        const from = Math.min(range[0], fileData.size - 1);
                         const to = Math.min(range[1] !== -1 ? range[1]
-                                                            : file.size - 1,
-                                            file.size - 1);
-                        this.log("DAV", "info", "Bytes Range: " + from + "-" + to + "/" + file.size);
+                                                            : fileData.size - 1,
+                                            fileData.size - 1);
+                        this.log("DAV", "info", "Bytes Range: " + from + "-" + to + "/" + fileData.size);
+
                         ev.response(206, "Partital Content", mayCompress)
                         .header("Accept-Ranges", "bytes")
-                        .header("Content-Range", "bytes " + from + "-" + to + "/" + file.size)
+                        .header("Content-Range", "bytes " + from + "-" + to + "/" + fileData.size)
                         .header("Last-Modified", new Date(finfo.mtime).toUTCString())
-                        .stream(file.slice(from, to).stream(), file.mimetype, to - from + 1)
+                        .stream(fileData.slice(from, to).stream(), fileData.mimetype, to - from + 1)
                         .send();
                     }
                 })
@@ -641,7 +641,7 @@ shRequire([__dirname + "/httpsession.js", "shellfish/core/xmlsax"], (httpSession
             const path = rootPath(priv.root, hrefToPath(ev.url.path));
             this.log("DAV", "info", "PUT " + path);
 
-            priv.filesystem.write(path, ev.stream)
+            priv.filesystem.write(path, new core.FileData(ev.stream))
             .then(() =>
             {
                 ev.response(200, "OK")

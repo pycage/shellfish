@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -423,24 +423,24 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                     const blob = ev.target.result;
                     if (blob)
                     {
-                        resolve(blob);
+                        resolve(new core.FileData(blob));
                     }
                     else
                     {
                         console.error("read: Failed to read file: " + path);
-                        reject(blob);
+                        reject(new core.FileData(blob));
                     }
                 };
             });
         }
     
-        write(path, blob)
+        write(path, fileData)
         {
             return new Promise(async (resolve, reject) =>
             {
-                if (! blob instanceof Blob)
+                if (! fileData instanceof core.FileData)
                 {
-                    console.error("Write error: Blob expected.");
+                    console.error("Write error: FileData expected.");
                     reject(null);
                     return;
                 }
@@ -482,7 +482,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                         dir: this.normalizePath(dir),
                         name: name,
                         type: "f",
-                        size: blob.size,
+                        size: fileData.size,
                         mimetype: mime.mimeType(name),
                         ctime: Math.floor(Date.now() / 1000),
                         mtime: Math.floor(Date.now() / 1000)
@@ -496,7 +496,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                         .add(item);
                         tx
                         .objectStore("res")
-                        .add(blob.slice(), path);
+                        .add(fileData.blob().slice(), path);
                     }
                     else
                     {
@@ -506,7 +506,7 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
                         .put(item);
                         tx
                         .objectStore("res")
-                        .put(blob.slice(), path);
+                        .put(fileData.blob().slice(), path);
                     }
                 };
             });

@@ -24,6 +24,284 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire([__dirname + "/object.js"], obj =>
 {
+    const modFs = shRequire.environment === "node" ? require("node:fs") : null;
+    const modStream = shRequire.environment === "node" ? require("node:stream") : null;
+
+    /**
+     * Class representing file data for reading or writing.
+     * 
+     * @memberof core.Filesystem
+     * 
+     * @property {number} size - The data size in bytes.
+     * @property {string} mimetype - The MIME type of the data.
+     */
+    class FileData
+    {
+        /**
+         * Creates a new `FileData` object from the given data source.
+         * 
+         * @param {string|ArrayBuffer|ReadableStream|Blob|FileInfo} dataSource - The data source.
+         */
+        constructor(dataSource)
+        {
+            this.sourceType = "unknown";
+            this.from = 0;
+            this.to = -1;
+
+            if (! dataSource)
+            {
+                this.sourceType = "string";
+                this.dataSource = "";
+            }
+            else if (dataSource.byteLength !== undefined)
+            {
+                this.sourceType = "buffer";
+                this.dataSource = dataSource;
+            }
+            else if (typeof dataSource === "string")
+            {
+                this.sourceType = "buffer";
+                this.dataSource = new TextEncoder().encode(dataSource);
+            }
+            else if (typeof dataSource.read === "function" || dataSource.rawHeaders)
+            {
+                this.sourceType = "stream";
+                this.dataSource = dataSource;
+            }
+            else if (typeof dataSource.arrayBuffer === "function")
+            {
+                this.sourceType = "blob";
+                this.dataSource = dataSource;
+            }
+            else if (dataSource.path)
+            {
+                this.sourceType = "finfo";
+                this.dataSource = dataSource;
+            }
+            //console.log("Create FileData of type " + this.sourceType);
+        }
+
+        get size()
+        {
+            if (this.sourceType === "finfo" || this.sourceType === "blob")
+            {
+                return this.dataSource.size;
+            }
+            else if (this.sourceType === "buffer" || this.sourceType === "string")
+            {
+                return this.dataSource.length;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        get mimetype()
+        {
+            if (this.sourceType === "finfo")
+            {
+                return this.dataSource.mimetype;
+            }
+            else if (this.sourceType === "blob")
+            {
+                return this.dataSource.type;
+            }
+            else
+            {
+                return "application/octet-stream";
+            }
+        }
+
+        /**
+         * Returns a sliced version of this `FileData` object.
+         * 
+         * @param {number} from - The start position in bytes of the slice.
+         * @param {number} to - The (non-inclusive) end position in bytes of the slice.
+         * @returns {core.Filesystem.FileData} A new `FileData` object.
+         */
+        slice(from, to)
+        {
+            const f = new FileData(this.dataSource);
+            f.from = from;
+            f.to = to;
+            return f;
+        }
+
+        /**
+         * Returns a promise that resolves to the data as ArrayBuffer.
+         * 
+         * @returns {Promise<ArrayBuffer>} A promise that resolves to an ArrayBuffer.
+         */
+        async arrayBuffer()
+        {
+            if (this.sourceType === "blob")
+            {
+                if (this.to > this.from)
+                {
+                    return (await this.dataSource.arrayBuffer()).slice(this.from, this.to);
+                }
+                else
+                {
+                    return await this.dataSource.arrayBuffer();
+                }
+            }
+            else if (this.sourceType === "buffer")
+            {
+                if (this.to > this.from)
+                {
+                    return this.buffer.slice(this.from, this.to);
+                }
+                else
+                {
+                    return this.buffer;
+                }
+            }
+            else if (this.sourceType === "finfo" && modFs)
+            {
+                const streamReader = new Promise((resolve, reject) =>
+                {
+                    const chunks = [];
+                    const stream = modFs.createReadStream(this.dataSource.path, { encoding: "binary" });
+                    stream.on("data", chunk =>
+                    {
+                        chunks.push(Buffer.from(chunk, "binary"));
+                    });
+                    stream.on("end", () =>
+                    {
+                        let buffer = null;
+                        if (this.to > this.from)
+                        {
+                            buffer = Buffer.concat(chunks).slice(this.from, this.to);
+                        }
+                        else
+                        {
+                            buffer = Buffer.concat(chunks);
+                        }
+                        resolve(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
+                    });
+                    stream.on("error", err =>
+                    {
+                        reject(err);
+                    });
+                });
+
+                return await streamReader;
+            }
+            else if (this.sourceType === "stream" && modStream)
+            {
+                const chunks = [];
+                const stream = this.dataSource;
+                stream.on("data", chunk =>
+                {
+                    chunks.push(Buffer.from(chunk, "binary"));
+                });
+                stream.on("end", () =>
+                {
+                    if (this.to > this.from)
+                    {
+                        return Buffer.concat(chunks).slice(this.from, this.to);
+                    }
+                    else
+                    {
+                        return Buffer.concat(chunks);
+                    }
+                });
+                stream.on("error", err =>
+                {
+                    throw err;
+                });
+            }
+            else
+            {
+                console.error("Unsupported FileData source type: " + this.sourceType);
+                return null;
+            }
+        }
+
+        /**
+         * Returns a Blob with the data.
+         * 
+         * @returns {Blob} A Blob with the data.
+         */
+        blob()
+        {
+            if (this.sourceType === "blob")
+            {
+                return this.dataSource;
+            }
+            else if (this.sourceType === "buffer")
+            {
+                return new Blob([this.dataSource]);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /**
+         * Returns a readable stream for reading from the data.
+         * 
+         * @returns {ReadStream} A readable stream.
+         */
+        stream()
+        {
+            if (! modStream)
+            {
+                return null;
+            }
+
+            if (this.sourceType === "stream")
+            {
+                return this.dataSource;
+            }
+            else if (this.sourceType === "buffer")
+            {
+                if (this.to > this.from)
+                {
+                    async function * generate(buffer) { yield buffer; }
+                    const s = modStream.Readable.from(generate(this.dataSource.slice(this.from, this.to)));
+                    return s;
+                }
+                else
+                {
+                    async function * generate(buffer) { yield buffer; }
+                    const s = modStream.Readable.from(generate(this.dataSource));
+                    return s;
+                }
+            }
+            else if (this.sourceType === "finfo")
+            {
+                if (this.to > this.from)
+                {
+                    return modFs.createReadStream(this.dataSource.path, { start: this.from, end: this.to });
+                }
+                else
+                {
+                    return modFs.createReadStream(this.dataSource.path);
+                }
+            }
+            else
+            {
+                console.error("Unsupported FileData source type: " + this.sourceType);
+                return null;
+            }
+        }
+
+        /**
+         * Returns a Promise that resolves to a string with the data.
+         * 
+         * @returns {Promise<string>} A Promise that resolves to a string.
+         */
+        async text()
+        {
+            return new TextDecoder().decode(await this.arrayBuffer());
+        }
+    }
+    exports.FileData = FileData;
+
+
     /**
      * Base class for filesystem implementations.
      * 
@@ -279,8 +557,8 @@ shRequire([__dirname + "/object.js"], obj =>
         {
             const f = async () =>
             {
-                const blob = await this.read(sourcePath);
-                await this.write(destPath, blob);
+                const fileData = await this.read(sourcePath);
+                await this.write(destPath, fileData);
             };
             return f();
         }
@@ -302,7 +580,7 @@ shRequire([__dirname + "/object.js"], obj =>
          * 
          * @param {string} path - The path of the file to read.
          * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
-         * @returns {Promise} - The Promise object with the file's contents as Blob.
+         * @returns {Promise} - The Promise object with the file's contents as {@link core.Filesystem.FileData}.
          */
         read(path, progressCallback)
         {
@@ -313,11 +591,11 @@ shRequire([__dirname + "/object.js"], obj =>
          * Writes the given Blob to the given path.
          * 
          * @param {string} path - The path of the file to write.
-         * @param {Blob} blob - The Blob of data to write.
+         * @param {core.Filesystem.FileData} fileData - The data to write.
          * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
          * @returns {Promise} The Promise object.
          */
-        write(path, blob, progressCallback)
+        write(path, fileData, progressCallback)
         {
             throw "Not implemented";
         }

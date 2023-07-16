@@ -150,6 +150,12 @@ Layouting UI elements on screen is intuitive, yet powerful.
   Shui code.
 * The new keyword `unresolved` can be used before JavaScript blocks in Shui to
   process the block as unresolved, i.e. without the Shui resolver overhead.
+* Elements derived from {@link html.Item} have new shortcut properties `fill`
+  and `margins` for setting `fillWidth` and `fillHeight`, respectively
+  `marginTop`, `marginBottom`, `marginLeft`, `marginRight` to the same value.
+* **API-Break:** The file data returned by {@link core.Filesystem#read} and
+  passed to {@link core.Filesystem#write} has been unified to the new type
+  {@link core.Filesystem.FileData}.
 
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter

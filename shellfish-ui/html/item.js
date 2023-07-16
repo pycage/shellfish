@@ -97,12 +97,14 @@ shRequire(["shellfish/low",
      * @property {bool} enabled - (default: `true`) Whether the item accepts user input.
      * @property {bool} fillHeight - (default: `false`) Whether to fill the parent's height in "free" and "global" position mode. Ignores the "height" parameter.
      * @property {bool} fillWidth - (default: `false`) Whether to fill the parent's width. Ignores the "width" parameter.
+     * @property {bool} fill - [writeonly] Shortcut property for setting `fillWidth` and `fillHeight` to the same value.
      * @property {bool} focus - (default: `false`) Whether the item has the keyboard focus. Setting this will move the focus to the item.
      * @property {number} height - (default: `-1`) The nominal height. Set to -1 for auto-height.
      * @property {number} marginBottom - (default: `0`) The bottom margin's width.
      * @property {number} marginLeft - (default: `0`) The left margin's width.
      * @property {number} marginRight - (default: `0`) The right margin's width.
      * @property {number} marginTop - (default: `0`) The top margin's width.
+     * @property {number} margins - [writeonly] Shortcut property for setting `marginTop`, `marginBottom`, `marginLeft`, `marginRight` to the same value.
      * @property {number} maxHeight - (default: `-1`) The item's maximum height. It will not grow further.
      * @property {number} maxWidth - (default: `-1`) The item's maximum width. It will not grow further.
      * @property {number} minHeight - (default: `0`) The item's minimum height. It will not shrink further.
@@ -798,6 +800,12 @@ shRequire(["shellfish/low",
             }
         }
 
+        set fill(value)
+        {
+            this.fillWidth = value;
+            this.fillHeight = value;
+        }
+
         get fillWidth() { return d.get(this).fillWidth; }
         set fillWidth(value)
         {
@@ -890,6 +898,14 @@ shRequire(["shellfish/low",
             };
 
             r.request(this.bbox);
+        }
+
+        set margins(v)
+        {
+            this.marginTop = v;
+            this.marginBottom = v;
+            this.marginLeft = v;
+            this.marginRight = v;
         }
 
         get marginTop() { return d.get(this).marginTop; }

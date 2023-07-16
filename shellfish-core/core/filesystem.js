@@ -53,9 +53,19 @@ shRequire([__dirname + "/object.js"], obj =>
                 this.sourceType = "string";
                 this.dataSource = "";
             }
-            else if (dataSource.byteLength !== undefined)
+            else if (dataSource.constructor.name === "ArrayBuffer")
             {
                 this.sourceType = "buffer";
+                this.dataSource = dataSource;
+            }
+            else if (dataSource.constructor.name === "Blob")
+            {
+                this.sourceType = "blob";
+                this.dataSource = dataSource;
+            }
+            else if (dataSource.constructor.name === "File")
+            {
+                this.sourceType = "blob";
                 this.dataSource = dataSource;
             }
             else if (typeof dataSource === "string")
@@ -66,11 +76,6 @@ shRequire([__dirname + "/object.js"], obj =>
             else if (typeof dataSource.read === "function" || dataSource.rawHeaders)
             {
                 this.sourceType = "stream";
-                this.dataSource = dataSource;
-            }
-            else if (typeof dataSource.arrayBuffer === "function")
-            {
-                this.sourceType = "blob";
                 this.dataSource = dataSource;
             }
             else if (dataSource.path)

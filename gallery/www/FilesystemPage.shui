@@ -143,8 +143,8 @@ Page {
                     {
                         for (let i = 0; i < files.length; ++i)
                         {
-                            const fileItem = new core.FileData(files[i]);
-                            drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
+                            const fileItem = files[i];
+                            drive.write(filesView.model.path + "/" + fileItem.name, new core.FileData(fileItem))
                             .then(() =>
                             {
 
@@ -233,8 +233,9 @@ Page {
                         {
                             continue;
                         }
-                        const fileItem = new core.FileData(item.getAsFile());
-                        drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
+                        const fileItem = item.getAsFile();
+                        console.log("Drop file: " + fileItem.size);
+                        drive.write(filesView.model.path + "/" + fileItem.name, new core.FileData(fileItem))
                         .then(() =>
                         {
 
@@ -281,9 +282,9 @@ Page {
                             if (file && file.mimetype.startsWith("image/"))
                             {
                                 drive.read(file.path)
-                                .then(blob =>
+                                .then(fileData =>
                                 {
-                                    thumbnail = blobUrl(blob);
+                                    thumbnail = blobUrl(fileData.blob());
                                 })
                                 .catch(() => { });
                             }
@@ -309,9 +310,9 @@ Page {
                                 dlg.show();
                                 dlg.title = low.escapeMarkup(file.name);
                                 drive.read(file.path)
-                                .then((blob) =>
+                                .then((fileData) =>
                                 {
-                                    dlg.file = blob;
+                                    dlg.file = fileData.blob();
                                 });
                             }
                         }

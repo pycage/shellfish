@@ -41,14 +41,14 @@ require "shellfish/ui";
  * @class
  * @extends html.Object
  *
- * @property {html.Item} target - (default: `parent`) The target element of the tooltip.
+ * @property {html.Item} target - (default: `thisMouseBox`) The target element of the tooltip.
  * @property {string} text - The text to display.
  * @property {bool} visible - Whether the tooltip is visible. This property may be controlled externally, if needed.
  */
 Object {
     id: tooltip
 
-    property target: parent
+    property target: thisMouseBox
     property text: ""
     property visible: thisDocument.inputDevice === "mouse" && parent.hovered ||
                       thisDocument.inputDevice === "keyboard" && parent.focus

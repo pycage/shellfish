@@ -121,7 +121,7 @@ Page {
 
                 onClick: () =>
                 {
-                    drive.write(filesView.model.path + "/New File.txt", new Blob([""]))
+                    drive.write(filesView.model.path + "/New File.txt", new core.FileData(""))
                     .then(() =>
                     {
                         console.log("saved file");
@@ -143,7 +143,7 @@ Page {
                     {
                         for (let i = 0; i < files.length; ++i)
                         {
-                            const fileItem = files[i];
+                            const fileItem = new core.FileData(files[i]);
                             drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
                             .then(() =>
                             {
@@ -233,7 +233,7 @@ Page {
                         {
                             continue;
                         }
-                        const fileItem = item.getAsFile();
+                        const fileItem = new core.FileData(item.getAsFile());
                         drive.write(filesView.model.path + "/" + fileItem.name, fileItem)
                         .then(() =>
                         {

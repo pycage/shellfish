@@ -23,7 +23,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 require "shellfish/ui";
 
 /**
- * Element representing an expandable menu item with sub menu items.
+ * Element representing an expandable menu item with sub menu items. This is an
+ * alternative to using a regular sub menu and is more suitable for touch screen
+ * navigation.
  *
  * @memberof ui
  * @name MenuExpander

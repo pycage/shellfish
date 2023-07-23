@@ -297,6 +297,8 @@ exports.tools = {
         "RegExp",
         "Set",
         "SharedArrayBuffer",
+        "TextDecoder",
+        "TextEncoder",
         "Uint16Array",
         "Uint32Array",
         "Uint8Array",

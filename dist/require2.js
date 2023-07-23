@@ -356,6 +356,8 @@ const shRequire = (function ()
     {
         return new Promise((resolve, reject) =>
         {
+            shRequire.registerCallback(scriptId, () => { resolve(true); });
+
             if (hasDom)
             {
                 const scriptNode = document.createElement("script");
@@ -363,9 +365,7 @@ const shRequire = (function ()
                 scriptNode.charset = "utf-8";
                 scriptNode.async = loadAsync;
                 const codeUrl = URL.createObjectURL(new Blob([code], { type: "application/javascript" }));
-        
-                shRequire.registerCallback(scriptId, () => { resolve(true); });
-       
+              
                 scriptNode.addEventListener("error", function ()
                 {
                     URL.revokeObjectURL(codeUrl);
@@ -384,7 +384,6 @@ const shRequire = (function ()
                     const shRequire = __require;
                     // using eval for the time being, until some better solution comes around
                     eval(code);
-                    resolve(true);
                 }
                 catch (err)
                 {
@@ -398,7 +397,6 @@ const shRequire = (function ()
                 inlineModule.paths = module.paths;
                 inlineModule.shRequire = __require;
                 inlineModule._compile("const shRequire = module.shRequire; " + code, url);
-                resolve(true);
             }
             else if (typeof Blob !== "undefined")
             {
@@ -418,7 +416,7 @@ const shRequire = (function ()
             }
             else
             {
-                resolve(false);    
+                resolve(false);
             }
         });
     }

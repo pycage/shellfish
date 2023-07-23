@@ -29,7 +29,7 @@ shRequire(["shellfish/core"], core =>
 
     /* Reads the HTTP request body.
      */
-    function readRequest(request)
+    function readRequest(request, type)
     {
         return new Promise((resolve, reject) =>
         {
@@ -42,7 +42,15 @@ shRequire(["shellfish/core"], core =>
 
             request.on("end", () =>
             {
-                resolve(Buffer.concat(chunks).toString("binary"));
+                const data = Buffer.concat(chunks);
+                if (type === "buffer")
+                {
+                    resolve(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+                }
+                else
+                {
+                    resolve(data.toString("binary"));
+                }
             });
         });
     }
@@ -77,6 +85,7 @@ shRequire(["shellfish/core"], core =>
         }
 
         request.body = () => { return readRequest(request.original); },
+        request.arrayBuffer = () => { return readRequest(request.original, "buffer"); },
         request.stream = request.original,
         request.response = makeResponse,
         request.unmappedUrl = request.url;

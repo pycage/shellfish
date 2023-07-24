@@ -1165,6 +1165,14 @@ exports.tools = {
             const scopes = [modules.map(m => m.alias), [/*"self"*/]];
             code += parseJsArrowFunction(data, pos, modules, scopes, chainResolver);
         }
+        else if (next(data, pos, "async"))
+        {
+            expect(data, pos, "async");
+            skipWhitespace(data, pos, true, true);
+            const scopes = [modules.map(m => m.alias), [/*"self"*/]];
+            code += "async ";
+            code += parseJsArrowFunction(data, pos, modules, scopes, chainResolver);
+        }
         else if (next(data, pos, "template"))
         {
             code += "() => " +
@@ -2188,6 +2196,7 @@ exports.tools = {
             }
         });
         
+        //code += `console.log(${names[counter]});`;
         code += `return ${names[counter]};`;
         code += "})().val";
         //console.log("Resolving to: " + code);

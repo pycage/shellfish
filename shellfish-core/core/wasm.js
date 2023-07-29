@@ -38,6 +38,9 @@ shRequire([__dirname + "/object.js"], (obj) =>
      * Modularization of the runtime is taking place internally, so Emscripten
      * does not have to be instructed to build a modularized runtime.
      * 
+     * @deprecated Since WASM modules can be imported directly, this class is
+     * deprecated and will be removed eventually.
+     * 
      * @memberof core
      * @extends core.Object
      *

@@ -5,7 +5,7 @@
 In short, Shellfish is a **declarative toolkit** for JavaScript environments and targets
 **full-stack development**. This means, it covers both, the client UI and the server side.
 
-Its runtime has **no additional dependecies** and works on any compatible JavaScript
+Its runtime has **no additional dependencies** and works on any compatible JavaScript
 runtime environment, including:
 
 * Modern web browsers

@@ -32,6 +32,17 @@ shRequire([__dirname + "/object.js", __dirname + "/filesystem.js"], (obj, fs) =>
      * The properties are persisted in a file on a file system,
      * and their values must be JSON-serializable.
      * 
+     * Example
+     * ```
+     * FileStorage {
+     *     filesystem: LocalFS { }
+     *     path: "/path/to/the/storage/file"
+     * 
+     *     property foo: "bar"
+     *     property anotherProperty: 42
+     * }
+     * ```
+     * 
      * @extends core.Object
      * @memberof core
      * 

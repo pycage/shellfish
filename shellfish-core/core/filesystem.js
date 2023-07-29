@@ -341,7 +341,7 @@ shRequire([__dirname + "/object.js"], obj =>
         /**
          * Joins a list of path components.
          * 
-         * All path components must be encoded (@see {html.Filesystem#encodeName}).
+         * All path components must be encoded (@see {@link core.Filesystem#encodeName}).
          * 
          * @param  {string[]} args - The path components.
          * @returns {string} - The resulting path.
@@ -427,6 +427,23 @@ shRequire([__dirname + "/object.js"], obj =>
         /**
          * Retrieves a file info object for the given path.
          * 
+         * A file info object is a plain dictionary object with several
+         * entries describing a file or directory.
+         * 
+         * For example:
+         * ```
+         * {
+         *     path: "/etc/fstab",       // the full path
+         *     dir: "/etc",              // the path to the parent directory
+         *     name: "fstab",            // the filename
+         *     type: "f",                // either "f" for files or "d" for directories
+         *     size: 120,                // the file size in bytes
+         *     mimetype: "text/plain",   // the MIME type of the file
+         *     ctime: 1690621908,        // the creation time as a Unix timestamp
+         *     mtime: 1690621908         // the modification time as a Unix timestamp
+         * }
+         * ```
+         * 
          * @param {string} path - The path.
          * @returns {Promise} The Promise object.
          */
@@ -489,6 +506,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         /**
          * Searches for files matching a query and returns a Promise object with the file items.
+         * The format of the query string is defined by the particular implementation.
          * 
          * @param {string} path - The path to search.
          * @param {string} query - The search query.

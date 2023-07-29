@@ -321,44 +321,49 @@ shRequire([__dirname + "/object.js"], obj =>
      * Class representing a proxy for handling remote procedure calls (RPC)
      * on a server with {@link server.RpcSession} as counter part.
      * 
-     * ### Example: Invoke a remote function
-     *     RpcProxy {
+     * Example: Invoke a remote function
+     * ```
+     * RpcProxy {
+     *     endpoint: "/::rpc"
      * 
-     *         onInitialization: () =>
+     *     onInitialization: () =>
+     *     {
+     *         console.log("Invoking a remote function");
+     *         invoke("remoteCall", [1, 2, 3])
+     *         .then(result =>
      *         {
-     *             console.log("Invoking a remote function");
-     *             invoke("remoteCall", [1, 2, 3])
-     *             .then(result =>
-     *             {
-     *                 console.log("Result: " + result);
-     *             }
+     *             console.log("Result: " + result);
      *         }
-     * 
      *     }
+     * 
+     * }
+     * ```
      * 
      * It is possible to pass callback functions to a RPC call.
      * 
-     * ### Example: Using callbacks
-     * 
-     *     invoke("doSomething", progress =>
-     *     {
-     *         console.log("Current progress: " + Math.round(progress * 100) + "%");
-     *     })
-     *     .then(result =>
-     *     {
-     *         console.log("Result: " + result);
-     *     });
+     * Example: Using callbacks
+     * ```
+     * invoke("doSomething", progress =>
+     * {
+     *     console.log("Current progress: " + Math.round(progress * 100) + "%");
+     * })
+     * .then(result =>
+     * {
+     *     console.log("Result: " + result);
+     * });
+     * ```
      * 
      * The RPC endpoint may return proxy objects for complex interfaces.
      * 
-     * ### Example: Using a proxy object
-     * 
-     *     invoke("getProxyInstance")
-     *     .then(async proxy =>
-     *     {
-     *         const sum = await proxy.addRemote(1, 2);
-     *         await proxy.countDown(n => console.log(n));
-     *     });
+     * Example: Using a proxy object
+     * ```
+     * invoke("getProxyInstance")
+     * .then(async proxy =>
+     * {
+     *     const sum = await proxy.addRemote(1, 2);
+     *     await proxy.countDown(n => console.log(n));
+     * });
+     * ```
      * 
      * @extends core.Object
      * @memberof core

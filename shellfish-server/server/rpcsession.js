@@ -134,44 +134,48 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * session ID, except for the initial connection. This header may be used
      * to open a session per client.
      * 
-     * ### Example
-     *     HTTPRoute {
-     *         when: req => req.url.path === "/::rpc"
-     *         generateSessionId: req => req.headers.get("x-shellfish-rpc-session") || core.generateUid()
+     * Example
+     * ```
+     * HTTPRoute {
+     *     when: req => req.url.path === "/::rpc"
+     *     generateSessionId: req => req.headers.get("x-shellfish-rpc-session") || core.generateUid()
      * 
-     *         delegate: template RpcSession {
-     *             onInitialization: () =>
-     *             {
-     *                 registerMethod("sum", (a, b) => a + b);
-     *                 registerMethod("countDown", cb =>
-     *                 {
-     *                     for (let i = 10; i > 0; --i)
-     *                     {
-     *                         cb(i);
-     *                     }
-     *                 });
-     *             }
-     *         }
-     *     }
-     * 
-     * ### Example: Creating and returning a RPC proxy object to the client
-     * 
-     *     class MyClass
-     *     {
-     *         constructor(initial)
+     *     delegate: template RpcSession {
+     *         onInitialization: () =>
      *         {
-     *             this.value = initial;
-     *         }
+     *             registerMethod("sum", (a, b) => a + b);
      * 
-     *         add(n) { this.value += n; }
-     *
-     *         value() { return this.value; }
+     *             registerMethod("countDown", cb =>
+     *             {
+     *                 for (let i = 10; i > 0; --i)
+     *                 {
+     *                     cb(i);
+     *                 }
+     *             });
+     *         }
+     *     }
+     * }
+     * ```
+     * 
+     * Example: Creating and returning a RPC proxy object to the client
+     * ```
+     * class MyClass
+     * {
+     *     constructor(initial)
+     *     {
+     *         this.value = initial;
      *     }
      * 
-     *     registerMethod("getMyClass", (initial) =>
-     *     {
-     *         return proxyObject(new MyClass(initial));
-     *     });
+     *     add(n) { this.value += n; }
+     *
+     *     value() { return this.value; }
+     * }
+     * 
+     * registerMethod("getMyClass", (initial) =>
+     * {
+     *     return proxyObject(new MyClass(initial));
+     * });
+     * ```
      * 
      * @extends server.HTTPSession
      * @memberof server

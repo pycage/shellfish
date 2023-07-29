@@ -28,7 +28,8 @@ shRequire([__dirname + "/action.js"], act =>
     /**
      * Class representing a parallel action.
      * 
-     * The parallel action runs its child actions in parallel.
+     * The parallel action runs its child actions in parallel and finishes
+     * when all child actions have finished.
      * 
      * @memberof core
      * @extends core.Action

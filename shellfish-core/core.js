@@ -56,6 +56,7 @@ const includes = [
     "parallelaction",
     "repeater",
     "rpcproxy",
+    "scalemodel",
     "scriptaction",
     "sequentialaction",
     "threadpool",

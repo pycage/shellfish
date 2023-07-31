@@ -38,9 +38,32 @@ shRequire([__dirname + "/object.js"], obj =>
             ++idCounter;
         }
 
-        postMessage(sessionId, message)
+        postMessage(sessionId, message, binaries)
         {
-            //console.log("Send: " + JSON.stringify(message));
+            console.log("Send: " + JSON.stringify(message));
+
+            if (! binaries)
+            {
+                binaries = [];
+            }
+            const binarySize = binaries.map(b => b.length).reduce((a, b) => a + b, 0);
+            //console.log("SEND BINARY SIZE: " + binarySize);
+            //console.log(binaries);
+            const json = JSON.stringify(message);
+            const jsonData = new TextEncoder().encode(json);
+            const buffer = new Uint8Array(4 + jsonData.length + binarySize);
+            const view32 = new Uint32Array(buffer.buffer, 0, 1);
+            view32[0] = jsonData.length;
+            
+            let offset = 4;
+            buffer.set(jsonData, offset);
+            offset += jsonData.length;
+            
+            binaries.forEach(b =>
+            {
+                buffer.set(b, offset);
+                offset += b.length;
+            });
 
             const headers = new Headers();
             headers.append("x-shellfish-rpc-socket", this.socketId);
@@ -48,7 +71,8 @@ shRequire([__dirname + "/object.js"], obj =>
             fetch(this.endpoint, {
                 method: "POST",
                 headers,
-                body: JSON.stringify(message)
+                body: buffer
+                //body: JSON.stringify(message)
             })
             .catch(err =>
             {
@@ -70,6 +94,7 @@ shRequire([__dirname + "/object.js"], obj =>
                     let buffer = null;
                     let bufferOffset = 0;
                     let dataOffset = 0;
+                    let jsonSize = 0;
 
                     this.reader = response.body.getReader();
 
@@ -89,12 +114,17 @@ shRequire([__dirname + "/object.js"], obj =>
                         
                         if (buffer === null)
                         {
-                            const size = value[dataOffset++] +
-                                         (value[dataOffset++] << 8) +
-                                         (value[dataOffset++] << 16) +
-                                         (value[dataOffset++] << 24);
+                            jsonSize = value[dataOffset++] +
+                                       (value[dataOffset++] << 8) +
+                                       (value[dataOffset++] << 16) +
+                                       (value[dataOffset++] << 24);
 
-                            buffer = new ArrayBuffer(size);
+                            const binarySize = value[dataOffset++] +
+                                               (value[dataOffset++] << 8) +
+                                               (value[dataOffset++] << 16) +
+                                               (value[dataOffset++] << 24);
+
+                            buffer = new ArrayBuffer(jsonSize + binarySize);
                             bufferOffset = 0;
                         }
 
@@ -107,13 +137,16 @@ shRequire([__dirname + "/object.js"], obj =>
 
                         if (bufferOffset === buffer.byteLength)
                         {
+                            const jsonData = buffer.slice(0, jsonSize);
+                            const binaryData = buffer.slice(jsonSize);
+
                             const dec = new TextDecoder();
-                            const json = dec.decode(buffer);
+                            const json = dec.decode(jsonData);
                             try
                             {
                                 //console.log("Receive: " + json);
                                 const message = JSON.parse(json);
-                                this.handler(message);
+                                this.handler(message, binaryData);
                             }
                             catch (err)
                             {
@@ -163,9 +196,30 @@ shRequire([__dirname + "/object.js"], obj =>
             this.handler = handler;
         }
 
-        postMessage(sessionId, message)
+        postMessage(sessionId, message, binaries)
         {
             //console.log("Send: " + JSON.stringify(message));
+
+            if (! binaries)
+            {
+                binaries = [];
+            }
+            const binarySize = binaries.map(b => b.length).reduce((a, b) => a + b, 0);
+            const json = JSON.stringify(message);
+            const jsonData = new TextEncoder().encode(json);
+            const buffer = new Uint8Array(4 + jsonData.length + binarySize);
+            const view32 = new Uint32Array(buffer.buffer, 0, 1);
+            view32[0] = jsonData.length;
+            
+            let offset = 4;
+            buffer.set(jsonData, offset);
+            offset += jsonData.length;
+            
+            binaries.forEach(b =>
+            {
+                buffer.set(b, offset);
+                offset += b.length;
+            });
 
             const req = this.modHttp.request(this.endpoint, {
                 method: "POST",
@@ -174,7 +228,8 @@ shRequire([__dirname + "/object.js"], obj =>
                     "x-shellfish-rpc-session": sessionId
                 }
             });
-            req.write(JSON.stringify(message));
+            req.write(buffer);
+            //req.write(JSON.stringify(message));
             req.end();
         }
 
@@ -245,6 +300,7 @@ shRequire([__dirname + "/object.js"], obj =>
             let buffer = null;
             let bufferOffset = 0;
             let dataOffset = 0;
+            let jsonSize = 0;
 
             while (! done)
             {
@@ -259,12 +315,17 @@ shRequire([__dirname + "/object.js"], obj =>
                 
                 if (buffer === null)
                 {
-                    const size = value[dataOffset++] +
+                    jsonSize = value[dataOffset++] +
+                               (value[dataOffset++] << 8) +
+                               (value[dataOffset++] << 16) +
+                               (value[dataOffset++] << 24);
+
+                    const binarySize = value[dataOffset++] +
                                  (value[dataOffset++] << 8) +
                                  (value[dataOffset++] << 16) +
                                  (value[dataOffset++] << 24);
 
-                    buffer = new ArrayBuffer(size);
+                    buffer = new ArrayBuffer(jsonSize + binarySize);
                     bufferOffset = 0;
                 }
 
@@ -277,13 +338,16 @@ shRequire([__dirname + "/object.js"], obj =>
 
                 if (bufferOffset === buffer.byteLength)
                 {
+                    const jsonData = buffer.slice(0, jsonSize);
+                    const binaryData = buffer.slice(jsonSize);
+
                     const dec = new TextDecoder();
-                    const json = dec.decode(buffer);
+                    const json = dec.decode(jsonData);
                     try
                     {
                         //console.log("Receive: " + json);
                         const message = JSON.parse(json);
-                        this.handler(message);
+                        this.handler(message, binaryData);
                     }
                     catch (err)
                     {
@@ -365,6 +429,8 @@ shRequire([__dirname + "/object.js"], obj =>
      * });
      * ```
      * 
+     * Values of type `Uint8Array` are transfered in binary form.
+     * 
      * @extends core.Object
      * @memberof core
      * 
@@ -417,7 +483,7 @@ shRequire([__dirname + "/object.js"], obj =>
             }
 
             const MSock = shRequire.environment === "node" ? MessageSocketNode : MessageSocket;
-            priv.socket = new MSock(priv.endpoint, msg =>
+            priv.socket = new MSock(priv.endpoint, (msg, binaryData) =>
             {
                 if (msg.type === "ready")
                 {
@@ -445,7 +511,7 @@ shRequire([__dirname + "/object.js"], obj =>
                 }
                 else if (msg.type === "methodResult")
                 {
-                    priv.callMap.get(msg.callId).resolve(this.processOutParameters([msg.value])[0]);
+                    priv.callMap.get(msg.callId).resolve(this.processReceiveParameters([msg.value], binaryData)[0]);
                     priv.callMap.delete(msg.callId);
                 }
                 else if (msg.type === "methodError")
@@ -455,7 +521,7 @@ shRequire([__dirname + "/object.js"], obj =>
                 }
                 else if (msg.type === "callback")
                 {
-                    const params = this.processOutParameters(msg.parameters);
+                    const params = this.processReceiveParameters(msg.parameters, binaryData);
                     const remove = priv.callbackMap.get(msg.callback)(...params);
                     if (remove)
                     {
@@ -479,7 +545,7 @@ shRequire([__dirname + "/object.js"], obj =>
             if (priv.clientId !== "")
             {
                 this.log("", "debug", "Calling RPC method: " + callItem.name);
-                priv.socket.postMessage(priv.sessionId, { type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters });
+                priv.socket.postMessage(priv.sessionId, { type: "call", clientId: priv.clientId, name: callItem.name, callId, parameters: callItem.parameters }, callItem.binaries);
             }
             else
             {
@@ -487,11 +553,12 @@ shRequire([__dirname + "/object.js"], obj =>
             }
         }
 
-        processInParameters(parameters)
+        processSendParameters(parameters)
         {
             const priv = d.get(this);
 
-            return parameters.map(p =>
+            const binaries = [];
+            const convertedParameters = parameters.map(p =>
             {
                 //console.log(typeof p);
                 if (typeof p === "function")
@@ -504,16 +571,25 @@ shRequire([__dirname + "/object.js"], obj =>
                     priv.callbacks.push(callbackId);
                     return { type: "callback", clientId: priv.clientId, safeCallback: callbackId };
                 }
+                else if (typeof p === "object" && p.constructor.name === "Uint8Array")
+                {
+                    binaries.push(p);
+                    return { type: "binary", size: p.length };
+                }
                 else
                 {
                     return p;
                 }
             });
+
+            return [ convertedParameters, binaries ];
         }
 
-        processOutParameters(results)
+        processReceiveParameters(results, binaryData)
         {
             const priv = d.get(this);
+
+            let binaryOffset = 0;
 
             return results.map(r =>
             {
@@ -529,13 +605,14 @@ shRequire([__dirname + "/object.js"], obj =>
                         {
                             return new Promise((resolve, reject) =>
                             {
-                                const params = this.processInParameters(parameters);
+                                const [ params, binaries ] = this.processSendParameters(parameters);
 
                                 const callId = idCounter;
                                 ++idCounter;
                                 priv.callMap.set(callId, {
                                     name: r.instance + "." + method,
                                     parameters: params,
+                                    binaries,
                                     resolve,
                                     reject
                                 });
@@ -544,6 +621,12 @@ shRequire([__dirname + "/object.js"], obj =>
                         }
                     });
                     return proxy;
+                }
+                else if (!! r && typeof r === "object" && r.type === "binary")
+                {
+                    const data = binaryData.slice(binaryOffset, binaryOffset + r.size);
+                    binaryOffset += r.size;
+                    return new Uint8Array(data);
                 }
                 else
                 {
@@ -558,13 +641,14 @@ shRequire([__dirname + "/object.js"], obj =>
 
             return new Promise((resolve, reject) =>
             {
-                const params = this.processInParameters(parameters);
+                const [ params, binaries ] = this.processSendParameters(parameters);
 
                 const callId = idCounter;
                 ++idCounter;
                 priv.callMap.set(callId, {
                     name,
                     parameters: params,
+                    binaries,
                     resolve,
                     reject
                 });

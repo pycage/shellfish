@@ -156,6 +156,10 @@ Layouting UI elements on screen is intuitive, yet powerful.
 * **API-Break:** The file data returned by {@link core.Filesystem#read} and
   passed to {@link core.Filesystem#write} has been unified to the new type
   {@link core.Filesystem.FileData}.
+* The RPC protocol between {@link core.RpcProxy} and {@link server.RpcSession}
+  now supports transfering Uint8Array parameters in binary form.
+* The new element {@link core.ScaleModel} provides a list model for generating
+  scale displays.
 
 ### June 2023
 * The method {@link core.Object#wait} now has an optional `name` parameter

@@ -26,8 +26,29 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
 
     let idCounter = 0;
 
-    function processInParameters(self, clientId, parameters)
+    function processSendParameters(parameters)
     {
+        const binaries = [];
+        const convertedParameters = parameters.map(p =>
+        {
+            if (typeof p === "object" && (p.constructor.name === "Uint8Array" || p.constructor.name === "Buffer"))
+            {
+                binaries.push(p);
+                return { type: "binary", size: p.length };
+            }
+            else
+            {
+                return p;
+            }
+        });
+
+        return [ convertedParameters, binaries ];
+    }
+
+    function processReceiveParameters(self, clientId, parameters, binaryData)
+    {
+        let binaryOffset = 0;
+
         return parameters.map(p =>
         {
             if (!! p && typeof p === "object")
@@ -38,8 +59,17 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                     const callbackId = p.safeCallback;
                     return (...parameters) =>
                     {
-                        self.postMessage(clientId, { type: "callback", callback: callbackId, parameters });
+                        const [ convertedParameters, binaries ] = processSendParameters(parameters);
+                        self.postMessage(clientId, { type: "callback", callback: callbackId, parameters: convertedParameters }, binaries);
                     };
+                }
+                else if (p.type === "binary")
+                {
+                    //console.log("BINARY DATA " + p.size);
+                    const data = binaryData.slice(binaryOffset, binaryOffset + p.size);
+                    //console.log(data);
+                    binaryOffset += p.size;
+                    return data;
                 }
                 else
                 {
@@ -55,6 +85,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
 
     function handleResult(self, clientId, r, onResult, onError)
     {
+        //console.log("Handle result: " + r.constructor.name);
         if (typeof r === "object" && r.constructor.name === "Promise")
         {
             r
@@ -72,27 +103,32 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
         }
     }
 
-    function handleMessage(self, clientId, msg)
+    function handleMessage(self, clientId, msg, binaryData)
     {
         const priv = d.get(self);
 
+        priv.clients.get(clientId).expires = Date.now() + 60000;
+
         if (msg.type === "heartbeat")
         {
-            priv.clients.get(clientId).expires = Date.now() + 60000;
+            // nothing to do
         }
         else if (msg.type === "call")
         {
             // call a registered method
 
+            //console.log("CALL " + JSON.stringify(msg) + " " + binaryData.byteLength);
             if (priv.methods.has(msg.name))
             {
-                const parameters = processInParameters(self, clientId, msg.parameters);
+                //console.log("PROCESS PARAMETERS " + msg.name);
+                const parameters = processReceiveParameters(self, clientId, msg.parameters, binaryData);
                 try
                 {
                     const result = priv.methods.get(msg.name)(...parameters);
                     handleResult(self, clientId, result, r =>
                     {
-                        self.postMessage(clientId, { type: "methodResult", callId: msg.callId, value: r });
+                        const [ convertedParameters, binaries ] = processSendParameters([r]);
+                        self.postMessage(clientId, { type: "methodResult", callId: msg.callId, value: convertedParameters[0] }, binaries);
                     },
                     err =>
                     {
@@ -177,6 +213,8 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * });
      * ```
      * 
+     * Values of type `Uint8Array` are transfered in binary form.
+     * 
      * @extends server.HTTPSession
      * @memberof server
      */
@@ -235,12 +273,19 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 else if (req.method === "POST")
                 {
                     // incoming message
-                    req.body().then(data =>
+                    req.arrayBuffer().then(data =>
                     {
                         let msg = null;
+                        let binaryData = null;
                         try
                         {
-                            msg = JSON.parse(data);
+                            const view32 = new Uint32Array(data, 0, 1);
+                            const jsonSize = view32[0];
+                            //console.log("JSON SIZE " + jsonSize + " DATA " + data.byteLength);
+                            const jsonData = data.slice(4, 4 + jsonSize);
+                            binaryData = data.slice(4 + jsonSize);
+
+                            msg = JSON.parse(new TextDecoder().decode(jsonData));
                         }
                         catch (err)
                         {
@@ -258,7 +303,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                         }
                         else
                         {
-                            handleMessage(this, msg.clientId, msg);
+                            handleMessage(this, msg.clientId, msg, binaryData);
                             req.response(200, "OK")
                             .send();
                         }
@@ -279,7 +324,11 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
 
             clientIds.forEach(clientId =>
             {
-                this.postMessage(clientId, { type: "heartbeat" });
+                const client = priv.clients.get(clientId);
+                if (client.expires < Date.now() + 30000)
+                {
+                    this.postMessage(clientId, { type: "heartbeat" });
+                }
             });
 
             this.wait(30000, "heartbeat")
@@ -342,25 +391,46 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
             }
         }
 
-        postMessage(clientId, message)
+        /**
+         * Posts a message to the given client.
+         * 
+         * @private
+         * 
+         * @param {string} clientId - The client ID.
+         * @param {string} message - The message.
+         * @param {{Uint8Array[]}} binaries - An optional list of Uint8Array binaries.
+         */
+        postMessage(clientId, message, binaries)
         {
             const priv = d.get(this);
 
             const client = priv.clients.get(clientId);
             if (client)
             {
+                if (! binaries)
+                {
+                    binaries = [];
+                }
+
                 const enc = new TextEncoder();
                 const data = enc.encode(JSON.stringify(message));
+                //console.log("OUT: " + JSON.stringify(message));
                 this.log("RPC", "info", "RPC send message to client " + clientId + ", type: " + message.type);
     
                 const size = data.length;
-                const buffer = new ArrayBuffer(size + 4);
-                const view32 = new Uint32Array(buffer, 0, 1);
+                const buffer = new ArrayBuffer(size + 8);
+                const view32 = new Uint32Array(buffer, 0, 2);
                 view32[0] = size;
+                view32[1] = binaries.map(b => b.length).reduce((a, b) => a + b, 0);
                 const view8 = new Uint8Array(buffer);
-                view8.set(data, 4);
+                view8.set(data, 8);
     
                 client.reverseChannel.write(view8);
+
+                if (binaries)
+                {
+                    binaries.forEach(b => client.reverseChannel.write(b));
+                }
             }
             else
             {

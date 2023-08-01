@@ -40,7 +40,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         postMessage(sessionId, message, binaries)
         {
-            console.log("Send: " + JSON.stringify(message));
+            //console.log("Send: " + JSON.stringify(message));
 
             if (! binaries)
             {

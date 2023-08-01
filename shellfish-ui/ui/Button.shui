@@ -33,7 +33,7 @@ require "shellfish/ui";
  * @property {string} icon - (default: `""`) The name of the icon to display.
  * @property {string} secondaryIcon - (default: `""`) The name of the secondary icon to display.
  * @property {string} text - (default: `""`) The label text to display.
- * @property {bool} flat - (default: `false`) Whether the button flat, i.e. borderless.
+ * @property {bool} flat - (default: `false`) Whether the button is flat, i.e. borderless.
  * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
  * @property {html.Object} labelProfile - (default: `null`) The profile that is applied to the labels.
  * @property {number} repeatAcceleration - (default: `0`) The acceleration factor of auto-repeated triggering rate. A value greater than `1.0` accelerates the triggering, while a value less than `1.0` decelerates it. A value of `0` disables auto-repeat.

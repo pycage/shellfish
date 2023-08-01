@@ -24,7 +24,7 @@ require "shellfish/fengshui" as fengshui;
 require "shellfish/html";
 
 /**
- * Element for embedding Shui element dynamically, either from a Shui file or
+ * Element for embedding a Shui element dynamically, either from a Shui file or
  * a Shui template.
  *
  * @memberof ui

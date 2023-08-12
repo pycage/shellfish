@@ -266,13 +266,13 @@ shRequire([__dirname + "/object.js"], obj =>
                 if (this.to > this.from)
                 {
                     async function * generate(buffer) { yield buffer; }
-                    const s = modStream.Readable.from(generate(this.dataSource.slice(this.from, this.to)));
+                    const s = modStream.Readable.from(generate(new Uint8Array(this.dataSource.slice(this.from, this.to))));
                     return s;
                 }
                 else
                 {
                     async function * generate(buffer) { yield buffer; }
-                    const s = modStream.Readable.from(generate(this.dataSource));
+                    const s = modStream.Readable.from(generate(new Uint8Array(this.dataSource)));
                     return s;
                 }
             }

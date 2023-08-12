@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -682,9 +682,9 @@ exports.focusNext = focusNext;
  */
 function fullscreenStatus()
 {
-    var state = document.webkitIsFullScreen || 
-                document.mozFullScreen ||
-                document.fullScreen;
+    var state = document.fullScreen ||
+                document.webkitIsFullScreen || 
+                document.mozFullScreen;
 
     return (state === true);
 }
@@ -700,7 +700,11 @@ exports.fullscreenStatus = fullscreenStatus;
 function fullscreenEnter(target)
 {
     var e = target;
-    if (e.webkitRequestFullscreen)
+    if (e.requestFullscreen)
+    {
+        e.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+    else if (e.webkitRequestFullscreen)
     {
         e.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
     }
@@ -712,10 +716,6 @@ function fullscreenEnter(target)
     {
         e.msRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
     }
-    else if (e.requestFullscreen)
-    {
-        e.requestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    }
 }
 exports.fullscreenEnter = fullscreenEnter;
 
@@ -726,7 +726,11 @@ exports.fullscreenEnter = fullscreenEnter;
  */
 function fullscreenExit()
 {
-    if (document.webkitExitFullscreen)
+    if (document.exitFullscreen)
+    {
+        document.exitFullscreen();
+    }
+    else if (document.webkitExitFullscreen)
     {
         document.webkitExitFullscreen();
     }
@@ -737,10 +741,6 @@ function fullscreenExit()
     else if (document.msExitFullscreen)
     {
         document.msExitFullscreen();
-    }
-    else if (document.exitFullscreen)
-    {
-        document.exitFullscreen();
     }
 }
 exports.fullscreenExit = fullscreenExit;
@@ -854,25 +854,6 @@ function isFrameUpdate()
     return duringFrameUpdate;
 }
 exports.isFrameUpdate = isFrameUpdate;
-
-/**
- * Returns a Promise object that resolves when idle. You may use this to have
- * UI updates processed inbetween.
- * 
- * @memberof low
- * @returns {Promise} A Promise object.
- */
-function later()
-{
-    return new Promise((resolve, reject) =>
-    {
-        setTimeout(() =>
-        {
-            resolve();
-        }, 0);
-    });
-}
-exports.later = later;
 
 /**
  * Registers a custom topdown-event handler on the given DOM node.

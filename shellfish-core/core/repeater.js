@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -237,10 +237,9 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             }
             else
             {
-                item = priv.delegate();
+                item = priv.delegate({ modelData: modelData });
                 if (item)
                 {
-                    item.modelData = modelData;
                     item.referenceAdd(this);
                 }
             }

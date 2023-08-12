@@ -802,8 +802,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             else
             {
                 //console.log("create item for " + idx);
-                item = priv.delegate();
-                item.modelData = modelData;
+                item = priv.delegate({ modelData: modelData });
             }
             
             return item;

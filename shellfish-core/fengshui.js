@@ -50,8 +50,7 @@ exports.tools = {
             {
                 const el = declarative.element(cacheItem, null)
                             .property("elementType", elementName)
-                            .property("defaultContainer", "", true)
-                            .property("modelData", { }, true);
+                            .property("defaultContainer", "", true);
                 const proto = Object.getPrototypeOf(el);
 
                 ["add", "property", "get", "find", "children", "call", "crossConnect"]
@@ -80,8 +79,7 @@ exports.tools = {
                 {
                     const el = declarative.element(modules[key][elementName], null)
                                .property("elementType", elementName)
-                               .property("defaultContainer", "", true)
-                               .property("modelData", { }, true);
+                               .property("defaultContainer", "", true);
                     const proto = Object.getPrototypeOf(el);
 
                     ["add", "property", "get", "find", "children", "call", "crossConnect"]
@@ -110,7 +108,7 @@ exports.tools = {
                  (name === "this" + self.get().elementType ? self : undefined) ||
                  (name === "this" + self.get().objectType ? self : undefined) ||
                  self.find(name, namespace) ||
-                 pRslv(name) || 
+                 pRslv(name) ||
                  modules[name];
 
         if (result)
@@ -119,6 +117,14 @@ exports.tools = {
         }
         
         return result;
+    },
+
+    addProperties: function (obj, props)
+    {
+        Object.keys(props).forEach(key =>
+        {
+            obj.property(key, props[key]);
+        });
     }
 };
 
@@ -849,6 +855,15 @@ exports.tools = {
             }
         `;
 
+        // FIXME: resetting addedProperties to undefined here is not pretty...
+        const addProperties = `
+            if (typeof addedProperties !== "undefined")
+            {
+                fengshui_Internal.tools.addProperties(self, addedProperties);
+                addedProperties = undefined;
+            }
+        `;
+
         if (isRoot)
         {
             code += `
@@ -856,6 +871,7 @@ exports.tools = {
                 const self = root;
                 
                 ${rslv}
+                ${addProperties}
 
                 self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
             `;
@@ -868,6 +884,7 @@ exports.tools = {
                     const self = elementLookup("${elementName}", __pRslv__);
 
                     ${rslv}
+                    ${addProperties}
 
                     self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
                     return self;
@@ -967,7 +984,17 @@ exports.tools = {
         let code = "";
         if (nextIsToken(data, pos, TOKEN_ELEMENT))
         {
-            code += "{ create: function (__pRslv__) { const __namespace = \"tmp." + pos.value + "\"; return function () { " + parseElement(data, pos, true, modules) + " return self; }; }(__rslv__) }";
+            code += `{
+                create: ((__pRslv__) =>
+                {
+                    const __namespace = "tmp.${pos.value}";
+                    return () =>
+                    {
+                        ${parseElement(data, pos, true, modules)}
+                        return self;
+                    };
+                })(__rslv__)
+            }`;
         }
         else
         {
@@ -1003,7 +1030,7 @@ exports.tools = {
         }
         else if (next(data, pos, "template"))
         {
-            code += "() => " +
+            code += "(addedProperties) => " +
                     "{" +
                     "  return " + parseElementTemplate(data, pos, modules) + ".create(__rslv__);" +
                     "}";
@@ -1085,38 +1112,6 @@ exports.tools = {
         return code;
     }
 
-    function parseTemplate(data, pos, modules)
-    {
-        expect(data, pos, "template");
-        skipWhitespace(data, pos, true, true);
-        let propName = readUntil(data, pos, ":\t\n\r\v ");
-        skipWhitespace(data, pos, true, true);
-        expect(data, pos, ":");
-        skipWhitespace(data, pos, true, true);
-        
-        let code = ".use(self).property(\"" + propName + "\", ";
-
-        if (nextIsToken(data, pos, TOKEN_ELEMENT))
-        {
-            code += `{
-                create: (__pRslv__) =>
-                {
-                    return () =>
-                    {
-                        ${parseElement(data, pos, true, modules)} return root;
-                    }
-                }(__rslv__)
-            }`;
-        }
-        else
-        {
-            throw "Syntax error in line " + lineOfPos(data, pos) + ": element expected.";
-        }
-
-        code += ")";
-
-        return code;
-    }
 
     function parseProperty(data, pos, modules)
     {
@@ -1175,7 +1170,7 @@ exports.tools = {
         }
         else if (next(data, pos, "template"))
         {
-            code += "() => " +
+            code += "(addedProperties) => " +
                     "{" +
                     "  return " + parseElementTemplate(data, pos, modules) + ".create(__rslv__);" +
                     "}";

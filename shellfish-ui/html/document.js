@@ -39,11 +39,6 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
         };
     }
 
-    /**
-     * A keyboard event.
-     * @typedef KeyEvent
-     * @memberof html.Document
-     */
     function makeKeyEvent(ev)
     {
         return {
@@ -326,7 +321,7 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
              * Is triggered when a key is pressed while the document has keyboard
              * focus.
              * @event keyDown
-             * @param {html.Document.KeyEvent} event - The event object.
+             * @param {html.Item.KeyboardEvent} event - The event object.
              * @memberof html.Document
              */
             this.registerEvent("keyDown");
@@ -335,7 +330,7 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
              * Is triggered when a key is released while the item has keyboard
              * focus.
              * @event keyUp
-             * @param {html.Document.KeyboardEvent} event - The event object.
+             * @param {html.Item.KeyboardEvent} event - The event object.
              * @memberof html.Document
              */
              this.registerEvent("keyUp");

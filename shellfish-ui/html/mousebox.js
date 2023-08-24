@@ -49,7 +49,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
      * @memberof html.MouseBox
      * 
      * @property {bool} accepted - (default: `false`) Set to `true` to accept the event and prevent it from bubbling up.
-     * @property {number} buttons - [readonly] The buttons pressed.
+     * @property {number} buttons - [readonly] The buttons pressed as a bitmask with `left = 1, right = 2, middle = 4`.
      * @property {bool} directTarget - [readonly] `true` if this event was emitted by the direct target instead of having bubbled up.
      * @property {Event} original - [readonly] The original HTML pointer event.
      * @property {number} pointerId - [readonly] The ID of the pointer.

@@ -37,7 +37,7 @@ require "shellfish/ui";
  * @property {number} minValue - (default: `0`) The minimum allowed value.
  * @property {bool} seeking - [readonly] `true` while the user is seeking.
  * @property {number} seekValue - [readonly] The actual value while `seeking` is `true`. Otherwise the same as `value`.
- * @property {number} stepSize - (default: `5`) The step size between value changes. The step size only applies to value changes with the PgUp/PgDown keyboard keys.
+ * @property {number} stepSize - (default: `5`) The step size between value changes. The step size only applies to value changes with the PgUp/PgDown keyboard keys or the mouse wheel.
  * @property {template} styleOfBackground - The background style template.
  * @property {template} styleOfHandle - The handle style template.
  * @property {number} value - (default: `0`) The current value. This value is not updated while `seeking` is `true`.
@@ -132,11 +132,11 @@ MouseBox {
         ev.accepted = true;
         if (ev.deltaY > 0)
         {
-            value = Math.max(minValue, seekValue - 1);
+            value = Math.max(minValue, seekValue - stepSize);
         }
         else if (ev.deltaY < 0)
         {
-            value = Math.min(maxValue, seekValue + 1);
+            value = Math.min(maxValue, seekValue + stepSize);
         }
     }
 
@@ -163,9 +163,12 @@ MouseBox {
 
         onPointerDown: (ev) =>
         {
-            slider.focus = true;
-            slider.seeking = true;
-            ev.accepted = true;
+            if (ev.buttons === 1)
+            {
+                slider.focus = true;
+                slider.seeking = true;
+                ev.accepted = true;
+            }
         }
 
         onDrag: (ev) =>
@@ -193,14 +196,17 @@ MouseBox {
 
     onPointerDown: (ev) =>
     {
-        ev.accepted = true;
+        if (ev.buttons === 1)
+        {
+            ev.accepted = true;
 
-        handle.animated = true;
-        const x = Math.max(0, Math.min(bboxWidth, ev.x));
-        value = minValue + (maxValue - minValue) * (x / bboxWidth);
-        handle.animated = false;
+            handle.animated = true;
+            const x = Math.max(0, Math.min(bboxWidth, ev.x));
+            value = minValue + (maxValue - minValue) * (x / bboxWidth);
+            handle.animated = false;
 
-        focus = true;
+            focus = true;
+        }
     }
 
     onKeyDown: (ev) =>

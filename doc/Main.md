@@ -139,6 +139,8 @@ Layouting UI elements on screen is intuitive, yet powerful.
 * The `modelData` property is now only defined on elements where needed. This
   makes it possible to access the `modelData` property of a delegate from
   further down the hierarchy.
+* The element {@link core.RpcProxy} now has a `status` property for monitoring
+  the connection status.
 
 ### July 2023
 * The new function {@link core.generateUid} generates a UID that is unique

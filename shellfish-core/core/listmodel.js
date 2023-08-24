@@ -50,13 +50,13 @@ shRequire([__dirname + "/object.js"], function (obj)
             /**
              * Is triggered when the model was reset.
              * @event modelReset
-             * @memberof html.ListModel
+             * @memberof core.ListModel
              */
             this.registerEvent("modelReset");
             /**
              * Is triggered when data items were inserted.
              * @event modelInsert
-             * @memberof html.ListModel
+             * @memberof core.ListModel
              * @param {number} at - The position where the items where inserted at.
              * @param {number} n - The amount of items inserted.
              */
@@ -64,14 +64,14 @@ shRequire([__dirname + "/object.js"], function (obj)
             /**
              * Is triggered when data items were removed.
              * @event modelRemove
-             * @memberof html.ListModel
+             * @memberof core.ListModel
              * @param {number} at - The position where the item was removed from.
              */
             this.registerEvent("modelRemove");
             /**
              * Is triggered when a data item was changed.
              * @event modelReplace
-             * @memberof html.ListModel
+             * @memberof core.ListModel
              * @param {number} at - The position of the item that was replaced.
              */
             this.registerEvent("modelReplace");

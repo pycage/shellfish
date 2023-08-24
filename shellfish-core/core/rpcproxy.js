@@ -74,9 +74,18 @@ shRequire([__dirname + "/object.js"], obj =>
                 body: buffer
                 //body: JSON.stringify(message)
             })
+            .then(response =>
+            {
+                if (! response.ok)
+                {
+                    console.error(response.statusText);
+                    this.handler({ type: "exit" });
+                }
+            })
             .catch(err =>
             {
-                console.error(err);
+                console.error(JSON.stringify(message) + " " + err);
+                this.handler({ type: "exit" });
             });
         }
 
@@ -110,6 +119,7 @@ shRequire([__dirname + "/object.js"], obj =>
                             done = r.done;
                             value = r.value;
                             dataOffset = 0;
+                            // FIXME: value might be undefined in here (when server closes connection)
                         }
                         
                         if (buffer === null)
@@ -435,6 +445,7 @@ shRequire([__dirname + "/object.js"], obj =>
      * @memberof core
      * 
      * @property {string} endpoint - (default: `"/"`) The address of the RPC endpoint.
+     * @property {string} status - [readonly] The current connection status. One of `disconnected|connecting|connected`
      */
     class RpcProxy extends obj.Object
     {
@@ -450,20 +461,27 @@ shRequire([__dirname + "/object.js"], obj =>
                 callbackMap: new Map(),
                 sessionId: "",
                 clientId: "",
-                messageQueue: []
+                messageQueue: [],
+                status: "disconnected"
             });
 
             this.notifyable("endpoint");
+            this.notifyable("status");
 
             this.onDestruction = () =>
             {
                 const priv = d.get(this);
-                priv.socket.postMessage(priv.sessionId, { type: "exit", clientId: priv.clientId });
-                priv.socket.close();
+                if (priv.socket)
+                {
+                    priv.socket.postMessage(priv.sessionId, { type: "exit", clientId: priv.clientId });
+                    priv.socket.close();
+                }
                 priv.callMap.clear();
                 priv.callbackMap.clear();
             };
         }
+
+        get status() { return d.get(this).status; }
 
         get endpoint() { return d.get(this).endpoint; }
         set endpoint(e)
@@ -482,13 +500,21 @@ shRequire([__dirname + "/object.js"], obj =>
                 priv.socket.close();
             }
 
+            priv.status = "connecting";
+            this.statusChanged();
+
             const MSock = shRequire.environment === "node" ? MessageSocketNode : MessageSocket;
             priv.socket = new MSock(priv.endpoint, (msg, binaryData) =>
             {
+                console.log("HANDLER CALLED " + msg.type);
                 if (msg.type === "ready")
                 {
                     priv.clientId = msg.clientId;
                     priv.sessionId = msg.sessionId;
+
+                    priv.status = "connected";
+                    this.statusChanged();
+
                     priv.messageQueue.forEach(callId => this.call(callId));
                     priv.messageQueue = [];
                 }
@@ -500,6 +526,9 @@ shRequire([__dirname + "/object.js"], obj =>
                 else if (msg.type === "exit")
                 {
                     this.log("", "debug", "RPC connection closed");
+                    priv.status = "disconnected";
+                    this.statusChanged();
+
                     priv.callbacks.forEach(cbId =>
                     {
                         priv.callbackMap.delete(cbId);

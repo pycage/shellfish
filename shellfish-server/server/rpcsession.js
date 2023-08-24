@@ -254,7 +254,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                     priv.clients.set(clientId, {
                         reverseChannel,
                         proxies: [],
-                        expires: Date.now() + 60000
+                        expires: Date.now() + 50000
                     });
 
                     req.response(200, "OK")
@@ -310,6 +310,15 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                     });
                 }
             };
+
+            this.onDestruction = () =>
+            {
+                const clientIds = [...priv.clients.keys()];
+                clientIds.forEach(clientId =>
+                {
+                    this.removeClient(clientId);
+                });
+            };
         }
 
         heartbeat()
@@ -325,13 +334,13 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
             clientIds.forEach(clientId =>
             {
                 const client = priv.clients.get(clientId);
-                if (client.expires < Date.now() + 30000)
+                if (client.expires < Date.now() + 25000)
                 {
                     this.postMessage(clientId, { type: "heartbeat" });
                 }
             });
 
-            this.wait(30000, "heartbeat")
+            this.wait(25000, "heartbeat")
             .then(() =>
             {
                 this.heartbeat();
@@ -455,9 +464,10 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
          * passed to the RPC client.
          * 
          * @param {object} obj - The object for which to create the proxy.
+         * @param {[string[]]} exposedMethods - An optional list of the methods to expose. If this parameter is not used, all methods will be exposed.
          * @returns {object} The RPC proxy object.
          */
-        proxyObject(obj)
+        proxyObject(obj, exposedMethods)
         {
             const proxyId = idCounter;
             ++idCounter;
@@ -469,6 +479,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 let keys = Object.getOwnPropertyNames(obj)
                 .filter(n => n !== "constructor")
                 .filter(n => typeof obj[n] === "function")
+                .filter(n => exposedMethods ? exposedMethods.indexOf(n) !== -1 : true);
                 const proto = Object.getPrototypeOf(obj);
                 if (! proto.hasOwnProperty("hasOwnProperty"))
                 {

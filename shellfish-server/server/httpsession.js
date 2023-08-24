@@ -396,6 +396,7 @@ shRequire(["shellfish/core"], core =>
             }
             priv.timeoutHandler = setTimeout(() =>
             {
+                this.log("HTTP", "debug", "Session timeout reached of " + this.objectType + " " + priv.sessionId);
                 this.close();
             }, priv.timeout);
         }

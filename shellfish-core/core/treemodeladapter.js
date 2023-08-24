@@ -1,3 +1,25 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
 shRequire([__dirname + "/listmodel.js"], lm =>
 {
 
@@ -24,7 +46,8 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 skipTrees: [],
                 collapseMap: new Map(),
                 toListIndexCache: new Map(),
-                toTreeIndexCache: new Map()
+                toTreeIndexCache: new Map(),
+                nodesOfInfluence: [] // nodes of influence are the only nodes with influence on the status of other nodes
             });
 
             this.notifyable("levelRole");
@@ -68,14 +91,14 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 
                 m.connect("modelReset", this, () =>
                 {
-                    this.updateSkipTrees();
+                    this.updateNodeMaps();
                     this.modelReset();
                     this.sizeChanged();
                 });
 
                 m.connect("modelInsert", this, (at, size) =>
                 {
-                    this.updateSkipTrees();
+                    this.updateNodeMaps();
                     
                     // find the ranges of insertions and propagate those
                     const insertionRanges = [];
@@ -116,7 +139,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 m.connect("modelRemove", this, at =>
                 {
                     const treeIdx = this.toTreeIndex(at);
-                    this.updateSkipTrees();
+                    this.updateNodeMaps();
                     
                     if (treeIdx !== -1)
                     {
@@ -170,7 +193,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                         // - insert what's inbetween
                         const treeIdx = this.toTreeIndex(at);
                         const nextListIdx = this.toListIndex(treeIdx + 1);
-                        this.updateSkipTrees();
+                        this.updateNodeMaps();
                         const newNextTreeIdx = this.toTreeIndex(nextListIdx);
                         this.modelReplace(treeIdx);
                         this.modelInsert(treeIdx + 1, newNextTreeIdx - (treeIdx + 1));
@@ -184,7 +207,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                         // - map tree index of next tree node to list index
                         // - remove the difference
                         const treeIdx = this.toTreeIndex(at);
-                        this.updateSkipTrees();
+                        this.updateNodeMaps();
                         const nextListIdx = this.toListIndex(treeIdx + 1);
                         this.modelReplace(treeIdx);
                         for (let i = nextListIdx; i > at; --i)
@@ -199,7 +222,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                         this.modelReplace(this.toTreeIndex(at));
                     }
                 });
-                this.updateSkipTrees();
+                this.updateNodeMaps();
             }
         }
 
@@ -234,39 +257,37 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             return collapsed !== undefined ? collapsed : true;
         }
 
-        isLeaf(n)
+        visibleNodes()
         {
             const priv = d.get(this);
+            const visibles = [];
 
-            const listIndex = this.toListIndex(n);
-            const item = priv.model.at(listIndex);
-            if (listIndex < priv.model.size - 1)
+            let pos = 0;
+            priv.skipTrees.forEach(item =>
             {
-                const nextItem = priv.model.at(listIndex + 1);
-                return nextItem[priv.levelRole] <= item[priv.levelRole];
-            }
-            else
+                for (let i = pos; i < item[0]; ++i)
+                {
+                    visibles.push(i);
+                }
+                pos = item[1] + 1;
+            });
+            for (let i = pos; i < priv.model.size; ++i)
             {
-                return true;
+                visibles.push(i);
             }
-        }
 
-        isLastChild(n)
-        {
-            const priv = d.get(this);
-
-            const listIndex = this.toListIndex(n);
-            const item = priv.model.at(listIndex);
-            return ! this.hasMoreOnLevel(n, item[priv.levelRole]);
+            return visibles;
         }
 
         hasMoreOnLevel(n, level)
         {
             const priv = d.get(this);
 
-            for (let i = n + 1; i < this.size; ++i)
+            // we only have to look at the nodes of influence
+            const noi = priv.nodesOfInfluence.filter(idx => idx > n);
+            for (let i = 0; i < noi.length; ++i)
             {
-                const nodeLevel = this.at(i)[priv.levelRole];
+                const nodeLevel = priv.model.at(noi[i])[priv.levelRole];
                 if (nodeLevel < level)
                 {
                     return false;
@@ -277,14 +298,36 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 }
             }
             return false;
+
+            /*
+            for (let i = n + 1; i < this.size; ++i)
+            {
+                const nodeLevel = priv.model.at(this.toListIndex(i))[priv.levelRole];
+                if (nodeLevel < level)
+                {
+                    return false;
+                }
+                else if (nodeLevel === level)
+                {
+                    return true;
+                }
+            }
+            return false;
+            */
         }
 
-        updateSkipTrees()
+        updateNodeMaps()
         {
-            d.get(this).toListIndexCache.clear();
-            d.get(this).toTreeIndexCache.clear();
-            d.get(this).skipTrees = this.makeSkipTrees(0, d.get(this).model.size - 1);
-            //console.log(JSON.stringify(d.get(this).skipTrees));
+            const priv = d.get(this);
+
+            priv.toListIndexCache.clear();
+            priv.toTreeIndexCache.clear();
+            priv.skipTrees = this.makeSkipTrees(0, priv.model.size - 1);
+            console.log("Skip Trees: " + JSON.stringify(priv.skipTrees));
+
+            // get the nodes of influence
+            priv.nodesOfInfluence = this.makeNodesOfInfluence();
+            console.log("Nodes of Influence: " + JSON.stringify(priv.nodesOfInfluence));
         }
 
         makeSkipTrees(from, to)
@@ -340,6 +383,42 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             }
 
             return newTrees;
+        }
+
+        makeNodesOfInfluence()
+        {
+            const priv = d.get(this);
+            
+            const nodesOfInfluence = [];
+            let prevLevel = -1;
+            let prevIdx = -1;
+            let prevNodeOfInfluence = -1;
+            const visibleNodes = this.visibleNodes();
+
+            visibleNodes.forEach(idx =>
+            {
+                const item = priv.model.at(idx);
+                const level = item[priv.levelRole];
+                if (level !== prevLevel)
+                {
+                    if (prevIdx !== -1 && prevIdx !== prevNodeOfInfluence)
+                    {
+                        nodesOfInfluence.push(prevIdx);
+                    }
+                    nodesOfInfluence.push(idx);
+                    prevNodeOfInfluence = idx;
+                }
+                prevLevel = level;
+                prevIdx = idx;
+            });
+
+            // the last node is of interest, too
+            if (prevNodeOfInfluence !== visibleNodes[visibleNodes.length - 1])
+            {
+                nodesOfInfluence.push(visibleNodes[visibleNodes.length - 1]);
+            }
+
+            return nodesOfInfluence;
         }
 
         toListIndex(n)
@@ -484,9 +563,25 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             const listIdx = this.toListIndex(n);
             const item = priv.model.at(listIdx);
             const obj = Object.create(item);
+
+            const verticals = [];
+            const level = item[priv.levelRole];
+            for (let i = 1; i <= level; ++i)
+            {
+                if (i === level)
+                {
+                    verticals.push(this.hasMoreOnLevel(n, i) ? 2 : 1);
+                }
+                else
+                {
+                    //verticals.push(2);
+                    verticals.push(this.hasMoreOnLevel(n, i) ? 2 : 0);
+                }
+            }
+
             obj.nodeStatus = {
                 collapsed: this.isCollapsed(n),
-                hasNextSibling: this.hasMoreOnLevel(n, item.level)
+                verticals
             };
             return obj;
         }

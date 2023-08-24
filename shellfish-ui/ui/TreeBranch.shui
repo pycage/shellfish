@@ -31,6 +31,8 @@ Box {
     // the type of node
     property nodeType: "node"
 
+    property nodeStatus: ({ })
+
     property branchLines: true
     property branchLinesColor: theme.borderColor
 
@@ -40,16 +42,11 @@ Box {
 
     property iconColor: theme.primaryColor
 
-    // whether to display the node as collapsed
-    property collapsed: false
-
-    property hasNextSibling: true
-
     layout: "row"
 
     event click
 
-    // indentation with decoration
+    // indentation with branch lines
     Box {
         fillHeight: true
         layout: "row"
@@ -58,11 +55,7 @@ Box {
             model: branch.level
 
             delegate: template Box {
-                /*
-                property drawLine: treeItem.revision < 0 ||
-                                   modelData.index === thisRepeater.model.size - 1 ||
-                                   thisListView.model.hasMoreOnLevel(treeItem.itemIndex, modelData.index + 1)
-                */
+                property verticalLine: branch.nodeStatus.verticals[modelData.index];
                 property drawLine: true
 
                 width: theme.itemWidthSmall
@@ -72,7 +65,7 @@ Box {
 
                 // upper vertical line
                 Box {
-                    visible: branch.branchLines
+                    visible: branch.branchLines && parent.verticalLine !== 0
                     position: "free"
                     x: parent.bboxWidth / 2
                     width: 1
@@ -82,10 +75,7 @@ Box {
 
                 // lower vertical line
                 Box {
-                    visible: branch.branchLines &&
-                             (modelData.index < thisRepeater.count - 1 ||
-                              branch.hasNextSibling)
-                    //visible: ! (branch.isLastChild && modelData.index === thisRepeater.count - 1)
+                    visible: branch.branchLines && parent.verticalLine === 2
                     position: "free"
                     x: parent.bboxWidth / 2
                     y: parent.bboxHeight / 2
@@ -96,8 +86,7 @@ Box {
 
                 // horizontal line
                 Box {
-                    visible: branch.branchLines &&
-                             modelData.index === thisRepeater.count - 1
+                    visible: branch.branchLines && modelData.index === thisRepeater.count - 1
                     position: "free"
                     x: parent.bboxWidth / 2
                     y: parent.bboxHeight / 2
@@ -116,7 +105,8 @@ Box {
         width: bboxHeight
         fillHeight: true
         flat: true
-        icon: branch.collapsed ? branch.collapsedIcon : branch.uncollapsedIcon
+        icon: branch.nodeStatus.collapsed ? branch.collapsedIcon
+                                          : branch.uncollapsedIcon
 
         labelProfile: Object {
             property color: branch.iconColor

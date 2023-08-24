@@ -220,6 +220,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         }
     }
 
+    let revisionCounter = 0;
 
     const d = new WeakMap();
 
@@ -529,6 +530,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 priv.model.disconnect("modelReset", this);
                 priv.model.disconnect("modelInsert", this);
                 priv.model.disconnect("modelRemove", this);
+                priv.model.disconnect("modelReplace", this);
                 priv.model.referenceRemove(this);
             }
 
@@ -541,6 +543,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 let prevSize = 0;
                 mObj.connect("modelReset", this, () =>
                 {
+                    console.log("MODEL RESET");
                     this.log("", "debug", "ListView model reset with " + mObj.size + " items");
                     if (mObj.size === 0 && prevSize === 0)
                     {
@@ -787,9 +790,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         {
             const priv = d.get(this);
             const modelData = {
+                revision: revisionCounter,
                 index: idx,
                 value: priv.model.at(idx)
             };
+            ++revisionCounter;
 
             let item = null;
             if (priv.recycleBin.length > 0)
@@ -813,9 +818,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             //console.log("update item " + idx);
             const priv = d.get(this);
             const modelData = {
+                revision: revisionCounter,
                 index: idx,
                 value: priv.model.at(idx)
             };
+            ++revisionCounter;
+
             if (modelData.value !== undefined)
             {
                 const item = this.getItem(idx);

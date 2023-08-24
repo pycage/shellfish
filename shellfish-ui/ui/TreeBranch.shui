@@ -1,0 +1,142 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+Box {
+    id: branch
+
+    // the depth level in the tree
+    property level: 0
+
+    // the type of node
+    property nodeType: "node"
+
+    property branchLines: true
+    property branchLinesColor: theme.borderColor
+
+    property leafIcon: "core-file-empty"
+    property collapsedIcon: "core-arrow_right"
+    property uncollapsedIcon: "core-arrow_down"
+
+    property iconColor: theme.primaryColor
+
+    // whether to display the node as collapsed
+    property collapsed: false
+
+    property hasNextSibling: true
+
+    layout: "row"
+
+    event click
+
+    // indentation with decoration
+    Box {
+        fillHeight: true
+        layout: "row"
+
+        Repeater {
+            model: branch.level
+
+            delegate: template Box {
+                /*
+                property drawLine: treeItem.revision < 0 ||
+                                   modelData.index === thisRepeater.model.size - 1 ||
+                                   thisListView.model.hasMoreOnLevel(treeItem.itemIndex, modelData.index + 1)
+                */
+                property drawLine: true
+
+                width: theme.itemWidthSmall
+                fillHeight: true
+
+                color: drawLine ? "transparent" : "red"
+
+                // upper vertical line
+                Box {
+                    visible: branch.branchLines
+                    position: "free"
+                    x: parent.bboxWidth / 2
+                    width: 1
+                    height: parent.bboxHeight / 2
+                    color: branch.branchLinesColor
+                }
+
+                // lower vertical line
+                Box {
+                    visible: branch.branchLines &&
+                             (modelData.index < thisRepeater.count - 1 ||
+                              branch.hasNextSibling)
+                    //visible: ! (branch.isLastChild && modelData.index === thisRepeater.count - 1)
+                    position: "free"
+                    x: parent.bboxWidth / 2
+                    y: parent.bboxHeight / 2
+                    width: 1
+                    height: parent.bboxHeight / 2
+                    color: branch.branchLinesColor
+                }
+
+                // horizontal line
+                Box {
+                    visible: branch.branchLines &&
+                             modelData.index === thisRepeater.count - 1
+                    position: "free"
+                    x: parent.bboxWidth / 2
+                    y: parent.bboxHeight / 2
+                    width: parent.bboxWidth / 2
+                    height: 1
+                    color: branch.branchLinesColor
+                }
+            }
+        }
+    }
+
+    Button {
+        id: collapseButton
+
+        visible: branch.nodeType === "node"
+        width: bboxHeight
+        fillHeight: true
+        flat: true
+        icon: branch.collapsed ? branch.collapsedIcon : branch.uncollapsedIcon
+
+        labelProfile: Object {
+            property color: branch.iconColor
+        }
+
+        onClick: () =>
+        {
+            branch.click();
+        }
+    }
+
+    Box {
+        visible: branch.nodeType === "leaf"
+        width: bboxHeight
+        fillHeight: true
+        layout: "center"
+
+        Label {
+            color: branch.iconColor
+            text: "[icon:" + branch.leafIcon + "]"
+        }
+    }
+}

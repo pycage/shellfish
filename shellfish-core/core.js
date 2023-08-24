@@ -61,6 +61,7 @@ const includes = [
     "sequentialaction",
     "threadpool",
     "timer",
+    "treemodeladapter",
     "waitaction",
     "wasm"
 ];

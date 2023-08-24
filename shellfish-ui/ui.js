@@ -76,6 +76,7 @@ const mods = [
     "Theme",
     "TimePicker",
     "Tooltip",
+    "TreeBranch",
     "Window",
     "WindowTitle"
 ];

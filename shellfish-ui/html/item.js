@@ -44,7 +44,7 @@ shRequire(["shellfish/low",
      * 
      * @property {bool} accepted - Set to `true` if you handled the event in order to prevent it from bubbling up in the hierarchy of elements.
      * @property {KeyboardEvent} original - The original HTML event.
-     * @property {string} key - The pressed key code.
+     * @property {string} key - The name of the pressed key.
      * @property {string} char - The character of the pressed key.
      * @property {bool} altKey - Whether the Alt modifier is pressed.
      * @property {bool} ctrlKey - Whether the Ctrl modifier is pressed.

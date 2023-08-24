@@ -113,6 +113,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             d.set(this, {
                 element: null,
                 id: { },
+                elementType: { },
                 changeWatchers: [],
                 propertySupplyHandles: { },
                 dormantProperties: { },
@@ -213,6 +214,21 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             else
             {
                 d.get(this).id[ns] = i;
+                return this;
+            }
+        }
+
+        elementType(type, ns)
+        {
+            ns = ns || "";
+
+            if (type === undefined)
+            {
+                return d.get(this).elementType[ns] || "";
+            }
+            else
+            {
+                d.get(this).elementType[ns] = type;
                 return this;
             }
         }

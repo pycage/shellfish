@@ -49,8 +49,7 @@ exports.tools = {
             else
             {
                 const el = declarative.element(cacheItem, null)
-                            .property("elementType", elementName)
-                            .property("defaultContainer", "", true);
+                           .property("defaultContainer", "", true);
                 const proto = Object.getPrototypeOf(el);
 
                 ["add", "property", "get", "find", "children", "call", "crossConnect"]
@@ -78,7 +77,6 @@ exports.tools = {
                 else
                 {
                     const el = declarative.element(modules[key][elementName], null)
-                               .property("elementType", elementName)
                                .property("defaultContainer", "", true);
                     const proto = Object.getPrototypeOf(el);
 
@@ -105,8 +103,8 @@ exports.tools = {
         }
 
         result = self[name] ||
-                 (name === "this" + self.get().elementType ? self : undefined) ||
-                 (name === "this" + self.get().objectType ? self : undefined) ||
+                 (name === "this" + self.elementType(undefined, namespace) ? self : undefined) ||
+                 (name === "this" + self.get()?.objectType ? self : undefined) ||
                  self.find(name, namespace) ||
                  pRslv(name) ||
                  modules[name];
@@ -864,6 +862,8 @@ exports.tools = {
             }
         `;
 
+        const strippedElementName = elementName.substring(elementName.lastIndexOf(".") + 1);
+
         if (isRoot)
         {
             code += `
@@ -873,7 +873,8 @@ exports.tools = {
                 ${rslv}
                 ${addProperties}
 
-                self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
+                self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}", __namespace)
+                ${parseElementBlock(data, pos, modules)}
             `;
         }
         else
@@ -886,7 +887,8 @@ exports.tools = {
                     ${rslv}
                     ${addProperties}
 
-                    self.set("objectType", "${elementName}")${parseElementBlock(data, pos, modules)}
+                    self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}", __namespace)
+                    ${parseElementBlock(data, pos, modules)}
                     return self;
                 })(__rslv__)
             `;

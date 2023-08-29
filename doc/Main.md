@@ -141,6 +141,8 @@ Layouting UI elements on screen is intuitive, yet powerful.
   further down the hierarchy.
 * The element {@link core.RpcProxy} now has a `status` property for monitoring
   the connection status.
+* The new elements {@link core.TreeModelAdapter} and {@link ui.TreeBranch} help
+  to implement collapsible tree views based on a list model.
 
 ### July 2023
 * The new function {@link core.generateUid} generates a UID that is unique

@@ -464,7 +464,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
          * passed to the RPC client.
          * 
          * @param {object} obj - The object for which to create the proxy.
-         * @param {[string[]]} exposedMethods - An optional list of the methods to expose. If this parameter is not used, all methods will be exposed.
+         * @param {string[]} exposedMethods - An optional list of the methods to expose. If this parameter is not used, all methods will be exposed.
          * @returns {object} The RPC proxy object.
          */
         proxyObject(obj, exposedMethods)

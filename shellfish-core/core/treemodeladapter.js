@@ -26,13 +26,22 @@ shRequire([__dirname + "/listmodel.js"], lm =>
     const d = new WeakMap();
 
     /**
-     * Class representing an adapter for treating a {@link core.ListModel} as
-     * a tree.
+     * Class representing an adapter for treating a {@link core.ListModel} with
+     * a role for the depth level as a tree with collapsible nodes.
+     *
+     * This adapter extends the original list items with a new role for the
+     * status of the tree node. The status is an object with these properties:
+     *
+     *  * `collapsed`: Whether the node is currently collapsed.
+     *  * `verticals`: A list of booleans telling for each depth level up to this node if there are vertical lines going past this node. This information can be used for rendering branch lines.
+     *
+     * A tree model may be used anywhere a list model is expected.
      * 
      * @extends core.ListModel
      * @memberof core
-     * 
+     *
      * @property {string} levelRole - (default: `"level"`) The name of the role holding the depth level of a tree node.
+     * @property {string} statusRole - (default: `"nodeStatus"`) The name of the role to be used for the status of a tree node.
      * @property {core.ListModel} model - (default: null) The list model to work on.
      */
     class TreeModelAdapter extends lm.ListModel
@@ -42,6 +51,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             super();
             d.set(this, {
                 levelRole: "level",
+                statusRole: "nodeStatus",
                 model: null,
                 skipTrees: [],
                 collapseMap: new Map(),
@@ -51,6 +61,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             });
 
             this.notifyable("levelRole");
+            this.notifyable("statusRole");
             this.notifyable("model");
 
             this.onDestruction = () =>
@@ -67,6 +78,13 @@ shRequire([__dirname + "/listmodel.js"], lm =>
         {
             d.get(this).levelRole = r;
             this.levelRoleChanged();
+        }
+
+        get statusRole() { return d.get(this).statusRole; }
+        set statusRole(r)
+        {
+            d.get(this).statusRole = r;
+            this.statusRoleChanged();
         }
 
         get model() {return d.get(this).model; }
@@ -91,6 +109,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 
                 m.connect("modelReset", this, () =>
                 {
+                    priv.collapseMap.clear();
                     this.updateNodeMaps();
                     this.modelReset();
                     this.sizeChanged();
@@ -98,6 +117,17 @@ shRequire([__dirname + "/listmodel.js"], lm =>
 
                 m.connect("modelInsert", this, (at, size) =>
                 {
+                    // shift entries in collapse map
+                    const collapseKeys = [...priv.collapseMap.keys()]
+                    .filter(idx => idx >= at)
+                    .sort((a, b) => b - a /* reverse */);
+                    collapseKeys.forEach(idx =>
+                    {
+                        const collapsed = priv.collapseMap.get(idx);
+                        priv.collapseMap.set(idx + size, collapsed);
+                        priv.collapseMap.delete(idx);
+                    });
+
                     this.updateNodeMaps();
                     
                     // find the ranges of insertions and propagate those
@@ -138,6 +168,18 @@ shRequire([__dirname + "/listmodel.js"], lm =>
 
                 m.connect("modelRemove", this, at =>
                 {
+                    // shift entries in collapse map
+                    priv.collapseMap.delete(at);
+                    const collapseKeys = [...priv.collapseMap.keys()]
+                    .filter(idx => idx > at)
+                    .sort((a, b) => a - b);
+                    collapseKeys.forEach(idx =>
+                    {
+                        const collapsed = priv.collapseMap.get(idx);
+                        priv.collapseMap.set(idx - 1, collapsed);
+                        priv.collapseMap.delete(idx);
+                    });
+
                     const treeIdx = this.toTreeIndex(at);
                     this.updateNodeMaps();
                     
@@ -240,6 +282,12 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             return priv.model.size - skippedAmount;
         }
 
+        /**
+         * Sets the collapsion state of a tree node.
+         * 
+         * @param {number} n - The tree index of the node.
+         * @param {bool} value - Whether the node shall be collapsed.
+         */
         setCollapsed(n, value)
         {
             const priv = d.get(this);
@@ -298,22 +346,6 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 }
             }
             return false;
-
-            /*
-            for (let i = n + 1; i < this.size; ++i)
-            {
-                const nodeLevel = priv.model.at(this.toListIndex(i))[priv.levelRole];
-                if (nodeLevel < level)
-                {
-                    return false;
-                }
-                else if (nodeLevel === level)
-                {
-                    return true;
-                }
-            }
-            return false;
-            */
         }
 
         updateNodeMaps()
@@ -323,11 +355,11 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             priv.toListIndexCache.clear();
             priv.toTreeIndexCache.clear();
             priv.skipTrees = this.makeSkipTrees(0, priv.model.size - 1);
-            console.log("Skip Trees: " + JSON.stringify(priv.skipTrees));
+            //console.log("Skip Trees: " + JSON.stringify(priv.skipTrees));
 
             // get the nodes of influence
             priv.nodesOfInfluence = this.makeNodesOfInfluence();
-            console.log("Nodes of Influence: " + JSON.stringify(priv.nodesOfInfluence));
+            //console.log("Nodes of Influence: " + JSON.stringify(priv.nodesOfInfluence));
         }
 
         makeSkipTrees(from, to)
@@ -388,7 +420,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
         makeNodesOfInfluence()
         {
             const priv = d.get(this);
-            
+
             const nodesOfInfluence = [];
             let prevLevel = -1;
             let prevIdx = -1;
@@ -421,6 +453,12 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             return nodesOfInfluence;
         }
 
+        /**
+         * Converts a tree index to a list index of the underlying list model.
+         * 
+         * @param {number} n - The tree index.
+         * @returns {number} - The list index.
+         */
         toListIndex(n)
         {
             const priv = d.get(this);
@@ -459,6 +497,14 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             return pointAt + remaining;
         }
 
+        /**
+         * Converts a list index of the underlying list model to a tree index.
+         * If the list item is currently not visible in the tree due to a collapsed ancestor,
+         * `-1` will be returned instead.
+         * 
+         * @param {number} n - The list index.
+         * @returns {number} - The tree index, or `-1` if the list item is not visible in the tree.
+         */
         toTreeIndex(n)
         {
             const priv = d.get(this);
@@ -579,7 +625,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 }
             }
 
-            obj.nodeStatus = {
+            obj[priv.statusRole] = {
                 collapsed: this.isCollapsed(n),
                 verticals
             };

@@ -22,6 +22,54 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "shellfish/ui";
 
+/**
+ * Element representing a tree branch for showing a tree node in a list view.
+ *
+ * This element may, for instance, be used in the delegate of a {@link html.ListView}
+ * with a {@link core.TreeModelAdapter} as model for adding a tree view UI.
+ *
+ * Example:
+ * ```
+ * ListView {
+ *    fill: true
+ *
+ *    model: treeModel
+ *    cellWidth: bboxWidth
+ *    cellHeight: theme.itemHeightSmall
+ *
+ *    delegate: template Box {
+ *        layout: "center-row"
+ *
+ *        TreeBranch {
+              fillHeight: true
+ *            level: modelData.value.level
+ *            nodeStatus: modelData.value.nodeStatus
+ *            nodeType: modelData.value.nodeType
+ *        }
+ *
+ *        Label {
+ *            marginLeft: theme.paddingSmall
+ *            text: modelData.value.text
+ *        }
+ *    }
+ * }
+ * ```
+ *
+ * @memberof ui
+ * @name TreeBranch
+ * @class
+ * @extends html.Box
+ *
+ * @property {bool} branchLines - (default: `true`) Whether to show the branch lines.
+ * @property {core.Color} branchLinesColor - (default: `theme.borderColor`) The color of the branch lines.
+ * @property {string} collapsedIcon - (default: `"core-arrow_right"`) The icon to use for collapsed non-leaf nodes.
+ * @property {core.Color} iconColor - (default: `theme.borderColor`) The color of the icon.
+ * @property {string} leafIcon - (default: `"core-file-empty"`) The icon to use for leaf nodes.
+ * @property {number} level - (default: `0`) The depth level of this node.
+ * @property {object} nodeStatus - (default: `{ }`) The node status object for this node.
+ * @property {string} nodeType - (default: `node`) The type of this node. One of `node|leaf`
+ * @property {string} uncollapsedIcon - (default: `"core-arrow_down"`) The icon to use for uncollapsed non-leaf nodes.
+ */
 Box {
     id: branch
 
@@ -42,9 +90,17 @@ Box {
 
     property iconColor: theme.primaryColor
 
-    layout: "row"
-
+    /**
+     * Is triggered when the user clicked the collapse/uncollapse button.
+     *
+     * @memberof ui.TreeBranch.prototype
+     * @name click
+     * @event
+     * @param {html.MouseBox.PointerEvent} event - The pointer event of the click.
+     */
     event click
+
+    layout: "row"
 
     // indentation with branch lines
     Box {
@@ -112,9 +168,9 @@ Box {
             property color: branch.iconColor
         }
 
-        onClick: () =>
+        onClick: ev =>
         {
-            branch.click();
+            branch.click(ev);
         }
     }
 

@@ -1,0 +1,212 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit examples.
+Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+require "shellfish/low" as low;
+require "./Header.shui";
+
+Page {
+    id: page
+
+    into header Header {
+        id: header
+        
+        title: "Tree View"
+        subtitle: "Total: " + dataModel.size + " nodes, " + treeView.count + " visible"
+        codeUrls: [__filename, "Header.shui"]
+    }
+
+    ListModel {
+        id: dataModel
+
+        data: [
+            { obj: window, level: 0, nodeType: "node", text: "**window** " + window }
+        ]
+    }
+
+    TreeModelAdapter {
+        id: treeAdapter
+
+        model: dataModel
+    }
+
+    Box {
+        fillWidth: true
+        height: thisDocument.bboxHeight
+
+        Box {
+            marginTop: header.bboxHeight + theme.paddingSmall
+            marginLeft: theme.paddingSmall
+            marginRight: theme.paddingSmall
+            fillWidth: true
+
+            Label {
+                fillWidth: true
+                overflowBehavior: "wrap"
+
+                text: "The **TreeModelAdapter** adapter adds tree functionality to a **ListModel** " +
+                    "that has a role for the depth-level. The **TreeBranch** visual element " +
+                    "adds the tree-specific UI to any item delegate."
+            }
+        }
+
+        Box {
+            fillWidth: true
+            height: theme.itemHeightMedium
+
+            layout: "center-row"
+
+            Switch {
+                id: branchLinesSwitch
+                marginLeft: theme.paddingSmall
+            }
+
+            Label {
+                marginLeft: theme.paddingSmall
+                text: "Branch Lines"
+            }
+
+            Box { fillWidth: true }
+        }
+
+        ListView {
+            id: treeView
+
+            marginTop: theme.paddingMedium
+            fillWidth: true
+            fillHeight: true
+
+            model: treeAdapter
+
+            cellWidth: bboxWidth
+            cellHeight: theme.itemHeightMedium
+
+            delegate: template MouseBox {
+                id: treeItem
+
+                property highlighted: selector.selection.has(modelData.index)
+                property itemIndex: modelData.index
+                property revision: modelData.revision
+
+                color: highlighted ? theme.highlightBackgroundColor
+                                   : modelData.index % 2 === 0 ? theme.contentBackgroundColor
+                                                               : theme.contentAltBackgroundColor
+                layout: "center-row"
+
+                onClick: ev =>
+                {
+                    selector.select(modelData.index, "replace");
+                    ev.accepted = true;
+                }
+
+                TreeBranch {
+                    id: branch
+
+                    fillHeight: true
+
+                    level: modelData.value.level
+                    nodeType: modelData.value.nodeType
+                    nodeStatus: modelData.value.nodeStatus
+
+                    iconColor: parent.highlighted ? theme.highlightColor
+                                                  : theme.primaryColor
+
+                    branchLines: branchLinesSwitch.checked
+
+                    function makeSubTree(item, idx)
+                    {
+                        let pos = idx + 1;
+                        let count = 0;
+                        const keys = [];
+                        for (let key in item.obj)
+                        {
+                            keys.push(key);
+                        }
+                        const nodes = [];
+                        keys.sort().forEach(key =>
+                        {
+                            const childObj = item.obj[key];
+                            const type = typeof childObj;
+                            const value = "" + childObj;
+
+                            const child = {
+                                obj: childObj,
+                                level: item.level + 1,
+                                nodeType: type === "object" && childObj !== null ? "node" : "leaf",
+                                text: "**" + low.escapeMarkup(key) + "** " + low.escapeMarkup(value.split("\n").join(" "))
+                            };
+                            nodes.push(child);
+
+                            ++count;
+                            if (count === 1000)
+                            {
+                                return;
+                            }
+                        });
+                        thisListView.model.bulkInsert(pos, nodes);
+                    }
+
+                    onClick: () =>
+                    {
+                        const item = modelData.value;
+
+                        if (item.nodeStatus.collapsed)
+                        {
+                            // uncollapse
+                            makeSubTree(item, modelData.index);
+                            thisListView.model.setCollapsed(modelData.index, false);
+                        }
+                        else
+                        {
+                            // collapse
+                            const s = thisListView.model.size;
+                            for (let i = modelData.index + 1; i < s; ++i)
+                            {
+                                if (thisListView.model.at(modelData.index + 1).level <= item.level)
+                                {
+                                    break;
+                                }
+                                thisListView.model.remove(modelData.index + 1);
+                            }
+                            thisListView.model.setCollapsed(modelData.index, true);
+                        }
+                    }
+                }
+
+                Label {
+                    marginLeft: theme.paddingSmall
+                    fillWidth: true
+                    overflowBehavior: "ellipsis"
+                    color: parent.highlighted ? theme.highlightColor
+                                              : theme.primaryColor
+                    text: modelData.value.text
+                }
+
+            }
+
+            ListViewSelector { id: selector }
+            ScrollIndicator { }
+        }
+
+    }
+
+}

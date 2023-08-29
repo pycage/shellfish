@@ -140,6 +140,7 @@ Page {
                                 ["Layout", "LayoutPage", "ui-view_grid"],
                                 ["Text Input", "TextInputPage", "input-keyboard"],
                                 ["List View and Grid View", "BreedingPage", "ui-view_list"],
+                                ["Tree View", "TreeViewPage", "ui-view_tree"],
                                 ["Menus and Message Dialogs", "MenusPage", "ui-menu"],
                                 ["Profiles", "ProfilesPage", "ui-toggle_on"],
                                 ["Themes", "ThemesPage", "ui-star"],

@@ -23,6 +23,6 @@
     "build-legacy-shellfish-ui": "node tools/make-bundle.js --legacy dist/shellfish-ui.pkg shellfish-ui",
     "build-legacy-shellfish-3d": "node tools/make-bundle.js --legacy dist/shellfish-3d.pkg shellfish-3d",
     "build-legacy-shellfish-server": "node tools/make-bundle.js --legacy dist/shellfish-server.pkg shellfish-server",
-    "run-gallery": "node dist/shui-node.js dist/shellfish.pkg dist/shellfish-server.pkg dist/require.js gallery/main.shui"
+    "run-gallery": "node dist/shellfish-node.js dist/shellfish.pkg dist/shellfish-server.pkg dist/require2.js gallery/main.shui"
   }
 }

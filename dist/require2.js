@@ -660,7 +660,7 @@ const shRequire = (function ()
                 reject(new Error("CSS style sheets require a DOM to load."));
             }
     
-            if (url.indexOf("?") === -1)
+            if (! url.startsWith("data:") && url.indexOf("?") === -1)
             {
                 // prevent CSS caching
                 url += "?ver=" + Date.now();

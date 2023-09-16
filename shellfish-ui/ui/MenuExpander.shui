@@ -76,10 +76,11 @@ MenuItem {
         marginLeft: 2
         color: theme.secondaryBackgroundColor
 
-        onClick: ev =>
+        onPointerDown: ev =>
         {
             ev.accepted = true;
-            thisMenu.close();
+            wait(100).then(() => { thisMenu.close(); });
         }
+
     }
 }

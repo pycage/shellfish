@@ -184,8 +184,11 @@ Overlay {
             {
                 ev.accepted = true;
 
-                menu.cascadingClose();
-                menu.close();
+                wait(100).then(() =>
+                {
+                    menu.cascadingClose();
+                    menu.close();
+                });
             }
 
             onKeyDown: (ev) =>

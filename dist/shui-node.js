@@ -75,6 +75,7 @@ if (haveError)
     process.exit(1);
 }
 
+console.warn("The use of 'shui-node.js' is deprecated. Please use 'shellfish-node.js' instead.");
 shellfishRun(bundles, shRequire =>
 {
     shRequire(["shui-loader.js"], loader =>

@@ -543,7 +543,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 let prevSize = 0;
                 mObj.connect("modelReset", this, () =>
                 {
-                    console.log("MODEL RESET");
                     this.log("", "debug", "ListView model reset with " + mObj.size + " items");
                     if (mObj.size === 0 && prevSize === 0)
                     {

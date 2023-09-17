@@ -1159,6 +1159,9 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
          * holding a reference to this object from then on. Objects are not
          * discarded while still being referenced.
          * 
+         * The reference is removed automatically when the referencing object
+         * gets discarded.
+         * 
          * @param {core.Object} which - The referencing object.
          * @see {@link core.Object#referenceRemove referenceRemove}
          */

@@ -195,27 +195,32 @@ shRequire([__dirname + "/object.js"], obj =>
             }
             else if (this.sourceType === "stream" && modStream)
             {
-                const chunks = [];
-                const stream = this.dataSource;
-                stream.on("data", chunk =>
+                const streamReader = new Promise((resolve, reject) =>
                 {
-                    chunks.push(Buffer.from(chunk, "binary"));
-                });
-                stream.on("end", () =>
-                {
-                    if (this.to > this.from)
+                    const chunks = [];
+                    const stream = this.dataSource;
+                    stream.on("data", chunk =>
                     {
-                        return Buffer.concat(chunks).slice(this.from, this.to);
-                    }
-                    else
+                        chunks.push(Buffer.from(chunk, "binary"));
+                    });
+                    stream.on("end", () =>
                     {
-                        return Buffer.concat(chunks);
-                    }
+                        if (this.to > this.from)
+                        {
+                            resolve(Buffer.concat(chunks).slice(this.from, this.to));
+                        }
+                        else
+                        {
+                            resolve(Buffer.concat(chunks));
+                        }
+                    });
+                    stream.on("error", err =>
+                    {
+                        reject(err);
+                    });
                 });
-                stream.on("error", err =>
-                {
-                    throw err;
-                });
+
+                return await streamReader;
             }
             else
             {

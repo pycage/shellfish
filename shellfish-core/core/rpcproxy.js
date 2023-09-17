@@ -506,7 +506,6 @@ shRequire([__dirname + "/object.js"], obj =>
             const MSock = shRequire.environment === "node" ? MessageSocketNode : MessageSocket;
             priv.socket = new MSock(priv.endpoint, (msg, binaryData) =>
             {
-                console.log("HANDLER CALLED " + msg.type);
                 if (msg.type === "ready")
                 {
                     priv.clientId = msg.clientId;

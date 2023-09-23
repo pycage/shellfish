@@ -223,7 +223,10 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                     }
 
                     const isCollapsed = this.isCollapsed(at);
-                    const wasCollapsed = this.toTreeIndex(at + 1) === -1;
+                    // nodes without children are considered collapsed always
+                    const wasCollapsed = at < m.size - 1 && m.at(at + 1)[priv.levelRole] > m.at(at)[levelRole]
+                                         ? this.toTreeIndex(at + 1) === -1
+                                         : true;
                     //console.log("isCollapsed " + isCollapsed + " wasCollapsed " + wasCollapsed);
 
                     if (! isCollapsed && wasCollapsed)
@@ -581,7 +584,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             const item = priv.model.at(listIdx);
             const level = item[priv.levelRole];
 
-            if (this.hasMoreOnLevel(at, level))
+            if (this.hasMoreOnLevel(listIdx, level))
             {
                 priv.model.remove(listIdx);
             }
@@ -608,6 +611,10 @@ shRequire([__dirname + "/listmodel.js"], lm =>
 
             const listIdx = this.toListIndex(n);
             const item = priv.model.at(listIdx);
+            if (! item)
+            {
+                return null;
+            }
             const obj = Object.create(item);
 
             const verticals = [];
@@ -616,17 +623,17 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             {
                 if (i === level)
                 {
-                    verticals.push(this.hasMoreOnLevel(n, i) ? 2 : 1);
+                    verticals.push(this.hasMoreOnLevel(listIdx, i) ? 2 : 1);
                 }
                 else
                 {
                     //verticals.push(2);
-                    verticals.push(this.hasMoreOnLevel(n, i) ? 2 : 0);
+                    verticals.push(this.hasMoreOnLevel(listIdx, i) ? 2 : 0);
                 }
             }
 
             obj[priv.statusRole] = {
-                collapsed: this.isCollapsed(n),
+                collapsed: this.isCollapsed(listIdx),
                 verticals
             };
             return obj;

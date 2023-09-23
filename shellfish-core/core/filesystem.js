@@ -94,7 +94,14 @@ shRequire([__dirname + "/object.js"], obj =>
             }
             else if (this.sourceType === "buffer" || this.sourceType === "string")
             {
-                return this.dataSource.length;
+                if (this.dataSource.byteLength !== undefined)
+                {
+                    return this.dataSource.byteLength;
+                }
+                else
+                {
+                    return this.dataSource.length;
+                }
             }
             else
             {
@@ -155,11 +162,11 @@ shRequire([__dirname + "/object.js"], obj =>
             {
                 if (this.to > this.from)
                 {
-                    return this.buffer.slice(this.from, this.to);
+                    return this.dataSource.slice(this.from, this.to);
                 }
                 else
                 {
-                    return this.buffer;
+                    return this.dataSource;
                 }
             }
             else if (this.sourceType === "finfo" && modFs)

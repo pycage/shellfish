@@ -237,7 +237,7 @@ Overlay {
                     }
                     ev.accepted = true;
                 }
-                if (current !== -1)
+                if (current !== -1 && cs[current])
                 {
                     cs[current].selectItem(false);
                 }

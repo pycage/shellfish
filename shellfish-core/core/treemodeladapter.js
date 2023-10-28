@@ -224,7 +224,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
 
                     const isCollapsed = this.isCollapsed(at);
                     // nodes without children are considered collapsed always
-                    const wasCollapsed = at < m.size - 1 && m.at(at + 1)[priv.levelRole] > m.at(at)[levelRole]
+                    const wasCollapsed = at < m.size - 1 && m.at(at + 1)[priv.levelRole] > m.at(at)[priv.levelRole]
                                          ? this.toTreeIndex(at + 1) === -1
                                          : true;
                     //console.log("isCollapsed " + isCollapsed + " wasCollapsed " + wasCollapsed);

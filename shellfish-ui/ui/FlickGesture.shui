@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * Element for adding flick gestures to a {@link html.MouseBox} element. This element
- * must be an ancestor of a {@link html.MouseBox}.
+ * must have a {@link html.MouseBox} as ancestor.
  *
  * Flicking scrolls the target element by changing the `contentX` and `contentY` properties.
  *

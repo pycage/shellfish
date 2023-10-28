@@ -137,6 +137,8 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ### October 2023
 * The element {@link ui.Button} is now stylable with templates.
+* **API Break:** The deprecated element {@link core.Wasm} has been removed. WebAssembly modules
+  can be imported directly.
 
 ### August 2023
 * The `modelData` property is now only defined on elements where needed. This

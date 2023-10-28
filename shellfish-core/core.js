@@ -62,8 +62,7 @@ const includes = [
     "threadpool",
     "timer",
     "treemodeladapter",
-    "waitaction",
-    "wasm"
+    "waitaction"
 ];
 
 shRequire(mods.map(m => __dirname + "/" + m + ".js"), () =>

@@ -24,8 +24,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
  * A generic C++ STL vector: `std::vector<T>`.
- * @typedef StdVector
- * @memberof html.Wasm
  */
 
 shRequire([__dirname + "/object.js"], (obj) =>
@@ -41,9 +39,6 @@ shRequire([__dirname + "/object.js"], (obj) =>
      * @deprecated Since WASM modules can be imported directly, this class is
      * deprecated and will be removed eventually.
      * 
-     * @memberof core
-     * @extends core.Object
-     *
      * @property {html.Canvas} canvas - (default: `null`) A canvas for graphical output.
      * @property {string} source - (default: `""`) The URL of the .wasm file. An accompanying .js file for setting up the runtime must be present.
      * @property {object} instance - [readonly] The WASM instance once loaded.

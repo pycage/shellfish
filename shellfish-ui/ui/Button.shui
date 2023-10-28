@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,6 +37,7 @@ require "shellfish/ui";
  * @property {bool} checked - (default: `false`) Whether the button is currently in checked state.
  * @property {html.Object} labelProfile - (default: `null`) The profile that is applied to the labels.
  * @property {number} repeatAcceleration - (default: `0`) The acceleration factor of auto-repeated triggering rate. A value greater than `1.0` accelerates the triggering, while a value less than `1.0` decelerates it. A value of `0` disables auto-repeat.
+ * @property {template} styleOfBackground - The background style template.
  */
 MouseBox {
     id: button
@@ -48,6 +49,20 @@ MouseBox {
     property checked: false
     property repeatAcceleration: 0
     property labelProfile: null
+
+    property styleOfBackground: template Box {
+        fillWidth: true
+        fillHeight: true
+
+        color: button.checked || button.pressed ? theme.highlightBackgroundColor
+                                                : button.containsMouse ? theme.hoverBackgroundColor
+                                                                       : button.flat ? "transparent"
+                                                                                     : theme.contentBackgroundColor
+
+        borderWidth: button.flat ? 0 : 1
+        borderRadius: button.flat ? 0 : theme.borderRadius
+        borderColor: theme.borderColor
+    }
 
     Object {
         id: priv
@@ -70,14 +85,6 @@ MouseBox {
         }
     }
 
-    color: checked || pressed ? theme.highlightBackgroundColor
-                              : containsMouse ? theme.hoverBackgroundColor
-                                              : flat ? "transparent"
-                                                     : theme.contentBackgroundColor
-
-    borderWidth: flat ? 0 : 1
-    borderRadius: flat ? 0 : theme.borderRadius
-    borderColor: theme.borderColor
     layout: "center-row"
 
     minWidth: theme.itemWidthSmall
@@ -116,6 +123,14 @@ MouseBox {
             click(ev);
             ev.accepted = true;
         }
+    }
+
+    Loader {
+        position: "free"
+        fillWidth: true
+        fillHeight: true
+
+        sourceTemplate: styleOfBackground
     }
 
     Label {

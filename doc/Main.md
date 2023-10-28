@@ -135,6 +135,9 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ## News
 
+### October 2023
+* The element {@link ui.Button} is now stylable with templates.
+
 ### August 2023
 * The `modelData` property is now only defined on elements where needed. This
   makes it possible to access the `modelData` property of a delegate from

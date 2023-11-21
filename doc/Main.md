@@ -135,10 +135,28 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ## News
 
+### November 2023
+* `require.js` is now the same as `require2.js` and `require2.js` is going to be
+  removed eventually. The previous version of `require.js` is currently available as
+  `requireLegacy.js`.
+* The element {@link core.TreeModelAdapter} has a new property `dynamicContentProvider`
+  for populating the model with content dynamically when uncollapsing a node.
+* The new element {@link core.RegistryFile} provides a file-backed easy-to-use
+  hierarchical registry database for storing configurations.
+* The new element {@link core.RegistryOverlay} provides an overlay over a
+  registry for temporary changes that can then be either applied or cancelled.
+* It is now possible in Shui code to assign `Promise` objects to properties, and the
+  property will be set when the `Promise` resolves.
+
 ### October 2023
 * The element {@link ui.Button} is now stylable with templates.
-* **API Break:** The deprecated element {@link core.Wasm} has been removed. WebAssembly modules
-  can be imported directly.
+* The new function {@link core.formatBytes} can be used to format a bytes
+  number to a human-readable string.
+* The element {@link ui.FSItem} now supports the value `compact` for its
+  `displayMode` property for a more compact item layout suitable for small
+  screens.
+* **API Break:** The deprecated element {@link core.Wasm} has been removed.
+  WebAssembly modules can be imported directly.
 
 ### August 2023
 * The `modelData` property is now only defined on elements where needed. This

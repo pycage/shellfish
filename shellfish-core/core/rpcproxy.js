@@ -537,12 +537,12 @@ shRequire([__dirname + "/object.js"], obj =>
                     priv.clientId = "";
                     priv.socket = null;
                 }
-                else if (msg.type === "methodResult")
+                else if (msg.type === "result")
                 {
                     priv.callMap.get(msg.callId).resolve(this.processReceiveParameters([msg.value], binaryData)[0]);
                     priv.callMap.delete(msg.callId);
                 }
-                else if (msg.type === "methodError")
+                else if (msg.type === "error")
                 {
                     priv.callMap.get(msg.callId).reject(msg.value);
                     priv.callMap.delete(msg.callId);
@@ -597,7 +597,7 @@ shRequire([__dirname + "/object.js"], obj =>
                     ++idCounter;
                     priv.callbackMap.set(callbackId, p);
                     priv.callbacks.push(callbackId);
-                    return { type: "callback", clientId: priv.clientId, safeCallback: callbackId };
+                    return { type: "callback", clientId: priv.clientId, callback: callbackId };
                 }
                 else if (typeof p === "object" && p.constructor.name === "Uint8Array")
                 {

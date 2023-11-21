@@ -56,7 +56,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 if (p.type === "callback")
                 {
                     // create callback function
-                    const callbackId = p.safeCallback;
+                    const callbackId = p.callback;
                     return (...parameters) =>
                     {
                         const [ convertedParameters, binaries ] = processSendParameters(parameters);
@@ -128,22 +128,22 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                     handleResult(self, clientId, result, r =>
                     {
                         const [ convertedParameters, binaries ] = processSendParameters([r]);
-                        self.postMessage(clientId, { type: "methodResult", callId: msg.callId, value: convertedParameters[0] }, binaries);
+                        self.postMessage(clientId, { type: "result", callId: msg.callId, value: convertedParameters[0] }, binaries);
                     },
                     err =>
                     {
-                        self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: "" + err });
+                        self.postMessage(clientId, { type: "error", callId: msg.callId, value: "" + err });
                     });
                 }
                 catch (err)
                 {
-                    self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: "" + err });
+                    self.postMessage(clientId, { type: "error", callId: msg.callId, value: "" + err });
                 }
             }
             else
             {
                 const err = "No such method to call: " + msg.name;
-                self.postMessage(clientId, { type: "methodError", callId: msg.callId, value: err });
+                self.postMessage(clientId, { type: "error", callId: msg.callId, value: err });
             }
         }
         else if (msg.type === "exit")
@@ -215,6 +215,151 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * 
      * Values of type `Uint8Array` are transfered in binary form.
      * 
+     * ## Details of the RPC Protocol
+     * 
+     * This section describes the underlying RPC protocol. Understanding the protocol is
+     * not required for using the {@link core.RpcProxy} or {@link server.RpcSession}.
+     * 
+     * ### Communication
+     * 
+     * The communication between client and server (endpoint) runs over HTTP or HTTPS
+     * with a reverse channel for receiving asynchronous messages from the server.
+     * 
+     * Initially, the client sends a `GET` request to the endpoint in order to retrieve
+     * the reverse channel. From then on, the client sends messages to the endpoint via
+     * `POST` messages, while the server sends messages to the client via the reverse
+     * channel.
+     * 
+     * ### Message Data
+     * 
+     * Messages consist of a JSON document describing the type of message along with
+     * type-specific properties, and an optional chunk of binary data.
+     * 
+     * The binary chunk is used when transfering parameters in binary form.
+     * 
+     * A message looks like this:
+     * 
+     *  - `JSON_SIZE` - 32 bits: The size of the JSON document in bytes.
+     *  - `BINARY_SIZE` - 32 bits: The size of the binary chunk in bytes.
+     *  - `JSON`: The JSON document. This is the message body.
+     *  - `BINARIES`: The chunk of binary data. This is a concatenation of the binary parameters in the message.
+     * 
+     * For messages without binary parts, the `BINARIES` chunk is of size `0`.
+     *
+     * ### Initiating the Connection
+     * 
+     * In order to initiate a connection and retrieve the reverse channel, the client
+     * sends a `GET` request to the endpoint. The server's response will be an unlimited
+     * data stream with `ContentType: application/x-shellfish-rpc`, over which incoming
+     * messages will arrive. This is the reverse channel.
+     * 
+     * Upon successful connection, the server sends a `ready` message to the client along
+     * with a unique `clientId` and `sessionId`, e.g.
+     * ```
+     * { type: "ready", clientId: "7b12a3-a2ce36-598a73", sessionId: "2683a9-453d46-58df44" }
+     * ```
+     * All RPC `POST` messages sent from the client to the endpoint are expected to have
+     * the `x-shellfish-rpc-session` HTTP header set with the session ID received above.
+     * This allows the server to route the message to the corresponding `RPCSession` instance.
+     * 
+     * ### Message Types
+     * 
+     * #### `heartbeat`
+     * 
+     * At intervals (every 30 seconds) the server will send a `heartbeat` message to clients
+     * that haven't recently sent any messages
+     * ```
+     * { type: "heartbeat" }
+     * ```
+     * and expects to receive a response `heartbeat` message.
+     * ```
+     * { type: "heartbeat", clientId: "7b12a3-a2ce36-598a73" }
+     * ```
+     * If a client does not respond to the heartbeat request, the server will close the
+     * connection and destroy any context it may have associated with it.
+     * 
+     * #### `exit`
+     * 
+     * The client may send an `exit` message to the server in order to close a connection
+     * immediately.
+     * ```
+     * { type: "exit", clientId: "7b12a3-a2ce36-598a73" }
+     * ```
+     * 
+     * #### `call`
+     * 
+     * The client sends a `call` message to the server in order to invoke a remote procedure
+     * by name.
+     * ```
+     * { type: "call", clientId: "7b12a3-a2ce36-598a73", name: "foo", callId: 42, parameters }
+     * ```
+     * The property `callId` is an ID by which the client associates `result` and `error` messages
+     * with this particular remote call.
+     * 
+     * The property `name` is the name of the remote procedure to invoke.
+     * 
+     * The property `parameters` is a list of parameter items (see below) passed to the remote procedure.
+     * 
+     * #### `result`
+     * 
+     * When a remote procedure is finished, the server sends a `result` message with the
+     * result value to the client.
+     * ```
+     * { type: "result", callId: 42, value: "This is the result" }
+     * ```
+     * The `value` property contains a single parameter item with the return value.
+     * 
+     * #### `error`
+     * 
+     * If a remote procedure fails, the server sends an `error` message to the client.
+     * ```
+     * { type: "error", callId: 42, value: "Some error occured." }
+     * ```
+     * The `value` property contains the error message string.
+     * 
+     * #### `callback`
+     * 
+     * Callbacks invoked by the server asynchronously are sent by the `callback` message.
+     * ```
+     * { type: "callback", callback: 11, parameters }
+     * ```
+     * The `callback` property contains the ID of the callback which is recognized by the client.
+     * 
+     * The `parameters` property contains a list of parameter items.
+     * 
+     * ### Parameter Items
+     * 
+     * There are four types of parameters: callbacks, proxy objects, binary data, and JSON-serializable data.
+     * 
+     * JSON-serializable data is passed as is.
+     * 
+     * Binary data is passed as binary items:
+     * ```
+     * { type: "binary", size: 32768 }
+     * ```
+     * The property `size` is the size of this particular parameter value in bytes within
+     * the `BINARIES` chunk of the message.
+     * 
+     * Callbacks are passed as callback items:
+     * ```
+     * { type: "callback", clientId: "7b12a3-a2ce36-598a73", callback: 11 }
+     * ```
+     * The property `callback` is an ID recognized by the client and is associated with
+     * a function stored on the client side.
+     * 
+     * Proxy objects may only be passed from the server to the client. A proxy object item looks like
+     * ```
+     * { type: "proxy", instance: 99, methods: ["foo", "bar"] }
+     * ```
+     * The property `instance` is an ID recognized by the server and is associated with the
+     * instance of the actual object.
+     * 
+     * The property `methods` is a list of available method names that may be called via the
+     * `call` message by appending to the `instance` ID, e.g.
+     * ```
+     * { type: "call", clientId: "7b12a3-a2ce36-598a73", name: "99.foo", callId: 43, parameters: ["data"] }
+     * ```
+     * 
      * @extends server.HTTPSession
      * @memberof server
      */
@@ -264,6 +409,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
 
                     this.postMessage(clientId, { type: "ready", clientId: clientId, sessionId: this.sessionId });
 
+                    this.log("RPC", "debug", "Connected clients on " + this.objectId + ": " + priv.clients.size);
                     if (priv.clients.size === 1)
                     {
                         this.heartbeat();
@@ -293,7 +439,12 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                             return;
                         }
 
-                        this.log("RPC", "info", "RPC message from client " + msg.clientId + ", type: " + msg.type);
+                        let logDetails = "";
+                        if (msg.type === "call")
+                        {
+                            logDetails = ", call ID: " + msg.callId + ", name: " + msg.name + ", " + msg.parameters.length + " parameters";
+                        }
+                        this.log("RPC", "info", "RECEIVE message from client " + msg.clientId + ", type: " + msg.type + logDetails);
 
                         if (! priv.clients.has(msg.clientId))
                         {
@@ -394,9 +545,13 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
 
             if (priv.clients.size === 0)
             {
-                this.log("RPC", "debug", "All clients disconnected");
+                this.log("RPC", "debug", "All clients disconnected from " + this.objectId);
                 this.abortWait("heartbeat");
                 this.abortWait("closeExpired");
+            }
+            else
+            {
+                this.log("RPC", "debug", "Connected clients on " + this.objectId + ": " + priv.clients.size);
             }
         }
 
@@ -424,7 +579,12 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 const enc = new TextEncoder();
                 const data = enc.encode(JSON.stringify(message));
                 //console.log("OUT: " + JSON.stringify(message));
-                this.log("RPC", "info", "RPC send message to client " + clientId + ", type: " + message.type);
+                let logDetails = "";
+                if (message.type === "result" || message.type === "error")
+                {
+                    logDetails = ", call ID: " + message.callId;
+                }
+                this.log("RPC", "info", "SEND message to client " + clientId + ", type: " + message.type + logDetails);
     
                 const size = data.length;
                 const buffer = new ArrayBuffer(size + 8);

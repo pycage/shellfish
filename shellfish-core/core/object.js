@@ -1449,6 +1449,9 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
          * This is the prefered way to change a property's value as it takes
          * potential transitioning into account.
          * 
+         * If the value is a Promise object, it will be changed when the Promise
+         * resolves.
+         * 
          * @param {string} name - The name of the property.
          * @param {any} newValue - The property's new value.
          * @see {@link core.Object#transitionable transitionable}
@@ -1461,24 +1464,38 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
                 return;
             }
 
-            const transitionProp = name + "Transition";
-            if (this[transitionProp] &&
-                this[transitionProp].enabled &&
-                d.get(this).lifeCycleStatus === "initialized")
+            const f = (newValue) =>
             {
-                const transition = this[transitionProp];
-                transition.from = this[name];
-                transition.to = newValue;
-                const interpolate = d.get(this).interpolators[name];
-                if (interpolate)
+                const transitionProp = name + "Transition";
+                if (this[transitionProp] &&
+                    this[transitionProp].enabled &&
+                    d.get(this).lifeCycleStatus === "initialized")
                 {
-                    transition.interpolate = interpolate;
+                    const transition = this[transitionProp];
+                    transition.from = this[name];
+                    transition.to = newValue;
+                    const interpolate = d.get(this).interpolators[name];
+                    if (interpolate)
+                    {
+                        transition.interpolate = interpolate;
+                    }
+                    transition.start((value) => { this[name] = value; });
                 }
-                transition.start((value) => { this[name] = value; });
+                else
+                {
+                    this[name] = newValue;
+                }
+            };
+
+            if (type === "object" && newValue !== null && newValue.constructor.name === "Promise")
+            {
+                newValue
+                .then(f)
+                .catch(err => { console.error(err); });
             }
             else
             {
-                this[name] = newValue;
+                f(newValue);
             }
         }
 
@@ -1944,6 +1961,34 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
         return uid;
     }
     exports.generateUid = generateUid;
+
+    /**
+     * Formats a bytes number to a string.
+     * 
+     * @memberof core
+     * 
+     * @param {number} bytes - The bytes number to format.
+     * @returns {string} The formatted string.
+     */
+    function formatBytes(bytes)
+    {
+        let size = Math.ceil(bytes / 1024);
+        const units = ["K", "M", "G", "T"];
+
+        let sizeText = "";
+        for (let i = 0; i < units.length; ++i)
+        {
+            const unit = units[i];
+            if (size < 1024)
+            {
+                sizeText = (i === 0 ? size : size.toFixed(1)) + unit;
+                break;
+            }
+            size /= 1024;
+        }
+        return sizeText;
+    }
+    exports.formatBytes = formatBytes;
 
     /**
      * Creates a dump of the current status for debugging purposes.

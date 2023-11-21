@@ -54,6 +54,8 @@ const includes = [
     "listmodel",
     "object",
     "parallelaction",
+    "registryfile",
+    "registryoverlay",
     "repeater",
     "rpcproxy",
     "scalemodel",

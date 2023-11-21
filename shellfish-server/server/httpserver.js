@@ -198,25 +198,34 @@ shRequire(["shellfish/core"], core =>
         get enabled() { return d.get(this).enabled; }
         set enabled(e)
         {
-            d.get(this).enabled = e;
-            this.enabledChanged();
-            this.listen();
+            if (e !== d.get(this).enabled)
+            {
+                d.get(this).enabled = e;
+                this.enabledChanged();
+                this.listen();
+            }
         }
 
         get certificate() { return d.get(this).certificate; }
         set certificate(c)
         {
-            d.get(this).certificate = c;
-            this.certificateChanged();
-            this.listen();
+            if (c !== d.get(this).certificate)
+            {
+                d.get(this).certificate = c;
+                this.certificateChanged();
+                this.listen();
+            }
         }
 
         get host() { return d.get(this).host; }
         set host(h)
         {
-            d.get(this).host = h;
-            this.hostChanged();
-            this.listen();
+            if (h !== d.get(this).host)
+            {
+                d.get(this).host = h;
+                this.hostChanged();
+                this.listen();
+            }
         }
 
         get keepAlive() { return d.get(this).keepAlive; }
@@ -235,25 +244,34 @@ shRequire(["shellfish/core"], core =>
         get key() { return d.get(this).key; }
         set key(k)
         {
-            d.get(this).key = k;
-            this.keyChanged();
-            this.listen();
+            if (k !== d.get(this).key)
+            {
+                d.get(this).key = k;
+                this.keyChanged();
+                this.listen();
+            }
         }
 
         get port() { return d.get(this).port; }
         set port(p)
         {
-            d.get(this).port = p;
-            this.portChanged();
-            this.listen();
+            if (p !== d.get(this).port)
+            {
+                d.get(this).port = p;
+                this.portChanged();
+                this.listen();
+            }
         }
 
         get secure() { return d.get(this).secure; }
         set secure(s)
         {
-            d.get(this).secure = s;
-            this.secureChanged();
-            this.listen();
+            if (s !== d.get(this).secure)
+            {
+                d.get(this).secure = s;
+                this.secureChanged();
+                this.listen();
+            }
         }
 
         listen()

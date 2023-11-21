@@ -33,6 +33,8 @@ require "shellfish/ui";
  * @class
  * @extends html.ListView
  *
+ * @deprecated Use a {@link html.ListView} instead.
+ *
  * @property {string} displayMode - (default: `"list"`) The display mode. One of `list|grid`
  * @property {html.Filesystem} filesystem - (default: null) If the filesystem is set, it is used for icon thumbnails.
  * @property {number} iconScale - (default: `1`) The scaling factor of icons.

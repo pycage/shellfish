@@ -119,6 +119,8 @@ MenuItemBase {
             id: label
 
             marginLeft: theme.paddingSmall
+            //fillWidth: true
+            //overflowBehavior: "ellipsis"
             color: ancestorsEnabled ? (item.highlighted ? theme.highlightColor : theme.primaryColor)
                                     : theme.disabledColor
             text: item.format(item.text)

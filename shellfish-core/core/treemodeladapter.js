@@ -37,10 +37,40 @@ shRequire([__dirname + "/listmodel.js"], lm =>
      *
      * A tree model may be used anywhere a list model is expected.
      * 
+     * ### Dynamic Content
+     * 
+     * The list model can be populated dynamically when uncollapsing a node by defining the
+     * `dynamicContentProvider` function. This function takes a tree node index and is
+     * expected to return a Promise for a list of node items (`async` functions return
+     * a Promise automatically).
+     * 
+     * ```
+     * TreeModelAdapter {
+     *     model: listModel
+     *     dynamicContentProvider: async (idx) =>
+     *     {
+     *         const item = at(idx);
+     *         const nodes = [];
+     *         for (let i = 0; i < 10; ++i)
+     *         {
+     *             nodes.push({
+     *                 name: "Item #" + (i + 1),
+     *                 level: item.level + 1,
+     *                 nodeType: "folder"
+     *             });
+     *         }
+     *         return nodes;
+     *     }
+     * }
+     * ```
+     * 
+     * The thus newly created node items are removed from the model automatically when collapsing an ancestor node.
+     * 
      * @extends core.ListModel
      * @memberof core
      *
      * @property {string} levelRole - (default: `"level"`) The name of the role holding the depth level of a tree node.
+     * @property {function} dynamicContentProvider - (default: `null`) If this function is defined, it will be used to fill the model with content dynamically when uncollapsing a node.
      * @property {string} statusRole - (default: `"nodeStatus"`) The name of the role to be used for the status of a tree node.
      * @property {core.ListModel} model - (default: null) The list model to work on.
      */
@@ -53,6 +83,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 levelRole: "level",
                 statusRole: "nodeStatus",
                 model: null,
+                dynamicContentProvider: null,
                 skipTrees: [],
                 collapseMap: new Map(),
                 toListIndexCache: new Map(),
@@ -60,6 +91,7 @@ shRequire([__dirname + "/listmodel.js"], lm =>
                 nodesOfInfluence: [] // nodes of influence are the only nodes with influence on the status of other nodes
             });
 
+            this.notifyable("dynamicContentProvider");
             this.notifyable("levelRole");
             this.notifyable("statusRole");
             this.notifyable("model");
@@ -78,6 +110,13 @@ shRequire([__dirname + "/listmodel.js"], lm =>
         {
             d.get(this).levelRole = r;
             this.levelRoleChanged();
+        }
+
+        get dynamicContentProvider() { return d.get(this).dynamicContentProvider; }
+        set dynamicContentProvider(p)
+        {
+            d.get(this).dynamicContentProvider = p;
+            this.dynamicContentProviderChanged();
         }
 
         get statusRole() { return d.get(this).statusRole; }
@@ -296,9 +335,45 @@ shRequire([__dirname + "/listmodel.js"], lm =>
             const priv = d.get(this);
 
             const listIdx = this.toListIndex(n);
-            priv.collapseMap.set(listIdx, value);
-
             const item = this.model.at(listIdx);
+
+            if (priv.dynamicContentProvider)
+            {
+                if (value)
+                {
+                    // collapse
+                    const s = priv.model.size;
+                    for (let i = n + 1; i < s; ++i)
+                    {
+                        if (this.at(n + 1).level <= item.level)
+                        {
+                            break;
+                        }
+                        this.remove(n + 1);
+                    }
+                }
+                else
+                {
+                    // uncollapse
+                    priv.dynamicContentProvider(n)
+                    .then(nodes =>
+                    {
+                        if (nodes.length === 0)
+                        {
+                            return;
+                        }
+
+                        this.bulkInsert(n + 1, nodes);
+
+                        priv.collapseMap.set(listIdx, false);
+                        priv.model.replace(listIdx, item);
+                    })
+                    .catch(err => console.error(err));
+                    return;
+                }
+            }
+
+            priv.collapseMap.set(listIdx, value);
             priv.model.replace(listIdx, item);
         }
 

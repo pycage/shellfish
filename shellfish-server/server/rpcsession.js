@@ -56,11 +56,11 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 if (p.type === "callback")
                 {
                     // create callback function
-                    const callbackId = p.callback;
+                    const callbackId = p.callbackId;
                     return (...parameters) =>
                     {
                         const [ convertedParameters, binaries ] = processSendParameters(parameters);
-                        self.postMessage(clientId, { type: "callback", callback: callbackId, parameters: convertedParameters }, binaries);
+                        self.postMessage(clientId, { type: "callback", callbackId: callbackId, parameters: convertedParameters }, binaries);
                     };
                 }
                 else if (p.type === "binary")
@@ -94,7 +94,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
         }
         else if (typeof r === "object" && r.type === "proxy")
         {
-            d.get(self).clients.get(clientId).proxies.push(r.instance);
+            d.get(self).clients.get(clientId).proxies.push(r.instanceId);
             onResult(r);
         }
         else
@@ -321,9 +321,9 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * 
      * Callbacks invoked by the server asynchronously are sent by the `callback` message.
      * ```
-     * { type: "callback", callback: 11, parameters }
+     * { type: "callback", callbackId: 11, parameters }
      * ```
-     * The `callback` property contains the ID of the callback which is recognized by the client.
+     * The `callbackId` property contains the ID of the callback which is recognized by the client.
      * 
      * The `parameters` property contains a list of parameter items.
      * 
@@ -342,20 +342,20 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * 
      * Callbacks are passed as callback items:
      * ```
-     * { type: "callback", clientId: "7b12a3-a2ce36-598a73", callback: 11 }
+     * { type: "callback", clientId: "7b12a3-a2ce36-598a73", callbackId: 11 }
      * ```
      * The property `callback` is an ID recognized by the client and is associated with
      * a function stored on the client side.
      * 
      * Proxy objects may only be passed from the server to the client. A proxy object item looks like
      * ```
-     * { type: "proxy", instance: 99, methods: ["foo", "bar"] }
+     * { type: "proxy", instanceId: 99, methods: ["foo", "bar"] }
      * ```
-     * The property `instance` is an ID recognized by the server and is associated with the
+     * The property `instanceId` is an ID recognized by the server and is associated with the
      * instance of the actual object.
      * 
      * The property `methods` is a list of available method names that may be called via the
-     * `call` message by appending to the `instance` ID, e.g.
+     * `call` message by appending to the `instanceId` ID, e.g.
      * ```
      * { type: "call", clientId: "7b12a3-a2ce36-598a73", name: "99.foo", callId: 43, parameters: ["data"] }
      * ```
@@ -425,11 +425,11 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                         let binaryData = null;
                         try
                         {
-                            const view32 = new Uint32Array(data, 0, 1);
+                            const view32 = new Uint32Array(data, 0, 2);
                             const jsonSize = view32[0];
                             //console.log("JSON SIZE " + jsonSize + " DATA " + data.byteLength);
-                            const jsonData = data.slice(4, 4 + jsonSize);
-                            binaryData = data.slice(4 + jsonSize);
+                            const jsonData = data.slice(8, 8 + jsonSize);
+                            binaryData = data.slice(8 + jsonSize);
 
                             msg = JSON.parse(new TextDecoder().decode(jsonData));
                         }
@@ -655,7 +655,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
                 methods.push(key);
             });
 
-            return { type: "proxy", instance: proxyId, methods: methods };
+            return { type: "proxy", instanceId: proxyId, methods: methods };
         }
     }
     exports.RpcSession = RpcSession;

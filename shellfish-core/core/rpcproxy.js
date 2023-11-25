@@ -51,11 +51,12 @@ shRequire([__dirname + "/object.js"], obj =>
             //console.log(binaries);
             const json = JSON.stringify(message);
             const jsonData = new TextEncoder().encode(json);
-            const buffer = new Uint8Array(4 + jsonData.length + binarySize);
-            const view32 = new Uint32Array(buffer.buffer, 0, 1);
+            const buffer = new Uint8Array(8 + jsonData.length + binarySize);
+            const view32 = new Uint32Array(buffer.buffer, 0, 2);
             view32[0] = jsonData.length;
+            view32[1] = binarySize;
             
-            let offset = 4;
+            let offset = 8;
             buffer.set(jsonData, offset);
             offset += jsonData.length;
             
@@ -66,13 +67,11 @@ shRequire([__dirname + "/object.js"], obj =>
             });
 
             const headers = new Headers();
-            headers.append("x-shellfish-rpc-socket", this.socketId);
             headers.append("x-shellfish-rpc-session", sessionId);
             fetch(this.endpoint, {
                 method: "POST",
                 headers,
                 body: buffer
-                //body: JSON.stringify(message)
             })
             .then(response =>
             {
@@ -91,10 +90,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         connect()
         {
-            const headers = new Headers();
-            headers.append("x-shellfish-rpc-socket", this.socketId);
-
-            fetch(this.endpoint, { headers })
+            fetch(this.endpoint)
             .then(async response =>
             {
                 if (response.ok)
@@ -177,6 +173,11 @@ shRequire([__dirname + "/object.js"], obj =>
                     }
 
                 }
+                else
+                {
+                    console.error("RPC connection closed on error: " + response.statusText);
+                    this.handler({ type: "exit" });
+                }
             })
             .catch(err =>
             {
@@ -217,11 +218,12 @@ shRequire([__dirname + "/object.js"], obj =>
             const binarySize = binaries.map(b => b.length).reduce((a, b) => a + b, 0);
             const json = JSON.stringify(message);
             const jsonData = new TextEncoder().encode(json);
-            const buffer = new Uint8Array(4 + jsonData.length + binarySize);
-            const view32 = new Uint32Array(buffer.buffer, 0, 1);
+            const buffer = new Uint8Array(8 + jsonData.length + binarySize);
+            const view32 = new Uint32Array(buffer.buffer, 0, 2);
             view32[0] = jsonData.length;
+            view32[1] = binarySize;
             
-            let offset = 4;
+            let offset = 8;
             buffer.set(jsonData, offset);
             offset += jsonData.length;
             
@@ -234,7 +236,6 @@ shRequire([__dirname + "/object.js"], obj =>
             const req = this.modHttp.request(this.endpoint, {
                 method: "POST",
                 headers: {
-                    "x-shellfish-rpc-socket": this.socketId,
                     "x-shellfish-rpc-session": sessionId
                 }
             });
@@ -248,11 +249,7 @@ shRequire([__dirname + "/object.js"], obj =>
             let done = false;
             let value = null;
 
-            const headers = {
-                "x-shellfish-rpc-socket": this.socketId
-            };
-
-            const req = this.modHttp.request(this.endpoint, { headers });
+            const req = this.modHttp.request(this.endpoint);
 
             let dataResolver = null;
             req.on("response", res =>
@@ -550,10 +547,10 @@ shRequire([__dirname + "/object.js"], obj =>
                 else if (msg.type === "callback")
                 {
                     const params = this.processReceiveParameters(msg.parameters, binaryData);
-                    const remove = priv.callbackMap.get(msg.callback)(...params);
+                    const remove = priv.callbackMap.get(msg.callbackId)(...params);
                     if (remove)
                     {
-                        priv.callbackMap.delete(msg.callback);
+                        priv.callbackMap.delete(msg.callbackId);
                     }
                 }
             });
@@ -597,7 +594,7 @@ shRequire([__dirname + "/object.js"], obj =>
                     ++idCounter;
                     priv.callbackMap.set(callbackId, p);
                     priv.callbacks.push(callbackId);
-                    return { type: "callback", clientId: priv.clientId, callback: callbackId };
+                    return { type: "callback", clientId: priv.clientId, callbackId: callbackId };
                 }
                 else if (typeof p === "object" && p.constructor.name === "Uint8Array")
                 {
@@ -638,7 +635,7 @@ shRequire([__dirname + "/object.js"], obj =>
                                 const callId = idCounter;
                                 ++idCounter;
                                 priv.callMap.set(callId, {
-                                    name: r.instance + "." + method,
+                                    name: r.instanceId + "." + method,
                                     parameters: params,
                                     binaries,
                                     resolve,

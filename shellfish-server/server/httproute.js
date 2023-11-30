@@ -168,7 +168,10 @@ shRequire(["shellfish/core"], core =>
                         priv.authentication.requestAuthorization(response);
                         
                         // delay the response to discourage brute force attempts
-                        setTimeout(() => { response.end(); }, 3000);
+                        this.wait(3000).then(() =>
+                        {
+                            response.end();
+                        });
                     }
                     else
                     {

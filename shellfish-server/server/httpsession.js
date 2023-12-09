@@ -111,13 +111,16 @@ shRequire(["shellfish/core"], core =>
     /**
      * Class representing a HTTP response.
      * 
+     * Use the `response` method of {@link server.HTTPServer.HTTPRequestEvent}
+     * to create a response.
+     * 
      * The setter methods of this class return the class instance itself, so
      * method calls may be chained.
      * 
      * @memberof server
      * 
      * @example
-     * response(200, "OK")
+     * req.response(200, "OK")
      * .cookie("MyCookie", "42")
      * .body("Hello World", "text/html")
      * .send();
@@ -301,21 +304,23 @@ shRequire(["shellfish/core"], core =>
      * A session is identified by a session ID.
      * 
      * @example
-     * HttpSession {
+     * HTTPSession {
+     * 
      *     onRequest: req =>
      *     {
      *         if (req.method === "FOO")
      *         {
-     *             response(200, "OK")
+     *             req.response(200, "OK")
      *             .body("You requested " + req.url)
      *             .send();
      *         }
      *         else
      *         {
-     *             response(404, "Not Found")
+     *             req.response(404, "Not Found")
      *             .send();
      *         }
      *     }
+     * 
      * }
      * 
      * @extends core.Object
@@ -347,15 +352,33 @@ shRequire(["shellfish/core"], core =>
 
             /**
              * Is triggered when a request comes in.
+             * 
              * @event request
              * @memberof server.HTTPSession
+             * 
+             * @param {server.HTTPServer.HTTPRequestEvent} request - The request event.
              */
             this.registerEvent("request");
 
             /**
-             * Is triggered when a response is ready to be sent.
+             * Is triggered when a response is ready to be sent. This allows to make modifications
+             * to the response before sending.
+             * 
+             * ### Example
+             * ```
+             * WebSession {
+             *    filesystem: localFs
+             *    root: "/var/www"
+             *    indexFile: "index.html"
+             *
+             *    onResponseReady: r => { r.enableCrossOriginIsolation(); }
+             * }
+             * ```
+             * 
              * @event responseReady
              * @memberof server.HTTPSession
+             * 
+             * @param {server.HTTPResponse} response - The response object.
              */
             this.registerEvent("responseReady");
         }
@@ -431,7 +454,8 @@ shRequire(["shellfish/core"], core =>
         }
 
         /**
-         * Closes this session.
+         * Closes this session. This removes this particular session instance
+         * from the parent HTTP server.
          */
         close()
         {

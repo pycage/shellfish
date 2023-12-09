@@ -170,50 +170,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * session ID, except for the initial connection. This header may be used
      * to open a session per client.
      * 
-     * Example
-     * ```
-     * HTTPRoute {
-     *     when: req => req.url.path === "/::rpc"
-     *     generateSessionId: req => req.headers.get("x-shellfish-rpc-session") || core.generateUid()
-     * 
-     *     delegate: template RpcSession {
-     *         onInitialization: () =>
-     *         {
-     *             registerMethod("sum", (a, b) => a + b);
-     * 
-     *             registerMethod("countDown", cb =>
-     *             {
-     *                 for (let i = 10; i > 0; --i)
-     *                 {
-     *                     cb(i);
-     *                 }
-     *             });
-     *         }
-     *     }
-     * }
-     * ```
-     * 
-     * Example: Creating and returning a RPC proxy object to the client
-     * ```
-     * class MyClass
-     * {
-     *     constructor(initial)
-     *     {
-     *         this.value = initial;
-     *     }
-     * 
-     *     add(n) { this.value += n; }
-     *
-     *     value() { return this.value; }
-     * }
-     * 
-     * registerMethod("getMyClass", (initial) =>
-     * {
-     *     return proxyObject(new MyClass(initial));
-     * });
-     * ```
-     * 
-     * Values of type `Uint8Array` are transfered in binary form.
+     * Parameters of type `Uint8Array` are transfered in binary form.
      * 
      * ## Details of the RPC Protocol
      * 
@@ -611,6 +568,19 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
         /**
          * Registers a function as RPC method.
          * 
+         * ### Example
+         * ```
+         * registerMethod("sum", (a, b) => a + b);
+         * 
+         * registerMethod("countDown", cb =>
+         * {
+         *     for (let i = 10; i > 0; --i)
+         *     {
+         *         cb(i);
+         *     }
+         * });
+         * ```
+         * 
          * @param {string} name - The name of the method.
          * @param {function} f - The method's implementation.
          */
@@ -622,6 +592,26 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
         /**
          * Creates a RPC proxy object of the given object, which can then be
          * passed to the RPC client.
+         * 
+         * ### Example
+         * ```
+         * class MyClass
+         * {
+         *     constructor(initial)
+         *     {
+         *         this.value = initial;
+         *     }
+         * 
+         *     add(n) { this.value += n; }
+         *
+         *     value() { return this.value; }
+         * }
+         * 
+         * registerMethod("getMyClass", (initial) =>
+         * {
+         *     return proxyObject(new MyClass(initial));
+         * });
+         * ```
          * 
          * @param {object} obj - The object for which to create the proxy.
          * @param {string[]} exposedMethods - An optional list of the methods to expose. If this parameter is not used, all methods will be exposed.

@@ -32,6 +32,17 @@ shRequire(["shellfish/core"], core =>
      * Class representing a token-based authentication method.
      * The authentication token is expected in the HTTP cookie `AuthToken`.
      * 
+     * Tokens are runtime-associated with a user name until revoked and are only
+     * valid for a single source address.
+     * ```
+     * // issue a new token for user "user" coming from "127.0.0.1"
+     * const token = issueToken("user", "127.0.0.1");
+     * 
+     * // revoke that token, so that the user can no longer access areas
+     * // requiting authorization
+     * revokeToken(token);
+     * ```
+     * 
      * @extends core.Object
      * @memberof server
      */

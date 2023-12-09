@@ -75,7 +75,7 @@ shRequire([__dirname + "/action.js"], act =>
 
         /**
          * Returns a predicate function for waiting until the seconds hand of
-         * clock reaches the gives point.
+         * clock reaches the given point.
          * 
          * @param {number} n - The point to wait for.
          * @return {function} The predicate function.
@@ -96,7 +96,7 @@ shRequire([__dirname + "/action.js"], act =>
 
         /**
          * Returns a predicate function for waiting until the minutes hand of
-         * clock reaches the gives point.
+         * clock reaches the given point.
          * 
          * @param {number} n - The point to wait for.
          * @return {function} The predicate function.
@@ -117,7 +117,7 @@ shRequire([__dirname + "/action.js"], act =>
 
         /**
          * Returns a predicate function for waiting until the hours hand of
-         * clock reaches the gives point.
+         * clock reaches the given point.
          * 
          * @param {number} n - The point to wait for, given in UTC time.
          * @return {function} The predicate function.

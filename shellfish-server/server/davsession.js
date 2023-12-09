@@ -183,6 +183,31 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js", "shellfish/core/xmls
     /**
      * Class representing a WebDAV session serving a filesystem.
      * 
+     * On the client side, {@link html.DavFS} may be used as a WebDAV client.
+     * 
+     * ### Example
+     * ```
+     * HTTPServer {
+     * 
+     *     host: "0.0.0.0"
+     *     port: 8000
+     * 
+     *     LocalFS {
+     *         id: localFs
+     *     }
+     * 
+     *     HTTPRoute {
+     * 
+     *         delegate: DAVSession {
+     *             filesystem: localFs
+     *             root: "/opt/dav"
+     *         }
+     * 
+     *     }
+     * 
+     * }
+     * ```
+     * 
      * @extends server.HTTPSession
      * @memberof server
      * 

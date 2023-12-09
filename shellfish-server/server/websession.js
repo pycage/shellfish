@@ -140,6 +140,30 @@ shRequire([__dirname + "/httpsession.js", __dirname + "/localfs.js"], (httpSessi
      * When requesting a folder, a simple HTML page with the folder's contents
      * is generated.
      * 
+     * ### Example
+     * ```
+     * HTTPServer {
+     * 
+     *     host: "0.0.0.0"
+     *     port: 8000
+     * 
+     *     LocalFS {
+     *         id: localFs
+     *     }
+     * 
+     *     HTTPRoute {
+     * 
+     *         delegate: WebSession {
+     *             filesystem: localFs
+     *             root: "/opt/www"
+     *             indexFile: "index.html"
+     *         }
+     * 
+     *     }
+     * 
+     * }
+     * ```
+     * 
      * @extends server.HTTPSession
      * @memberof server
      * 

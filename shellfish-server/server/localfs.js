@@ -349,11 +349,21 @@ shRequire(["shellfish/core", "shellfish/core/mime"], function (core, mime)
             });
         }
 
+        /**
+         * Returns the path to the user's home directory.
+         * 
+         * @return {string} The path to the home directory.
+         */
         get homeDirectory()
         {
             return this.normalizePath(modOs.homedir());
         }
 
+        /**
+         * Returns the path to the standard directory for temporary files.
+         * 
+         * @return {string} The path to the standard directory for temporary files.
+         */
         get tempDir()
         {
             return this.normalizePath(modOs.tmpdir());

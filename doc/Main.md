@@ -135,6 +135,11 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ## News
 
+### December 2023
+* **API Break:** The deprecated property `prefix` has been removed from
+  {@link server.HTTPRoute}. Instead, the new method {@link server.HTTPRoute#pathPrefix}
+  can be used to create a simple prefix test for the `when` predicate.
+
 ### November 2023
 * `require.js` is now the same as `require2.js` and `require2.js` is going to be
   removed eventually. The previous version of `require.js` is currently available as

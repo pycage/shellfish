@@ -122,7 +122,7 @@ shRequire(["shellfish/core"], core =>
     const d = new WeakMap();
 
     /**
-     * Class representing a HTTP server.
+     * Class representing a HTTP or HTTPS server.
      * 
      * The HTTP server passes requests to its {@link server.HTTPRoute} child
      * elements. The HTTP route handling the request will create or re-use a
@@ -330,7 +330,6 @@ shRequire(["shellfish/core"], core =>
                 let handled = false;
                 this.children
                 .filter(c => c.when !== undefined && c.handleRequest !== undefined)
-                .filter(c => request.url.startsWith(c.prefix))
                 .filter(c => c.when(ev))
                 .forEach((route, idx) =>
                 {

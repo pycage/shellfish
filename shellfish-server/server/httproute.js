@@ -66,7 +66,6 @@ shRequire(["shellfish/core"], core =>
      * @property {server.HTTPAuth} authentication - (default: `null`) The authentication method, or `null`.
      * @property {server.HTTPSession} delegate - (default: `null`) The session delegate.
      * @property {function} generateSessionId - A function for generating a session ID out of a request.
-     * @property {string} prefix - (default: `"/"`) Deprecated: Use the `when` property instead. The path prefix for which this route is to be used.
      * @property {function} when - (default: `request => true`) A function for testing whether a request is to be handled by a request.
      */
     class HTTPRoute extends core.Object
@@ -80,7 +79,6 @@ shRequire(["shellfish/core"], core =>
                 connecting: false,
                 sessions: new Map(),
                 when: request => true,
-                prefix: "/",
                 generateSessionId: request =>
                 {
                     return request.sourceAddress + ":" + request.sourcePort;
@@ -88,7 +86,6 @@ shRequire(["shellfish/core"], core =>
             });
 
             this.notifyable("authentication");
-            this.notifyable("prefix");
         }
 
         get authentication() { return d.get(this).authentication; }
@@ -96,13 +93,6 @@ shRequire(["shellfish/core"], core =>
         {
             d.get(this).authentication = a;
             this.authenticationChanged();
-        }
-
-        get prefix() { return d.get(this).prefix; }
-        set prefix(p)
-        {
-            d.get(this).prefix = p;
-            this.prefixChanged();
         }
 
         get generateSessionId() {return d.get(this).generateSessionId; }
@@ -113,6 +103,18 @@ shRequire(["shellfish/core"], core =>
 
         get delegate() { return d.get(this).delegate; }
         set delegate(del) { d.get(this).delegate = del; }
+
+        /**
+         * Creates a simple predicate for `when` that tests just for a
+         * path prefix.
+         * 
+         * @param {string} p - The path prefix to test for.
+         * @return {function} A predicate function to use for `when`.
+         */
+        pathPrefix(p)
+        {
+            return (req) => { return req.url.path.startsWith(p); };
+        }
 
         /**
          * Returns the {@link server.HTTPSession} for the given ID. Creates a

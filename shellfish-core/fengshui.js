@@ -750,7 +750,6 @@ exports.tools = {
         }
 
         const code = `/* Compiled from Shui by Feng Shui Code Processor */
-            "use strict";
             exports.shuiReady = false;
             shRequire(["shellfish/fengshui"], (fengshui_Internal) =>
             {

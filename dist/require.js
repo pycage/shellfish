@@ -518,7 +518,7 @@ const shRequire = (function ()
         }
         else if (bundle.version === 2)
         {
-            let js = "";
+            let js = "\"use strict\";";
             const scriptId = idCounter;
             ++idCounter;
 
@@ -546,19 +546,22 @@ const shRequire = (function ()
                     {
                         // collect all JavaScript files wrapped in loader functions in a single module
                         js += `
-                            origRequire = shRequire;
-                            shRequire.registerLoader("${resUrl}", async (exports, __dirname, __filename) =>
+                            (() =>
                             {
-                                let reqQueue = [];
-                                const shRequire = origRequire.withQueue(reqQueue);
+                                const origRequire = shRequire;
+                                shRequire.registerLoader("${resUrl}", async (exports, __dirname, __filename) =>
+                                {
+                                    let reqQueue = [];
+                                    const shRequire = origRequire.withQueue(reqQueue);
 
-                                ${bundle.resources[resUrl]}
-                                const mod = typeof Module !== "undefined" ? Module : exports;
-                                shRequire.registerModule("${resUrl}", mod);
+                                    ${bundle.resources[resUrl]}
+                                    const mod = typeof Module !== "undefined" ? Module : exports;
+                                    shRequire.registerModule("${resUrl}", mod);
 
-                                while (reqQueue.length > 0) await reqQueue.shift();
-                            });
-                            origRequire.invokeCallback(${scriptId});
+                                    while (reqQueue.length > 0) await reqQueue.shift();
+                                });
+                                origRequire.invokeCallback(${scriptId});
+                            })();
                         `;
                     }
                     else
@@ -778,6 +781,7 @@ const shRequire = (function ()
             ++idCounter;
 
             const js = `/* Module ${url} */
+                "use strict";
                 (() =>
                 {
                     const origRequire = typeof shRequire !== "undefined" ? shRequire : undefined;
@@ -975,9 +979,10 @@ const shRequire = (function ()
     /**
      * Imports a list of modules.
      * 
-     * @param {string} urls - The URLs of the modules to import.
-     * @param {function} callback - A callback with the imported modules as parameters.
+     * @param {string[]} urls - The URLs of the modules to import. If this is a `string` instead of an `array`, the return value will be a single module.
+     * @param {function} [callback] - A callback with the imported modules as parameters.
      * @param {function} [processor = null] - An optional code processor.
+     * @returns {Promise<string[]>} - The list of modules.
      */
     async function __require(urls, callback, processor)
     {
@@ -1001,7 +1006,7 @@ const shRequire = (function ()
             }
             return mod;
         }
-        else
+        else if (Array.isArray(urls))
         {
             let modules = [];
             for (let i = 0; i < urls.length; ++i)

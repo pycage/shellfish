@@ -582,6 +582,7 @@ const shRequire = (function ()
                         js += `
                             shRequire.registerLoader("${resUrl}", (exports, __dirname, __filename) =>
                             {
+                                "use strict";
                                 const currentDependencyCounter = shRequire.dependencyCounter;
                                 ${bundle.resources[resUrl]}
                                 const mod = typeof Module !== "undefined" ? Module : exports;
@@ -818,6 +819,7 @@ const shRequire = (function ()
                 }
     
                 const js = `/* Module ${url} */
+                    "use strict";
                     (function (Module)
                     {
                         const __dirname = "${dirname.replace(/\\/g, "\\\\")}";

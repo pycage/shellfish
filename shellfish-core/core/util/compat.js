@@ -47,6 +47,43 @@ function addEventListener(target, event, callback, options)
 }
 exports.addEventListener = addEventListener;
 
+function fetchCompat(url)
+{
+    if (isWeb)
+    {
+        return fetch(url, { cache: "no-cache" })
+        .then(response =>
+        {
+            if (response.ok)
+            {
+                return response.text();
+            }
+            else
+            {
+                throw "Failed to read from " + url;
+            }
+        });
+    }
+    else if (isNode)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            modFs.readFile(url, (err, data) =>
+            {
+                if (err)
+                {
+                    reject(err);
+                }
+                else
+                {
+                    resolve(data.toString());
+                }
+            });
+        });
+    }
+}
+exports.fetch = fetchCompat;
+
 function createWorkerThread(code)
 {
     if (isWeb)

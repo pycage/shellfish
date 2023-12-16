@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2020 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -83,7 +83,7 @@ shRequire([__dirname + "/fengshui.js"], (fengshui) =>
                 <p>
                 <tt>https://example.com/index.html?shui=main.shui</tt>
                 <hr>
-                <i>Shellfish UI toolkit &copy; 2019 - 2022 Martin Grimme</i>
+                <i>Shellfish UI toolkit &copy; 2019 - 2023 Martin Grimme</i>
             `);
         }
     }

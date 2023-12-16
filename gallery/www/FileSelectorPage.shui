@@ -20,7 +20,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/low" as low;
 require "shellfish/ui";
 require "./Header.shui";
 require "./Labeled.shui";
@@ -184,7 +183,7 @@ Page {
                     bold: true
                     fillWidth: true
                     overflowBehavior: "ellipsis"
-                    text: low.escapeMarkup(itemBox.modelData.value.name)
+                    text: escapeMarkup(itemBox.modelData.value.name)
                 }
 
                 Label {

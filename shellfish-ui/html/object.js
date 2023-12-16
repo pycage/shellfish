@@ -20,7 +20,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-shRequire(["shellfish/core"], core =>
+shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
 {
     const d = new WeakMap();
 
@@ -122,6 +122,33 @@ shRequire(["shellfish/core"], core =>
                 listeners.splice(idx, 1);
             }
         }
+
+        /**
+         * Escapes a text string for HTML output.
+         * 
+         * This function replaces certain characters in the text string by entities
+         * (for example, "`<`" becomes "`&lt;`") so that the string may safely be output in
+         * HTML.
+         * 
+         * @param {string} text - The text to escape.
+         * @returns {string} The escaped text.
+         */
+        escapeHtml(text)
+        {
+            return low.escapeHtml(text);
+        }
+
+        /**
+         * Escapes a text string for literal output.
+         * 
+         * @param {string} text - The text to escape.
+         * @returns {string} The escaped text.
+         */
+        escapeMarkup(text)
+        {
+            return low.escapeMarkup(text);
+        }
+
     }
     exports.Object = Obj;
 });

@@ -79,6 +79,8 @@ exports.elapsed = elapsed;
  * (for example, "`<`" becomes "`&lt;`") so that the string may safely be output in
  * HTML.
  * 
+ * @deprecated Use {@link html.Object#escapeHtml} instead.
+ * 
  * @memberof low
  * 
  * @param {string} text - The text to escape.
@@ -111,6 +113,8 @@ exports.escapeHtml = escapeHtml;
  * 
  * @example
  * const output = low.resolveIcons("This is an [icon:bug] icon.");
+ * 
+ * @deprecated Resolving icons is handled by {@link html.Label} internally.
  * 
  * @memberof low
  * 
@@ -154,6 +158,8 @@ exports.resolveIcons = resolveIcons;
 /**
  * Escapes a text string for literal output.
  * 
+ * @deprecated Use {@link html.Object#escapeMarkup} instead.
+ * 
  * @memberof low
  * 
  * @param {string} text - The text to escape.
@@ -173,6 +179,8 @@ exports.escapeMarkup = escapeMarkup;
  * * \**italic*\*
  * * \*\***bold**\*\*
  * * \__underlined_\_
+ * 
+ * @deprecated Resolving markup is handled by {@link html.Label} internally.
  * 
  * @memberof low
  * 

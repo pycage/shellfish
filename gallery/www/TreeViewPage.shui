@@ -21,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 require "shellfish/ui";
-require "shellfish/low" as low;
 require "./Header.shui";
 
 Page {
@@ -152,7 +151,7 @@ Page {
                                 obj: childObj,
                                 level: item.level + 1,
                                 nodeType: type === "object" && childObj !== null ? "node" : "leaf",
-                                text: "**" + low.escapeMarkup(key) + "** " + low.escapeMarkup(value.split("\n").join(" "))
+                                text: "**" + escapeMarkup(key) + "** " + escapeMarkup(value.split("\n").join(" "))
                             };
                             nodes.push(child);
 

@@ -20,7 +20,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
-require "shellfish/low" as low;
 require "shellfish/ui";
 require "./Header.shui";
 
@@ -123,7 +122,7 @@ Page {
                     fontSize: theme.fontSizeSmall
                     overflowBehavior: "ellipsis"
                     horizontalAlignment: "center"
-                    text: low.escapeMarkup(item.modelData.value.icon)
+                    text: escapeMarkup(item.modelData.value.icon)
                 }
 
             }

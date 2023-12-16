@@ -21,7 +21,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 require "shellfish/ui";
-require "shellfish/low" as low;
 require "./Header.shui";
 require "./Labeled.shui";
 
@@ -308,7 +307,7 @@ Page {
                             {
                                 const dlg = imageDialog();
                                 dlg.show();
-                                dlg.title = low.escapeMarkup(file.name);
+                                dlg.title = escapeMarkup(file.name);
                                 drive.read(file.path)
                                 .then((fileData) =>
                                 {

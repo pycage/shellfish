@@ -46,15 +46,6 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
         .html()
     );
 
-    function defaultFilter(s)
-    {
-        return low.resolveMarkup(
-            low.resolveIcons(
-                low.escapeHtml(s).replace(/\n/g, "<br>")
-            )
-        );
-    }
-
     const d = new WeakMap();
 
     /**
@@ -200,10 +191,10 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             let out = "" + text;
             if (isLiteral)
             {
-                out = low.escapeHtml(out)
-                         .replace(/\r?\n /g, "<br>&nbsp;")
-                         .replace(/\r?\n/g, "<br>")
-                         .replace(/  /g, "&nbsp; ");
+                out = this.escapeHtml(out)
+                          .replace(/\r?\n /g, "<br>&nbsp;")
+                          .replace(/\r?\n/g, "<br>")
+                          .replace(/  /g, "&nbsp; ");
             }
             else if (typeof priv.filter === "function")
             {
@@ -211,7 +202,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             }
             else
             {
-                out = defaultFilter(out);
+                out = low.resolveMarkup(low.resolveIcons(this.escapeHtml(out).replace(/\n/g, "<br>")));
             }
             if (out === text)
             {

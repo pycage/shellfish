@@ -195,6 +195,11 @@ shRequire(["shellfish/core"], core =>
                     this.response.end();
                 });
 
+                this.response.on("close", () =>
+                {
+                    this.dataStream.destroy();
+                });
+
                 if (this.dataSize !== -1 && ! this.compress)
                 {
                     this.response.setHeader("Content-Length", "" + this.dataSize);

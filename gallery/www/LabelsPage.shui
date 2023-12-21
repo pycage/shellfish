@@ -187,7 +187,7 @@ Page {
             fillWidth: true
             marginTop: theme.paddingLarge
             fontFamily: fontSelectionBox.text
-            fontSize: fontSizeSlider.value
+            fontSize: fontSizeSlider.seekValue
             overflowBehavior: overflowSelectionBox.text
             horizontalAlignment: alignmentSelectionBox.text
             color: colorSelectionBox.text

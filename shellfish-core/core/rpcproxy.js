@@ -115,7 +115,11 @@ shRequire([__dirname + "/object.js"], obj =>
                             done = r.done;
                             value = r.value;
                             dataOffset = 0;
-                            // FIXME: value might be undefined in here (when server closes connection)
+                            // value might be undefined in here (when server closes connection)
+                            if (value === undefined)
+                            {
+                                break;
+                            }
                         }
                         
                         if (buffer === null)
@@ -501,7 +505,7 @@ shRequire([__dirname + "/object.js"], obj =>
             this.statusChanged();
 
             const MSock = shRequire.environment === "node" ? MessageSocketNode : MessageSocket;
-            priv.socket = new MSock(priv.endpoint, (msg, binaryData) =>
+            priv.socket = new MSock(priv.endpoint, this.safeCallback((msg, binaryData) =>
             {
                 if (msg.type === "ready")
                 {
@@ -553,7 +557,7 @@ shRequire([__dirname + "/object.js"], obj =>
                         priv.callbackMap.delete(msg.callbackId);
                     }
                 }
-            });
+            }));
             priv.socket.connect();
         }
 

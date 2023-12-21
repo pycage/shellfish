@@ -214,6 +214,12 @@ shRequire([__dirname + "/filesystem.js", __dirname + "/util/mime.js"], (fs, mime
             const buffer = await fileData.arrayBuffer();
             console.log(buffer);
 
+            if (self.lifeCycleStatus === "destroyed")
+            {
+                resolve();
+                return;
+            }
+
             const buffer32 = new Uint32Array(buffer, 0, 16);
             const version = buffer32.at(0);
 
@@ -241,6 +247,12 @@ shRequire([__dirname + "/filesystem.js", __dirname + "/util/mime.js"], (fs, mime
             const json = await jsonBlob.text();
             const obj = JSON.parse(json);
             
+            if (self.lifeCycleStatus === "destroyed")
+            {
+                resolve();
+                return;
+            }
+
             priv.data = dataBuffer;
             priv.index = obj.index;
             priv.freeBlocks = obj.freeBlocks;

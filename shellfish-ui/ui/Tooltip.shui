@@ -81,7 +81,7 @@ Object {
 
         onHeightChanged: () =>
         {
-            if (height > 0 && ! initialized)
+            if (height > 0 && ! initialized && tooltip.target)
             {
                 const tbbox = {
                     x: tooltip.target.bboxX,

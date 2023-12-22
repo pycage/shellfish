@@ -28,26 +28,6 @@ Page {
 
     property showControls: true
 
-    function formatTime(seconds)
-    {
-        let t = seconds;
-        const secs = Math.floor(t) % 60;
-        t /= 60;
-        const minutes = Math.floor(t) % 60;
-        t /= 60;
-        const hours = Math.floor(t);
-
-        let h = hours.toFixed(0);
-        let m = minutes.toFixed(0);
-        let s = secs.toFixed(0);
-
-        if (h.length === 1) h = "0" + h;
-        if (m.length === 1) m = "0" + m;
-        if (s.length === 1) s = "0" + s;
-
-        return (hours > 0 ? h + ":" : "") + m + ":" + s;
-    }
-
     function openFileDialog()
     {
         fsel.open((files) =>
@@ -206,10 +186,10 @@ Page {
             horizontalAlignment: "center"
             color: "white"
             fontSize: theme.fontSizeSmall
-            text: seekBar.seeking ? page.formatTime(seekBar.seekTime) + " / " +
-                                    page.formatTime(video.duration)
-                                  : page.formatTime(video.currentTime) + " / " +
-                                    page.formatTime(video.duration)
+            text: seekBar.seeking ? core.formatSeconds(seekBar.seekTime) + " / " +
+                                    core.formatSeconds(video.duration)
+                                  : core.formatSeconds(video.currentTime) + " / " +
+                                    core.formatSeconds(video.duration)
         }
 
         Box {

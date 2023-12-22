@@ -28,12 +28,12 @@ shRequire([__dirname + "/action.js"], act =>
     /**
      * Class representing a waiting action.
      * 
-     * The waiting may be aborted by setting the `enabled` property to `false`.
+     * The waiting may be aborted anytime by setting the `enabled` property to `false`.
      * 
      * @memberof core
      * @extends core.Action
      * 
-     * @property {function} until - A predicate function taking the current timestamp and returning the timestamp until when to wait.
+     * @property {function} until - (default: `null`) A predicate function taking the current timestamp and returning the timestamp until when to wait. When `null`, it waits forever.
      */
     class WaitAction extends act.Action
     {
@@ -41,7 +41,7 @@ shRequire([__dirname + "/action.js"], act =>
         {
             super();
             d.set(this, {
-                until: now => now + 1000
+                until: null
             });
 
             this.notifyable("until");
@@ -51,6 +51,14 @@ shRequire([__dirname + "/action.js"], act =>
                 if (this.status === "stopping")
                 {
                     this.abortWait("wait");
+                }
+            };
+
+            this.onEnabledChanged = () =>
+            {
+                if (! this.enabled)
+                {
+                    this.stop();
                 }
             };
         }
@@ -142,11 +150,21 @@ shRequire([__dirname + "/action.js"], act =>
             {
                 if (this.enabled)
                 {
-                    const now = Date.now();
-                    const waitUntil = d.get(this).until(now);
-                    const diff = Math.max(0, waitUntil - now);
-    
-                    await this.wait(diff, "wait");
+                    if (d.get(this).until)
+                    {
+                        const now = Date.now();
+                        const waitUntil = d.get(this).until(now);
+                        const diff = Math.max(0, waitUntil - now);
+
+                        await this.wait(diff, "wait");
+                    }
+                    else
+                    {
+                        while (this.status === "running")
+                        {
+                            await this.wait(1000 * 3600 * 24 * 365 * 100, "wait");
+                        }
+                    }
                 }
                 if (this.lifeCycleStatus !== "destroyed")
                 {

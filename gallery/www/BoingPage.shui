@@ -49,13 +49,6 @@ Page {
 
         layout: "center"
 
-        onClick: {
-            if (! animation.busy)
-            {
-                animation.start();
-            }
-        }
-
         Box {
             id: sun
             
@@ -123,6 +116,14 @@ Page {
 
     SequentialAction {
         id: animation
+
+        repeat: true
+
+        onInitialization: () => { start(); }
+
+        WaitAction {
+            enabled: ! box.pressed
+        }
 
         ScriptAction {
             script: {

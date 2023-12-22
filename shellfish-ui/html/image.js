@@ -126,34 +126,6 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
         get originalWidth() { return d.get(this).item.naturalWidth; }
         get originalHeight() { return d.get(this).item.naturalHeight; }
 
-        /**
-         * Loads the image from a HTML5 file object.
-         * This method is deprecated and should not be used anymore. Use
-         * the `blobUrl()` converter method from {@link html.Object Object} instead for
-         * assigning a blob to the `source` property.
-         * @deprecated
-         * 
-         * @param {object} fileObj - The file object to read.
-         */
-        fromFile(fileObj)
-        {
-            if (! ("" + fileObj.type).startsWith("image/"))
-            {
-                d.get(this).status = "error";
-                this.statusChanged();
-                return;
-            }
-
-            const reader = new FileReader();
-
-            reader.onload = () =>
-            {
-                this.source = reader.result;
-            };
-
-            reader.readAsDataURL(fileObj);
-        }
-
         get()
         {
             return d.get(this).item;

@@ -66,8 +66,15 @@ textarea {
 }
 
 .sh-type-box {
+    position: relative;
     /* boxes have their own local stacking context */
     z-index: 0;
+}
+
+.sh-type-label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 .sh-underline {
@@ -157,6 +164,21 @@ div.sh-layout-center-row {
     justify-content: center;
     align-items: center;
     align-content: center;
+}
+
+div.sh-overflowbehavior-none {
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+div.sh-overflowbehavior-wrap {
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+
+div.sh-overflowbehavior-scroll {
+    flex-wrap: nowrap;
+    overflow: auto;
 }
 
 ::cue {

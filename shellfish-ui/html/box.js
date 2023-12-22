@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -26,15 +26,13 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 {
     const HTML = low.createElementTree(
         low.tag("div")
-        .class("sh-no-scrollbars sh-layout-column sh-type-box")
-        .style("position", "relative")
+        .class("sh-no-scrollbars sh-layout-column sh-overflowbehavior-none sh-type-box")
         .style("width", "auto")
         .style("height", "auto")
         .style("border-color", "black")
         .style("border-width", "0")
         .style("border-style", "solid")
         .style("border-radius", "0")
-        .style("overflow", "hidden")
         .html()
     );
 
@@ -74,6 +72,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 overflowBehavior: "none",
                 scrollbars: false,
                 currentCssClass: "sh-layout-column",
+                currentOverflowClass: "sh-overflowbehavior-none",
                 layoutPending: false,
                 item: HTML.cloneNode()
             });
@@ -217,48 +216,30 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 }
             }
 
+            function setOverflowClass(newCls)
+            {
+                if (newCls !== priv.currentOverflowClass)
+                {
+                    item.classList.remove(priv.currentOverflowClass);
+                    item.classList.add(newCls);
+                    priv.currentOverflowClass = newCls;
+                }
+            }
+
             switch (priv.layout)
             {
             case "column":
                 setLayoutClass("sh-layout-column");
-                /*
-                low.css(item, "display", "flex");
-                low.css(item, "flex-direction", "column");
-                low.css(item, "justify-content", "flex-start");
-                low.css(item, "align-items", "flex-start");
-                low.css(item, "align-content", "start");
-                */
                 break;
             case "row":
                 setLayoutClass("sh-layout-row");
-                /*
-                low.css(item, "display", "flex");
-                low.css(item, "flex-direction", "row");
-                low.css(item, "justify-content", "flex-start");
-                low.css(item, "align-items", "flex-start");
-                low.css(item, "align-content", "start");
-                */
                 break;
             case "center":
             case "center-column":
                 setLayoutClass("sh-layout-center-column");
-                /*
-                low.css(item, "display", "flex");
-                low.css(item, "flex-direction", "column");
-                low.css(item, "justify-content", "center");
-                low.css(item, "align-items", "center");
-                low.css(item, "align-content", "center");
-                */
                 break;
             case "center-row":
                 setLayoutClass("sh-layout-center-row");
-                /*
-                low.css(item, "display", "flex");
-                low.css(item, "flex-direction", "row");
-                low.css(item, "justify-content", "center");
-                low.css(item, "align-items", "center");
-                low.css(item, "align-content", "center");
-                */
                 break;
             default:
                 throw `Invalid value for layout (${this.objectLocation}): ${d.get(this).layout}`;
@@ -267,16 +248,25 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
             switch (d.get(this).overflowBehavior)
             {
             case "none":
+                setOverflowClass("sh-overflowbehavior-none");
+                /*
                 this.css("flex-wrap", "nowrap");
                 this.css("overflow", "hidden");
+                */
                 break;
             case "wrap":
+                setOverflowClass("sh-overflowbehavior-wrap");
+                /*
                 this.css("flex-wrap", "wrap");
                 this.css("overflow", "hidden");
+                */
                 break;
             case "scroll":
+                setOverflowClass("sh-overflowbehavior-scroll");
+                /*
                 this.css("flex-wrap", "nowrap");
                 this.css("overflow", "auto");
+                */
                 break;
             default:
                 throw `Invalid value for overflowBehavior (${this.objectLocation}): ${d.get(this).overflowBehavior}`;
@@ -313,7 +303,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                     {
                        priv.item.appendChild(child.get());
                     }
-                }
+                };
+                
                 if (this.lifeCycleStatus === "new")
                 {
                     this.withoutSizing(f);

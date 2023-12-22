@@ -597,7 +597,14 @@ shRequire(["shellfish/low",
 
                 if (fillWidth)
                 {
-                    this.css("width", "calc(100% - " + marginLeft + "px - " + marginRight + "px)");
+                    if (marginLeft !== 0 || marginRight !== 0)
+                    {
+                        this.css("width", "calc(100% - " + marginLeft + "px - " + marginRight + "px)");
+                    }
+                    else
+                    {
+                        this.css("width", "100%");
+                    }
                     this.css("left", marginLeft + "px");
                     this.css("right", "");
                 }
@@ -623,7 +630,14 @@ shRequire(["shellfish/low",
 
                 if (fillHeight)
                 {
-                    this.css("height", "calc(100% - " + marginTop + "px - " + marginBottom + "px)");
+                    if (marginTop !== 0 || marginBottom !== 0)
+                    {
+                        this.css("height", "calc(100% - " + marginTop + "px - " + marginBottom + "px)");
+                    }
+                    else
+                    {
+                        this.css("height", "100%");
+                    }
                     this.css("top", marginTop + "px");
                     this.css("bottom", "");
                 }
@@ -655,7 +669,14 @@ shRequire(["shellfish/low",
 
                 if (fillWidth)
                 {
-                    this.css("width", "calc(100% - " + marginLeft + "px - " + marginRight + "px)");
+                    if (marginLeft !== 0 || marginRight !== 0)
+                    {
+                        this.css("width", "calc(100% - " + marginLeft + "px - " + marginRight + "px)");
+                    }
+                    else
+                    {
+                        this.css("width", "100%");
+                    }
                     this.css("margin-left", marginLeft + "px");
                     this.css("margin-right", marginRight + "px");
                     if (this.parent && (this.parent.layout === "row" || this.parent.layout === "center-row"))
@@ -674,7 +695,14 @@ shRequire(["shellfish/low",
 
                 if (fillHeight)
                 {
-                    this.css("height", "calc(100% - " + marginTop + "px - " + marginBottom + "px)");
+                    if (marginTop !== 0 || marginBottom !== 0)
+                    {
+                        this.css("height", "calc(100% - " + marginTop + "px - " + marginBottom + "px)");
+                    }
+                    else
+                    {
+                        this.css("height", "100%");
+                    }
                     this.css("margin-top", marginTop + "px");
                     this.css("margin-bottom", marginBottom + "px");
                     
@@ -1317,8 +1345,9 @@ shRequire(["shellfish/low",
                                    bboxHasChangedWidth ||
                                    bboxHasChangedHeight;
 
-            if (bboxHasChanged)
+            if (bboxHasChanged && this.ancestorsVisible)
             {
+                //console.log("BBOX CHANGED " + this.objectType + "@" + this.objectLocation);
                 priv.prevBbox = bbox;
                 this.bboxChanged();
                 if (bboxHasChangedX) this.bboxXChanged();
@@ -1353,7 +1382,7 @@ shRequire(["shellfish/low",
                 // - this bbox has changed
                 if (bboxHasChanged || (fromChild && item.position === "inline"))
                 {
-                    if (bbox.width * bbox.height > 0)
+                    if (priv.visibility && bbox.width * bbox.height > 0)
                     {
                         this.children.forEach((c) =>
                         {
@@ -1461,7 +1490,6 @@ shRequire(["shellfish/low",
         get()
         {
             throw "Subclasses must override Item.get()."
-            return null;
         }
 
         /**

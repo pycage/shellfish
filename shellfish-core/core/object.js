@@ -1990,6 +1990,36 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
     }
     exports.formatBytes = formatBytes;
 
+    function formatSeconds(seconds, detailed)
+    {
+        let centis = "" + Math.floor((seconds - Math.floor(seconds)) * 100);
+        let t = seconds;
+        const secs = Math.floor(t) % 60;
+        t /= 60;
+        const minutes = Math.floor(t) % 60;
+        t /= 60;
+        const hours = Math.floor(t);
+
+        let h = hours.toFixed(0);
+        let m = minutes.toFixed(0);
+        let s = secs.toFixed(0);
+
+        if (h.length === 1) h = "0" + h;
+        if (m.length === 1) m = "0" + m;
+        if (s.length === 1) s = "0" + s;
+        if (centis.length === 1) centis = "0" + centis;
+
+        if (detailed)
+        {
+            return (hours > 0 ? h + ":" : "") + m + ":" + s + "." + centis;
+        }
+        else
+        {
+            return (hours > 0 ? h + ":" : "") + m + ":" + s;
+        }
+    }
+    exports.formatSeconds = formatSeconds;
+
     /**
      * Creates a dump of the current status for debugging purposes.
      *

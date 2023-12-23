@@ -216,9 +216,23 @@ class RegistryFile extends obj.Object
 
             const p = new Promise(resolve => {priv.resolvers.push(resolve); });
             await p;
-            return await this.read(key, defaultValue);
         }
 
+        return this.readSync(key, defaultValue);
+    }
+
+    /**
+     * Synchronous version of {@link core.RegistryFile#read}. This method is not part of
+     * the registry interface and only provides valid results once the registry has the
+     * `ready` flag set to `true`.
+     * 
+     * @param {string} key - The key to read.
+     * @param {any} defaultValue - The default value to return if the key was not found.
+     * @returns {any} The key's value.
+     */
+    readSync(key, defaultValue)
+    {
+        const priv = d.get(this);
         const reg = priv.registry;
         
         const obj = reg[key];

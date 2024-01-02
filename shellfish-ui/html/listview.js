@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2019 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2019 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -231,8 +231,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
      * @memberof html
      * 
      * @property {number} cacheMargin - (default: `0`) The size of the margin around the visible viewport that is kept in cache.
-     * @property {number} cellHeight - The height of an item.
-     * @property {number} cellWidth - The width of an item.
+     * @property {number} cellHeight - (default: `32`) The height of an item.
+     * @property {number} cellWidth - (default: `64`) The width of an item.
      * @property {number} count - [readonly] The amount of items.
      * @property {fengshui.Template} delegate - The delegate template for creating items dynamically.
      * @property {core.ListModel} model - The model to display. You may pass a number value to implicitly create a simple model.

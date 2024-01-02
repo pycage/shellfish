@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -58,10 +58,15 @@ Button {
     secondaryIcon: "core-menu"
     text: model.size > selection ? model.at(selection) : emptyText
 
-    onPointerDown: (ev) =>
+    onPointerDown: ev =>
+    {
+        click(ev);
+    }
+
+    onClick: ev =>
     {
         ev.accepted = true;
-        
+
         if (! _menu)
         {
             _createMenu();
@@ -105,37 +110,56 @@ Button {
     }
 
     property _menuT: template Menu {
-        id: selMenu
 
-        onVisibleChanged: () =>
+        onCascadingClose: () =>
         {
-            if (! visible)
-            {
-                box.focus = true;
-            }
+            // give focus back to the button when the menu closes
+            box.focus = true;
         }
 
-        Repeater {
-            id: itemRepeater
-            
+        ListView {
+            width: thisMenu.menuRuler.max.width
+            height: Math.min(cellHeight * count, cellHeight * 10, thisDocument.windowHeight * 0.8)
+            cellWidth: bboxWidth
+            cellHeight: theme.itemHeightMedium
+            canFocus: true
+           
             model: box.model
 
-            delegate: template MenuItem {
-                minWidth: box.bboxWidth - 2 /* menu borders */
-                text: modelData.value
-
-                onClick: (ev) =>
+            onAncestorsVisibleChanged: () =>
+            {
+                if (ancestorsVisible)
                 {
-                    box.selection = modelData.index;
-                }
-
-                Timer {
-                    running: selMenu.visible && parent.modelData.index === box.selection
-                    repeat: false
-                    interval: 0
-                    onTimeout: () => { parent.selectItem(false); }
+                    wait(100).then(() =>
+                    {
+                        positionViewAt(box.selection);
+                        selector.select(box.selection, "replace");
+                    });
                 }
             }
+
+            delegate: template MenuItem {
+                property itemSelected: selector.selection.has(modelData.index)
+
+                text: modelData.value
+
+                onItemSelectedChanged: () =>
+                {
+                    if (itemSelected)
+                    {
+                        selectItem(itemSelected);
+                    }
+                }
+
+                onClick: ev =>
+                {
+                    selector.select(modelData.index, "replace");
+                    box.selection = modelData.index;
+                }
+            }
+
+            ListViewSelector { id: selector }
+            ScrollIndicator { }
         }
     }
 }

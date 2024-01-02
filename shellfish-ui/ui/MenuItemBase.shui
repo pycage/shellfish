@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -30,8 +30,8 @@ require "shellfish/ui";
  * @class
  * @extends html.MouseBox
  *
- * @property {bool} selected - (default: `false`) Whether the menu item is currently selected.
- * @property {bool} highlighted - (default: `false`) Whether the menu item is currently highlighted.
+ * @property {bool} selected - [readonly] Whether the menu item is currently selected.
+ * @property {bool} highlighted - [readonly] Whether the menu item is currently highlighted (not necessarily selected).
  * @property {fengshui.Template} menu - (default: `null`) A template for a submenu.
  * @property {bool} menuOpened - [readonly] Whether the submenu is currently opened.
  */
@@ -372,6 +372,7 @@ MouseBox {
         }
         else
         {
+            // standalone menu item with menu
             if (menu && ! menuOpened)
             {
                 showMenu();

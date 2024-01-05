@@ -812,7 +812,7 @@ function addFrameHandler(handler, annotation)
 
     if (animationFrameHandlers.size === 1)
     {
-        window.requestAnimationFrame(function callback(timestamp)
+        const callback = (timestamp) =>
         {
             //console.log(animationFrameHandlers.size + " handlers");
             duringFrameUpdate = true;
@@ -823,9 +823,25 @@ function addFrameHandler(handler, annotation)
             duringFrameUpdate = false;
             if (animationFrameHandlers.size > 0)
             {
-                window.requestAnimationFrame(callback);
+                if (document.visibilityState === "visible" && window.requestAnimationFrame)
+                {
+                    window.requestAnimationFrame(callback);
+                }
+                else
+                {
+                    setTimeout(() => { callback(Date.now()); }, 1000 / 60);
+                }
             }
-        });
+        };
+
+        if (document.visibilityState === "visible" && window.requestAnimationFrame)
+        {
+            window.requestAnimationFrame(callback);
+        }
+        else
+        {
+            setTimeout(() => { callback(Date.now()); }, 1000 / 60);
+        }
     }
 
     return {

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -152,65 +152,58 @@ MouseBox {
               : item.displayMode === "grid" ? "column"
                                             : "center-column"
 
-        Box {
-            fill: true
-            layout: item.displayMode === "list" ? "row"
-                  : item.displayMode === "grid" ? "column"
-                                                : "center-column"
+        Repeater {
+            model: ListModel { data: ["name", "type", "mtime", "size"] }
 
-            Repeater {
-                model: ListModel { data: ["name", "type", "mtime", "size"] }
+            delegate: template Box {
+                width: item.displayMode === "list" ? (item.columnWidths[modelData.index] - (modelData.index === 0 ? iconBox.bboxWidth : 0)) || -1
+                                                    : -1
+                fillWidth: width === -1
+                fillHeight: item.displayMode === "list"
+                layout: "center"
 
-                delegate: template Box {
-                    width: item.displayMode === "list" ? (item.columnWidths[modelData.index] - (modelData.index === 0 ? iconBox.bboxWidth : 0)) || -1
-                                                       : -1
-                    fillWidth: width === -1
-                    fillHeight: item.displayMode === "list"
-                    layout: "center"
+                Label {
+                    id: label
 
-                    Label {
-                        id: label
+                    property listAlignment: modelData.value === "size" && item.displayMode === "list" ? "right" : "left"
 
-                        property listAlignment: modelData.value === "size" && item.displayMode === "list" ? "right" : "left"
+                    property hasOverflow: contentWidth > Math.round(bboxWidth) ||
+                                          contentHeight > Math.round(bboxHeight)
 
-                        property hasOverflow: contentWidth > Math.round(bboxWidth) ||
-                                              contentHeight > Math.round(bboxHeight)
+                    fillWidth: true
+                    maxHeight: fontSize * 2.4
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall
+                    horizontalAlignment: item.displayMode === "list" || item.displayMode === "compact" ? listAlignment : "center"
+                    overflowBehavior: item.displayMode === "grid" && modelData.value === "name" ? "break"
+                                                                                                : "ellipsis"
+                    fontSize: item.displayMode === "grid" && modelData.value !== "name" ? theme.fontSizeSmall
+                                                                                        : theme.fontSizeMedium
+                    color: item.highlighted || item.containsMouse ? theme.highlightColor 
+                           : modelData.value === "name" ? theme.primaryColor
+                                                        :theme.secondaryColor
 
-                        fillWidth: true
-                        maxHeight: fontSize * 2.4
-                        marginLeft: theme.paddingSmall
-                        marginRight: theme.paddingSmall
-                        horizontalAlignment: item.displayMode === "list" || item.displayMode === "compact" ? listAlignment : "center"
-                        overflowBehavior: item.displayMode === "grid" && modelData.value === "name" ? "break"
-                                                                                                    : "ellipsis"
-                        fontSize: item.displayMode === "grid" && modelData.value !== "name" ? theme.fontSizeSmall
-                                                                                            : theme.fontSizeMedium
-                        color: item.highlighted || item.containsMouse ? theme.highlightColor 
-                             : modelData.value === "name" ? theme.primaryColor
-                                                          :theme.secondaryColor
-
-                        text: item.makeRoleLabel(item.file, modelData.value)
-                    }
-
-                    Box {
-                        visible: modelData.value === "name" &&
-                                 item.displayMode === "grid" &&
-                                 label.hasOverflow
-                        fillWidth: true
-                        marginLeft: theme.paddingSmall
-                        marginRight: theme.paddingSmall
-                        height: 1
-                        color: label.color
-                    }
-
-                    Tooltip {
-                        visible: item.hovered &&
-                                 modelData.value === "name" &&
-                                 label.hasOverflow
-                        text: label.text
-                    }
+                    text: item.makeRoleLabel(item.file, modelData.value)
                 }
-            }// Repeater
-        }
+
+                Box {
+                    visible: modelData.value === "name" &&
+                             item.displayMode === "grid" &&
+                             label.hasOverflow
+                    fillWidth: true
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall
+                    height: 1
+                    color: label.color
+                }
+
+                Tooltip {
+                    visible: item.hovered &&
+                             modelData.value === "name" &&
+                             label.hasOverflow
+                    text: label.text
+                }
+            }
+        }// Repeater
     }
 }

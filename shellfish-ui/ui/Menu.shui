@@ -252,18 +252,14 @@ Overlay {
 
     }
 
-    Box {
+    ScrollIndicator {
         position: "free"
         visible: menuBox.contentHeight > menuBox.bboxHeight
         x: menuBox.x + menuBox.bboxWidth - width
         y: menuBox.y
+        target: menuBox
         width: theme.paddingSmall
         height: menuBox.height
-
-        ScrollIndicator {
-            target: menuBox
-            width: parent.width
-        }
     }
 
 }

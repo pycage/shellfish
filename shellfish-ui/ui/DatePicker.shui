@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -132,30 +132,31 @@ Button {
                 fillWidth: true
                 fillHeight: true
 
-                dayDelegate: template Button {
+                dayDelegate: template MouseBox {
                     id: dayButton
-
-                    labelProfile: Object {
-                        property horizontalAlignment: "right"
-                        property fontSize: theme.fontSizeSmall
-                        property bold: cal.isToday(dayButton.modelData.value.year,
-                                                   dayButton.modelData.value.month,
-                                                   dayButton.modelData.value.day)
-                    }
 
                     visible: modelData.value.day !== 0
                     opacity: modelData.value.month === cal.date[1] ? 1.0 : 0.4
+                    color: containsMouse ? theme.highlightBackgroundColor : "transparent"
 
-                    flat: true
-                    text: "" + modelData.value.day
+                    layout: "center"
 
-                    onClick: (ev) =>
+                    onClick: ev =>
                     {
                         dateButton.date = [modelData.value.year,
                                            modelData.value.month,
                                            modelData.value.day];
                         thisMenu.close();
                         ev.accepted = true;
+                    }
+
+                    Label {
+                        fontSize: theme.fontSizeSmall
+                        bold: cal.isToday(dayButton.modelData.value.year,
+                                          dayButton.modelData.value.month,
+                                          dayButton.modelData.value.day)
+                        color: parent.containsMouse ? theme.highlightColor : theme.primaryColor
+                        text: "" + modelData.value.day
                     }
                 }
             }

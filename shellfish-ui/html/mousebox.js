@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -267,47 +267,6 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
 
             let haveClickDetection = false;
             let haveDragDetection = false;
-
-            /**
-             * Is triggered when the mouse enters the item.
-             * @event mouseOver
-             * @deprecated Use the pointer events instead.
-             * @param {html.MouseBox.PointerEvent} event - The event object.
-             * @memberof html.MouseBox
-             */
-            this.registerEvent("mouseOver", () => this.ensureListener("mouseover", this.mouseOver, makePointerEvent, true));
-            /**
-             * Is triggered when the mouse leaves the item.
-             * @event mouseOut
-             * @deprecated Use the pointer events instead.
-             * @param {html.MouseBox.PointerEvent} event - The event object.
-             * @memberof html.MouseBox
-             */
-            this.registerEvent("mouseOut", () => this.ensureListener("mouseout", this.mouseOut, makePointerEvent));
-            /**
-             * Is triggered when a mouse button is pressed.
-             * @event mouseDown
-             * @deprecated Use the pointer events instead.
-             * @param {html.MouseBox.PointerEvent} event - The event object.
-             * @memberof html.MouseBox
-             */
-            this.registerEvent("mouseDown", () => this.ensureListener("mousedown", this.mouseDown, makePointerEvent));
-            /**
-             * Is triggered when a mouse button is released.
-             * @event mouseUp
-             * @deprecated Use the pointer events instead.
-             * @param {html.MouseBox.PointerEvent} event - The event object.
-             * @memberof html.MouseBox
-             */
-            this.registerEvent("mouseUp", () => this.ensureListener("mouseup", this.mouseUp, makePointerEvent));
-            /**
-             * Is triggered when the mouse is being moved.
-             * @event mouseMove
-             * @deprecated Use the pointer events instead.
-             * @param {html.MouseBox.PointerEvent} event - The event object.
-             * @memberof html.MouseBox
-             */
-            this.registerEvent("mouseMove", () => this.ensureListener("mousemove", this.mouseMove, makePointerEvent));
             
             /**
              * Is triggered when a mouse button was clicked.

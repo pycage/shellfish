@@ -1034,16 +1034,37 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 }
             }
 
-            // sort to render items next to the screen first
-            items.sort((a, b) =>
+            const changedItems = items.filter(itemData =>
             {
+                // do some prefiltering to reduce the workload
+                const item = priv.itemMeta.at(itemData[0])
+                if (! item)
+                {
+                    return true;
+                }
+                const itemPos = itemData[1];
+                return item.x !== itemPos[0] ||
+                        item.y !== itemPos[1] ||
+                        item.width !== priv.cellWidth ||
+                        item.height !== priv.cellHeight;
+            })
+            .sort((a, b) =>
+            {
+                // sort to render items next to the screen first
                 const aDist = a[2];
                 const bDist = b[2];
 
                 return aDist < bDist ? -1 : 1;
             });
            
-            this.renderItems(items);
+            if (changedItems.length > 0)
+            {
+                this.renderItems(changedItems);
+            }
+            else
+            {
+                this.updateContentSize();
+            }
 
             //console.log("new range: " + JSON.stringify([beginIndex, endIndex]));
 
@@ -1058,15 +1079,18 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 return;
             }
 
-            const now = Date.now();
             const priv = d.get(this);
 
+            const now = Date.now();
             const boxNode = priv.item.children[0];
 
             //console.log("render " + items.length + " items");
             //console.log("itemsPerRow: " + priv.itemsPerRow);
 
             //const newItems = [];
+
+            // remove node from DOM to avoid expensive layoutings inbetween
+            boxNode.remove();
 
             for (let n = 0; n < items.length; ++n)
             {
@@ -1160,6 +1184,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 }
             }
 
+            // put box back into DOM
+            priv.item.prepend(boxNode);
+
             /*
             for (let i = 0; i < newItems.length; ++i)
             {
@@ -1181,27 +1208,33 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             if (priv.orientation === "vertical")
             {
                 const viewSize = this.bboxHeight;
-                if (pos[1] + priv.cellHeight > this.contentY + viewSize)
+                const itemTop = pos[1];
+                const itemBottom = itemTop + priv.cellHeight;
+
+                if (itemBottom > this.contentY + viewSize)
                 {
-                    this.contentY = Math.max(0, pos[1] + priv.cellHeight - viewSize);
+                    this.contentY = Math.max(0, itemBottom - viewSize);
                 }
-                else if (pos[1] < this.contentY)
+                else if (itemTop < this.contentY)
                 {
-                    this.contentY = pos[1];
+                    this.contentY = itemTop;
                 }
             }
             else
             {
                 const viewSize = this.bboxWidth;
-                if (pos[0] + priv.cellWidth > this.contentX + viewSize)
+                const itemLeft = pos[0];
+                const itemRight = itemLeft + priv.cellWidth;
+
+                if (itemRight > this.contentX + viewSize)
                 {
-                    this.contentX = Math.max(0, pos[0] + priv.cellWidth - viewSize);
+                    this.contentX = Math.max(0, itemRight - viewSize);
                 }
-                else if (pos[0] < this.contentX)
+                else if (itemLeft < this.contentX)
                 {
-                    this.contentX = pos[0];
+                    this.contentX = itemLeft;
                 }
-            }         
+            }
         }
 
         add(child)

@@ -36,43 +36,28 @@ require "shellfish/ui";
  * @extends ui.Button
  *
  * @property {string} emptyText - (default: `""`) The text to show if the model is empty.
- * @property {html.ListModel} model - (default: `ListModel { }`) The list model of strings holding the selection items.
+ * @property {function} formatText - A function `(modelData, index) => <string>` for creating the display text.
+ * @property {html.ListModel} model - (default: `ListModel { }`) The list model holding the selection items. If the items are not strings, specify a `formatText` function.
  * @property {number} selection - (default: `0`) The index of the currently selected item.
  */
 Button {
     id: box
 
     property model: ListModel { }
+    property formatText: (item, idx) => "" + item
     property selection: 0
     property emptyText: "?"
-
-    property _menu: null
-
-    function _createMenu()
-    {
-        _menu = _menuT();
-    }
 
     minWidth: theme.itemWidthLarge
 
     secondaryIcon: "core-menu"
-    text: model.size > selection ? model.at(selection) : emptyText
+    text: model.size > selection ? formatText(model.at(selection), selection) : emptyText
 
     onPointerDown: ev =>
     {
-        click(ev);
-    }
-
-    onClick: ev =>
-    {
         ev.accepted = true;
-
-        if (! _menu)
-        {
-            _createMenu();
-        }
-
-        _menu.popup(self);
+        const menu = _menuT();
+        menu.popup(self);
     }
 
     onWheel: (ev) =>
@@ -118,7 +103,7 @@ Button {
         }
 
         ListView {
-            width: thisMenu.menuRuler.max.width
+            width: box.bboxWidth - 1
             height: Math.min(cellHeight * count, cellHeight * 10, thisDocument.windowHeight * 0.8)
             cellWidth: bboxWidth
             cellHeight: theme.itemHeightMedium
@@ -132,7 +117,7 @@ Button {
                 {
                     wait(100).then(() =>
                     {
-                        positionViewAt(box.selection);
+                        positionViewAt(box.selection + (height / cellHeight) / 2);
                         selector.select(box.selection, "replace");
                     });
                 }
@@ -141,7 +126,7 @@ Button {
             delegate: template MenuItem {
                 property itemSelected: selector.selection.has(modelData.index)
 
-                text: modelData.value
+                text: box.formatText(modelData.value, modelData.index)
 
                 onItemSelectedChanged: () =>
                 {
@@ -159,6 +144,7 @@ Button {
             }
 
             ListViewSelector { id: selector }
+            OverflowScroller { }
             ScrollIndicator { }
         }
     }

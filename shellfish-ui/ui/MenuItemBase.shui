@@ -425,7 +425,7 @@ MouseBox {
 
     canFocus: !! thisMenu
 
-    width: !! thisMenu ? thisMenu.menuRuler.max.width : -1
+    fillWidth: !! thisMenu
     height: theme.itemHeightMedium
 
     highlighted: selected || menuOpened

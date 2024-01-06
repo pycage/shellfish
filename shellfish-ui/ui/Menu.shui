@@ -32,7 +32,6 @@ require "shellfish/ui";
  * @extends ui.Overlay
  *
  * @property {bool} menuOpened - [readonly] Whether the menu is currently opened.
- * @property {html.Ruler} menuRuler - (default: `Ruler { }`) A ruler for layouting the menu items.
  */
 Overlay {
     id: menu
@@ -40,7 +39,6 @@ Overlay {
     container default: menuBoxContent
 
     property menuOpened: visible
-    property menuRuler: Ruler { }
 
     /**
      * Shows the menu next to a parent element.
@@ -85,12 +83,6 @@ Overlay {
                 menuBox.anchorWidth = 0;
                 menuBox.anchorHeight = parentBbox.height;
             }
-            menuRuler.request({
-                x: 0,
-                y: 0,
-                width: parentBbox.width - 2 * 1 /* border */,
-                height: 0
-            });
         }
         else
         {
@@ -174,7 +166,7 @@ Overlay {
         y: showBelow ? anchorY
                      : anchorY - anchorHeight - height
 
-        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bboxHeight + 2 /* borders */)
+        height: Math.min((showBelow ? spaceBelow : spaceAbove) - theme.paddingLarge, menuBoxContent.bboxHeight + 3 /* borders */)
         color: theme.primaryBackgroundColor
         borderWidth: 1
         borderColor: theme.borderColor

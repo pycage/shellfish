@@ -1090,7 +1090,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             //const newItems = [];
 
             // remove node from DOM to avoid expensive layoutings inbetween
-            boxNode.remove();
+            if (items.length > 10)
+            {
+                boxNode.remove();
+            }
 
             for (let n = 0; n < items.length; ++n)
             {
@@ -1185,7 +1188,10 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
             }
 
             // put box back into DOM
-            priv.item.prepend(boxNode);
+            if (items.length > 10)
+            {
+                priv.item.prepend(boxNode);
+            }
 
             /*
             for (let i = 0; i < newItems.length; ++i)

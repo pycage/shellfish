@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -2019,6 +2019,17 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
         }
     }
     exports.formatSeconds = formatSeconds;
+
+    /**
+     * Returns the current amount of objects of type {@link core.Object}.
+     * 
+     * @returns {number} The amount.
+     */
+    function objectCount()
+    {
+        return objCounter;
+    }
+    exports.objectCount = objectCount;
 
     /**
      * Creates a dump of the current status for debugging purposes.

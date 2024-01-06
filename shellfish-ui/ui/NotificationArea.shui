@@ -1,0 +1,408 @@
+/*******************************************************************************
+This file is part of the Shellfish UI toolkit.
+Copyright (c) 2024 Martin Grimme <martin.grimme@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*******************************************************************************/
+
+require "shellfish/ui";
+
+/**
+ * Element for displaying popup notifications.
+ *
+ * This box is transparent to pointer events and may be placed above your
+ * application contents. The notification popups are as wide as this
+ * notification area.
+ *
+ * Example
+ * ```
+ * require "shellfish/ui";
+ * require "/icons/ui-icons.css";
+ *
+ * Document {
+ *
+ *     onInitialization: () =>
+ *     {
+ *         notificationArea.createNotification("Welcome", "ui-info", "Welcome to Shellfish!");
+ *     }
+ *
+ *     NotificationArea {
+ *         id: notificationArea
+ *
+ *         position: "free"
+ *         origin: "top-right"
+ *         width: theme.itemWidthLarge * 2
+ *         height: thisDocument.windowHeight
+ *     }
+ *
+ * }
+ * ```
+ *
+ * @memberof ui
+ * @name NotificationArea
+ * @class
+ * @extends html.Box
+ *
+ * @property {number} count - [readonly] The current amount of notifications.
+ */
+Box {
+    id: notificationArea
+
+    property count: 0
+
+    /**
+     * Creates and returns a new custom notification. If `sourceTemplate` is specified,
+     * the template is loaded into the notification window.
+     *
+     * @method
+     * @name createCustomNotification
+     * @memberof ui.NotificationArea.prototype
+     *
+     * @param {[function]} sourceTemplate - A Shui template.
+     * @return {html.Box} The notification.
+     */
+    function createCustomNotification(sourceTemplate)
+    {
+        const item = notificationT();
+        if (sourceTemplate)
+        {
+            item.sourceTemplate = sourceTemplate;
+        }
+
+        if (children().length > 0)
+        {
+            get().add(item.get(), children()[children().length - 1].get());
+        }
+        else
+        {
+            add(item);
+        }
+        item.open();
+        return item;
+    }
+
+    /**
+     * Creates and returns a standard notification with title, icon,
+     * and message text. The notification disappears after a set time.
+     *
+     * @method
+     * @name createNotification
+     * @memberof ui.NotificationArea.prototype
+     *
+     * @param {string} title - The title text.
+     * @param {string} icon - The icon to show. Pass `""` for no icon.
+     * @param {string} message - The message text.
+     * @param {number} [timeout] - The timeout value in ms after which the notification disappears. Defaults to 3000 ms.
+     * @return {html.Box} The notification.
+     */
+    function createNotification(title, icon, message, timeout)
+    {
+        if (timeout === undefined)
+        {
+            timeout = 3000;
+        }
+
+        const item = createCustomNotification();
+        item.title = title;
+        item.icon = icon;
+        item.message = message;
+        wait(timeout).then(() =>
+        {
+            item.close();
+        });
+
+        return item;
+    }
+
+    /**
+     * Is triggered when the notification area wants to draw attention, e.g.
+     * when a new notification appears.
+     * By default, nothing special happens on this event.
+     *
+     * @memberof ui.NotificationArea.prototype
+     * @name drawAttention
+     * @event
+     */
+    event drawAttention
+
+    overflowBehavior: "scroll"
+
+    onInitialization: () =>
+    {
+        css("pointer-events", "none");
+    }
+
+    onCountChanged: () =>
+    {
+        if (count > 0)
+        {
+            drawAttention();
+        }
+    }
+
+    OverflowScroller { }
+
+
+    /**
+     * A notification popup.
+     *
+     * @memberof ui.NotificationArea
+     * @name Notification
+     * @class
+     * @extends html.Box
+     *
+     * @property {string} icon - (default: `""`) The name of the icon.
+     * @property {ui.Object} item - (default: `null`) The item created from a custom template.
+     * @property {string} message - (default: `""`) The message text.
+     * @property {number} progress - (default: `-1.0`) A progress value between `0.0` and `1.0`, or a negative value for showing no progress bar.
+     * @property {string} progressText - (default: `""`) The text to display next to the progress bar.
+     * @property {string} title - (default: `""`) The title text.
+     */
+    property notificationT: template Box {
+        id: notification
+
+        property title: ""
+        property icon: ""
+        property message: ""
+        property progress: -1.0
+        property progressText: ""
+        property sourceTemplate: null
+
+        property item: customLoader.item
+
+        property closed: false
+
+        function open()
+        {
+            wait(100).then(() => { openAnimation.start(); });
+        }
+
+        function close()
+        {
+            if (! closed)
+            {
+                closed = true;
+                closeAnimation.start().then(() => { parent = null; });
+            }
+        }
+
+        fillWidth: true
+        height: 0
+
+        SequentialAction {
+            id: openAnimation
+
+            ScriptAction {
+                script: () =>
+                {
+                    ++notificationArea.count;
+                }
+            }
+
+            WaitAction {
+                enabled: notification.sourceTemplate !== null && ! customLoader.item
+            }
+
+            NumberAnimation {
+                from: 0
+                to: contentBox.bboxHeight + 2 * theme.paddingSmall
+                duration: 500
+
+                onNext: value => { notification.height = value; }
+            }
+
+            NumberAnimation {
+                from: notification.bboxWidth
+                to: 0
+                duration: 500
+
+                onNext: value => { contentBox.marginLeft = value; }
+            }
+        }
+
+        SequentialAction {
+            id: closeAnimation
+
+            ScriptAction {
+                script: () =>
+                {
+                    --notificationArea.count;
+                }
+            }
+
+            NumberAnimation {
+                from: 0
+                to: notification.bboxWidth
+                duration: 500
+
+                onNext: value => { contentBox.marginLeft = value; }
+            }
+
+            NumberAnimation {
+                from: bboxHeight
+                to: 0
+                duration: 500
+
+                onNext: value => { notification.height = value; }
+            }
+        }
+
+        MouseBox {
+            id: contentBox
+
+            width: notification.bboxWidth - theme.paddingSmall
+
+            marginLeft: notification.bboxWidth
+            marginRight: theme.paddingSmall
+            marginTop: theme.paddingSmall
+            marginBottom: theme.paddingSmall
+
+            color: theme.primaryBackgroundColor
+            borderColor: theme.borderColor
+            borderWidth: 1
+            borderRadius: theme.borderRadius
+
+            style: "sh-dropshadow"
+
+            onInitialization: () =>
+            {
+                css("pointer-events", "auto");
+            }
+
+            onPointerMove: () =>
+            {
+                notificationArea.drawAttention();
+            }
+
+            onContainsMouseChanged: () =>
+            {
+                if (containsMouse)
+                {
+                    notificationArea.drawAttention();
+                }
+            }
+
+            // title bar
+            Box {
+                fillWidth: true
+                height: theme.itemHeightSmall
+                color: theme.primaryColor
+                layout: "center-row"
+
+                Label {
+                    marginTop: 2
+                    marginBottom: 2
+                    marginLeft: theme.paddingSmall
+                    marginRight: theme.paddingSmall
+                    fillWidth: true
+                    overflowBehavior: "ellipsis"
+                    bold: true
+                    color: theme.primaryBackgroundColor
+                    text: notification.title
+                }
+
+                MouseBox {
+                    width: bboxHeight
+                    fillHeight: true
+                    color: containsMouse ? theme.highlightBackgroundColor : "transparent"
+                    layout: "center"
+
+                    onClick: ev =>
+                    {
+                        ev.accepted = true;
+                        notification.close();
+                    }
+
+                    Label {
+                        color: parent.containsMouse ? theme.highlightColor : theme.primaryBackgroundColor
+                        text: "[icon:core-window-close]"
+                    }
+                }
+            }
+
+            Box {
+                fillWidth: true
+                layout: "center-row"
+                
+                Label {
+                    visible: text !== ""
+                    marginLeft: theme.paddingSmall
+                    fontSize: theme.fontSizeLarge
+                    text: notification.icon ? "[icon:" + notification.icon + "]" : ""
+                }
+
+                Label {
+                    visible: text !== ""
+                    margins: theme.paddingSmall
+                    fillWidth: true
+                    overflowBehavior: "wrap"
+                    text: notification.message
+                }
+            }
+
+            Loader {
+                id: customLoader
+
+                visible: !! item
+                fillWidth: true
+                sourceTemplate: notification.sourceTemplate
+            }
+
+            Box {
+                visible: notification.progress >= 0.0
+
+                marginTop: theme.paddingSmall
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                fillWidth: true
+                layout: "row"
+
+                Label {
+                    fillWidth: true
+                    fontSize: theme.fontSizeSmall
+                    text: notification.progressText
+                }
+
+                Label {
+                    fontSize: theme.fontSizeSmall
+                    text: Math.round(notification.progress * 100) + "%"
+                }
+            }
+
+            Box {
+                visible: notification.progress >= 0.0
+                marginLeft: theme.paddingSmall
+                marginRight: theme.paddingSmall
+                marginBottom: theme.paddingSmall
+                fillWidth: true
+                height: theme.paddingSmall
+                color: theme.secondaryBackgroundColor
+                borderRadius: theme.borderRadius
+
+                Box {
+                    width: Math.max(0, Math.min(parent.bboxWidth, parent.bboxWidth * notification.progress))
+                    fillHeight: true
+                    color: theme.primaryColor
+                }
+
+            }
+        }
+
+    }
+
+}

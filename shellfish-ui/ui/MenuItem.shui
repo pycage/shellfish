@@ -115,17 +115,19 @@ MenuItemBase {
             text: visible ? "[icon:" + item.icon + "]" : ""
         }
 
+        Box { width: theme.paddingMedium }
+
         Label {
             id: label
 
-            marginLeft: theme.paddingMedium
-            marginRight: theme.paddingMedium
             fillWidth: true
             overflowBehavior: "ellipsis"
             color: ancestorsEnabled ? (item.highlighted ? theme.highlightColor : theme.primaryColor)
                                     : theme.disabledColor
             text: item.format(item.text)
         }
+
+        Box { width: theme.paddingMedium }
 
         Box {
             id: shortcutLabel

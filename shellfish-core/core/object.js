@@ -55,11 +55,11 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
             this.depth = 0;
         }
 
-        runAfterTrigger(f)
+        runAfterTrigger(f, force)
         {
             this.afterTriggerHandlers.push(f);
 
-            if (this.handlers.size === 0)
+            if (force && this.handlers.size === 0)
             {
                 this.trigger(null, "", []);
             }
@@ -1804,7 +1804,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
                             waitAborters.delete(this.objectId + "#" + name);
                         }
                         resolve(true);
-                    }, () => ! aborted && this.lifeCycleStatus !== "destroyed"));
+                    }, () => ! aborted && this.lifeCycleStatus !== "destroyed"), true);
 
                     if (name)
                     {
@@ -1836,6 +1836,43 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
                             resolve(false);
                         });
                     }
+                }
+            });
+        }
+
+        /**
+         * Returns a Promise that resolves after there has been any event
+         * activity.
+         * 
+         * If the wait operation is given a name, it is abortable via the
+         * {@link core.Object#abortWait} method. In this case, the promise
+         * resolves to `false`.
+         * 
+         * @param {string} name - An optional name for aborting via {@link core.Object#abortWait}.
+         * @returns {Promise} The Promise object.
+         */
+        waitForActivity(name)
+        {
+            return new Promise((resolve, reject) =>
+            {
+                let aborted = false;
+                connHub.runAfterTrigger(this.safeCallback(() =>
+                {
+                    if (name)
+                    {
+                        waitAborters.delete(this.objectId + "#" + name);
+                    }
+                    resolve(true);
+                }, () => ! aborted && this.lifeCycleStatus !== "destroyed"), false);
+
+                if (name)
+                {
+                    waitAborters.set(this.objectId + "#" + name, () =>
+                    {
+                        aborted = true;
+                        waitAborters.delete(this.objectId + "#" + name);
+                        resolve(false);
+                    });
                 }
             });
         }

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -52,8 +52,10 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
     const elementRegistry = new Map();
 
     // a warehouse for storing pre-created elements for quick delivery
-    const elementWarehouse = new warehouse.Warehouse((type) => { return new Element(type); },
-                                                     25);
+    // (this occupies some RAM, so only do this where we can be sure it's safe)
+    const elementWarehouse = shRequire.deviceMemory >= 4
+                             ? new warehouse.Warehouse((type) => { return new Element(type); }, 25)
+                             : null;
 
     /**
      * Returns if the given object is a dynamic value.
@@ -790,11 +792,13 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
      */
     function element(type)
     {
-        if (type.name === "Box" ||
-            type.name === "MouseBox" ||
-            type.name === "Label" ||
-            type.name === "Ruler" ||
-            type.name === "Timer")
+        if (elementWarehouse &&
+            (type.name === "Box" ||
+             type.name === "MouseBox" ||
+             type.name === "Label" ||
+             type.name === "Object" ||
+             type.name === "Ruler" ||
+             type.name === "Timer"))
         {
             return elementWarehouse.retrieve(type);
         }

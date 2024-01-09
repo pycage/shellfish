@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -73,7 +73,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
                 scrollbars: false,
                 currentCssClass: "sh-layout-column",
                 currentOverflowClass: "sh-overflowbehavior-none",
-                layoutPending: false,
+                layoutPending: true,
                 item: HTML.cloneNode()
             });
 
@@ -89,17 +89,30 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
 
             this.onInitialization = () =>
             {
-                this.updateLayout();
-            };
-
-            this.onVisibleChanged = () =>
-            {
-                if (this.visible && d.get(this).layoutPending)
+                if (this.visible && this.ancestorsVisible && d.get(this).layoutPending)
                 {
                     d.get(this).layoutPending = false;
                     this.updateLayout();
                 }
             };
+
+            this.onVisibleChanged = () =>
+            {
+                if (this.visible && this.ancestorsVisible && d.get(this).layoutPending)
+                {
+                    d.get(this).layoutPending = false;
+                    this.updateLayout();
+                }
+            };
+
+            this.onAncestorsVisibleChanged = () =>
+            {
+                if (this.visible && this.ancestorsVisible && d.get(this).layoutPending)
+                {
+                    d.get(this).layoutPending = false;
+                    this.updateLayout();
+                }
+            }
         }
 
         get color() { return d.get(this).color; }
@@ -198,7 +211,7 @@ shRequire(["shellfish/low", __dirname + "/item.js"], function (low, item)
         {
             const priv = d.get(this);
             
-            if (! this.visible)
+            if (! this.visible || ! this.ancestorsVisible || this.lifeCycleStatus === "new")
             {
                 priv.layoutPending = true;
                 return;

@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2022 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -67,7 +67,6 @@ Box {
     height: theme.itemHeightMedium
     color: target.selected ? theme.highlightBackgroundColor
                            : theme.secondaryBackgroundColor
-    layout: "center-row"
 
     Object {
         id: buttonProfile
@@ -75,72 +74,79 @@ Box {
                                         : theme.primaryColor
     }
 
-    Label {
-        visible: titlebar.icon !== ""
-        marginLeft: theme.paddingSmall
-        color: target.selected ? theme.highlightColor
-                               : theme.primaryColor
-        text: "[icon:" + titlebar.icon + "]"
-    }
+    Box {
+        position: "free"
+        fill: true
+        layout: "center-row"
 
-    Label {
-        marginLeft: theme.paddingSmall
-        fillWidth: true
-        overflowBehavior: "ellipsis"
-        color: target.selected ? theme.highlightColor
-                               : theme.primaryColor
-        text: titlebar.text
-    }
+        Label {
+            visible: titlebar.icon !== ""
+            marginLeft: theme.paddingSmall
+            color: target.selected ? theme.highlightColor
+                                : theme.primaryColor
+            text: "[icon:" + titlebar.icon + "]"
+        }
 
-    Button {
-        visible: titlebar.showMinimize
-        labelProfile: buttonProfile
-        width: bboxHeight
-        fillHeight: true
-        flat: true
-        icon: "core-window-minimize"
+        Label {
+            marginLeft: theme.paddingSmall
+            fillWidth: true
+            overflowBehavior: "ellipsis"
+            color: target.selected ? theme.highlightColor
+                                : theme.primaryColor
+            text: titlebar.text
+        }
 
-        onPointerDown: (ev) => { ev.accepted = true; }
+        Button {
+            visible: titlebar.showMinimize
+            labelProfile: buttonProfile
+            width: bboxHeight
+            fillHeight: true
+            flat: true
+            icon: "core-window-minimize"
 
-        onClick: (ev) =>
-        {
-            titlebar.minimize();
-            ev.accepted = true;
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            onClick: (ev) =>
+            {
+                titlebar.minimize();
+                ev.accepted = true;
+            }
+        }
+
+        Button {
+            visible: titlebar.showMaximize && target.resizable
+            labelProfile: buttonProfile
+            width: bboxHeight
+            fillHeight: true
+            flat: true
+            icon: "core-window-maximize"
+
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            onClick: (ev) =>
+            {
+                target.maximized = ! target.maximized;
+                ev.accepted = true;
+            }
+        }
+
+        Button {
+            visible: titlebar.showClose
+            labelProfile: buttonProfile
+            width: bboxHeight
+            fillHeight: true
+            flat: true
+            icon: "core-window-close"
+
+            onPointerDown: (ev) => { ev.accepted = true; }
+
+            onClick: (ev) =>
+            {
+                titlebar.close();
+                ev.accepted = true;
+            }
         }
     }
 
-    Button {
-        visible: titlebar.showMaximize && target.resizable
-        labelProfile: buttonProfile
-        width: bboxHeight
-        fillHeight: true
-        flat: true
-        icon: "core-window-maximize"
-
-        onPointerDown: (ev) => { ev.accepted = true; }
-
-        onClick: (ev) =>
-        {
-            target.maximized = ! target.maximized;
-            ev.accepted = true;
-        }
-    }
-
-    Button {
-        visible: titlebar.showClose
-        labelProfile: buttonProfile
-        width: bboxHeight
-        fillHeight: true
-        flat: true
-        icon: "core-window-close"
-
-        onPointerDown: (ev) => { ev.accepted = true; }
-
-        onClick: (ev) =>
-        {
-            titlebar.close();
-            ev.accepted = true;
-        }
-    }
 
 }

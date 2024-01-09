@@ -84,8 +84,8 @@ shRequire(["shellfish/low",
      * @property {bool} ancestorsVisible - [readonly] Whether all ancestors are visible.
      * @property {number} aspectRatio - (default: `0`) The aspect ratio of the side lengths. If this value is greater than `0`, the element is sized within the constraints of `width` and `height`.
      * @property {html.Item.BoundingBox} bbox - [readonly] The item's bounding box in window coordinates.
-     * @property {number} bboxX - [readonly] The item's bounding box X position in window coordinates.
-     * @property {number} bboxY - [readonly] The item's bounding box Y position in window coordinates.
+     * @property {number} bboxX - [readonly] The item's bounding box X position in window coordinates. Reading this gives the current value, but updates aren't propagated automatically.
+     * @property {number} bboxY - [readonly] The item's bounding box Y position in window coordinates. Reading this gives the current value, but updates aren't propagated automatically.
      * @property {number} bboxWidth - [readonly] The item's bounding box width in window coordinates.
      * @property {number} bboxHeight - [readonly] The item's bounding box height in window coordinates.
      * @property {bool} canFocus - (default: `false`) Whether the item may accept keyboard focus.
@@ -174,7 +174,8 @@ shRequire(["shellfish/low",
                 style: [],
                 scrolling: false,
                 visibility: false,
-                usingBboxXY: false
+                usingBboxXY: false,
+                trackingPosition: false
             });
             
             this.notifyable("ancestorsEnabled");
@@ -1177,6 +1178,55 @@ shRequire(["shellfish/low",
             }
         }
 
+        /**
+         * Enables tracking the position (propagating updates of the `bboxX`
+         * and `bboxY` properties) of this element.
+         * This is disabled by default for performance reasons, but, if needed,
+         * can be enabled by calling this method.
+         * 
+         * Calling this method multiple times has no further effect.
+         */
+        enablePositionTracking()
+        {
+            if (d.get(this).trackingPosition)
+            {
+                return;
+            }
+
+            console.log("Enabling position tracking on " + this.objectType + "@" + this.objectLocation);
+
+            const w = () =>
+            {
+                this.wait(10).then(() => { f(); });
+            };
+
+            const f = () =>
+            {
+                if (! d.get(this).visibility || ! this.bboxXChanged || ! this.bboxYChanged)
+                {
+                    return;
+                }
+
+                const cache = d.get(this).cachedBbox;
+                const currentX = this.bboxX;
+                const currentY = this.bboxY;
+
+                if (! cache || currentX !== cache.x)
+                {
+                    this.bboxXChanged();
+                }
+                if (! cache || currentY !== cache.y)
+                {
+                    this.bboxYChanged();
+                }
+                
+                this.waitForActivity().then(() => { w(); });
+            };
+
+            d.get(this).trackingPosition = true;
+            w();
+        }
+
         applyFocusTrap(ev)
         {
             if (! (this.visible && this.ancestorsVisible && this.enabled && this.ancestorsEnabled))
@@ -1275,6 +1325,13 @@ shRequire(["shellfish/low",
                             low.css(item, key, priv.cssCache[key]);
                         }
                         priv.cssCache = null;
+                    }
+
+                    // re-enable position tracking
+                    if (priv.trackingPosition)
+                    {
+                        priv.trackingPosition = false;
+                        this.enablePositionTracking();
                     }
                 }
                 else

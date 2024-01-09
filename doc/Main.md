@@ -135,6 +135,13 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ## News
 
+### January 2024
+* Improved UI performance.
+* The new element {@link ui.NotificationArea} lets you display notification
+  popups in your application.
+* **API Break:** The deprecated `mouse` events of {@link html.MouseBox} have
+  been removed.
+
 ### December 2023
 * **API Break:** The deprecated property `prefix` has been removed from
   {@link server.HTTPRoute}. Instead, the new method {@link server.HTTPRoute#pathPrefix}

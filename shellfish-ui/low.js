@@ -812,6 +812,8 @@ function addFrameHandler(handler, annotation)
 
     if (animationFrameHandlers.size === 1)
     {
+        const dateOffset = Date.now();
+
         const callback = (timestamp) =>
         {
             //console.log(animationFrameHandlers.size + " handlers");
@@ -829,7 +831,7 @@ function addFrameHandler(handler, annotation)
                 }
                 else
                 {
-                    setTimeout(() => { callback(Date.now()); }, 1000 / 60);
+                    setTimeout(() => { callback(dateOffset - Date.now()); }, 1000 / 60);
                 }
             }
         };
@@ -840,7 +842,7 @@ function addFrameHandler(handler, annotation)
         }
         else
         {
-            setTimeout(() => { callback(Date.now()); }, 1000 / 60);
+            setTimeout(() => { callback(dateOffset - Date.now()); }, 1000 / 60);
         }
     }
 

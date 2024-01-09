@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -168,20 +168,32 @@ MouseBox {
         profiles: button.labelProfile ? [button.labelProfile] : []
     }
 
-    Timer {
-        running: button.repeatAcceleration > 0 && button.pressed
-        repeat: true
-
-        onRunningChanged: () =>
+    property repeatInterval: 300
+    onPressedChanged: () =>
+    {
+        repeatInterval = 300;
+        if (pressed)
         {
-            interval = 300;
+            if (repeatAcceleration > 0)
+            {
+                function f()
+                {
+                    wait(repeatInterval, "repeat").then(() =>
+                    {
+                        if (repeatInterval > 10)
+                        {
+                            repeatInterval = repeatInterval / repeatAcceleration;
+                        }
+                        f();
+                    });
+                }
+
+                f();
+            }
         }
-
-        onTimeout: () =>
+        else
         {
-            button.click({ });
-
-            interval = interval / button.repeatAcceleration;
+            abortWait("repeat");
         }
     }
 

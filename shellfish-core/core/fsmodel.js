@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2020 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -246,7 +246,7 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
         {
             const priv = d.get(this);
 
-            if (! priv.loading)
+            if (! priv.loading && reset)
             {
                 priv.loading = true;
                 this.loadingChanged();
@@ -283,9 +283,11 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                     priv.items = items;
                     this.processItems(items, reset);
 
-                    priv.loading = false;
-                    this.loadingChanged();
-    
+                    if (priv.loading)
+                    {
+                        priv.loading = false;
+                        this.loadingChanged();
+                    }
                 }));
             }
             else
@@ -302,9 +304,11 @@ shRequire([__dirname + "/listmodel.js"], function (lm)
                     priv.items = items;
                     this.processItems(items, reset);
 
-                    priv.loading = false;
-                    this.loadingChanged();
-    
+                    if (priv.loading)
+                    {
+                        priv.loading = false;
+                        this.loadingChanged();
+                    }
                 }));
             }
         }

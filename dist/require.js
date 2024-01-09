@@ -1061,6 +1061,7 @@ const shRequire = (function ()
         f.resource = __require.resource;
         f.selfUrl = __require.selfUrl;
         f.environment = __require.environment;
+        f.deviceMemory = __require.deviceMemory;
 
         return f;
     };
@@ -1097,6 +1098,30 @@ const shRequire = (function ()
         else
         {
             return "web";
+        }
+    })();
+
+    /**
+     * Holds the amount of Gigabytes of total device RAM detected. This may be
+     * a very imprecise value due to browser security restrictions and is only
+     * available in secure contexts. Not all browsers support this, either.
+     * 
+     * The value is `-1` if it could not be detected.
+     */
+    __require.deviceMemory = (() =>
+    {
+        if (typeof navigator !== "undefined" && navigator.deviceMemory)
+        {
+            return navigator.deviceMemory;
+        }
+        else if (isNode)
+        {
+            const os = require("os");
+            return Math.floor(os.totalmem() / (1024 * 1024 * 1024));
+        }
+        else
+        {
+            return -1;
         }
     })();
 
@@ -1320,7 +1345,8 @@ const shRequire = (function ()
         })();
     }// if (hasDom)
 
-    log("", "debug", "Initialized Shellfish module manager. Detected environment: " + __require.environment);
+    log("", "debug", "Initialized Shellfish module manager. Detected environment: " + __require.environment +
+         ", RAM: " + (__require.deviceMemory > 0 ? ">= " + __require.deviceMemory + " G" : "unknown"));
 
     // In order to support both module systems, ESM and CJS, exports are not used.
     // Instead, we assign the Shellfish environment to a certain variable in scope,

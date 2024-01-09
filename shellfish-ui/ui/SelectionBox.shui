@@ -115,7 +115,7 @@ Button {
             {
                 if (ancestorsVisible)
                 {
-                    wait(100).then(() =>
+                    wait(0).then(() =>
                     {
                         positionViewAt(box.selection + (height / cellHeight) / 2);
                         selector.select(box.selection, "replace");

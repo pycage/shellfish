@@ -154,27 +154,32 @@ MouseBox {
                 pos += cellSize;
             }
 
-            // remove exceeding items, but not the first or the last
-            while (m.length > 0 && maxItems > 1 && m.length > maxItems)
+            const decimateEvenly = (l, toN) =>
             {
-                const tooMany = m.length - maxItems;
-
-                const sizes = m
-                .map((item, idx) => { return { size: item.until - item.position, index: idx }; })
-                .slice(1, -1)
-                .sort((itemA, itemB) => itemA.size - itemB.size);
-
-                const toRemove = sizes
-                .slice(0, tooMany)
-                .map(item => item.index);
-
-                if (toRemove.length === 0)
+                if (l.length <= toN)
                 {
-                    break;
+                    return l;
+                }
+                else if (toN === 0)
+                {
+                    return [];
                 }
 
-                m = m.filter((nil, idx) => toRemove.indexOf(idx) === -1);
-            }
+                const stepSize = l.length / toN;
+                const result = [];
+                result.push(l[0]);
+                for (let i = 1; i < toN - 1; ++i)
+                {
+                    const idx = Math.floor(stepSize * i);
+                    result.push(l[idx]);
+                }
+                result.push(l[l.length - 1]);
+
+                return result;
+            };
+
+            // remove exceeding items, but not the first or the last
+            m = decimateEvenly(m, maxItems);
         }
 
         const newSetup = JSON.stringify(m);

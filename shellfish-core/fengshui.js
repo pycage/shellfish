@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2019 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2019 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -103,8 +103,9 @@ exports.tools = {
         }
 
         result = self[name] ||
-                 (name === "this" + self.elementType(undefined, namespace) ? self : undefined) ||
-                 (name === "this" + self.get()?.objectType ? self : undefined) ||
+                 (name.startsWith("this") && self.elementTypes().find(type => "this" + type === name) ? self : undefined) ||
+                 //(name === "this" + self.elementType(undefined, namespace) ? self : undefined) ||
+                 //(name === "this" + self.get()?.objectType ? self : undefined) ||
                  self.find(name, namespace) ||
                  pRslv(name) ||
                  modules[name];
@@ -872,7 +873,7 @@ exports.tools = {
                 ${rslv}
                 ${addProperties}
 
-                self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}", __namespace)
+                self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}")
                 ${parseElementBlock(data, pos, modules)}
             `;
         }
@@ -886,7 +887,7 @@ exports.tools = {
                     ${rslv}
                     ${addProperties}
 
-                    self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}", __namespace)
+                    self.set("objectType", "${strippedElementName}").elementType("${strippedElementName}")
                     ${parseElementBlock(data, pos, modules)}
                     return self;
                 })(__rslv__)

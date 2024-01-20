@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2023 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -95,6 +95,11 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
         else if (typeof r === "object" && r.type === "proxy")
         {
             d.get(self).clients.get(clientId).proxies.push(r.instanceId);
+            // the proxy may be destroyed explicitly
+            self.registerMethod(r.instanceId + ".destroy", () =>
+            {
+                self.deleteProxy(clientId, r.instanceId);
+            });
             onResult(r);
         }
         else
@@ -232,7 +237,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
      * ```
      * { type: "heartbeat", clientId: "7b12a3-a2ce36-598a73" }
      * ```
-     * If a client does not respond to the heartbeat request, the server will close the
+     * If a client does not respond to the heartbeat request in time, the server will close the
      * connection and destroy any context it may have associated with it.
      * 
      * #### `exit`
@@ -489,14 +494,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
             client.reverseChannel.end();
             client.proxies.forEach(proxyId =>
             {
-                const methods = [...priv.methods.keys()];
-                methods.forEach(methodId =>
-                {
-                    if (methodId.startsWith(proxyId + "."))
-                    {
-                        priv.methods.delete(methodId);
-                    }
-                });
+                this.deleteProxy(clientId, proxyId);
             });
             priv.clients.delete(clientId);
 
@@ -510,6 +508,22 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
             {
                 this.log("RPC", "debug", "Connected clients on " + this.objectId + ": " + priv.clients.size);
             }
+        }
+
+        deleteProxy(clientId, proxyId)
+        {
+            const priv = d.get(this);
+            const client = priv.clients.get(clientId);
+
+            const methods = [...priv.methods.keys()];
+            methods.forEach(methodId =>
+            {
+                if (methodId.startsWith(proxyId + "."))
+                {
+                    priv.methods.delete(methodId);
+                }
+            });
+            client.proxies = client.proxies.filter(p => p !== proxyId);
         }
 
         /**
@@ -593,6 +607,10 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
          * Creates a RPC proxy object of the given object, which can then be
          * passed to the RPC client.
          * 
+         * The proxy object is destroyed when the connection to the client
+         * closes. In order to destroy it earlier, it exposes the special method
+         * `destroy()` to the client.
+         * 
          * ### Example
          * ```
          * class MyClass
@@ -627,7 +645,7 @@ shRequire(["shellfish/core", __dirname + "/httpsession.js"], (core, httpsession)
             function allKeys(obj)
             {
                 let keys = Object.getOwnPropertyNames(obj)
-                .filter(n => n !== "constructor")
+                .filter(n => n !== "constructor" && n !== "destroy")
                 .filter(n => typeof obj[n] === "function")
                 .filter(n => exposedMethods ? exposedMethods.indexOf(n) !== -1 : true);
                 const proto = Object.getPrototypeOf(obj);

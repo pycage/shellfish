@@ -149,8 +149,8 @@ Overlay {
 
         property spaceAbove: anchorY - anchorHeight
         property spaceBelow: menu.bboxHeight - anchorY
-        property showBelow: spaceBelow > bboxHeight ? true
-                                                    : spaceBelow > spaceAbove
+        property showBelow: spaceBelow > menuBoxContent.bboxHeight ? true
+                                                                   : spaceBelow > spaceAbove
 
         property spaceLeft: anchorX - anchorWidth
         property spaceRight: menu.bboxWidth - anchorX

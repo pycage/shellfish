@@ -53,17 +53,22 @@ require "shellfish/ui";
  * }
  * ```
  *
+ * Notifications have a number of properties you can set to control their appearance.
+ * See {@link ui.NotificationArea.Notification Notification} for details.
+ *
  * @memberof ui
  * @name NotificationArea
  * @class
  * @extends html.Box
  *
  * @property {number} count - [readonly] The current amount of notifications.
+ * @property {string} verticalAlignment - (default: `"top"`) The vertical alignment of the notifications. One of `top|bottom`
  */
 Box {
     id: notificationArea
 
     property count: 0
+    property verticalAlignment: "top"
 
     /**
      * Creates and returns a new custom notification. If `sourceTemplate` is specified,
@@ -153,6 +158,10 @@ Box {
         {
             drawAttention();
         }
+    }
+
+    Box {
+        fillHeight: notificationArea.verticalAlignment === "bottom"
     }
 
     OverflowScroller { }
@@ -357,6 +366,8 @@ Box {
 
             Loader {
                 id: customLoader
+
+                property notification: parent.parent
 
                 visible: !! item
                 fillWidth: true

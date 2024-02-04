@@ -193,7 +193,7 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
                         }
                         catch (err)
                         {
-                            console.error(`[${exports.dbgctx}] Error triggering event '${emitter.constructor.name}.${event} (${emitter.objectLocation}): ${err}\n${err.stack || "<stacktrace not available>"}`);
+                            console.error(`[${exports.dbgctx.location}] Error triggering event '${emitter.constructor.name}.${event} (${emitter.objectLocation}): ${err}\n${err.stack || "<stacktrace not available>"}`);
                         }
                     }
                 }
@@ -2178,4 +2178,4 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
 });
 
 // internal debug context for giving helpful error messages
-exports.dbgctx = "<no information>";
+exports.dbgctx = { location: "<no information>" };

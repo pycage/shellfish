@@ -991,7 +991,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                             }
                             catch (err)
                             {
-                                console.error(`[${core.dbgctx}] DynamicValue.update (${this._sh_annotation}): ${err}`);
+                                console.error(`[${core.dbgctx.location}] DynamicValue.update (${this._sh_annotation}): ${err}`);
                             }
                         }
                     }
@@ -1034,7 +1034,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
                     }
                     catch (err)
                     {
-                        console.error(`[${core.dbgctx}] DynamicValue.update (${this._sh_annotation}): ${err}`);
+                        console.error(`[${core.dbgctx.location}] DynamicValue.update (${this._sh_annotation}): ${err}`);
                     }
                 }
                 this.cachedValue = undefined;
@@ -1134,7 +1134,7 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             }
             catch (err)
             {
-                console.error(`[${core.dbgctx}] Could not evaluate binding: ${b._sh_annotation}\n${deps.map(d => "- " + d._sh_annotation + " = " + d.val).join("\n")}\n${err}`);
+                console.error(`[${core.dbgctx.location}] Could not evaluate binding: ${b._sh_annotation}\n${deps.map(d => "- " + d._sh_annotation + " = " + d.val).join("\n")}\n${err}`);
                 return undefined;
             }
         };

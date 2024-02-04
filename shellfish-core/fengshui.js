@@ -440,19 +440,32 @@ exports.tools = {
     }
     exports.load = load;
 
+    function prettyChar(c)
+    {
+        if (c === "\n")
+        {
+            return "<newline>";
+        }
+        else
+        {
+            return c;
+        }
+    }
+
     function lineOfPos(data, pos)
     {
         const lines = data.split("\n");
         let sum = 0;
         for (let line = 0; line < lines.length; ++line)
         {
+            const col = pos.value - sum;
             sum += lines[line].length + 1 /* the '\n' we split at */;
             if (sum > pos.value)
             {
-                return line + 1;
+                return (line + 1) + ":" + (col + 1);
             }
         }
-        return -1;
+        return "-1";
     }
 
     function skipWhitespace(data, pos, skipNewline, skipComments)
@@ -903,7 +916,7 @@ exports.tools = {
 
     function parseElementBlock(data, pos, modules)
     {
-        let code = `.set("objectLocation", __filename + ":" + ${lineOfPos(data, pos)})`;
+        let code = `.set("objectLocation", __filename + ":${lineOfPos(data, pos)}")`;
         while (pos.value < data.length)
         {
             skipWhitespace(data, pos, true, true);
@@ -1315,7 +1328,7 @@ exports.tools = {
             }
             else if (next(data, pos, ":"))
             {
-                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + data[pos.value] + "'.";
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + prettyChar(data[pos.value]) + "'.";
             }
             else if (next(data, pos, "}"))
             {
@@ -1495,7 +1508,7 @@ exports.tools = {
             }
             else
             {
-                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + data[pos.value] + "'.";
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + prettyChar(data[pos.value]) + "'.";
             }
         }
 
@@ -1731,7 +1744,7 @@ exports.tools = {
             }
             else
             {
-                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + data[pos.value] + "'.";
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + prettyChar(data[pos.value]) + "'.";
             }
         }// while
 
@@ -1745,6 +1758,7 @@ exports.tools = {
         let code = "";
 
         code += expect(data, pos, "{");
+        code += `core.dbgctx.location = __filename + ":${lineOfPos(data, pos)}";`;
         while (pos.value < data.length)
         {
             skipWhitespace(data, pos, true, true);
@@ -1758,7 +1772,7 @@ exports.tools = {
             }
             else if (next(data, pos, ":"))
             {
-                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + data[pos.value] + "'.";
+                throw "Syntax error in line " + lineOfPos(data, pos) + ": invalid character '" + prettyChar(data[pos.value]) + "'.";
             }
             else
             {
@@ -2133,7 +2147,7 @@ exports.tools = {
 
         if (line !== thePreviousLine)
         {
-            code += `core.dbgctx = __filename + ":${line}";`;
+            code += `core.dbgctx.location = __filename + ":${line}";`;
             thePreviousLine = line;
         }
 

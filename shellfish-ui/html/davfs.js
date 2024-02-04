@@ -428,7 +428,10 @@ shRequire(["shellfish/core"], function (core)
                         if (status.lengthComputable && status.total > 0)
                         {
                             const p = status.loaded / status.total;
-                            progressCallback(p);
+                            progressCallback(p, {
+                                amount: status.loaded,
+                                total: status.total
+                            });
                         }
                     });
                     xhr.addEventListener("loadend", () =>

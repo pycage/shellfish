@@ -313,10 +313,10 @@ shRequire(["shellfish/core"], core =>
      * 
      *     onRequest: req =>
      *     {
-     *         if (req.method === "FOO")
+     *         if (req.method === "GET")
      *         {
      *             req.response(200, "OK")
-     *             .body("You requested " + req.url)
+     *             .body("You requested " + req.url.href)
      *             .send();
      *         }
      *         else

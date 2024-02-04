@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2023 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -445,7 +445,7 @@ shRequire([__dirname + "/object.js"], obj =>
      * @extends core.Object
      * @memberof core
      * 
-     * @property {string} endpoint - (default: `"/"`) The address of the RPC endpoint.
+     * @property {string} endpoint - (default: `""`) The address of the RPC endpoint. Setting this to an empty string will close the connection cleanly.
      * @property {string} status - [readonly] The current connection status. One of `disconnected|connecting|connected`
      */
     class RpcProxy extends obj.Object
@@ -454,7 +454,7 @@ shRequire([__dirname + "/object.js"], obj =>
         {
             super();
             d.set(this, {
-                endpoint: "/",
+                endpoint: "",
                 socket: null,
                 task: { },
                 callbacks: [],
@@ -471,14 +471,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
             this.onDestruction = () =>
             {
-                const priv = d.get(this);
-                if (priv.socket)
-                {
-                    priv.socket.postMessage(priv.sessionId, { type: "exit", clientId: priv.clientId });
-                    priv.socket.close();
-                }
-                priv.callMap.clear();
-                priv.callbackMap.clear();
+                this.disconnectRpc();
             };
         }
 
@@ -498,7 +491,13 @@ shRequire([__dirname + "/object.js"], obj =>
 
             if (priv.socket)
             {
-                priv.socket.close();
+                this.disconnectRpc();
+            }
+
+            if (priv.endpoint === "")
+            {
+                // not to be connected
+                return;
             }
 
             priv.status = "connecting";
@@ -559,6 +558,21 @@ shRequire([__dirname + "/object.js"], obj =>
                 }
             }));
             priv.socket.connect();
+        }
+
+        disconnectRpc()
+        {
+            const priv = d.get(this);
+            if (priv.socket)
+            {
+                priv.socket.postMessage(priv.sessionId, { type: "exit", clientId: priv.clientId });
+                priv.socket.close();
+            }
+            priv.callMap.clear();
+            priv.callbackMap.clear();
+            priv.messageQueue = [];
+            priv.clientId = "";
+            priv.sessionId = "";
         }
 
         call(callId)

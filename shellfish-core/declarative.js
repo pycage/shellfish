@@ -837,6 +837,17 @@ shRequire(["shellfish/core", "shellfish/core/warehouse"], function (core, wareho
             {
                 return el.id(i, ns);
             };
+            proxy.event = function (n)
+            {
+                el.event(n);
+                return this;
+            };
+            proxy.property = function (n, v)
+            {
+                el.property(n, v);
+                return this;
+            };
+
             /*
             proxy.find = function (id, ns)
             {

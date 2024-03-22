@@ -203,14 +203,29 @@ MouseBox {
             return;
         }
 
-        const stepSize = target.contentHeight / labelRepeater.count;
-        if (ev.deltaY < 0)
+        if (orientation === "horizontal")
         {
-            target.contentY = target.contentY - stepSize;
+            const stepSize = target.contentWidth / labelRepeater.count;
+            if (ev.deltaY < 0)
+            {
+                target.contentX = target.contentX - stepSize;
+            }
+            else if (ev.deltaY > 0)
+            {
+                target.contentX = target.contentX + stepSize;
+            }
         }
-        else if (ev.deltaY > 0)
+        else
         {
-            target.contentY = target.contentY + stepSize;
+            const stepSize = target.contentHeight / labelRepeater.count;
+            if (ev.deltaY < 0)
+            {
+                target.contentY = target.contentY - stepSize;
+            }
+            else if (ev.deltaY > 0)
+            {
+                target.contentY = target.contentY + stepSize;
+            }
         }
     }
 
@@ -233,14 +248,23 @@ MouseBox {
 
             onClick: ev =>
             {
-                indexScroller.target.contentY = modelData.value.position;
+                if (indexScroller.orientation === "horizontal")
+                {
+                    indexScroller.target.contentX = modelData.value.position;
+                }
+                else
+                {
+                    indexScroller.target.contentY = modelData.value.position;
+                }
                 ev.accepted = true;
             }
 
             Loader {
                 property containsMouse: parent.containsMouse
-                property inView: indexScroller.target.contentY < parent.modelData.value.until &&
-                                 indexScroller.target.contentY + indexScroller.target.bboxHeight > parent.modelData.value.position
+                property inView: indexScroller.orientation === "horizontal" ? indexScroller.target.contentX < parent.modelData.value.until &&
+                                                                              indexScroller.target.contentX + indexScroller.target.bboxWidth > parent.modelData.value.position
+                                                                            : indexScroller.target.contentY < parent.modelData.value.until &&
+                                                                              indexScroller.target.contentY + indexScroller.target.bboxHeight > parent.modelData.value.position
                 property text: parent.modelData.value.label
 
                 fillWidth: true

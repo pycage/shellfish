@@ -53,6 +53,7 @@ require "shellfish/ui";
  * @extends html.Box
  *
  * @property {number} stepSize - (default: `theme.paddingMedium`) The step size for scrolling.
+ * @property {template} styleOfHandle - The handle style template. It is expected to have a property `edge` that will be set to the particular edge (one of `top|bottom|left|right`).
  * @property {html.Box} target - (default: `parent`) The target box.
  */
 Box {
@@ -61,6 +62,54 @@ Box {
     property stepSize: theme.paddingMedium
 
     property target: parent
+
+    property styleOfHandle: template MouseBox {
+
+        property edge: ""
+
+        width: fillWidth ? -1 : theme.paddingLarge
+        height: fillHeight ? -1 : theme.paddingLarge
+        fillWidth: edge === "top" || edge === "bottom"
+        fillHeight: edge === "left" || edge === "right"
+
+        layout: "center"
+
+        color: pressed ? theme.highlightBackgroundColor
+                       : containsMouse ? theme.hoverBackgroundColor
+                                       : "transparent"
+
+        // what a hack, but well...
+        //onDrag: (ev) => { ev.accepted = true; }
+
+        Label {
+            visible: parent.containsMouse
+            text: (() =>
+            {
+                switch (parent.edge)
+                {
+                case "top":
+                    return "[icon:core-arrow_up]";
+                case "bottom":
+                    return "[icon:core-arrow_down]";
+                case "left":
+                    return "[icon:core-arrow_left]";
+                case "right":
+                    return "[icon:core-arrow_right]";
+                }
+            })()
+        }
+
+        Timer {
+            running: parent.containsMouse
+            repeat: true
+            interval: 50
+
+            onTimeout: () =>
+            {
+                box.scrollEdge(parent.edge);
+            }
+        }
+    }
 
     function scroll(axis, amount)
     {
@@ -90,6 +139,25 @@ Box {
         }
     }
 
+    function scrollEdge(edge)
+    {
+        switch (edge)
+        {
+        case "top":
+            scroll("y", -box.stepSize);
+            break;
+        case "bottom":
+            scroll("y", box.stepSize);
+            break;
+        case "left":
+            scroll("x", -box.stepSize);
+            break;
+        case "right":
+            scroll("x", box.stepSize);
+            break;
+        }
+    }
+
     visible: thisDocument.inputDevice !== "touch" &&
              (target.contentWidth > target.bboxWidth ||
               target.contentHeight > target.bboxHeight)
@@ -113,206 +181,67 @@ Box {
         }
     }
 
-    MouseBox {
-        visible: target.contentX > 0
-        position: "free"
-        width: theme.paddingLarge
-        fillHeight: true
-        layout: "center"
-        //style: "sh-dropshadow"
-
-        color: pressed ? theme.highlightBackgroundColor
-                       : containsMouse ? theme.hoverBackgroundColor
-                                       : "transparent"
-
-        onInitialization: () =>
-        {
-            css("pointer-events", "all");
+    Repeater {
+        model: ListModel {
+            data: [
+                "top", "bottom", "left", "right"
+            ]
         }
+        delegate: template Box {
 
-        // what a hack, but well...
-        onDrag: (ev) => { ev.accepted = true; }
+            property edge: modelData.value
 
-        onWheel: (ev) =>
-        {
-            if (ev.deltaX > 0 || ev.deltaY > 0)
+            visible: (() =>
             {
-                box.scroll("x", box.stepSize);
-            }
-            else if (ev.deltaX < 0 || ev.deltaY < 0)
+                switch (edge)
+                {
+                case "top":
+                    return target.contentY > 0;
+                case "bottom":
+                    return target.bboxHeight < target.contentHeight &&
+                           target.contentY + 0.5 < target.contentHeight - target.bboxHeight;
+                case "left":
+                    return target.contentX > 0;
+                case "right":
+                    return target.bboxWidth < target.contentWidth &&
+                           target.contentX + 0.5 < target.contentWidth - target.bboxWidth;
+                }
+            })()
+
+            position: "free"
+            origin: (() =>
             {
-                box.scroll("x", -box.stepSize);
-            }
-            ev.accepted = true;
-        }
+                switch (edge)
+                {
+                case "top":
+                    return "top-left";
+                case "bottom":
+                    return "bottom-left";
+                case "left":
+                    return "top-left";
+                case "right":
+                    return "top-right";
+                }
+            })()
 
-        Label {
-            visible: parent.containsMouse
-            text: "[icon:core-arrow_left]"
-        }
+            fillWidth: edge === "top" || edge === "bottom"
+            fillHeight: edge === "left" || edge === "right"
 
-        Timer {
-            running: parent.containsMouse
-            repeat: true
-            interval: 50
+            Loader {
+                fillWidth: parent.fillWidth
+                fillHeight: parent.fillHeight
+                sourceTemplate: box.styleOfHandle
 
-            onTimeout: () =>
-            {
-                box.scroll("x", -box.stepSize);
-            }
-        }
-    }
+                layout: "center"
 
-    MouseBox {
-        visible: target.bboxWidth < target.contentWidth &&
-                 target.contentX + 0.5 < target.contentWidth - target.bboxWidth
-        position: "free"
-        origin: "top-right"
-        width: theme.paddingLarge
-        fillHeight: true
-        layout: "center"
-        //style: "sh-dropshadow"
-
-        color: pressed ? theme.highlightBackgroundColor
-                       : containsMouse ? theme.hoverBackgroundColor
-                                       : "transparent"
-
-        onInitialization: () =>
-        {
-            css("pointer-events", "all");
-        }
-
-        // what a hack, but well...
-        onDrag: (ev) => { ev.accepted = true; }
-
-        onWheel: (ev) =>
-        {
-            if (ev.deltaX > 0 || ev.deltaY > 0)
-            {
-                box.scroll("x", box.stepSize);
-            }
-            else if (ev.deltaX < 0 || ev.deltaY < 0)
-            {
-                box.scroll("x", -box.stepSize);
-            }
-            ev.accepted = true;
-        }
-
-        Label {
-            visible: parent.containsMouse
-            text: "[icon:core-arrow_right]"
-        }
-
-        Timer {
-            running: parent.containsMouse
-            repeat: true
-            interval: 50
-
-            onTimeout: () =>
-            {
-                box.scroll("x", box.stepSize);
-            }
-        }
-    }
-
-    MouseBox {
-        visible: target.contentY > 0
-        position: "free"
-        fillWidth: true
-        height: theme.paddingLarge
-        layout: "center"
-        //style: "sh-dropshadow"
-
-        color: pressed ? theme.highlightBackgroundColor
-                       : containsMouse ? theme.hoverBackgroundColor
-                                       : "transparent"
-
-        onInitialization: () =>
-        {
-            css("pointer-events", "all");
-        }
-
-        // what a hack, but well...
-        onDrag: (ev) => { ev.accepted = true; }
-
-        onWheel: (ev) =>
-        {
-            if (ev.deltaX > 0 || ev.deltaY > 0)
-            {
-                box.scroll("y", box.stepSize);
-            }
-            else if (ev.deltaX < 0 || ev.deltaY < 0)
-            {
-                box.scroll("y", -box.stepSize);
-            }
-            ev.accepted = true;
-        }
-
-        Label {
-            visible: parent.containsMouse
-            text: "[icon:core-arrow_up]"
-        }
-
-        Timer {
-            running: parent.containsMouse
-            repeat: true
-            interval: 50
-
-            onTimeout: () =>
-            {
-                box.scroll("y", -box.stepSize);
-            }
-        }
-    }
-
-    MouseBox {
-        visible: target.bboxHeight < target.contentHeight &&
-                 target.contentY + 0.5 < target.contentHeight - target.bboxHeight
-        position: "free"
-        origin: "bottom-left"
-        fillWidth: true
-        height: theme.paddingLarge
-        layout: "center"
-        //style: "sh-dropshadow"
-
-        color: pressed ? theme.highlightBackgroundColor
-                       : containsMouse ? theme.hoverBackgroundColor
-                                       : "transparent"
-
-        onInitialization: () =>
-        {
-            css("pointer-events", "all");
-        }
-
-        // what a hack, but well...
-        onDrag: (ev) => { ev.accepted = true; }
-
-        onWheel: (ev) =>
-        {
-            if (ev.deltaX > 0 || ev.deltaY > 0)
-            {
-                box.scroll("y", box.stepSize);
-            }
-            else if (ev.deltaX < 0 || ev.deltaY < 0)
-            {
-                box.scroll("y", -box.stepSize);
-            }
-            ev.accepted = true;
-        }
-
-        Label {
-            visible: parent.containsMouse
-            text: "[icon:core-arrow_down]"
-        }
-
-        Timer {
-            running: parent.containsMouse
-            repeat: true
-            interval: 50
-
-            onTimeout: () =>
-            {
-                box.scroll("y", box.stepSize);
+                onItemChanged: () =>
+                {
+                    if (item)
+                    {
+                        item.edge = parent.edge;
+                        item.css("pointer-events", "all");
+                    }
+                }
             }
         }
     }

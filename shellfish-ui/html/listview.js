@@ -363,61 +363,66 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
                 const priv = d.get(this);
 
                 if (! this.scrolling && priv.snapMode !== "none" && ! na.running)
-                {
+                {                    
                     let contentPos = 0;
+                    let contentSize = 0;
                     let cellSize = 0;
                     let viewSize = 0;
+                    let snapLine = 0;
 
                     if (priv.orientation === "horizontal")
                     {
                         contentPos = this.contentX;
+                        contentSize = this.contentWidth;
                         viewSize = this.bboxWidth;
                         cellSize = priv.cellWidth;
                     }
                     else
                     {
                         contentPos = this.contentY;
+                        contentSize = this.contentHeight;
                         viewSize = this.bboxHeight;
                         cellSize = priv.cellHeight;
                     }
 
+                    const beginPos = 0;
+                    const endPos = contentSize - viewSize;
+
+                    if (contentPos < beginPos + 0.0001 || contentPos > endPos - 0.0001)
+                    {
+                        // snap to begin or end
+                        return;
+                    }
+
+                    // determine the snap line
                     if (priv.snapMode === "end")
                     {
-                        contentPos += viewSize;
+                        snapLine = viewSize;
                     }
-
-                    const moduloPos = contentPos % cellSize;
-                    if (moduloPos !== 0)
+                    else if (priv.snapMode === "center")
                     {
-                        const targetPos = (moduloPos < cellSize / 2) ? contentPos - moduloPos
-                                                                     : contentPos - moduloPos + cellSize;
-                                                                                
-                        if (Math.abs(contentPos - targetPos) < 1)
-                        {
-                            return;
-                        }
-                        na.from = contentPos;
-                        na.to = targetPos;
-
-
-                        na.start(this.safeCallback(pos =>
-                        {
-                            if (priv.snapMode === "end")
-                            {
-                                pos -= viewSize;
-                            }
-
-                            if (priv.orientation === "horizontal")
-                            {
-                                
-                                this.contentX = pos;
-                            }
-                            else
-                            {
-                                this.contentY = pos;
-                            }
-                        }));
+                        snapLine = (viewSize - cellSize) / 2;
                     }
+
+                    // snap to nearest element at the snap line
+                    const idxAtSnapLine = Math.round((contentPos + snapLine) / cellSize);
+                    const snapPos = Math.max(beginPos, Math.min(endPos, idxAtSnapLine * cellSize - snapLine));
+
+                    na.from = contentPos;
+                    na.to = snapPos;
+
+                    na.start(this.safeCallback(pos =>
+                    {
+                        if (priv.orientation === "horizontal")
+                        {
+                            
+                            this.contentX = pos;
+                        }
+                        else
+                        {
+                            this.contentY = pos;
+                        }
+                    }));
                 }
             };
 
@@ -636,7 +641,24 @@ shRequire(["shellfish/low", __dirname + "/item.js", __dirname + "/numberanimatio
         get delegate() { return d.get(this).delegate; }
         set delegate(del)
         {
+            const priv = d.get(this);
+
             d.get(this).delegate = del;
+
+            // clear old content
+            const toDestroy = [];
+            priv.itemMeta.forEach((item, idx) =>
+            {
+                toDestroy.push(idx);
+            });
+            toDestroy
+            .sort((a, b) => b < a ? -1 : 1)
+            .forEach((idx) =>
+            {
+                this.destroyItem(idx);
+            });
+            priv.windowRange = [-1, -1];
+
             this.dumpRecycleBin();
             this.render();
         }

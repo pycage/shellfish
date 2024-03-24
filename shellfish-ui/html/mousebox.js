@@ -545,8 +545,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     }
 
                     //console.log("passive pointerenter " + this.objectLocation);
-                    priv.containsMouse = true;
-                    this.containsMouseChanged();
+                    if (! priv.containsMouse)
+                    {
+                        priv.containsMouse = true;
+                        this.containsMouseChanged();
+                    }
                 }, { passive: true });
 
                 this.addTracedHtmlEventListener(item, "pointerover", () =>
@@ -557,8 +560,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     }
 
                     //console.log("passive pointerover " + this.objectLocation);
-                    priv.containsMouse = true;
-                    this.containsMouseChanged();
+                    if (! priv.containsMouse)
+                    {
+                        priv.containsMouse = true;
+                        this.containsMouseChanged();
+                    }
                 }, { passive: true });
 
                 this.addTracedHtmlEventListener(item, "pointerout", (ev) =>
@@ -603,8 +609,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                         this.touchPointsChanged();
                     }
 
-                    priv.containsMouse = false;
-                    this.containsMouseChanged();
+                    if (priv.containsMouse)
+                    {
+                        priv.containsMouse = false;
+                        this.containsMouseChanged();
+                    }
 
                     priv.pressed = false;
                     this.pressedChanged();
@@ -626,8 +635,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                         this.touchPointsChanged();
                     }
 
-                    priv.containsMouse = false;
-                    this.containsMouseChanged();
+                    if (priv.containsMouse)
+                    {
+                        priv.containsMouse = false;
+                        this.containsMouseChanged();
+                    }
 
                     priv.pressed = false;
                     this.pressedChanged();
@@ -693,7 +705,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
 
                     //console.log("passive mouseover " + this.objectLocation);
 
-                    if (legacyPointerType === "mouse")
+                    if (legacyPointerType === "mouse" && ! priv.containsMouse)
                     {
                         priv.containsMouse = true;
                         this.containsMouseChanged();
@@ -709,7 +721,7 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
 
                     //console.log("passive mouseout " + this.objectLocation);
 
-                    if (legacyPointerType === "mouse")
+                    if (legacyPointerType === "mouse" && priv.containsMouse)
                     {
                         priv.containsMouse = false;
                         this.containsMouseChanged();
@@ -731,8 +743,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     legacyPointerType = "touch";
                     priv.passiveEvent = pEvent;
 
-                    priv.containsMouse = true;
-                    this.containsMouseChanged();
+                    if (! priv.containsMouse)
+                    {
+                        priv.containsMouse = true;
+                        this.containsMouseChanged();
+                    }
 
                     priv.pressed = true;
                     this.pressedChanged();
@@ -792,8 +807,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                     }
                     this.touchPointsChanged();
 
-                    priv.containsMouse = false;
-                    this.containsMouseChanged();
+                    if (priv.containsMouse)
+                    {
+                        priv.containsMouse = false;
+                        this.containsMouseChanged();
+                    }
 
                     priv.clickAccepted = ev.sh_clickAccepted || false;
 
@@ -960,8 +978,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 window.removeEventListener(POINTER_EVENT ? "pointermove" : "mousemove", drag, true);
                 window.removeEventListener(POINTER_EVENT ? "pointerup" : "mouseup", stopDrag, true);
                 
-                priv.containsMouse = false;
-                this.containsMouseChanged();
+                if (priv.containsMouse)
+                {
+                    priv.containsMouse = false;
+                    this.containsMouseChanged();
+                }
 
                 priv.clickAccepted = false;
 
@@ -980,8 +1001,11 @@ shRequire(["shellfish/low", __dirname + "/box.js"], function (low, box)
                 window.removeEventListener("touchmove", touchDrag, true);
                 window.removeEventListener("touchend", stopTouchDrag, true);
                 
-                priv.containsMouse = false;
-                this.containsMouseChanged();
+                if (priv.containsMouse)
+                {
+                    priv.containsMouse = false;
+                    this.containsMouseChanged();
+                }
 
                 priv.clickAccepted = false;
 

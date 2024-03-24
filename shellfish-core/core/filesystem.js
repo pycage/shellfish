@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -415,6 +415,17 @@ shRequire([__dirname + "/object.js"], obj =>
         encodeName(name)
         {
             return name;
+        }
+
+        /**
+         * Returns a {@link core.FileData FileData} object for the given data source.
+         * 
+         * @param {string|ArrayBuffer|ReadableStream|Blob|FileInfo} dataSource - The data source.
+         * @return {core.FileData} The {@link core.FileData FileData} object.
+         */
+        makeFileData(data)
+        {
+            return new FileData(data);
         }
 
         /**

@@ -1308,7 +1308,11 @@ shRequire(["shellfish/low",
         updateVisibility()
         {
             const priv = d.get(this);
-            const visibility = this.lifeCycleStatus === "initialized" && this.visible && this.ancestorsVisible && !! this.parent;
+
+            const visibility = this.lifeCycleStatus === "initialized" &&
+                               this.visible &&
+                               this.ancestorsVisible &&
+                               !! this.parent;
             if (visibility !== priv.visibility)
             {
                 //console.log("Visibility Changed: " + this.objectType + "@" + this.objectLocation + " = " + visibility);
@@ -1522,6 +1526,59 @@ shRequire(["shellfish/low",
                 }
             }
             super.detachChild(child);
+        }
+
+        /**
+         * Returns whether the given box is (partially) within the viewport.
+         * The coordinates are in this element's local coordinate system.
+         *
+         * @param {number} x - The X position to test.
+         * @param {number} y - The Y position to test.
+         * @param {number} w - The width to test.
+         * @param {number} h - The height to test.
+         * @param {bool} recursive - If `true`, this method is called recursively to return whether the box is (partially) visible at all.
+         */
+        inView(x, y, w, h, recursive)
+        {
+            // coordinates are local coordinates within the parent
+
+            if (w * h === 0)
+            {
+                return false;
+            }
+            
+            const left = x;
+            const right = left + w;
+            const top = y;
+            const bottom = top + h;
+            
+            if (this.bboxWidth * this.bboxHeight > 0 &&
+                right >= this.contentX &&
+                left < this.contentX + this.bboxWidth &&
+                bottom >= this.contentY &&
+                top < this.contentY + this.bboxHeight)
+            {
+                if (! recursive)
+                {
+                    return true;
+                }
+                    
+                const parent = this.parent;
+                if (! parent)
+                {
+                    return false;
+                }
+
+                return parent.inView(left - this.contentX,
+                                     top - this.contentY,
+                                     w,
+                                     h,
+                                     true);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /**

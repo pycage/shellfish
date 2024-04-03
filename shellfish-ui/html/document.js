@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -639,6 +639,35 @@ shRequire(["shellfish/low", __dirname + "/object.js"], function (low, obj)
         {
             d.get(this).httpTokenQueue = new TokenQueue(s);
             this.maxHttpRequestsChanged();
+        }
+
+        /**
+         * Returns whether the given box is (partially) within the viewport.
+         * The coordinates are in this element's local coordinate system.
+         *
+         * @param {number} x - The X position to test.
+         * @param {number} y - The Y position to test.
+         * @param {number} w - The width to test.
+         * @param {number} h - The height to test.
+         */
+        inView(x, y, w, h)
+        {
+            const left = x;
+            const right = left + w;
+            const top = y;
+            const bottom = top + h;
+
+            if (right >= this.contentX &&
+                left < this.contentX + this.windowWidth &&
+                bottom >= this.contentY &&
+                top < this.contentY + this.windowHeight)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         updateSizeFrom(item, fromChild)

@@ -61,20 +61,12 @@ MouseBox {
             if (! _menu.visible)
             {
                 menuOpened = false;
-                if (thisMenu)
-                {
-                    selected = true;
-                }
             }
         };
 
         _menu.get().onCascadingClose = () =>
         {
             menuOpened = false;
-            if (thisMenu)
-            {
-                selected = true;
-            }
         };
 
         _menu.get().onPointerMove = (ev) =>
@@ -156,8 +148,6 @@ MouseBox {
      */
     function showMenu()
     {
-        selected = false;
-
         if (! menu)
         {
             return;
@@ -206,6 +196,7 @@ MouseBox {
         .filter((c) => { return c !== self && c.selectItem; })
         .forEach((c) =>
         {
+            //console.log("unselect " + c.text);
             c.selected = false;
             if (c.menuOpened)
             {
@@ -225,6 +216,8 @@ MouseBox {
      */
     function selectItem(activate)
     {
+        //console.log("select " + text);
+        selected = true;
         unselectSiblings();
 
         if (menu && activate)
@@ -292,13 +285,6 @@ MouseBox {
         }
     }
 
-    onInitialization: () =>
-    {
-        if (menu && ! _menu)
-        {
-            _createMenu();
-        }
-    }
 
     onAncestorsVisibleChanged: () =>
     {
@@ -317,6 +303,17 @@ MouseBox {
         if (selected)
         {
             focus = true;
+
+            const thisY = bboxY - thisMenu.menu.bboxY + thisMenu.menu.contentY;
+            if (thisY < thisMenu.menu.contentY)
+            {
+                thisMenu.menu.contentY = thisY;
+            }
+            else if (thisY > thisMenu.menu.contentY + thisMenu.menu.bboxHeight - bboxHeight)
+            {
+                console.log("position item " + thisY);
+                thisMenu.menu.contentY = thisY - thisMenu.menu.bboxHeight + bboxHeight;
+            }
         }
     }
 

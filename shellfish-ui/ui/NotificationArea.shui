@@ -78,7 +78,7 @@ Box {
      * @name createCustomNotification
      * @memberof ui.NotificationArea.prototype
      *
-     * @param {[function]} sourceTemplate - A Shui template.
+     * @param {function} [sourceTemplate] - A Shui template.
      * @return {html.Box} The notification.
      */
     function createCustomNotification(sourceTemplate)

@@ -24,6 +24,8 @@
             "layout-scrolling": { "title": "Scrolling" },
             "layout-ruler": { "title": "Aligning with Rulers" },
 
+            "logging": { "title": "Handling Log Messages" },
+
             "ui-colors": { "title": "Working with Colors" },
             "ui-theme": { "title": "Using the Theme for a Uniform Look" },
             "ui-profiles": { "title": "Using Profiles" },
@@ -32,7 +34,10 @@
             "ui-timer": { "title": "Timers" },
             "ui-defered": { "title": "Defered Creation of UI Elements" },
             "ui-listmodel": { "title": "List Models" },
-            "ui-dragndrop": { "title": "Drag and Drop" }
+            "ui-dragndrop": { "title": "Drag and Drop" },
+
+            "server-shellfish-node": { "title": "Using Shellfish on Node.js" },
+            "server-http": { "title": "Setting up a HTTP/S Server with Routing" }
         }
     }
 }

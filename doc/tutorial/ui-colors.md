@@ -126,5 +126,6 @@ read by its properties and are within the range of `0.0` and `1.0`.
 
 <div class="navstrip">
 <span class="go-home"><a href="index.html">Contents</a></span>
+<span class="go-previous">{@tutorial logging}</span>
 <span class="go-next">{@tutorial ui-profiles}</span>
 </div>

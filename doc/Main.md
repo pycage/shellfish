@@ -70,6 +70,7 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 ### Generic Topics
 
+* {@tutorial logging}
 * {@tutorial ui-colors}
 * {@tutorial ui-profiles}
 * {@tutorial ui-timer}
@@ -82,6 +83,14 @@ Layouting UI elements on screen is intuitive, yet powerful.
 * {@tutorial ui-animations}
 * {@tutorial ui-defered}
 * {@tutorial ui-dragndrop}
+
+### Server Programming
+
+Shellfish provides elements for building servers with Shui code.
+
+* {@tutorial server-shellfish-node}
+* {@tutorial server-http}
+
 <!--
 -->
 
@@ -134,6 +143,14 @@ Layouting UI elements on screen is intuitive, yet powerful.
 
 
 ## News
+
+### April 2024
+* The element {@link core.Repeater} is now capable of creating and destroying
+  its delegates dynamically with the `mayCreate` property.
+
+### March 2024
+* The element {@link ui.OverflowScroller} is now stylable with the `styleOfHandle`
+  template property.
 
 ### January 2024
 * Improved UI performance.

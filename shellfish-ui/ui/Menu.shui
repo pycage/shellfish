@@ -32,13 +32,15 @@ require "shellfish/ui";
  * @extends ui.Overlay
  *
  * @property {bool} menuOpened - [readonly] Whether the menu is currently opened.
+ * @property {number} reservedHeight - (default: `6`) The minimum height reserved for this menu. Use when you want to create menu items dynamically on scrolling.
  */
 Overlay {
-    id: menu
+    id: menuOverlay
 
     container default: menuBoxContent
 
     property menuOpened: visible
+    property menu: menuBox
 
     /**
      * Shows the menu next to a parent element.
@@ -93,20 +95,9 @@ Overlay {
         }
 
         show();
-
-        if (menuBox.children().length > 0)
-        {
-            wait(0)
-            .then(() =>
-            {
-                const cs = menuBox.children().filter((c) => { return c.canFocus && c.enabled && c.visible; });
-                if (cs.length > 0)
-                {
-                    cs[0].focus = true;
-                }
-            });
-        }
     }
+
+    event selectionMove
 
     /**
      * Is triggered when the menu cascade (this menu and all its submenus) is closing.
@@ -148,12 +139,12 @@ Overlay {
         property anchorHeight: 0
 
         property spaceAbove: anchorY - anchorHeight
-        property spaceBelow: menu.bboxHeight - anchorY
+        property spaceBelow: menuOverlay.bboxHeight - anchorY
         property showBelow: spaceBelow > menuBoxContent.bboxHeight ? true
                                                                    : spaceBelow > spaceAbove
 
         property spaceLeft: anchorX - anchorWidth
-        property spaceRight: menu.bboxWidth - anchorX
+        property spaceRight: menuOverlay.bboxWidth - anchorX
         property showRight: spaceRight > bboxWidth ? true
                                                    : spaceRight > spaceLeft
 
@@ -162,7 +153,7 @@ Overlay {
 
         x: showRight ? anchorX
                      : anchorWidth > 0 ? anchorX - anchorWidth - bboxWidth
-                                       : menu.bboxWidth - bboxWidth
+                                       : menuOverlay.bboxWidth - bboxWidth
         y: showBelow ? anchorY
                      : anchorY - anchorHeight - height
 
@@ -184,8 +175,8 @@ Overlay {
 
                 wait(100).then(() =>
                 {
-                    menu.cascadingClose();
-                    menu.close();
+                    menuOverlay.cascadingClose();
+                    menuOverlay.close();
                 });
             }
 
@@ -195,8 +186,8 @@ Overlay {
                 {
                     ev.accepted = true;
 
-                    menu.cascadingClose();
-                    menu.close();
+                    menuOverlay.cascadingClose();
+                    menuOverlay.close();
                     return;
                 }
 
@@ -242,16 +233,8 @@ Overlay {
             }
         }
 
-    }
-
-    ScrollIndicator {
-        position: "free"
-        visible: menuBox.contentHeight > menuBox.bboxHeight
-        x: menuBox.x + menuBox.bboxWidth - width
-        y: menuBox.y
-        target: menuBox
-        width: theme.paddingSmall
-        height: menuBox.height
+        ScrollIndicator { margins: 1 }
+        OverflowScroller { margins: 1 }
     }
 
 }

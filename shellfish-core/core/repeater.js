@@ -24,18 +24,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj, listModel)
 {
+    let revisionCounter = 0;
+
     let d = new WeakMap();
 
     /**
      * Class representing a repeater.
      * 
-     * The repeater creates a dynamic set of children from its delegate
-     * template according to a list model.
+     * The repeater is a lightweight element that creates a dynamic set of children
+     * from its delegate template according to a list model.
      * 
      * The repeater is not a visual element. The children are created within the
      * parent container.
      * 
-     * @example <caption>Shui code</caption>
+     * Example: Shui code
+     * ```
      * Box {
      *     Repeater {
      *         model: ListModel { data: sequence(0, 3) }
@@ -44,6 +47,40 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      *         }
      *     }
      * }
+     * ```
+     * 
+     * Usually the repeater creates all of its child elements at once.
+     * However, by changing the `mayCreate` property, you can make it create or
+     * destroy elements dynamically.
+     * 
+     * Example: Create children dynamically
+     * ```
+     * Box {
+     *     overflowBehavior: "scroll"
+     * 
+     *     // reserve space for contents
+     *     Box {
+     *       width: theme.itemWidthLarge
+     *       height: 150 * theme.itemHeightMedium
+     *     }
+     * 
+     *     Repeater {
+     *         model: ListModel { data: sequence(0, 150) }
+     * 
+     *         // create children that are inside the viewport
+     *         mayCreate: model.data.map((v, idx) => idx).filter(
+     *             idx => (idx + 1) * theme.itemHeightMedium > thisBox.contentY &&
+     *                    idx * theme.itemHeightMedium < thisBox.contentY + thisBox.bboxHeight
+     *         )
+     * 
+     *         delegate: template Label {
+     *             position: "free"
+     *             y: modelData.index * theme.itemHeightMedium
+     *             text: "Label #" + modelData.index
+     *         }
+     *     }
+     * }
+     * ```
      * 
      * @extends core.Object
      * @memberof core
@@ -51,6 +88,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      * @property {number} count - [readonly] The amount of items.
      * @property {fengshui.Template} delegate - (default: `null`) The delegate template. This does not need to be a visual element.
      * @property {core.Object[]} items - [readonly] The list of items.
+     * @property {number[]} mayCreate - (default: `null`) A list of the index numbers of children that may be created. Children not in this list may be destroyed. If `null`, all children may be created.
      * @property {core.ListModel} model - (default: `null`) The list model. You may pass a number value to implicitly create a simple model.
      */
     class Repeater extends obj.Object
@@ -61,11 +99,13 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             d.set(this, {
                 model: null,
                 delegate: () => null,
+                mayCreate: null,
                 items: [],
                 recycleBin: []
             });
 
             this.notifyable("count");
+            this.notifyable("mayCreate");
             this.notifyable("model");
 
             this.onInitialization = () =>
@@ -209,6 +249,14 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             this.renderAll();
         }
 
+        get mayCreate() { return d.get(this).mayCreate; }
+        set mayCreate(l)
+        {
+            d.get(this).mayCreate = l;
+            this.mayCreateChanged();
+            this.renderAll();
+        }
+
         get items() { return d.get(this).items.slice(); }
 
         dumpRecycleBin()
@@ -225,9 +273,11 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
         {
             const priv = d.get(this);
             const modelData = {
+                revision: revisionCounter,
                 index: idx,
                 value: priv.model.at(idx)
             };
+            ++revisionCounter;
 
             let item = null;
             if (priv.recycleBin.length > 0)
@@ -244,6 +294,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                 }
             }
 
+            //console.log("createItem " + idx);
             return item;
         }
 
@@ -251,9 +302,12 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
         {
             const priv = d.get(this);
             const modelData = {
+                revision: revisionCounter,
                 index: idx,
                 value: priv.model.at(idx)
             };
+            ++revisionCounter;
+
             if (modelData.value !== undefined)
             {
                 const item = this.getItem(idx);
@@ -270,8 +324,10 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             const item = this.getItem(idx);
             if (item)
             {
-                priv.recycleBin.push(item);
+                //console.log("destroyItem " + idx);
+                //priv.recycleBin.push(item);
                 item.parent = null;
+                item.referenceRemove(this);
             }
         }
 
@@ -320,21 +376,27 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                 const existingItems = items.filter(c => c !== undefined);
                 for (let i = 0; i < model.size; ++i)
                 {
+                    const isAlive = d.get(this).mayCreate !== null ? d.get(this).mayCreate.indexOf(i) !== -1 
+                                                                   : true;
+
                     if (items[i] === undefined)
                     {
-                        const item = this.createItem(i);
-                        if (item)
+                        if (isAlive)
                         {
-                            if (existingItems.length === 0)
+                            const item = this.createItem(i);
+                            if (item)
                             {
-                                this.parent.add(item);
+                                if (existingItems.length === 0)
+                                {
+                                    this.parent.add(item);
+                                }
+                                else
+                                {
+                                    this.parent.add(item, existingItems[0]);
+                                }
+    
+                                items[i] = item;
                             }
-                            else
-                            {
-                                this.parent.add(item, existingItems[0]);
-                            }
-
-                            items[i] = item;
                         }
                     }
                     else
@@ -342,6 +404,11 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                         if (existingItems.length > 0 && existingItems[0] === items[i])
                         {
                             existingItems.shift();
+                        }
+                        if (! isAlive && items[i])
+                        {
+                            this.destroyItem(i);
+                            items[i] = undefined;
                         }
                     }
                 }

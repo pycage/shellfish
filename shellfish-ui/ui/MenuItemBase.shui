@@ -311,7 +311,6 @@ MouseBox {
             }
             else if (thisY > thisMenu.menu.contentY + thisMenu.menu.bboxHeight - bboxHeight)
             {
-                console.log("position item " + thisY);
                 thisMenu.menu.contentY = thisY - thisMenu.menu.bboxHeight + bboxHeight;
             }
         }

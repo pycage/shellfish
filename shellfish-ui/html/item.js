@@ -1141,7 +1141,7 @@ shRequire(["shellfish/low",
             let item = this.get();
             if (v)
             {
-                item.focus();
+                item.focus({ preventScroll: true });
             }
         }
 

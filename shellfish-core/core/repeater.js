@@ -50,7 +50,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      * ```
      * 
      * Usually the repeater creates all of its child elements at once.
-     * However, by changing the `mayCreate` property, you can make it create or
+     * However, by changing the `dynamicItems` property, you can make it create or
      * destroy elements dynamically.
      * 
      * Example: Create children dynamically
@@ -68,7 +68,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      *         model: ListModel { data: sequence(0, 150) }
      * 
      *         // create children that are inside the viewport
-     *         mayCreate: model.data.map((v, idx) => idx).filter(
+     *         dynamicItems: model.data.map((v, idx) => idx).filter(
      *             idx => (idx + 1) * theme.itemHeightMedium > thisBox.contentY &&
      *                    idx * theme.itemHeightMedium < thisBox.contentY + thisBox.bboxHeight
      *         )
@@ -87,8 +87,8 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
      * 
      * @property {number} count - [readonly] The amount of items.
      * @property {fengshui.Template} delegate - (default: `null`) The delegate template. This does not need to be a visual element.
+     * @property {number[]} dynamicItems - (default: `null`) A list of the index numbers of children to be created dynamically. Children not in this list get destroyed. If `null`, all children get created at once.
      * @property {core.Object[]} items - [readonly] The list of items.
-     * @property {number[]} mayCreate - (default: `null`) A list of the index numbers of children that may be created. Children not in this list may be destroyed. If `null`, all children may be created.
      * @property {core.ListModel} model - (default: `null`) The list model. You may pass a number value to implicitly create a simple model.
      */
     class Repeater extends obj.Object
@@ -99,13 +99,13 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             d.set(this, {
                 model: null,
                 delegate: () => null,
-                mayCreate: null,
+                dynamicItems: null,
                 items: [],
                 recycleBin: []
             });
 
             this.notifyable("count");
-            this.notifyable("mayCreate");
+            this.notifyable("dynamicItems");
             this.notifyable("model");
 
             this.onInitialization = () =>
@@ -249,11 +249,11 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             this.renderAll();
         }
 
-        get mayCreate() { return d.get(this).mayCreate; }
-        set mayCreate(l)
+        get dynamicItems() { return d.get(this).dynamicItems; }
+        set dynamicItems(l)
         {
-            d.get(this).mayCreate = l;
-            this.mayCreateChanged();
+            d.get(this).dynamicItems = l.slice().sort((a, b) => Number.parseInt(a) - Number.parseInt(b));
+            this.dynamicItemsChanged();
             this.renderAll();
         }
 
@@ -374,14 +374,24 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             const f = () =>
             {
                 const existingItems = items.filter(c => c !== undefined);
+                const createDynamically = d.get(this).dynamicItems !== null;
+                const dynamicItems = createDynamically ? d.get(this).dynamicItems.slice()
+                                                       : null;
+
                 for (let i = 0; i < model.size; ++i)
                 {
-                    const isAlive = d.get(this).mayCreate !== null ? d.get(this).mayCreate.indexOf(i) !== -1 
-                                                                   : true;
+                    while (createDynamically && dynamicItems.length > 0 && dynamicItems[0] < i)
+                    {
+                        dynamicItems.shift();
+                    }
+                    const mayCreate = ! createDynamically || dynamicItems.length > 0 && dynamicItems[0] === i;
+
+                    //const isAlive = d.get(this).dynamicItems !== null ? d.get(this).dynamicItems.indexOf(i) !== -1 
+                    //                                                  : true;
 
                     if (items[i] === undefined)
                     {
-                        if (isAlive)
+                        if (mayCreate)
                         {
                             const item = this.createItem(i);
                             if (item)
@@ -405,7 +415,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                         {
                             existingItems.shift();
                         }
-                        if (! isAlive && items[i])
+                        if (! mayCreate && items[i])
                         {
                             this.destroyItem(i);
                             items[i] = undefined;

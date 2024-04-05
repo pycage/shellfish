@@ -146,7 +146,7 @@ Shellfish provides elements for building servers with Shui code.
 
 ### April 2024
 * The element {@link core.Repeater} is now capable of creating and destroying
-  its delegates dynamically with the `mayCreate` property.
+  its child items selectively with the `dynamicItems` property.
 
 ### March 2024
 * The element {@link ui.OverflowScroller} is now stylable with the `styleOfHandle`

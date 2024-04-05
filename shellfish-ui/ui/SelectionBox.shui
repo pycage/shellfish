@@ -95,6 +95,9 @@ Button {
     }
 
     property _menuT: template Menu {
+        id: selMenu
+
+        property selection: box.selection
 
         onCascadingClose: () =>
         {
@@ -102,50 +105,67 @@ Button {
             box.focus = true;
         }
 
-        ListView {
-            width: box.bboxWidth - 1
-            height: Math.min(cellHeight * count, cellHeight * 10, thisDocument.windowHeight * 0.8)
-            cellWidth: bboxWidth
-            cellHeight: theme.itemHeightMedium
-            canFocus: true
-           
+        // reserve space for all items
+        Box {
+            width: box.bboxWidth - 2 /* menu borders */
+            height: theme.itemHeightMedium * box.model.size
+        }
+
+        Repeater {
+            id: itemRepeater
+
             model: box.model
 
-            onAncestorsVisibleChanged: () =>
-            {
-                if (ancestorsVisible)
-                {
-                    wait(0).then(() =>
-                    {
-                        positionViewAt(box.selection + (height / cellHeight) / 2);
-                        selector.select(box.selection, "replace");
-                    });
-                }
-            }
+            dynamicItems: model.data.map((v, idx) => idx).filter(
+                idx => (idx + 1) * theme.itemHeightMedium > thisMenu.menu.contentY &&
+                       idx * theme.itemHeightMedium < thisMenu.menu.contentY + thisMenu.menu.bboxHeight ||
+                       idx === thisMenu.selection
+            )
 
             delegate: template MenuItem {
-                property itemSelected: selector.selection.has(modelData.index)
-
+                position: "free"
+                y: modelData.index * bboxHeight
                 text: box.formatText(modelData.value, modelData.index)
 
-                onItemSelectedChanged: () =>
+                onInitialization: () =>
                 {
-                    if (itemSelected)
+                    if (modelData.index === thisMenu.selection)
                     {
-                        selectItem(itemSelected);
+                        wait(10).then(() =>
+                        {
+                            selectItem(false);
+                        });
+                    }
+                }
+
+                thisMenu.onSelectionChanged: () =>
+                {
+                    if (modelData.index === thisMenu.selection)
+                    {
+                        selectItem(false);
+                    }
+                }
+
+                // custom navigation on dynamically created items
+                onKeyDown: ev =>
+                {
+                    if (ev.key === "ArrowUp")
+                    {
+                        thisMenu.selection = (box.model.size + thisMenu.selection - 1) % box.model.size;
+                        ev.accepted = true;
+                    }
+                    else if (ev.key === "ArrowDown")
+                    {
+                        thisMenu.selection = (thisMenu.selection + 1) % box.model.size;
+                        ev.accepted = true;
                     }
                 }
 
                 onClick: ev =>
                 {
-                    selector.select(modelData.index, "replace");
                     box.selection = modelData.index;
                 }
             }
-
-            ListViewSelector { id: selector }
-            OverflowScroller { }
-            ScrollIndicator { }
         }
     }
 }

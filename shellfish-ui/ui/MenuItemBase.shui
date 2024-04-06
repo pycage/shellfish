@@ -64,11 +64,6 @@ MouseBox {
             }
         };
 
-        _menu.get().onCascadingClose = () =>
-        {
-            menuOpened = false;
-        };
-
         _menu.get().onPointerMove = (ev) =>
         {
             let onItem = false;
@@ -131,6 +126,7 @@ MouseBox {
 
         _menu.get().onCascadingClose = () =>
         {
+            menuOpened = false;
             if (thisMenu)
             {
                 thisMenu.cascadingClose();
@@ -218,6 +214,11 @@ MouseBox {
     {
         //console.log("select " + text);
         selected = true;
+
+        if (! parent)
+        {
+            return;
+        }
         unselectSiblings();
 
         if (menu && activate)
@@ -300,7 +301,7 @@ MouseBox {
 
     onSelectedChanged: () =>
     {
-        if (selected)
+        if (selected && thisMenu)
         {
             focus = true;
 

@@ -246,6 +246,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
         set delegate(del)
         {
             d.get(this).delegate = del;
+            this.clear();
             this.renderAll();
         }
 
@@ -324,10 +325,16 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
             const item = this.getItem(idx);
             if (item)
             {
-                //console.log("destroyItem " + idx);
-                //priv.recycleBin.push(item);
+                if (priv.dynamicItems)
+                {
+                    priv.recycleBin.push(item);
+                }
+                else
+                {
+                    //console.log("destroyItem " + idx);
+                    item.referenceRemove(this);
+                }
                 item.parent = null;
-                item.referenceRemove(this);
             }
         }
 
@@ -347,6 +354,8 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                 }
             });
             d.get(this).items = [];
+
+            this.dumpRecycleBin();
         }
 
         renderAll()
@@ -386,9 +395,6 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                     }
                     const mayCreate = ! createDynamically || dynamicItems.length > 0 && dynamicItems[0] === i;
 
-                    //const isAlive = d.get(this).dynamicItems !== null ? d.get(this).dynamicItems.indexOf(i) !== -1 
-                    //                                                  : true;
-
                     if (items[i] === undefined)
                     {
                         if (mayCreate)
@@ -415,6 +421,7 @@ shRequire([__dirname + "/object.js", __dirname + "/listmodel.js"], function (obj
                         {
                             existingItems.shift();
                         }
+
                         if (! mayCreate && items[i])
                         {
                             this.destroyItem(i);

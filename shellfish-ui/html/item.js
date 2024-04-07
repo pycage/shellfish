@@ -444,6 +444,9 @@ shRequire(["shellfish/low",
             {
                 this.ancestorsVisibleChanged();
                 this.ancestorsEnabledChanged();
+
+                // reset the previous bbox
+                priv.prevBbox = { x: 0, y: 0, width: 0, height: 0 };
             };
         }
 

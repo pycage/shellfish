@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish toolkit.
-Copyright (c) 2022 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2022 - 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -294,6 +294,7 @@ shRequire(["shellfish/core"], core =>
 
             if (priv.server)
             {
+                priv.server.removeAllListeners();
                 priv.server.close();
                 this.log("HTTPServer", "info", "Closed Server");
             }

@@ -1532,14 +1532,14 @@ shRequire(["shellfish/low",
         }
 
         /**
-         * Returns whether the given box is (partially) within the viewport.
+         * Returns whether the given area is (partially) within the viewport.
          * The coordinates are in this element's local coordinate system.
          *
          * @param {number} x - The X position to test.
          * @param {number} y - The Y position to test.
          * @param {number} w - The width to test.
          * @param {number} h - The height to test.
-         * @param {bool} recursive - If `true`, this method is called recursively to return whether the box is (partially) visible at all.
+         * @param {bool} recursive - If `true`, this method is called recursively to return whether the area is (partially) visible at all.
          */
         inView(x, y, w, h, recursive)
         {
@@ -1554,7 +1554,7 @@ shRequire(["shellfish/low",
             const right = left + w;
             const top = y;
             const bottom = top + h;
-            
+
             if (this.bboxWidth * this.bboxHeight > 0 &&
                 right >= this.contentX &&
                 left < this.contentX + this.bboxWidth &&

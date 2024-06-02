@@ -55,7 +55,7 @@ MouseBox {
 
     property styleOfItem: template Box {
 
-        property highlighted: parent.inView || parent.containsMouse
+        property highlighted: parent.hasInView || parent.containsMouse
 
         fillWidth: true
         fillHeight: true
@@ -70,7 +70,7 @@ MouseBox {
             color: parent.highlighted ? theme.highlightColor
                                       : theme.primaryColor
             bold: true
-            text: parent.parent.text
+            text: escapeMarkup(parent.parent.text)
         }
     }
 
@@ -261,10 +261,10 @@ MouseBox {
 
             Loader {
                 property containsMouse: parent.containsMouse
-                property inView: indexScroller.orientation === "horizontal" ? indexScroller.target.contentX < parent.modelData.value.until &&
-                                                                              indexScroller.target.contentX + indexScroller.target.bboxWidth > parent.modelData.value.position
-                                                                            : indexScroller.target.contentY < parent.modelData.value.until &&
-                                                                              indexScroller.target.contentY + indexScroller.target.bboxHeight > parent.modelData.value.position
+                property hasInView: indexScroller.orientation === "horizontal" ? indexScroller.target.contentX < parent.modelData.value.until &&
+                                                                                 indexScroller.target.contentX + indexScroller.target.bboxWidth > parent.modelData.value.position
+                                                                               : indexScroller.target.contentY < parent.modelData.value.until &&
+                                                                                 indexScroller.target.contentY + indexScroller.target.bboxHeight > parent.modelData.value.position
                 property text: parent.modelData.value.label
 
                 fillWidth: true

@@ -69,8 +69,11 @@ Object {
 
     onDestruction: () =>
     {
-        box.parent = null;
-        box = null;
+        if (box)
+        {
+            box.parent = null;
+            box = null;
+        }
     }
 
     property box: null

@@ -1432,7 +1432,8 @@ shRequire(["shellfish/low",
                 // - or it came from an inline child
                 if (! item || (fromChild && item.position === "inline"))
                 {
-                    if (bboxHasChangedWidth || bboxHasChangedHeight)
+                    // FIXME: this optimization turned out to be too aggressive... but why?
+                    if (true) //bboxHasChangedWidth || bboxHasChangedHeight)
                     {
                         if (this.parent && this.parent !== item && this.parent.updateSizeFrom)
                         {
@@ -1476,7 +1477,7 @@ shRequire(["shellfish/low",
         updateContentSize()
         {
             const priv = d.get(this);
-
+            
             const cWidth = this.contentWidth;
             const cHeight = this.contentHeight;
             const hasChangedContentWidth = Math.abs(cWidth - priv.prevContentSize.width) > 0.1;

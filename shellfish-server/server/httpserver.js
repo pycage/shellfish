@@ -177,6 +177,7 @@ shRequire(["shellfish/core"], core =>
                 certificate: "",
                 key: "",
                 server: null,
+                connection: null,
                 keepAlive: 5000,
                 connecting: false
             });
@@ -282,8 +283,11 @@ shRequire(["shellfish/core"], core =>
                 priv.connecting = true;
                 this.defer(() =>
                 {
-                    priv.connecting = false;
-                    this.doListen();
+                    this.wait(100).then(() =>
+                    {
+                        priv.connecting = false;
+                        this.doListen();
+                    });
                 }, "listen");
             }
         }
@@ -296,6 +300,7 @@ shRequire(["shellfish/core"], core =>
             {
                 priv.server.removeAllListeners();
                 priv.server.close();
+                priv.connection.destroy();
                 this.log("HTTPServer", "info", "Closed Server");
             }
 
@@ -311,6 +316,10 @@ shRequire(["shellfish/core"], core =>
                     const sslServerKey = modFs.readFileSync(priv.key, "utf8");
                     const sslServerCert = modFs.readFileSync(priv.certificate, "utf8");
                     priv.server = modHttps.createServer({ key: sslServerKey, cert: sslServerCert });
+                    priv.server.once("connection", conn =>
+                    {
+                        priv.connection = conn;
+                    });
                 }
                 catch (err)
                 {

@@ -142,7 +142,6 @@ Box {
                 {
                     const delta = bboxWidth - sum;
                     const prefered = model.at(idx).width || 100;
-                    console.log("delta: " + delta + ", prefered: " + prefered);
                     return Math.max(delta, prefered === -1 ? 100 : prefered);
                 }
                 else

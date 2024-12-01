@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2024 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -37,6 +37,7 @@ require "shellfish/ui";
  * @extends html.Box
  *
  * @property {core.ListModel} model - The model of columns.
+ * @property {bool} autoStretch - (default: `true`) If `true`, the last column will be stretched automatically.
  * @property {number[]} columnWidths - [readonly] The widths of the particular columns.
  */
 Box {
@@ -44,6 +45,7 @@ Box {
 
     property model: ListModel { }
     property columnWidths: []
+    property autoStretch: true
 
     /**
      * Is triggered when the user clicks on a column header.
@@ -64,18 +66,19 @@ Box {
      */
     function resetColumns()
     {
-        if (colRepeater.count === 0)
+        if (model.size === 0)
         {
             return;
         }
 
-        let sizes = colRepeater.items.map((item, idx) =>
+        let sizes = [];
+        for (let i = 0; i < model.size; ++i)
         {
-            const modelItem = model.at(idx);
+            const modelItem = model.at(i);
             const prefered = modelItem.width || -1;
 
-            return prefered === -1 ? 0 : prefered;
-        });
+            sizes.push(prefered === -1 ? 0 : prefered);
+        }
 
         const sum = sizes.reduce((a, b) => a + b, 0);
         const remainder = bboxWidth - sum;
@@ -87,12 +90,7 @@ Box {
             sizes = sizes.map(s => s === 0 ? size : s);
         }
 
-        columnWidths = sizes;
-
-        columnWidths.forEach((w, idx) =>
-        {
-            colRepeater.items[idx].width = w;
-        });
+        setColumnWidths(sizes);
     }
 
     /**
@@ -107,25 +105,66 @@ Box {
      */
     function resizeColumn(idx, n)
     {
-        const ws = colRepeater.items.map(item =>
+        if (idx > columnWidths.length - 1)
         {
-            return item.width;
-        });
-        const totalWidth = ws.reduce((a, b) => a + b);
+            return;
+        }
 
-        colRepeater.items[idx].width += n;
-
-        columnWidths = colRepeater.items.map(item =>
+        const newWidths = columnWidths.slice();
+        if (newWidths[idx] + n > 16)
         {
-            return item.width;
-        });
+            newWidths[idx] += n;
+            setColumnWidths(newWidths);
+        }
+    }
+
+    /**
+     * Stretches the last column.
+     *
+     * @memberof ui.ListHeader.prototype
+     * @name resizeColumn
+     * @method
+     */
+    function setColumnWidths(newWidths)
+    {
+        if (! autoStretch)
+        {
+            columnWidths = newWidths;
+        }
+        else
+        {
+            let sum = 0;
+            const lastIdx = newWidths.length - 1;
+
+            columnWidths = newWidths.map((cw, idx) =>
+            {
+                if (idx === lastIdx)
+                {
+                    const delta = bboxWidth - sum;
+                    const prefered = model.at(idx).width || 100;
+                    console.log("delta: " + delta + ", prefered: " + prefered);
+                    return Math.max(delta, prefered === -1 ? 100 : prefered);
+                }
+                else
+                {
+                    sum += cw;
+                    return cw;
+                }
+            });
+        }
     }
 
     fillWidth: true
     height: theme.itemHeightSmall
     layout: "row"
 
-    onBboxWidthChanged: () => { resetColumns(); }
+    onBboxWidthChanged: () =>
+    {
+        if (autoStretch)
+        {
+            setColumnWidths(columnWidths);
+        }
+    }
 
     Repeater {
         id: colRepeater
@@ -133,7 +172,7 @@ Box {
         model: header.model
 
         delegate: template MouseBox {
-            width: 100
+            width: header.columnWidths[modelData.index] || 100
             fillHeight: true
             color: containsMouse ? theme.highlightBackgroundColor : "transparent"
 
@@ -166,6 +205,7 @@ Box {
             }
 
             MouseBox {
+                visible: ! header.autoStretch || modelData.index < header.model.size - 1
                 width: 6
                 fillHeight: true
                 cursor: "col-resize"

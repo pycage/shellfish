@@ -144,6 +144,13 @@ Shellfish provides elements for building servers with Shui code.
 
 ## News
 
+### December 2024
+* The element {@link ui.ListHeader} has a new property `autoStretch` for
+  automatically stretching the last column.
+
+### May 2024
+* The method {@link ui.Item#inView} tests if an area is within the current viewport.
+
 ### April 2024
 * The element {@link core.Repeater} is now capable of creating and destroying
   its child items selectively with the `dynamicItems` property.

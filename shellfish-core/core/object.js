@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2017 - 2024 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2017 - 2025 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, vec) =>
 {
+    const modFs = shRequire.environment === "node" ? require("node:fs") : null;
+    const modOs = shRequire.environment === "node" ? require("node:os") : null;
+    const modPath = shRequire.environment === "node" ? require("node:path") : null;
 
     /**
      * Class representing a hub of the event connections.
@@ -799,8 +802,48 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
     let idCounter = 0;
     const allInstances = new Set();
     const generatedUids = new Set();
+    const tempDir = modFs ? modFs.mkdtempSync(modPath.join(modOs.tmpdir(), "shellfish-")) : "";
+    const exitHandlers = [];
+
     const d = new WeakMap();
 
+    if (modFs && tempDir !== "")
+    {
+        exitHandlers.push(() =>
+        {
+            console.log("Removing temp dir: " + tempDir);
+            modFs.rmdirSync(tempDir, { recursive: true });
+            console.log("OK");
+        });
+
+        process.on("exit", () =>
+        {
+            console.log("Invoking exit handlers...");
+            exitHandlers.forEach(f => f());
+        });
+
+        [
+            "SIGABRT",
+            "SIGBUS",
+            "SIGFPE",
+            "SIGHUP",
+            "SIGILL",
+            "SIGINT",
+            "SIGQUIT",
+            "SIGSEGV",
+            "SIGTERM",
+            "SIGTRAP",
+            "SIGUSR1",
+            "SIGUSR2"
+        ].forEach((sig) =>
+        {
+            process.on(sig, () =>
+            {
+                console.log("Received signal: " + sig);
+                process.exit(1);
+            });
+        });
+    }
 
     class ProtoObject {
         customProperties()
@@ -1998,6 +2041,26 @@ shRequire([__dirname + "/util/color.js", __dirname + "/util/vec.js"], (colUtil, 
         return uid;
     }
     exports.generateUid = generateUid;
+
+    /**
+     * Provides a temporary file path.
+     *
+     * @memberof core
+     * 
+     * @returns {string} A temporary file path you may use for creating a file.
+     */
+    function temporaryFilePath()
+    {
+        if (modPath)
+        {
+            return modPath.join(tempDir, generateUid());
+        }
+        else
+        {
+            return "";
+        }
+    }
+    exports.temporaryFilePath = temporaryFilePath;
 
     /**
      * Formats a bytes number to a string.

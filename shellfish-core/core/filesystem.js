@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2024 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2025 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,74 @@ shRequire([__dirname + "/object.js"], obj =>
     const modFs = shRequire.environment === "node" ? require("node:fs") : null;
     const modStream = shRequire.environment === "node" ? require("node:stream") : null;
 
+    let allMaterializationsLRU = [];
+
+    function wait(ms)
+    {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function mkCacheFileFor(fileData)
+    {
+        const key = fileData.path;
+
+        const idx = allMaterializationsLRU.findIndex(entry => entry.key === key);
+        if (idx !== -1)
+        {
+            const entry = allMaterializationsLRU[idx];
+            allMaterializationsLRU.splice(idx, 1);
+            allMaterializationsLRU.push(entry);
+
+            while (entry.inProgress)
+            {
+                await wait(50);
+            }
+            return entry.path;
+        }
+
+        const entry = { key, path: "", inProgress: true };
+        allMaterializationsLRU.push(entry);
+
+        const tmpFile = obj.temporaryFilePath();
+
+        entry.path = tmpFile;
+
+        while (allMaterializationsLRU.length > 20)
+        {
+            const entry = allMaterializationsLRU.shift();
+            modFs.unlink(entry.path, () => { });
+        }
+
+        await new Promise((resolve, reject) =>
+        {
+            const inStream = fileData.stream();
+            const outStream = modFs.createWriteStream(tmpFile, "binary");
+    
+            inStream.pipe(outStream);
+
+            inStream.on("error", (err) =>
+            {
+                outStream.close();
+                reject(err);
+            });
+            
+            inStream.on("end", () =>
+            {
+                resolve();
+            });
+        });
+
+        for (let i = 0; i < allMaterializationsLRU.length; ++i)
+        {
+            if (allMaterializationsLRU[i].path === tmpFile)
+            {
+                allMaterializationsLRU[i].inProgress = false;
+            }
+        }
+
+        return tmpFile;
+    }
+
     /**
      * Class representing file data for reading or writing.
      * 
@@ -34,6 +102,7 @@ shRequire([__dirname + "/object.js"], obj =>
      * 
      * @property {number} size - The data size in bytes.
      * @property {string} mimetype - The MIME type of the data.
+     * @property {string} path - The path, if the source was a `FileInfo`, or an empty string otherwise.
      */
     class FileData
     {
@@ -41,9 +110,11 @@ shRequire([__dirname + "/object.js"], obj =>
          * Creates a new `FileData` object from the given data source.
          * 
          * @param {string|ArrayBuffer|ReadableStream|Blob|FileInfo} dataSource - The data source.
+         * @param {string} path - An optional path that will be used if the data source holds no path.
          */
-        constructor(dataSource)
+        constructor(dataSource, path)
         {
+            this.explicitPath = path || "";
             this.sourceType = "unknown";
             this.from = 0;
             this.to = -1;
@@ -83,7 +154,23 @@ shRequire([__dirname + "/object.js"], obj =>
                 this.sourceType = "finfo";
                 this.dataSource = dataSource;
             }
-            //console.log("Create FileData of type " + this.sourceType);
+            console.log("Create FileData of type " + this.sourceType);
+        }
+
+        get path()
+        {
+            if (this.explicitPath)
+            {
+                return this.explicitPath;
+            }
+            else if (this.sourceType === "finfo")
+            {
+                return this.dataSource.path;
+            }
+            else
+            {
+                return "";
+            }
         }
 
         get size()
@@ -314,6 +401,24 @@ shRequire([__dirname + "/object.js"], obj =>
         async text()
         {
             return new TextDecoder().decode(await this.arrayBuffer());
+        }
+
+        /**
+         * Returns the path to a materialization of this file data on a local storage.
+         * 
+         * This method is currently only available in a NodeJS environment.
+         * 
+         * @returns {Promise<string>} A promise that resolves to the path.
+         */
+        async materialized()
+        {
+            if (! modFs)
+            {
+                throw "Not supported";
+            }
+
+            const tmpFile = await mkCacheFileFor(this);
+            return tmpFile;
         }
     }
     exports.FileData = FileData;
@@ -622,7 +727,7 @@ shRequire([__dirname + "/object.js"], obj =>
 
         /**
          * Reads the file at the given path and returns a Promise object with the
-         * Blob.
+         * file data.
          * 
          * @param {string} path - The path of the file to read.
          * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
@@ -634,7 +739,7 @@ shRequire([__dirname + "/object.js"], obj =>
         }
 
         /**
-         * Writes the given Blob to the given path.
+         * Writes the given file data to the given path.
          * 
          * @param {string} path - The path of the file to write.
          * @param {core.Filesystem.FileData} fileData - The data to write.
@@ -644,6 +749,46 @@ shRequire([__dirname + "/object.js"], obj =>
         write(path, fileData, progressCallback)
         {
             throw "Not implemented";
+        }
+
+        /**
+         * Retrieves a file info object for the given path on a virtual file system.
+         * 
+         * @see {@link core.Filesystem.listInfo listInfo} for details.
+         * 
+         * @param {core.FileSystem.FileData} vfsData - The file data representing the VFS such as an archive file.
+         * @param {string} path - The path.
+         * @returns {Promise} The Promise object.
+         */
+        vfsFileInfo(vfsData, path)
+        {
+            return this.fileInfo(path);
+        }
+
+        /**
+         * Lists the files at the given path on a virtual file system and returns a Promise object with the file items.
+         * 
+         * @param {core.FileSystem.FileData} vfsData - The file data representing the VFS such as an archive file.
+         * @param {string} path - The path to list.
+         * @returns {Promise} The Promise object.
+         */
+        vfsList(vfsData, path)
+        {
+            return this.list(path);
+        }
+        
+        /**
+         * Reads the file at the given path on a virtual file system and returns a Promise object with the
+         * file data.
+         * 
+         * @param {core.FileSystem.FileData} vfsData - The file data representing the VFS such as an archive file.
+         * @param {string} path - The path of the file to read.
+         * @param {function} progressCallback - An optional progress callback, if supported by the implementation.
+         * @returns {Promise} - The Promise object with the file's contents as {@link core.Filesystem.FileData}.
+         */
+        vfsRead(vfsData, path, progressCallback)
+        {
+            return this.read(path, progressCallback);
         }
     }
     exports.Filesystem = Filesystem;

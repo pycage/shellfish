@@ -64,6 +64,7 @@ const includes = [
     "threadpool",
     "timer",
     "treemodeladapter",
+    "virtualfs",
     "waitaction"
 ];
 

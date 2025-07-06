@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of Shellfish.
-Copyright (c) 2020 - 2021 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2020 - 2025 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -51,6 +51,9 @@ const DEG_TO_RAD = Math.PI / 180;
 exports.PLUS = (a, b) => a + b;
 exports.MINUS = (a, b) => a - b;
 exports.MULTIPLY = (a, b) => a * b;
+exports.ABS = (a, b) => Math.abs(a);
+exports.MIN = (a, b) => Math.min(a, b);
+exports.MAX = (a, b) => Math.max(a, b);
 
 /**
  * Type for a (n x m) matrix. A vector is a special form of the matrix with one
@@ -83,10 +86,11 @@ function shape(m)
 exports.shape = shape;
 
 /**
- * Performs an element-wise operator with a scalar on a matrix.
+ * Performs an element-wise operator with a scalar or another matrix on a matrix.
+ * If using two matrices, they must be of the same shape.
  * 
- * The element-wise operators `PLUS`, `MINUS`, and `MULTIPLY` are available as
- * predefined functions in the `matrix` module.
+ * The element-wise operators `PLUS`, `MINUS`, `MULTIPLY`, `ABS`, `MIN`, `MAX`
+ * are available as predefined functions in the `matrix` module.
  * 
  * @memberof matrix
  * 
@@ -100,30 +104,102 @@ function elementWise(m, n, op)
     const s = exports.shape(m);
     const result = exports.mat(s.rows, s.cols);
 
-    for (let r = 0; r < s.rows; ++r)
+    if (typeof n === "number")
     {
-        for (let c = 0; c < s.cols; ++c)
+        for (let r = 0; r < s.rows; ++r)
         {
-            result[r][c] = op(m[r][c], n);
+            for (let c = 0; c < s.cols; ++c)
+            {
+                result[r][c] = op(m[r][c], n);
+            }
         }
     }
+    else
+    {
+        for (let r = 0; r < s.rows; ++r)
+        {
+            for (let c = 0; c < s.cols; ++c)
+            {
+                result[r][c] = op(m[r][c], n[r][c]);
+            }
+        }
+    }
+
     return result;
 }
 exports.elementWise = elementWise;
 
 /**
  * Creates a column-vector of the given values.
+ * If the first value is a column-vector, the vector will be expanded with more dimensions. 
  * 
  * @memberof matrix
  * 
- * @param {...number} values - The values.
+ * @param {...number} values - The values. The first element may be a column-vector.
  * @returns {matrix.Matrix} The vector (a (n x 1) matrix).
  */
 function vec(...values)
 {
-    return values.map(a => [a]);
+    if (typeof values[0] === "number")
+    {
+        return values.map(a => [a]);
+    }
+    else
+    {
+        const vec = values[0].slice();
+        for (let i = 1; i < values.length; ++i)
+        {
+            vec.push([values[i]]);
+        }
+        return vec;
+    }
 }
 exports.vec = vec;
+
+/**
+ * Extracts parts of a column-vector to form a new column-vector.
+ *
+ * @memberof matrix
+ * 
+ * @param {matrix.Matrix} v - The vector.
+ * @param {string} what - The parts to extract. A composition of `x|y|z|w|u|v|r|g|b|a`.
+ * @returns {matrix.Matrix|number} The new vector, or a number if only a single part was extracted.
+ */
+function swizzle(v, what)
+{
+    const elems = [];
+    const indexes = {
+        x: 0,
+        y: 1,
+        z: 2,
+        w: 3,
+        u: 0,
+        v: 1,
+        r: 0,
+        g: 1,
+        b: 2,
+        a: 3,
+        s: 0,
+        t: 1,
+        p: 2,
+        q: 3
+    };
+
+    for (let i = 0; i < what.length; ++i)
+    {
+        const idx = indexes[what[i]];
+        elems.push(v[idx][0]);
+    }
+    if (elems.length === 1)
+    {
+        return elems[0];
+    }
+    else
+    {
+        return exports.vec(...elems);
+    }
+}
+exports.swizzle = swizzle;
 
 /**
  * Creates a null matrix with the given dimensions.
@@ -220,6 +296,38 @@ function length(v)
     return Math.sqrt(v.reduce((a, b) => a + b[0] * b[0], 0.0));
 }
 exports.length = length;
+
+/**
+ * Returns the distance between two points in n-dimensional space represented by column-vectors.
+ *
+ * @memberof matrix
+ * 
+ * @param {matrix.Matrix} p1 - The first point.
+ * @param {matrix.Matrix} p2 - The second point.
+ * @returns {number} The distance between the points.
+ * @throws Throws an error if the matrix is not a vector.
+ */
+function distance(p1, p2)
+{
+    return exports.length(exports.sub(p1, p2));
+}
+exports.distance = distance;
+
+/**
+ * Normalizes the given column-vector.
+ *
+ * @memberof matrix
+ * 
+ * @param {matrix.Matrix} v - The vector.
+ * @returns {matrix.Matrix} The normalized vector.
+ * @throws Throws an error if the matrix is not a vector.
+ */
+function normalize(v)
+{
+    const len = exports.length(v);
+    return exports.mul(v, 1.0 / len);
+}
+exports.normalize = normalize;
 
 /**
  * Returns the transpose of the given matrix. Transposing a column-vector

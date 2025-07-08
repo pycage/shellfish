@@ -144,6 +144,14 @@ Shellfish provides elements for building servers with Shui code.
 
 ## News
 
+### July 2025
+* The element {@link ui.Canvas} has a new property `fragmentShader` for
+  rendering using a fragment shader.
+
+### June 2025
+* The new element {@link core.VirtualFS} provides a filesystem astraction for
+  nesting other filesystems.
+
 ### December 2024
 * The element {@link ui.ListHeader} has a new property `autoStretch` for
   automatically stretching the last column.

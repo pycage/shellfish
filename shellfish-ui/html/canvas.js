@@ -122,7 +122,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
          * 
          * When passing textures, `value` is the source path of the image file.
          * 
-         * @param {string} type - The type of uniform. Supported types are: `bool|float|int|mat3|mat4|vec2|vec3|vec4|texture`
+         * @param {string} type - The type of uniform. Supported types are: `float|int|mat3|mat4|vec2|vec3|vec4|texture`
          * @param {string} name - The name of the uniform. It must be defined by that name in the shader.
          * @param {any} value - The value to set.
          * @see {@link core.matrix matrix}
@@ -143,10 +143,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 return;
             }
 
-            if (type === "bool")
-            {
-                gl.uniform1b(uniformLocation, value);
-            }
             if (type === "float")
             {
                 gl.uniform1f(uniformLocation, value);

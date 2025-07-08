@@ -1,6 +1,6 @@
 /*******************************************************************************
 This file is part of the Shellfish UI toolkit.
-Copyright (c) 2021 - 2023 Martin Grimme <martin.grimme@gmail.com>
+Copyright (c) 2021 - 2025 Martin Grimme <martin.grimme@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -159,7 +159,8 @@ shRequire(["shellfish/low", __dirname + "/item.js"], (low, item) =>
                 const track = d.get(this).item.childNodes[0].track;
                 const cues = track.activeCues;
                 const texts = [];
-                for (let i = 0; i < cues.length; ++i)
+                // limit amount of cues in order to avoid exploding on bad subtitle files
+                for (let i = 0; i < Math.min(5, cues.length); ++i)
                 {
                     texts.push(cues[i].text);
                 }

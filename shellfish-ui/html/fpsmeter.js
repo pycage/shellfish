@@ -86,7 +86,6 @@ shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
                 {
                     let count = 0;
                     let prevTime = 0;
-                    let accumulatedFps = 0;
 
                     priv.handle = low.addFrameHandler((now) =>
                     {
@@ -94,21 +93,20 @@ shRequire(["shellfish/low", "shellfish/core"], (low, core) =>
                         {
                             prevTime = now;
                         }
-                        
+
                         if (now > prevTime && (! priv.manual || priv.manualFlag))
                         {
-                            accumulatedFps += 1000.0 / (now - prevTime);
-                            
                             ++count;
-                            if (count === 10)
+                            const timeElapsed = now - prevTime;
+                            if (timeElapsed > 1000)
                             {
-                                priv.fps = accumulatedFps / count;
+                                const avgTimePerFrame = timeElapsed / count;
+                                priv.fps = 1000.0 / avgTimePerFrame;
                                 this.fpsChanged();
                                 count = 0;
-                                accumulatedFps = 0;
+                                prevTime = now;
                             }
                             
-                            prevTime = now;
                             priv.manualFlag = false;
                         }
                         

@@ -24,7 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], function (low, item, mat)
 {
-        const simpleVertexShader = `#version 300 es
+    const simpleVertexShader = `#version 300 es
         in vec2 position;
         out vec2 uv;
 
@@ -57,12 +57,21 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        if (image.width !== undefined && image.height !== undefined && image.data !== undefined)
+        {
+            // this is an ImageData-like structure ({ width, height, data })
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image.data);
+        }
+        else
+        {
+            // this is an Image object
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        }
         gl.generateMipmap(gl.TEXTURE_2D)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.bindTexture(gl.TEXTURE_2D, null);
 
         return texture;
@@ -83,6 +92,9 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
      * @property {number} originalHeight - (default: `100`) The original unscaled height.
      * @property {number} originalWidth - (default: `100`) The original unscaled width.
      * @property {string} fragmentShader - (default: `""`) An optional GLSL fragment shader for rendering directly into the canvas.
+     * @property {string} errorMessage - (default: `""`) A shader-related error message.
+     * 
+     * @emits renderingFinished
      */
     class Canvas extends item.Item
     {
@@ -101,12 +113,22 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 programId: 0,
                 shader: "",
                 textures: [],
-                renderingScheduled: false
+                renderingScheduled: false,
+                errorMessage: ""
             });
 
             this.notifyable("originalWidth");
             this.notifyable("originalHeight");
             this.notifyable("fragmentShader");
+            this.notifyable("errorMessage");
+
+            /**
+             * Is triggered when rendering using the fragment shader finished.
+             * This event can be used for measing the frames per second, for instance.
+             * @event renderingFinished
+             * @memberof html.Canvas
+             */
+            this.registerEvent("renderingFinished");
         }
 
         updateContentSize()
@@ -120,9 +142,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
          * When passing vectors and matrices, they must be of the form created
          * by Shellfish's {@link core.matrix matrix} tools.
          * 
-         * When passing textures, `value` is the source path of the image file.
-         * 
-         * @param {string} type - The type of uniform. Supported types are: `float|int|mat3|mat4|vec2|vec3|vec4|texture`
+         * @param {string} type - The type of uniform. Supported types are: `float|int|mat3|mat4|vec2|vec3|vec4`
          * @param {string} name - The name of the uniform. It must be defined by that name in the shader.
          * @param {any} value - The value to set.
          * @see {@link core.matrix matrix}
@@ -139,7 +159,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             const uniformLocation = gl.getUniformLocation(priv.programId, name);
             if (! uniformLocation)
             {
-                console.error("Cannot find fragment shader uniform: " + name);
+                console.error("Cannot find uniform in shader: " + name);
                 return;
             }
 
@@ -161,51 +181,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 // transpose for OpenGL
                 gl.uniformMatrix4fv(uniformLocation, false, new Float32Array(mat.flat(mat.t(value))));
             }
-            else if (type === "texture")
-            {
-                let texIndex = priv.textures.findIndex(tex => tex.uniform === uniformLocation);
-                if (texIndex === -1)
-                {
-                    loadImage(value)
-                    .then(img =>
-                    {
-                        priv.textures.push({
-                            uniform: uniformLocation,
-                            source: value,
-                            texture: createTexture(gl, img)
-                        });
-                        texIndex = priv.textures.length - 1;
-                        gl.activeTexture(gl.TEXTURE0 + texIndex);
-                        gl.bindTexture(gl.TEXTURE_2D, priv.textures[texIndex].texture);
-                        gl.uniform1i(uniformLocation, texIndex);
-                    });
-                }
-                else
-                {
-                    if (priv.textures[texIndex].source !== source)
-                    {
-                        gl.deleteTexture(priv.textures[texIndex].texture);
-                        loadImage(value)
-                        .then(img =>
-                        {
-                            priv.textures.push({
-                                uniform: uniformLocation,
-                                source: value,
-                                texture: createTexture(gl, img)
-                            });
-                            gl.activeTexture(gl.TEXTURE0 + texIndex);
-                            gl.bindTexture(gl.TEXTURE_2D, priv.textures[texIndex].texture);
-                            gl.uniform1i(uniformLocation, texIndex);
-                        });
-                    }
-                    else
-                    {
-                        gl.activeTexture(gl.TEXTURE0 + texIndex);
-                        gl.bindTexture(gl.TEXTURE_2D, priv.textures[texIndex].texture);
-                        gl.uniform1i(uniformLocation, texIndex);
-                    }
-                }
-            }
             else if (type === "vec2")
             {
                 gl.uniform2fv(uniformLocation, new Float32Array(mat.flat(value)));
@@ -218,13 +193,198 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             {
                 gl.uniform4fv(uniformLocation, new Float32Array(mat.flat(value)));
             }
-            
-            this.invalidateCanvas();
         }
 
-        setTexture(uniform, source)
+        /**
+         * Sets a sampler (texture) value to pass to the fragment shader.
+         * 
+         * The `parameters` dictionary may contain these string entries:
+         * 
+         * * `wrap`: `[repeat|clamp|mirror, repeat|clamp|mirror]`
+         * * `filter`: `[linear|nearest, linear|nearest]`
+         * * `mipmap`: `[true|false]` (Generate mipmap textures)
+         * * `data`: `[true|false]` (Use this for storing data textures)
+         * 
+         * @param {string} name - The name of the uniform. It must be defined by that name in the shader.
+         * @param {number} width - The width of the texture. This value is ignored if `value` is an image type.
+         * @param {number} height - The height of the texture. This value is ignored if `value` is an image type.
+         * @param {any} value - The texture value to set. Either an image type, or a `Float32Array` or a `Int32Array`.
+         * @param {object} parameters - A dictionary of parameters.
+         */
+        setSampler(name, width, height, value, parameters)
         {
+            const priv = d.get(this);
+            const gl = priv.gl;
+            if (! gl)
+            {
+                return;
+            }
 
+            const uniformLocation = gl.getUniformLocation(priv.programId, name);
+            if (! uniformLocation)
+            {
+                console.error("Cannot find sampler uniform in shader: " + name);
+                return;
+            }
+
+            let texIndex = priv.textures.findIndex(tex => tex.uniform === name);
+            if (texIndex === -1)
+            {
+                // this is a new texture
+                texIndex = priv.textures.length;
+                const texHandle = gl.createTexture();
+                gl.uniform1i(uniformLocation, texIndex);
+
+                priv.textures.push({
+                    uniform: name,
+                    texture: texHandle
+                });
+            }
+
+            // use that texture
+            gl.activeTexture(gl.TEXTURE0 + texIndex);
+            gl.bindTexture(gl.TEXTURE_2D, priv.textures[texIndex].texture);
+
+            let generateMipMap = false;
+
+            if (parameters)
+            {
+                const valueMap = {
+                    "linear": gl.LINEAR,
+                    "nearest": gl.NEAREST,
+                    "repeat": gl.REPEAT,
+                    "clamp": gl.CLAMP_TO_EDGE,
+                    "mirror": gl.MIRRORED_REPEAT,
+                    "nearestMipmapNearest": gl.NEAREST_MIPMAP_NEAREST,
+                    "nearestMipmapLinear": gl.NEAREST_MIPMAP_LINEAR,
+                    "linearMipmapNearest": gl.LINEAR_MIPMAP_NEAREST,
+                    "linearMipmaplinear": gl.LINEAR_MIPMAP_LINEAR
+                };
+
+                for (let key in parameters)
+                {
+                    const param = parameters[key];
+                    if (key === "wrap")
+                    {
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, valueMap[param[0]] || gl.REPEAT);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, valueMap[param[1]] || gl.REPEAT);
+                    }
+                    else if (key == "filter")
+                    {
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, valueMap[param[0]] || gl.LINEAR);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, valueMap[param[1]] || gl.LINEAR);
+                    }
+                    else if (key == "mipmap")
+                    {
+                        generateMipMap = param;
+                    }
+                    else if (key == "data" && param)
+                    {
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, 0);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0);
+                    }
+                }
+            }
+
+            let internalFormat = gl.RGBA;
+            let dataFormat = gl.RGBA;
+            let dataType = gl.UNSIGNED_BYTE;
+            let data = value;
+
+            // analyze data
+            if (data.data)
+            {
+                data = value.data;
+            }
+            else if (data instanceof Float32Array)
+            {
+                gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+                internalFormat = gl.RGBA32F;
+                dataFormat = gl.RGBA;
+                dataType = gl.FLOAT;
+            }
+            else if (data instanceof Int32Array)
+            {
+                gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+                internalFormat = gl.RGBA32I;
+                dataFormat = gl.RGBA_INTEGER;
+                dataType = gl.INT;
+            }
+            else
+            {
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, dataFormat, dataType, value);
+                return;
+            }
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, dataType, data);
+
+            if (generateMipMap)
+            {
+                gl.generateMipmap(gl.TEXTURE_2D);
+            }
+        }
+
+        /**
+         * Updates an area of a sampler (texture). This allows updating a part
+         * of a texture without having to re-upload the full texture to the GPU.
+         * 
+         * @param {string} name - The name of the uniform. It must be defined by that name in the shader.
+         * @param {number} width - The width of the new area.
+         * @param {number} height - The height of the new area.
+         * @param {any} value - The texture value to set. Either an image type, or a `Float32Array` or a `Int32Array`.
+         */
+        updateSampler(name, x, y, width, height, value)
+        {
+            const priv = d.get(this);
+            const gl = priv.gl;
+            if (! gl)
+            {
+                return;
+            }
+
+            const uniformLocation = gl.getUniformLocation(priv.programId, name);
+            if (! uniformLocation)
+            {
+                console.error("Cannot find sampler uniform in shader: " + name);
+                return;
+            }
+
+            let texIndex = priv.textures.findIndex(tex => tex.uniform === name);
+            if (texIndex === -1)
+            {
+                console.error("Cannot update non-existing texture: " + name);
+                return;
+            }
+
+            // use that texture
+            gl.activeTexture(gl.TEXTURE0 + texIndex);
+            gl.bindTexture(gl.TEXTURE_2D, priv.textures[texIndex].texture);
+
+            let dataFormat = gl.RGBA;
+            let dataType = gl.UNSIGNED_BYTE;
+            let data = value;
+
+            // analyze data
+            if (data.data)
+            {
+                data = value.data;
+            }
+            else if (data instanceof Float32Array)
+            {
+                dataFormat = gl.RGBA;
+                dataType = gl.FLOAT;
+            }
+            else if (data instanceof Int32Array)
+            {
+                dataFormat = gl.RGBA_INTEGER;
+                dataType = gl.INT;
+            }
+
+            gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, width, height, dataFormat, dataType, data);
         }
 
         initShader()
@@ -240,7 +400,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             if (! gl.getShaderParameter(vShaderId, gl.COMPILE_STATUS))
             {
                 const info = gl.getShaderInfoLog(vShaderId);
-                throw "Failed to compile vertex shader: " + info;
+                console.error(info);
+                priv.errorMessage = info;
+                this.errorMessageChanged();
+                //throw "Failed to compile vertex shader: " + info;
+                return;;
             }
                 
             gl.shaderSource(fShaderId, priv.fragmentShader);
@@ -248,7 +412,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             if (! gl.getShaderParameter(fShaderId, gl.COMPILE_STATUS))
             {
                 const info = gl.getShaderInfoLog(fShaderId);
-                throw "Failed to compile fragment shader: " + info;
+                console.error(info);
+                priv.errorMessage = info;
+                this.errorMessageChanged();
+                //throw "Failed to compile fragment shader: " + info;
+                return;
             }
 
             const programId = gl.createProgram();
@@ -258,10 +426,15 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             if (! gl.getProgramParameter(programId, gl.LINK_STATUS))
             {
                 const info = gl.getProgramInfoLog(programId);
-                throw "Failed to link GLSL program: " + info;
+                console.error(info);
+                priv.errorMessage = info;
+                this.errorMessageChanged();
+                //throw "Failed to link GLSL program: " + info;
+                return;
             }
 
             gl.useProgram(programId);
+            console.log(gl.getShaderInfoLog(fShaderId));
 
             const positionAttrib = gl.getAttribLocation(programId, "position");
 
@@ -280,7 +453,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             
             gl.vertexAttribPointer(positionAttrib, 2, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(positionAttrib);
-
 
             priv.gl = gl;
             priv.programId = programId;
@@ -303,6 +475,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 const gl = priv.gl;
                 gl.viewport(0, 0, this.originalWidth, this.originalHeight);
                 gl.drawArrays(gl.TRIANGLES, 0, 6);
+                this.renderingFinished();
             });
         }
 
@@ -337,11 +510,12 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 if (s !== "")
                 {
                     this.initShader();
-                    this.invalidateCanvas();
                 }
                 this.fragmentShaderChanged();
             }
         }
+
+        get errorMessage() { return d.get(this).errorMessage; }
 
         get()
         {

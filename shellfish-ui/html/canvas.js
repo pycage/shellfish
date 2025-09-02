@@ -78,6 +78,8 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
     }
 
 
+    let glTimerExtUnsupported = false;
+
     const d = new WeakMap();
 
     /**
@@ -93,8 +95,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
      * @property {number} originalWidth - (default: `100`) The original unscaled width.
      * @property {string} fragmentShader - (default: `""`) An optional GLSL fragment shader for rendering directly into the canvas.
      * @property {string} errorMessage - (default: `""`) A shader-related error message.
-     * 
-     * @emits renderingFinished
      */
     class Canvas extends item.Item
     {
@@ -113,7 +113,6 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 programId: 0,
                 shader: "",
                 textures: [],
-                renderingScheduled: false,
                 errorMessage: ""
             });
 
@@ -121,19 +120,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             this.notifyable("originalHeight");
             this.notifyable("fragmentShader");
             this.notifyable("errorMessage");
-
-            /**
-             * Is triggered when rendering using the fragment shader finished.
-             * This event can be used for measing the frames per second, for instance.
-             * @event renderingFinished
-             * @memberof html.Canvas
-             */
-            this.registerEvent("renderingFinished");
         }
 
         updateContentSize()
         {
-            this.invalidateCanvas();
+            this.renderGL();
         }
 
         /**
@@ -196,7 +187,7 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
         }
 
         /**
-         * Sets a sampler (texture) value to pass to the fragment shader.
+         * Sets a 2D sampler (texture) value to pass to the fragment shader.
          * 
          * The `parameters` dictionary may contain these string entries:
          * 
@@ -314,6 +305,13 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
                 dataFormat = gl.RGBA_INTEGER;
                 dataType = gl.INT;
             }
+            else if (data instanceof Uint32Array)
+            {
+                gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+                internalFormat = gl.RGBA32UI;
+                dataFormat = gl.RGBA_INTEGER;
+                dataType = gl.UNSIGNED_INT;
+            }
             else
             {
                 gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, dataFormat, dataType, value);
@@ -382,6 +380,11 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             {
                 dataFormat = gl.RGBA_INTEGER;
                 dataType = gl.INT;
+            }
+            else if (data instanceof Uint32Array)
+            {
+                dataFormat = gl.RGBA_INTEGER;
+                dataType = gl.UNSIGNED_INT;
             }
 
             gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, width, height, dataFormat, dataType, data);
@@ -458,25 +461,107 @@ shRequire(["shellfish/low", __dirname + "/item.js", "shellfish/core/matrix"], fu
             priv.programId = programId;
         }
         
-        invalidateCanvas()
+        /**
+         * Renders using the configured fragment shader and returns the rendering time in nanoseconds
+         * precison, if measuring was requested and the platform supports it. Not all browsers
+         * may support the timer extension for measuring on all platforms, though.
+         * 
+         * @param {bool} measure - Whether to measure the rendering time.
+         * @return {number} The rendering time in nanoseconds, if measuring was requested. This value is `-1` if not supported by platform, or measuring was not requested.
+         */
+        async renderGL(measure)
         {
             const priv = d.get(this);
-            if (! priv.gl || priv.renderingScheduled)
+            if (! priv.gl)
             {
-                return;
+                return 0;
             }
 
-            priv.renderingScheduled = true;
+            const gl = priv.gl;
 
-            this.nextFrame(() =>
+            let timerExt = null;
+            let glVersion = 0;
+            if (measure && ! glTimerExtUnsupported)
             {
-                priv.renderingScheduled = false;
+                timerExt = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+                if (timerExt)
+                {
+                    glVersion = 2;
+                }
+                else
+                {
+                    timerExt = gl.getExtension("EXT_disjoint_timer_query");
+                    if (timerExt)
+                    {
+                        glVersion = 1;
+                    }
+                    else
+                    {
+                        glTimerExtUnsupported = true;
+                    }
+                }
+            }
 
-                const gl = priv.gl;
-                gl.viewport(0, 0, this.originalWidth, this.originalHeight);
-                gl.drawArrays(gl.TRIANGLES, 0, 6);
-                this.renderingFinished();
-            });
+            let timerQuery = null;
+            if (timerExt)
+            {
+                if (glVersion === 2)
+                {
+                    timerQuery = gl.createQuery();
+                    gl.beginQuery(timerExt.TIME_ELAPSED_EXT, timerQuery);
+                }
+                else
+                {
+                    timerQuery = gl.createQueryEXT();
+                    timerExt.beginQueryEXT(timerExt.TIME_ELAPSED_EXT, timerQuery);
+                }
+            }
+
+            gl.viewport(0, 0, this.originalWidth, this.originalHeight);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            if (timerExt)
+            {
+                if (glVersion === 2)
+                {
+                    gl.endQuery(timerExt.TIME_ELAPSED_EXT);
+                }
+                else
+                {
+                    timerExt.endQueryEXT(timerExt.TIME_ELAPSED_EXT);
+                }
+
+                const pollForResult = async () =>
+                {
+                    for (let tries = 0; tries < 50; ++tries)
+                    {
+                        if (glVersion === 2)
+                        {
+                            if (gl.getQueryParameter(timerQuery, gl.QUERY_RESULT_AVAILABLE) &&
+                                ! gl.getParameter(timerExt.GPU_DISJOINT_EXT))
+                            {
+                                return gl.getQueryParameter(timerQuery, gl.QUERY_RESULT);
+                            }
+                        }
+                        else
+                        {
+                            if (timerExt.getQueryObjectEXT(timerQuery, gl.QUERY_RESULT_AVAILABLE_EXT) &&
+                                ! gl.getParameter(timerExt.GPU_DISJOINT_EXT))
+                            {
+                                return timerExt.getQueryObjectEXT(timerQuery, gl.QUERY_RESULT_EXT);
+                            }
+                        }
+                        await this.wait(10);
+                    }
+                    return -1;
+                };
+    
+                return await pollForResult();
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         get context2d() { return this.get().getContext("2d"); }

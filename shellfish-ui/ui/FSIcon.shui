@@ -36,6 +36,7 @@ Label {
         case "application/x-7z-compressed":
         case "application/java-archive":
         case "application/gzip":
+        case "application/x-rar-compressed":
         case "application/zip":
             icon = "core-file-zip";
             break;

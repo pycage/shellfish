@@ -149,7 +149,7 @@ Shellfish provides elements for building servers with Shui code.
   rendering using a fragment shader.
 
 ### June 2025
-* The new element {@link core.VirtualFS} provides a filesystem astraction for
+* The new element {@link core.VirtualFS} provides a filesystem abstraction for
   nesting other filesystems.
 
 ### December 2024

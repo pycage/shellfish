@@ -144,6 +144,11 @@ Shellfish provides elements for building servers with Shui code.
 
 ## News
 
+### May 2025
+* The element {@link core.VirtualFS} supports copying files out of an archive now.
+* The element {@link ui.FSItem} has the new properties `captions`, `iconMargin`,
+  and `nameOverflowBehavior` for controlling the appearance.
+
 ### July 2025
 * The element {@link ui.Canvas} has a new property `fragmentShader` for
   rendering using a fragment shader.

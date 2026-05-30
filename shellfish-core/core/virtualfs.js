@@ -254,14 +254,8 @@ shRequire([__dirname + "/filesystem.js", __dirname + "/util/mime.js"], (fs, mime
             }
 
             const pathInfo = this.analyzePath(sourcePath);
-            if (! pathInfo.fs)
-            {
-                return await priv.filesystem.copy(sourcePath, destPath);
-            }
-            else
-            {
-                throw "Not supported";
-            }
+            const f = await this.read(sourcePath);
+            return await this.write(destPath, f);
         }
 
         async remove(path)
